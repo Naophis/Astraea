@@ -1,23 +1,24 @@
-#ifndef RTW_HEADER_mpc_tgt_calc_h_
-#define RTW_HEADER_mpc_tgt_calc_h_
+#ifndef mpc_tgt_calc_h_
+#define mpc_tgt_calc_h_
+#include <cmath>
 #include "rtwtypes.h"
+#include "rt_nonfinite.h"
 #include "bus.h"
 #include "mpc_tgt_calc_types.h"
 
 extern "C"
 {
 
-#include "rt_nonfinite.h"
+#include "rtGetInf.h"
 
 }
 
-#ifndef rtmGetErrorStatus
-#define rtmGetErrorStatus(rtm)         ((rtm)->errorStatus)
-#endif
+extern "C"
+{
 
-#ifndef rtmSetErrorStatus
-#define rtmSetErrorStatus(rtm, val)    ((rtm)->errorStatus = (val))
-#endif
+#include "rtGetNaN.h"
+
+}
 
 #include "bus.h"
 
@@ -78,10 +79,6 @@ class mpc_tgt_calcModelClass final
     int32_T Constant2_Value_i;
     int32_T Constant1_Value_kv;
     int32_T Constant2_Value_d;
-    int32_T Constant_Value_k;
-    int32_T Constant3_Value_i;
-    int32_T Constant1_Value_a0;
-    int32_T Constant2_Value_h;
     int32_T DataStoreMemory_InitialValue;
     int32_T DataStoreMemory1_InitialValue;
     real32_T Constant4_Value;
@@ -152,7 +149,6 @@ class mpc_tgt_calcModelClass final
     real32_T Constant1_Value_e1;
     real32_T Constant4_Value_l;
     real32_T Constant_Value_h5;
-    real32_T Gain2_Gain_g;
     real32_T Gain4_Gain_c;
     real32_T Gain1_Gain_b;
     real32_T Gain1_Gain_it;
@@ -164,6 +160,7 @@ class mpc_tgt_calcModelClass final
     real32_T Gain6_Gain_f;
     real32_T Gain1_Gain_i5;
     real32_T Gain3_Gain_k;
+    int8_T Constant4_Value_m;
     uint8_T ManualSwitch_CurrentSetting;
     uint8_T ManualSwitch_CurrentSetting_o;
     uint8_T ManualSwitch_CurrentSetting_c;
@@ -178,6 +175,8 @@ class mpc_tgt_calcModelClass final
 
   struct RT_MODEL_mpc_tgt_calc_T {
     const char_T * volatile errorStatus;
+    const char_T* getErrorStatus() const;
+    void setErrorStatus(const char_T* const volatile aErrorStatus);
   };
 
   mpc_tgt_calcModelClass(mpc_tgt_calcModelClass const&) = delete;

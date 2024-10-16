@@ -30,7 +30,8 @@ static t_tgt arg_tgt{
   0.0F,
   0.0F,
   0,
-  0.0F
+  0.0F,
+  0
 };
 
 static t_ego arg_ego{
@@ -130,7 +131,7 @@ void rt_OneStep(void)
   static boolean_T OverrunFlag{ false };
 
   if (OverrunFlag) {
-    rtmSetErrorStatus(mpc_tgt_calc_Obj.getRTM(), "Overrun");
+    mpc_tgt_calc_Obj.getRTM()->setErrorStatus("Overrun");
     return;
   }
 
@@ -149,7 +150,7 @@ int_T main(int_T argc, const char *argv[])
          "Generated ERT main won't simulate model step behavior. "
          "To change this behavior select the 'MAT-file logging' option.\n");
   fflush((nullptr));
-  while (rtmGetErrorStatus(mpc_tgt_calc_Obj.getRTM()) == (nullptr)) {
+  while (mpc_tgt_calc_Obj.getRTM()->getErrorStatus() == (nullptr)) {
   }
 
   mpc_tgt_calc_Obj.terminate();

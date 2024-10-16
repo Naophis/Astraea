@@ -1,5 +1,13 @@
-#ifndef RTW_HEADER_rtGetNaN_h_
-#define RTW_HEADER_rtGetNaN_h_
+#ifndef rtGetNaN_h_
+#define rtGetNaN_h_
+
+extern "C"
+{
+
+#include "rt_nonfinite.h"
+
+}
+
 #include "rtwtypes.h"
 #ifdef __cplusplus
 

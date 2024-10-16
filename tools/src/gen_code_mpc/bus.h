@@ -61,6 +61,7 @@ typedef struct {
   float slip_gain_K2;
   int time_step2;
   float axel_degenerate_gain;
+  char enable_slip_decel;
 } t_tgt;
 
 typedef struct{

@@ -1,8 +1,6 @@
-#ifndef RTW_HEADER_rt_nonfinite_h_
-#define RTW_HEADER_rt_nonfinite_h_
-#include <stddef.h>
+#ifndef rt_nonfinite_h_
+#define rt_nonfinite_h_
 #include "rtwtypes.h"
-#define NOT_USING_NONFINITE_LITERALS   1
 #ifdef __cplusplus
 
 extern "C"
@@ -16,31 +14,10 @@ extern "C"
   extern real32_T rtInfF;
   extern real32_T rtMinusInfF;
   extern real32_T rtNaNF;
-  extern void rt_InitInfAndNaN(size_t realSize);
   extern boolean_T rtIsInf(real_T value);
   extern boolean_T rtIsInfF(real32_T value);
   extern boolean_T rtIsNaN(real_T value);
   extern boolean_T rtIsNaNF(real32_T value);
-  struct BigEndianIEEEDouble {
-    struct {
-      uint32_T wordH;
-      uint32_T wordL;
-    } words;
-  };
-
-  struct LittleEndianIEEEDouble {
-    struct {
-      uint32_T wordL;
-      uint32_T wordH;
-    } words;
-  };
-
-  struct IEEESingle {
-    union {
-      real32_T wordLreal;
-      uint32_T wordLuint;
-    } wordL;
-  };
 
 #ifdef __cplusplus
 

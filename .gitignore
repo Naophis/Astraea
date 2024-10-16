@@ -13,3 +13,4 @@ managed_components/
 .idea/
 .env/
 *.mcap
+csv*/

@@ -3,12 +3,12 @@ dt: 0.001
 # tire2: 13.60125
 
 tire_tread: 38.0
-tire: 13.4550
-tire2: 13.4650
+tire: 13.2275
+tire2: 13.2275
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 4.0
-gear_a: 37
+gear_a: 39
 gear_b: 9
 # max_duty: 99.9
 max_duty: 99.950
@@ -17,15 +17,15 @@ FF_front: 1
 FF_roll: 1
 FF_keV: 1 #FF制御on/off flag
 
-motor_driver_type: 2 # 1: EN1_PH1, 2: EN1_PH2, 3: TWO_PWM
-motor_r_cw_ccw_type: 0 # 1: duty > 0 -> true, 0: duty < 0 -> true
-motor_l_cw_ccw_type: 1 # 1: duty > 0 -> true, 0: duty < 0 -> true
+motor_driver_type: 3 # 1: EN1_PH1, 2: EN1_PH2, 3: TWO_PWM
+motor_r_cw_ccw_type: 1 # 1: duty > 0 -> true, 0: duty < 0 -> true
+motor_l_cw_ccw_type: 0 # 1: duty > 0 -> true, 0: duty < 0 -> true
 # debug for motor io direction
 motor_debug_mode: 0
-motor_debug_mode_duty_r: 10
-motor_debug_mode_duty_l: 10
+motor_debug_mode_duty_r: -10
+motor_debug_mode_duty_l: -10
 
-MotorHz: 32500
+MotorHz: 37500
 SuctionHz: 32500
 MotorResolution: 40
 SuctionResolution: 40
@@ -71,8 +71,8 @@ cell2: 90
 
 # led_light_delay_cnt: 1250
 # led_light_delay_cnt2: 1250
-led_light_delay_cnt: 1250
-led_light_delay_cnt2: 1250
+led_light_delay_cnt: 950
+led_light_delay_cnt2: 950
 
 axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]
@@ -276,8 +276,8 @@ gyro_param:
   # Gray
   # gyro_w_gain_right: 0.002455800
   # gyro_w_gain_left: 0.002456000
-  gyro_w_gain_right: 0.00245025
-  gyro_w_gain_left: 0.00245025
+  gyro_w_gain_right: 0.0024745
+  gyro_w_gain_left: 0.0024745
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g

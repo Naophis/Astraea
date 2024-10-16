@@ -1,5 +1,5 @@
-#ifndef RTW_HEADER_mpc_tgt_calc_private_h_
-#define RTW_HEADER_mpc_tgt_calc_private_h_
+#ifndef mpc_tgt_calc_private_h_
+#define mpc_tgt_calc_private_h_
 #include "rtwtypes.h"
 #include "mpc_tgt_calc_types.h"
 #ifndef UCHAR_MAX

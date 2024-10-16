@@ -409,17 +409,25 @@ void SensingTask::task() {
 
     now_enc_r_time = esp_timer_get_time();
     int32_t enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
-    const auto enc_r_dt =
-        ((float)(now_enc_r_time - last_enc_r_time)) / 1000000.0;
-    se->encoder.right_old = se->encoder.right;
-    se->encoder.right = enc_r;
+    auto enc_r_dt = dt;
+    auto enc_l_dt = dt;
+    if (enc_r != 0) {
+      enc_r_dt = ((float)(now_enc_r_time - last_enc_r_time)) / 1000000.0;
+      se->encoder.right_old = se->encoder.right;
+      se->encoder.right = enc_r;
+    } else {
+      now_enc_r_time = last_enc_r_time;
+    }
 
     now_enc_l_time = esp_timer_get_time();
     int32_t enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
-    const auto enc_l_dt =
-        ((float)(now_enc_l_time - last_enc_l_time)) / 1000000.0;
+    if (enc_l != 0) {
+    enc_l_dt = ((float)(now_enc_l_time - last_enc_l_time)) / 1000000.0;
     se->encoder.left_old = se->encoder.left;
     se->encoder.left = enc_l;
+    } else {
+      now_enc_l_time = last_enc_l_time;
+    }
 
     calc_vel(gyro_dt, enc_l_dt, enc_r_dt);
 

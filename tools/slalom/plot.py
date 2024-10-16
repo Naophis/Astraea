@@ -43,7 +43,7 @@ class Plot:
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
-                rad = 58.5
+                rad = 56.5
                 n = 4
                 tgt_ang = 90
                 start_ang = 0
@@ -67,7 +67,7 @@ class Plot:
             else:
                 if hf_cl == 0:
                     # rad = 50.25
-                    rad = 54.5
+                    rad = 50.0
                     n = 4
                     tgt_ang = 180
                     end_pos = {"x": 0, "y": 180}
@@ -107,7 +107,7 @@ class Plot:
                 start_ang = 0
 
                 if hf_cl == 0:
-                    rad = 58
+                    rad = 45.0
                     n = 4
                     end_pos = {"x": 90, "y": 45}
                 elif hf_cl == 1:
@@ -119,7 +119,8 @@ class Plot:
             start_ang = 0
 
             if hf_cl == 0:
-                rad = 46.0
+                # rad = 46.0
+                rad = 44.0
                 n = 4
                 tgt_ang = 135
                 end_pos = {"x": 45, "y": 90}
@@ -147,7 +148,7 @@ class Plot:
         elif type == "dia135_2":
             start_ang = 45
             if hf_cl == 0:
-                rad = 44.50
+                rad = 42.0
                 n = 4
                 tgt_ang = 135
                 end_pos = {"x": -45, "y": 90}
@@ -159,7 +160,7 @@ class Plot:
         elif type == "dia90":
             start_ang = 0
             if hf_cl == 0:
-                rad = 45.0
+                rad = 42.0
                 n = 4
                 tgt_ang = 90
                 end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
@@ -249,12 +250,12 @@ class Plot:
         trj.plot(res1["after_path_x2"], res1["after_path_y2"],
                  ls="-", color="coral", lw=trj_width, alpha=trj_alpha)
         plW = plt.subplot2grid((plot_row, plot_col), (4, 1), rowspan=1)
-        plW.plot(res["w"])
+        plW.plot(res["alpha"])
 
         start_pos_x = [0, 0]
         start_pos_y = [0, 0]
         # start_pos_y = [-10, -10]
-        res = sla.calc_slip(start_ang)
+        res = sla.calc(start_ang)
 
         res2 = sla.calc_offset_dist(start_pos_x, start_pos_y, type, offset)
 

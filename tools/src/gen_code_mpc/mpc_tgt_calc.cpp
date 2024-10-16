@@ -3,13 +3,7 @@
 #include "bus.h"
 #include <cmath>
 #include "mpc_tgt_calc_private.h"
-
-extern "C"
-{
-
-#include "rt_nonfinite.h"
-
-}
+#include "cmath"
 
 void mpc_tgt_calcModelClass::mpc_tgt_calc_IfActionSubsystem(real32_T rty_Out1[2],
   P_IfActionSubsystem_mpc_tgt_c_T *localP)
@@ -76,7 +70,9 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   *arg_ego1)
 {
   t_ego rtb_BusAssignment1_o;
+  t_ego rtb_BusAssignment_m;
   real_T rtb_Switch_e;
+  int32_T rtb_Merge1;
   int32_T rtb_pivot_state;
   real32_T rtb_Abs6;
   real32_T rtb_Abs7;
@@ -86,11 +82,7 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   real32_T rtb_Gain4;
   real32_T rtb_Subtract2_k;
   real32_T rtb_Switch1_n_idx_1;
-  boolean_T rtb_NOT2;
-  boolean_T rtb_RelationalOperator1_g0;
-  rtb_FF_Left = std::abs(mpc_tgt_calc_P.Gain2_Gain_g * arg_tgt->tgt_angle);
-  rtb_RelationalOperator1_g0 = rtb_FF_Left >= mpc_tgt_calc_P.Constant1_Value_a0;
-  rtb_NOT2 = rtb_FF_Left <= mpc_tgt_calc_P.Constant2_Value_h;
+  boolean_T rtb_RelationalOperator_a;
   if (arg_tgt->v_max >= 0.0F) {
     rtb_Abs7 = arg_tgt->tgt_dist - arg_ego->dist;
     if (arg_ego->v - arg_tgt->end_v > mpc_tgt_calc_P.Constant3_Value_a &&
@@ -200,7 +192,6 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   rtb_Abs7 = rtb_FF_Left * static_cast<real32_T>(arg_time_step) *
     mpc_tgt_calc_P.dt;
   if (arg_mode == 1) {
-    int32_T rtb_Merge1;
     rtb_Merge1 = arg_time_step + arg_ego->sla_param.counter;
     if (rtb_Merge1 > arg_ego->sla_param.limit_time_count) {
       mpc_tgt_calc_IfActionSubsystem(mpc_tgt_calc_B.Merge_p,
@@ -280,8 +271,6 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
         mpc_tgt_calc_B.Merge1[0];
     }
   } else if (arg_mode == 2) {
-    t_ego rtb_BusAssignment_m;
-    int32_T rtb_Merge1;
     rtb_Divide_o = std::abs(arg_ego->ang);
     rtb_Gain2_ht = mpc_tgt_calc_P.Gain2_Gain * arg_tgt->alpha;
     rtb_Subtract2_k = std::abs(arg_tgt->tgt_angle);
@@ -296,7 +285,6 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
     if (arg_ego->pivot_state == 2.0F || std::abs(rtb_Switch1_n_idx_1) /
         (mpc_tgt_calc_P.Gain1_Gain_m * std::abs(rtb_Gain2_ht)) + rtb_Divide_o >=
         rtb_Subtract2_k) {
-      boolean_T rtb_RelationalOperator_a;
       if (rtb_Gain2_ht > mpc_tgt_calc_P.Switch2_Threshold) {
         rtb_RelationalOperator_a = arg_ego->w < arg_tgt->end_w;
       } else {
@@ -360,8 +348,6 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
       rtb_BusAssignment1_o = rtb_BusAssignment_m;
     }
   } else if (arg_mode == 4) {
-    t_ego rtb_BusAssignment_m;
-    int32_T rtb_Merge1;
     rtb_Divide_o = std::abs(arg_ego->img_ang);
     rtb_Gain2_ht = mpc_tgt_calc_P.Gain2_Gain_i * arg_tgt->alpha;
     rtb_Subtract2_k = std::abs(arg_tgt->tgt_angle);
@@ -377,7 +363,6 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
          arg_tgt->end_w * arg_tgt->end_w) / (mpc_tgt_calc_P.Gain1_Gain_hy * std::
          abs(rtb_Gain2_ht)) + rtb_Divide_o >= mpc_tgt_calc_P.Gain_Gain_m *
         rtb_Subtract2_k || rtb_Divide_o >= rtb_Gain4) {
-      boolean_T rtb_RelationalOperator_a;
       if (rtb_Gain2_ht > mpc_tgt_calc_P.Switch2_Threshold_m) {
         rtb_RelationalOperator_a = arg_ego->w < arg_tgt->end_w;
       } else {
@@ -434,9 +419,8 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
 
   rtb_Divide_o = rtb_BusAssignment1_o.w * static_cast<real32_T>(arg_time_step) *
     mpc_tgt_calc_P.dt;
-  if (arg_mode == mpc_tgt_calc_P.Constant_Value_k || arg_mode ==
-      mpc_tgt_calc_P.Constant3_Value_i && (rtb_RelationalOperator1_g0 &&
-       rtb_NOT2)) {
+  if (mpc_tgt_calc_P.Constant4_Value_m != 0 && arg_tgt->enable_slip_decel != 0)
+  {
     rtb_Abs6 = mpc_tgt_calc_P.dt * static_cast<real32_T>(arg_time_step);
     rtb_FF_Left = (mpc_tgt_calc_P.Constant_Value_o / arg_ego1->mass +
                    rtb_BusAssignment1_o.w * arg_ego->slip.vy) * rtb_Abs6 +
@@ -533,9 +517,9 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
     rtb_Abs6 = rtb_BusAssignment1_o.img_dist;
   }
 
-  rtb_NOT2 = std::isnan(rtb_BusAssignment1_o.alpha) || std::isinf
-    (rtb_BusAssignment1_o.alpha);
-  if (rtb_NOT2) {
+  rtb_RelationalOperator_a = std::isnan(rtb_BusAssignment1_o.alpha) || std::
+    isinf(rtb_BusAssignment1_o.alpha);
+  if (rtb_RelationalOperator_a) {
     rtb_Abs7 = arg_ego->w;
   } else {
     rtb_Abs7 = rtb_BusAssignment1_o.w;
@@ -544,12 +528,12 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
   rtb_BusAssignment1_o.accl = rtb_FF_Left;
   rtb_BusAssignment1_o.v = rtb_Subtract2_k;
   rtb_BusAssignment1_o.img_dist = rtb_Abs6;
-  if (rtb_NOT2) {
+  if (rtb_RelationalOperator_a) {
     rtb_BusAssignment1_o.alpha = mpc_tgt_calc_P.Constant1_Value_e1;
   }
 
   rtb_BusAssignment1_o.w = rtb_Abs7;
-  if (rtb_NOT2) {
+  if (rtb_RelationalOperator_a) {
     rtb_BusAssignment1_o.img_ang = arg_ego->img_ang;
   }
 
@@ -588,7 +572,6 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
 
 void mpc_tgt_calcModelClass::initialize()
 {
-  rt_InitInfAndNaN(sizeof(real_T));
   mpc_tgt_calc_B.Merge_p[0] = mpc_tgt_calc_P.Merge_InitialOutput;
   mpc_tgt_calc_B.Merge1[0] = mpc_tgt_calc_P.Merge1_InitialOutput;
   mpc_tgt_calc_B.Merge_p[1] = mpc_tgt_calc_P.Merge_InitialOutput;
@@ -599,16 +582,25 @@ void mpc_tgt_calcModelClass::terminate()
 {
 }
 
+const char_T* mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T::getErrorStatus()
+  const
+{
+  return (errorStatus);
+}
+
+void mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T::setErrorStatus(const
+  char_T* const volatile aErrorStatus)
+{
+  (errorStatus = aErrorStatus);
+}
+
 mpc_tgt_calcModelClass::mpc_tgt_calcModelClass() :
   mpc_tgt_calc_B(),
   mpc_tgt_calc_M()
 {
 }
 
-mpc_tgt_calcModelClass::~mpc_tgt_calcModelClass()
-{
-}
-
+mpc_tgt_calcModelClass::~mpc_tgt_calcModelClass() = default;
 mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T * mpc_tgt_calcModelClass::getRTM
   ()
 {

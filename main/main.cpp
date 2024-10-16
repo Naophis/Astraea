@@ -64,7 +64,7 @@ void init_uart() {
   uart_param_config(UART_NUM_0, &uart_config);
   uart_driver_install(UART_NUM_0, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags);
   uart_param_config(UART_NUM_0, &uart_config);
-  uart_set_pin(UART_NUM_0, TXD, RXD, RTS, CTS);
+  // uart_set_pin(UART_NUM_0, TXD, RXD, RTS, CTS);
 }
 
 void init_gpio() {
@@ -90,15 +90,12 @@ void init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << Motor_L_PWM;
   io_conf.pin_bit_mask |= 1ULL << Motor_R_PWM;
 
-  // io_conf.pin_bit_mask |= 1ULL << LED1;
-  // io_conf.pin_bit_mask |= 1ULL << LED2;
-  // io_conf.pin_bit_mask |= 1ULL << LED3;
-  // io_conf.pin_bit_mask |= 1ULL << LED4;
-  // io_conf.pin_bit_mask |= 1ULL << LED5;
+  io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
+  io_conf.pin_bit_mask |= 1ULL << L_CW_CCW2;
+  io_conf.pin_bit_mask |= 1ULL << R_CW_CCW2;
 
   io_conf.pin_bit_mask |= 1ULL << BUZZER;
-
-  // io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
 
   // 内部プルダウンしない
   io_conf.pull_down_en = (gpio_pulldown_t)0;
@@ -129,12 +126,78 @@ TaskHandle_t xTaskHandler;
 std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
   return sensing_entity;
 }
+mcpwm_config_t motor_pwm_conf;
+void set_motor_hz(unsigned long hz, int res) {
+  const unsigned long int resolution = ((unsigned long int)res) * 100'000L;
+  mcpwm_group_set_resolution(MCPWM_UNIT_0, resolution);
 
+  memset(&motor_pwm_conf, 0, sizeof(motor_pwm_conf));
+  motor_pwm_conf.frequency = hz; // PWM周波数= 10kHz,
+  motor_pwm_conf.cmpr_a = 0; // デューティサイクルの初期値（0%）
+  motor_pwm_conf.cmpr_b = 0; // デューティサイクルの初期値（0%）
+  motor_pwm_conf.counter_mode = MCPWM_UP_COUNTER;
+  motor_pwm_conf.duty_mode = MCPWM_DUTY_MODE_0; // アクティブハイ
+  mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_0, &motor_pwm_conf);
+  mcpwm_init(MCPWM_UNIT_0, MCPWM_TIMER_1, &motor_pwm_conf);
+
+  mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0A, Motor_L_PWM);
+  // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1A, Motor_R_PWM);
+  mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
+                      MCPWM_DUTY_MODE_0);
+  // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_A,
+  //                     MCPWM_DUTY_MODE_0);
+
+  // 2PWM input mode configuration
+  mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM0B, Motor_L_PWM2);
+  // mcpwm_gpio_init(MCPWM_UNIT_0, MCPWM1B, Motor_R_PWM2);
+  mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
+                      MCPWM_DUTY_MODE_0);
+  // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B,
+  //                     MCPWM_DUTY_MODE_0);
+}
 extern "C" void app_main() {
   // Adachi adachi;
 
   init_gpio();
   init_uart();
+
+  // mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM2A, SUCTION_PWM);
+  // mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
+  //                     MCPWM_DUTY_MODE_0);
+
+  // unsigned long MOTOR_HZ = 75000 / 1;
+  // set_motor_hz(MOTOR_HZ, 10);
+
+  // uint32_t high = 0;
+  // uint32_t low = 0;
+  // uint32_t Motor_L_PWM_BIT = BIT(L_CW_CCW1 - 32);
+  // high |= Motor_L_PWM_BIT;
+  // GPIO.out1_w1ts.val = high;
+  // // GPIO.out1_w1tc.val = low;
+
+  // mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
+  // while (1) {
+  //   if (gpio_get_level(SW1)) {
+  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 10);
+  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
+  //                         MCPWM_DUTY_MODE_0);
+  //     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
+  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 0);
+  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
+  //                         MCPWM_DUTY_MODE_0);
+  //   } else {
+  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
+  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
+  //                         MCPWM_DUTY_MODE_0);
+  //     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
+  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 10);
+  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
+  //                         MCPWM_DUTY_MODE_0);
+  //   }
+
+  //   vTaskDelay(100 / portTICK_RATE_MS);
+  //   printf("Hello world!\n");
+  // }
 
   QueueHandle_t xQueue;
   xQueue = xQueueCreate(4, sizeof(motion_tgt_val_t *));
