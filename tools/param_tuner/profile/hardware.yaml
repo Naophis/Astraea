@@ -3,8 +3,8 @@ dt: 0.001
 # tire2: 13.60125
 
 tire_tread: 38.0
-tire: 13.2275
-tire2: 13.2275
+tire: 13.6125
+tire2: 13.6125
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 4.0
@@ -22,7 +22,7 @@ motor_r_cw_ccw_type: 1 # 1: duty > 0 -> true, 0: duty < 0 -> true
 motor_l_cw_ccw_type: 0 # 1: duty > 0 -> true, 0: duty < 0 -> true
 # debug for motor io direction
 motor_debug_mode: 0
-motor_debug_mode_duty_r: -10
+motor_debug_mode_duty_r: 10
 motor_debug_mode_duty_l: -10
 
 MotorHz: 37500
@@ -31,20 +31,18 @@ MotorResolution: 40
 SuctionResolution: 40
 
 # roll
-Ke: 0.0015 # 大：逆起電力大
-# Km: 0.00225 # 大：縦系の出力小
-Km: 0.00225 # 大：縦系の出力小
-# Km: 0.000750 # 大：縦系の出力小
-# Lm: 0.0000175 # 大：横系の出力大
-Lm: 0.0000275 # 大：横系の出力大
+# Ke: 0.00172 # 大：逆起電力大
+Ke: 0.002560632779648483  # 大：逆起電力大
+Km: 0.00260946 # トルク定数：　大-> 縦系の出力小
+Lm: 0.0000145 # 大：横系の出力大
 
-Resist: 2.4
-Mass: 0.030
+Resist: 4.4
+Mass: 0.026
 
 slip_param_K: 0.5
 slip_param_k2: 150
 
-sakiyomi_time: 8
+sakiyomi_time: 6
 
 #ログON_OFF
 logging_time: 1.0
@@ -60,8 +58,8 @@ ff_v_th: 0
 ff_front_dury: 0.95
 
 # fail_safe
-fail_duty_cnt: 150
-fail_v_cnt: 35000
+fail_duty_cnt: 2500
+fail_v_cnt: 350000
 fail_w_cnt: 2500
 fail_ang_cnt: 500
 fail_wall_off_cnt: 500
@@ -81,6 +79,7 @@ axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
 search_sen_ctrl_limitter: 8
+torque_mode: 1
 
 ff_front_gain_14: 0.325
 ff_roll_gain_before: 0.25
@@ -131,27 +130,21 @@ motor_pid:
 motor_pid2:
   #AS5147P 
   mode: 7
-  p: 0.00295
-  i: 0.00225
+  p: 0.00225
+  i: 0.00195
   b: 0.00
-  d: 0.00295
+  d: 0.00225
 
+  # p: 0.001975
+  # i: 0.00195
+  # b: 0.00
+  # d: 0.001975
 
-  # mode: 3
-  # p: 23.9
-  # i: 3.18
-  # b: 0.00
-  # d: 2.35
-  # p: 0.00239
-  # i: 0.00
-  # b: 0.00
-  # d: 0.000
-
-  # mode: 10
-  # p: 0.0065
-  # i: 0.00125
-  # b: 0.00
-  # d: 0.00085
+  # test: 0
+  # p: 0.0
+  # i: 0.0
+  # b: 0.0
+  # d: 0.0
 
   c: 0
 motor_pid3:
@@ -170,29 +163,16 @@ gyro_pid:
   # c: 0.0
 
   mode: 3
-  p: 0.375
-  i: 0.0225
-  b: 0.0195
-  d: 0.225
+  p: 0.175
+  i: 0.0325
+  b: 0.0175
+  d: 0.175
   c: 0.0
-
-  # mode: 4
-  # p: 0.375
-  # i: 0.025
-  # b: 0.0
-  # d: 0.0
-  # c: 0.0
-
-  # p: 0.395
-  # i: 0.0
-  # b: 0.00215
-  # d: 0.195
-  # c: 0.0
 
   # p: 0.0
   # i: 0.0
-  # d: 0.0
   # b: 0.0
+  # d: 0.0
   # c: 0.0
 
 dist_pid:
@@ -215,23 +195,19 @@ angle_pid:
   b: 10
   c: 0
 str_agl_pid:
-  # p: 0.095
-  # d: 1.25
-  # p: 0.095 #search_mode
-  # b: 0.095 #!searchm_mode
+  mode: 1
   p: 0.095 #search_mode
   b: 0.125 #!searchm_mode
   d: 0.0035
-  # d: 0.00
+
+  # test
+  # p: 0.0 
+  # b: 0.0
+  # d: 0.0
+
   i: 0.0
-  mode: 1
-  # b: 0
   c: 0
 
-
-  # p: 0.0 #search_mode
-  # b: 0.0 #!searchm_mode
-  # d: 0.0
 str_agl_dia_pid:
   # p: 0.095
   # d: 1.25
@@ -276,8 +252,8 @@ gyro_param:
   # Gray
   # gyro_w_gain_right: 0.002455800
   # gyro_w_gain_left: 0.002456000
-  gyro_w_gain_right: 0.0024745
-  gyro_w_gain_left: 0.0024745
+  gyro_w_gain_left: 0.0024720
+  gyro_w_gain_right: 0.0024720
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g

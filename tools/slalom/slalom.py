@@ -60,6 +60,8 @@ class Slalom:
             self.Et = 0.603450161218938087668
         elif n == 4:
             self.Et = 0.763214618198974433973
+        elif n == 6:
+            self.Et = 0.865684377654884109268
         self.base_alpha = v / rad
 
     def set_cell_size(self, size):

@@ -31,8 +31,8 @@ class Plot:
         tgt_ang1 = tgt_ang2 = tgt_ang3 = 0
         if type == "normal":
             if hf_cl == 0:
-                rad = 24
-                n = 2
+                rad = 26
+                n = 4
                 tgt_ang = 90
                 end_pos = {"x": 45, "y": 45}
             elif hf_cl == 1:
@@ -43,7 +43,7 @@ class Plot:
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
-                rad = 56.5
+                rad = 54.5
                 n = 4
                 tgt_ang = 90
                 start_ang = 0
@@ -107,7 +107,7 @@ class Plot:
                 start_ang = 0
 
                 if hf_cl == 0:
-                    rad = 45.0
+                    rad = 52.0
                     n = 4
                     end_pos = {"x": 90, "y": 45}
                 elif hf_cl == 1:
@@ -120,7 +120,7 @@ class Plot:
 
             if hf_cl == 0:
                 # rad = 46.0
-                rad = 44.0
+                rad = 40.0
                 n = 4
                 tgt_ang = 135
                 end_pos = {"x": 45, "y": 90}
@@ -133,7 +133,7 @@ class Plot:
         elif type == "dia45_2":
             start_ang = 45
             if hf_cl == 0:
-                rad = 72
+                rad = 66
                 n = 4
                 tgt_ang = 45
                 end_pos = {"x": 90, "y": 45}
@@ -160,7 +160,7 @@ class Plot:
         elif type == "dia90":
             start_ang = 0
             if hf_cl == 0:
-                rad = 42.0
+                rad = 40.0
                 n = 4
                 tgt_ang = 90
                 end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
