@@ -87,12 +87,14 @@ void IRAM_ATTR UserInterface::motion_check() {
       LED_off_all();
     }
     if (button_state_hold()) {
+      LED_off_all();
       break;
     }
     if (sensing_result->ego.left90_mid_dist < 90 &&
         sensing_result->ego.right90_mid_dist < 90 &&
         sensing_result->ego.left90_mid_dist > 10 &&
         sensing_result->ego.right90_mid_dist > 10) {
+      LED_off_all();
       LED_off_all();
       for (int i = 0; i < 2; i++) {
         music_sync(MUSIC::C6_, 100);

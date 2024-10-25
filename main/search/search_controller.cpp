@@ -399,8 +399,30 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.sct = SensorCtrlType::Straight;
   p.wall_off_req = WallOffReq::NONE;
 
-  // float offset_dist = 45;
-
+  float offset_dist = 0;
+  if (td == TurnDirection::Right) {
+    if ((10 < sensing_result->ego.left45_dist) &&
+        (sensing_result->ego.left45_dist < param->th_offset_dist)) {
+      auto diff = -(param->sla_wall_ref_l - sensing_result->ego.left45_dist);
+      if (diff > param->normal_sla_offset_back) {
+        diff = param->normal_sla_offset_back;
+      } else if (diff < -param->normal_sla_offset_back) {
+        diff = -param->normal_sla_offset_back;
+      }
+      offset_dist += diff;
+    }
+  } else {
+    if ((10 < sensing_result->ego.right45_dist) &&
+        (sensing_result->ego.right45_dist < param->th_offset_dist)) {
+      auto diff = -(param->sla_wall_ref_r - sensing_result->ego.right45_dist);
+      if (diff > param->normal_sla_offset_back) {
+        diff = param->normal_sla_offset_back;
+      } else if (diff < -param->normal_sla_offset_back) {
+        diff = -param->normal_sla_offset_back;
+      }
+      offset_dist = diff;
+    }
+  }
   if (p.dist < 10) {
     p.dist = 10;
   }
@@ -460,7 +482,7 @@ MotionResult SearchController::pivot90(param_set_t &p_set,
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
   p.search_str_wide_ctrl_l = p.search_str_wide_ctrl_r = false;
-  p.dist = param->cell / 2;
+  p.dist = param->cell / 2 + offset_dist;
   // if (offset_dist != 45) {
   //   p.dist = offset_dist;
   // }

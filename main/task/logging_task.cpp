@@ -326,33 +326,33 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
            ld->pln_calc_time2,                //
            ld->pln_time_diff);                // 4
 
-    printf(f5,                          //
-           halfToFloat(ld->m_pid_p),    //
-           halfToFloat(ld->m_pid_i),    //
-           halfToFloat(ld->m_pid_i2),   //
-           halfToFloat(ld->m_pid_d),    //
-           halfToFloat(ld->m_pid_p_v),  //
-           halfToFloat(ld->m_pid_i_v),  //
-           halfToFloat(ld->m_pid_i2_v), //
-           halfToFloat(ld->m_pid_d_v),  //
-           halfToFloat(ld->g_pid_p),    //
-           halfToFloat(ld->g_pid_i),    //
-           halfToFloat(ld->g_pid_i2),   //
-           halfToFloat(ld->g_pid_d));   //
+    printf(f5,                                 //
+           halfToFloat(ld->m_pid_p),           //
+           halfToFloat(ld->m_pid_i),           //
+           halfToFloat(ld->m_pid_i2),          //
+           halfToFloat(ld->m_pid_d),           //
+           halfToFloat(ld->m_pid_p_v) * 1000,  //
+           halfToFloat(ld->m_pid_i_v) * 1000,  //
+           halfToFloat(ld->m_pid_i2_v) * 1000, //
+           halfToFloat(ld->m_pid_d_v) * 1000,  //
+           halfToFloat(ld->g_pid_p),           //
+           halfToFloat(ld->g_pid_i),           //
+           halfToFloat(ld->g_pid_i2),          //
+           halfToFloat(ld->g_pid_d));          //
 
-    printf(f6,                          //
-           halfToFloat(ld->g_pid_p_v),  //
-           halfToFloat(ld->g_pid_i_v),  //
-           halfToFloat(ld->g_pid_i2_v), //
-           halfToFloat(ld->g_pid_d_v),  //
-           halfToFloat(ld->s_pid_p),    //
-           halfToFloat(ld->s_pid_i),    //
-           halfToFloat(ld->s_pid_i2),   //
-           halfToFloat(ld->s_pid_d),    //
-           halfToFloat(ld->s_pid_p_v),  //
-           halfToFloat(ld->s_pid_i_v),  //
-           halfToFloat(ld->s_pid_i2_v), //
-           halfToFloat(ld->s_pid_d_v)); //
+    printf(f6,                                 //
+           halfToFloat(ld->g_pid_p_v) * 1000,  //
+           halfToFloat(ld->g_pid_i_v) * 1000,  //
+           halfToFloat(ld->g_pid_i2_v) * 1000, //
+           halfToFloat(ld->g_pid_d_v) * 1000,  //
+           halfToFloat(ld->s_pid_p),           //
+           halfToFloat(ld->s_pid_i),           //
+           halfToFloat(ld->s_pid_i2),          //
+           halfToFloat(ld->s_pid_d),           //
+           halfToFloat(ld->s_pid_p_v) * 1000,  //
+           halfToFloat(ld->s_pid_i_v) * 1000,  //
+           halfToFloat(ld->s_pid_i2_v) * 1000, //
+           halfToFloat(ld->s_pid_d_v) * 1000); //
 
     printf(f7,                             //
            halfToFloat(ld->ff_duty_front), //
@@ -396,7 +396,6 @@ void LoggingTask::dump_log_sysid(std::string file_name) {
            halfToFloat(ld->volt_r));                   //
   }
   printf("end___\n"); // csvファイル追記終了トリガー
-
 }
 
 void IRAM_ATTR LoggingTask::set_data() {
@@ -469,7 +468,12 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->m_pid_i = floatToHalf(error_entity->v_val.i);
   ld->m_pid_i2 = floatToHalf(error_entity->v_val.i2);
   ld->m_pid_d = floatToHalf(error_entity->v_val.d);
-  ld->m_pid_p_v = floatToHalf(error_entity->v_val.p_val);
+  if (idx_slalom_log == 0 || static_cast<int>(tgt_val->motion_type) == 0 ||
+      (error_entity->v_val.i_val == 0)) {
+    ld->m_pid_p_v = (real16_T)0;
+  } else {
+    ld->m_pid_p_v = floatToHalf(error_entity->v_val.p_val);
+  }
   ld->m_pid_i_v = floatToHalf(error_entity->v_val.i_val);
   ld->m_pid_i2_v = floatToHalf(error_entity->v_val.i2_val);
   ld->m_pid_d_v = floatToHalf(error_entity->v_val.d_val);
@@ -481,8 +485,12 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->g_pid_p_v = floatToHalf(error_entity->w_val.p_val);
   ld->g_pid_i_v = floatToHalf(error_entity->w_val.i_val);
   ld->g_pid_i2_v = floatToHalf(error_entity->w_val.i2_val);
-  ld->g_pid_d_v = floatToHalf(error_entity->w_val.d_val);
-
+  if (idx_slalom_log == 0 || static_cast<int>(tgt_val->motion_type) == 0 ||
+      (error_entity->v_val.i_val == 0)) {
+    ld->g_pid_d_v = (real16_T)0;
+  } else {
+    ld->g_pid_d_v = floatToHalf(error_entity->w_val.d_val);
+  }
   ld->s_pid_p = floatToHalf(error_entity->s_val.p);
   ld->s_pid_i = floatToHalf(error_entity->s_val.i);
   ld->s_pid_i2 = floatToHalf(error_entity->s_val.i2);

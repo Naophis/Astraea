@@ -131,6 +131,8 @@ typedef struct {
   float ff_duty_roll;
   float ff_duty_rpm_r;
   float ff_duty_rpm_l;
+  float ff_front_torque;
+  float ff_roll_torque;
 } t_ego;
 
 typedef struct {

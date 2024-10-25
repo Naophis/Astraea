@@ -422,9 +422,9 @@ void SensingTask::task() {
     now_enc_l_time = esp_timer_get_time();
     int32_t enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
     if (enc_l != 0) {
-    enc_l_dt = ((float)(now_enc_l_time - last_enc_l_time)) / 1000000.0;
-    se->encoder.left_old = se->encoder.left;
-    se->encoder.left = enc_l;
+      enc_l_dt = ((float)(now_enc_l_time - last_enc_l_time)) / 1000000.0;
+      se->encoder.left_old = se->encoder.left;
+      se->encoder.left = enc_l;
     } else {
       now_enc_l_time = last_enc_l_time;
     }

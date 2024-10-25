@@ -329,13 +329,13 @@ void MainTask::load_hw_param() {
 
   // printf("%s\n", str.c_str());
 
-  cJSON *root = cJSON_CreateObject(), *motor_pid, *motor_pid2, *motor_pid3,
-        *gyro_pid, *str_agl_pid, *str_agl_dia_pid, *gyro_param, *kalman_config,
-        *battery_param, *led_param, *angle_pid, *dist_pid, *sen_pid,
-        *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
-        *axel_degenerate_y, *led_blight, *gyro_pid_gain_limitter,
-        *motor_pid_gain_limitter, *motor2_pid_gain_limitter,
-        *motor3_pid_gain_limitter;
+  cJSON *root = cJSON_CreateObject(), *front_ctrl_roll_pid, *motor_pid,
+        *motor_pid2, *motor_pid3, *gyro_pid, *str_agl_pid, *str_agl_dia_pid,
+        *gyro_param, *kalman_config, *battery_param, *led_param, *angle_pid,
+        *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
+        *axel_degenerate_x, *axel_degenerate_y, *led_blight,
+        *gyro_pid_gain_limitter, *motor_pid_gain_limitter,
+        *motor2_pid_gain_limitter, *motor3_pid_gain_limitter;
 
   root = cJSON_Parse(str.c_str());
 
@@ -365,6 +365,8 @@ void MainTask::load_hw_param() {
   param->ff_roll_gain_after = getItem(root, "ff_roll_gain_after")->valuedouble;
 
   param->left_keep_dist_th = getItem(root, "left_keep_dist_th")->valuedouble;
+
+  param->torque_mode = getItem(root, "torque_mode")->valueint;
 
   param->normal_sla_l_wall_off_th_in =
       getItem(root, "normal_sla_l_wall_off_th_in")->valueint;
@@ -446,6 +448,15 @@ void MainTask::load_hw_param() {
   param->FF_front = getItem(root, "FF_front")->valueint;
   param->FF_roll = getItem(root, "FF_roll")->valueint;
   param->FF_keV = getItem(root, "FF_keV")->valueint;
+
+  front_ctrl_roll_pid = getItem(root, "front_ctrl_roll_pid");
+  param->front_ctrl_roll_pid.p = getItem(front_ctrl_roll_pid, "p")->valuedouble;
+  param->front_ctrl_roll_pid.i = getItem(front_ctrl_roll_pid, "i")->valuedouble;
+  param->front_ctrl_roll_pid.d = getItem(front_ctrl_roll_pid, "d")->valuedouble;
+  param->front_ctrl_roll_pid.b = getItem(front_ctrl_roll_pid, "b")->valuedouble;
+  param->front_ctrl_roll_pid.c = getItem(front_ctrl_roll_pid, "c")->valuedouble;
+  param->front_ctrl_roll_pid.mode =
+      getItem(front_ctrl_roll_pid, "mode")->valueint;
 
   motor_pid = getItem(root, "motor_pid");
   param->motor_pid.p = getItem(motor_pid, "p")->valuedouble;
@@ -999,6 +1010,10 @@ void MainTask::load_sensor_param() {
       cJSON_GetArrayItem(getItem(gain, "F4"), 0)->valuedouble;
   param->sensor_gain.front4.b =
       cJSON_GetArrayItem(getItem(gain, "F4"), 1)->valuedouble;
+  param->sensor_gain.front_ctrl_th.a =
+      cJSON_GetArrayItem(getItem(gain, "front_ctrl_th"), 0)->valuedouble;
+  param->sensor_gain.front_ctrl_th.b =
+      cJSON_GetArrayItem(getItem(gain, "front_ctrl_th"), 1)->valuedouble;
   param->sensor_gain.r45.a =
       cJSON_GetArrayItem(getItem(gain, "R45"), 0)->valuedouble;
   param->sensor_gain.r45.b =
@@ -2224,6 +2239,12 @@ void MainTask::test_search_sla(bool mode) {
   rorl = ui->select_direction();
   backup_r = param->sen_ref_p.normal.exist.right45;
   backup_l = param->sen_ref_p.normal.exist.left45;
+  backup_r_expand = param->sen_ref_p.normal.expand.right45;
+  backup_l_expand = param->sen_ref_p.normal.expand.left45;
+  param->sen_ref_p.normal.expand.right45 =
+      param->sen_ref_p.normal.exist.right45;
+  param->sen_ref_p.normal.expand.left45 = param->sen_ref_p.normal.exist.left45;
+  param->clear_dist_ragne_from = param->clear_dist_ragne_to = 0;
   // if (sys.test.ignore_opp_sen) {
   //   if (rorl == TurnDirection::Right) {
   //     param->sen_ref_p.normal.exist.right45 = 1;
@@ -2309,6 +2330,8 @@ void MainTask::test_search_sla(bool mode) {
       break;
     vTaskDelay(10.0 / portTICK_RATE_MS);
   }
+  param->sen_ref_p.normal.expand.right45 = backup_r_expand;
+  param->sen_ref_p.normal.expand.left45 = backup_l_expand;
 }
 
 // 探索中の前壁制御
@@ -2516,19 +2539,21 @@ void MainTask::test_dia_walloff() {
 }
 
 void MainTask::test_sla_walloff() {
-  // rorl = ui->select_direction();
-
-  // if (rorl == TurnDirection::Right) {
-  //   param->sen_ref_p.normal.exist.right45 = 1;
-  // } else {
-  //   param->sen_ref_p.normal.exist.left45 = 1;
-  // }
+  if (test_search_mode == 0) {
+    rorl = ui->select_direction();
+    if (rorl == TurnDirection::Left) {
+      param->sen_ref_p.normal.exist.left45 = 1;
+      param->sen_ref_p.normal.expand.left45 = 1;
+      param->sen_ref_p.normal.expand.left45_2 = 1;
+      param->right_keep_dist_th = -1;
+    } else {
+      param->sen_ref_p.normal.exist.right45 = 1;
+      param->sen_ref_p.normal.expand.right45 = 1;
+      param->sen_ref_p.normal.expand.right45_2 = 1;
+      param->left_keep_dist_th = -1;
+    }
+  }
   mp->reset_gyro_ref_with_check();
-
-  // if (sys.test.suction_active) {
-  //   pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-  //   vTaskDelay(500.0 / portTICK_PERIOD_MS);
-  // }
 
   reset_tgt_data();
   reset_ego_data();
@@ -2539,45 +2564,74 @@ void MainTask::test_sla_walloff() {
     lt->start_slalom_log();
   }
   // pt->active_logging(_f);
+  if (test_search_mode > 0) {
+    ps.v_max = sys.test.v_max;
+    ps.v_end = 300;
+    ps.dist = param->offset_start_dist_search;
+    ps.accl = sys.test.accl;
+    ps.decel = sys.test.decel;
+    ps.sct = SensorCtrlType::Straight;
+    ps.wall_off_req = WallOffReq::NONE;
+    ps.wall_off_dist_r = 0;
+    ps.wall_off_dist_l = 0;
+    ps.dia_mode = false;
+    mp->go_straight(ps, mp->fake_adachi, false);
 
-  ps.v_max = sys.test.v_max;
-  ps.v_end = 300;
-  ps.dist = param->offset_start_dist_search;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::Straight;
-  ps.wall_off_req = WallOffReq::NONE;
-  ps.wall_off_dist_r = 0;
-  ps.wall_off_dist_l = 0;
-  ps.dia_mode = false;
-  mp->go_straight(ps, mp->fake_adachi, false);
+    ps.v_max = sys.test.v_max;
+    ps.v_end = sys.test.v_max;
+    ps.dist = param->cell;
+    ps.accl = sys.test.accl;
+    ps.decel = sys.test.decel;
+    ps.sct = SensorCtrlType::Straight;
+    ps.wall_off_req = WallOffReq::NONE;
+    ps.wall_off_dist_r = 0;
+    ps.wall_off_dist_l = 0;
+    ps.dia_mode = false;
+    mp->go_straight(ps, mp->fake_adachi, true);
 
-  ps.v_max = sys.test.v_max;
-  ps.v_end = sys.test.v_max;
-  ps.dist = param->cell;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.sct = SensorCtrlType::Straight;
-  ps.wall_off_req = WallOffReq::NONE;
-  ps.wall_off_dist_r = 0;
-  ps.wall_off_dist_l = 0;
-  ps.dia_mode = false;
-  mp->go_straight(ps, mp->fake_adachi, true);
+    ps.dist = param->cell2 / 2 - 5;
+    ps.v_max = sys.test.v_max;
+    ps.v_end = 20;
+    ps.accl = sys.test.accl;
+    ps.decel = sys.test.decel;
+    ps.wall_off_req = WallOffReq::NONE;
+    mp->go_straight(ps);
+  } else {
 
-  ps.dist = param->cell2 / 2 - 5;
-  ps.v_max = sys.test.v_max;
-  ps.v_end = 20;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  ps.wall_off_req = WallOffReq::NONE;
-  mp->go_straight(ps);
+    ps.motion_type = MotionType::NONE;
+    ps.v_max = sys.test.v_max;
+    ps.v_end = sys.test.v_max;
+    ps.dist = 45 + 45 + param->offset_start_dist;
+    ps.accl = sys.test.accl;
+    ps.decel = sys.test.decel;
+    ps.sct = SensorCtrlType::Straight;
+    ps.wall_off_req = WallOffReq::NONE;
+    ps.wall_off_dist_r = 0;
+    ps.wall_off_dist_l = 0;
+    ps.dia_mode = false;
+    mp->go_straight(ps);
 
-  ps.v_max = 20;
-  ps.v_end = sys.test.end_v;
-  ps.dist = 5;
-  ps.accl = sys.test.accl;
-  ps.decel = sys.test.decel;
-  mp->go_straight(ps);
+    ps.dist = 90 - 5;
+    mp->wall_off(rorl, ps);
+    ps.motion_type = MotionType::NONE;
+    ps.v_max = sys.test.v_max;
+    ps.v_end = 20;
+    ps.accl = sys.test.accl;
+    ps.decel = sys.test.decel;
+    ps.wall_off_req = WallOffReq::NONE;
+    ps.sct = SensorCtrlType::Straight;
+    ps.wall_off_dist_r = 0;
+    ps.wall_off_dist_l = 0;
+    mp->go_straight(ps);
+
+    ps.v_max = 20;
+    ps.v_end = sys.test.end_v;
+    ps.dist = 5;
+    ps.accl = sys.test.accl;
+    ps.decel = sys.test.decel;
+    ps.motion_type = MotionType::NONE;
+    mp->go_straight(ps);
+  }
 
   vTaskDelay(100.0 / portTICK_RATE_MS);
   pt->motor_disable();

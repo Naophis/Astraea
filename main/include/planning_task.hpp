@@ -196,6 +196,8 @@ private:
   float calc_sensor_pid_dia();
   float check_sen_error();
   float check_sen_error_dia();
+
+  void calc_front_ctrl_duty(float &duty_c,float &duty_roll,float &duty_c2,float &duty_roll2);
   float error_right = 0;
   float error_left = 0;
   bool check_right = false;

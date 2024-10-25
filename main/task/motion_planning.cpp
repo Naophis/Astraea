@@ -116,27 +116,36 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
         if (sensing_result->ego.right45_dist <
                 param->wall_off_dist.exist_dist_r &&
             exist_right) {
-          wall_off_state = 1;
-        } else if (sensing_result->ego.left45_dist <
-                       param->wall_off_dist.exist_dist_l &&
-                   exist_left) {
-          wall_off_state = 2;
+          wall_off_state |= 1;
+        }
+        if (sensing_result->ego.left45_dist <
+                param->wall_off_dist.exist_dist_l &&
+            exist_left) {
+          wall_off_state |= 2;
+        }
+      } else if (wall_off_state == 3 && exist_right && exist_left) {
+        if (sensing_result->ego.right45_dist >
+            param->wall_off_dist.noexist_th_r2) {
+          wall_off_state = 4;
+          p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          return go_straight(p, fake_adachi, false);
+        } else if (sensing_result->ego.left45_dist >
+                   param->wall_off_dist.noexist_th_l2) {
+          wall_off_state = 4;
+          p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          return go_straight(p, fake_adachi, false);
         }
       } else if (wall_off_state == 1 && exist_right) {
         if (sensing_result->ego.right45_dist >
             param->wall_off_dist.noexist_th_r2) {
-          wall_off_state = 3;
-          // tgt_val->ego_in.dist -=
-          //     param->wall_off_dist.search_wall_off_r_dist_offset;
+          wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
           return go_straight(p, fake_adachi, false);
         }
       } else if (wall_off_state == 2 && exist_left) {
         if (sensing_result->ego.left45_dist >
             param->wall_off_dist.noexist_th_l2) {
-          wall_off_state = 3;
-          // tgt_val->ego_in.dist -=
-          //     param->wall_off_dist.search_wall_off_l_dist_offset;
+          wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
           return go_straight(p, fake_adachi, false);
         }
@@ -352,8 +361,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       // (sensing_result->ego.front_dist - param->front_dist_offset);
     }
     if (td == TurnDirection::Right) {
-      if (sensing_result->ego.left45_dist < param->th_offset_dist) {
-        auto diff = (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
+      if ((10 < sensing_result->ego.left45_dist) &&
+          (sensing_result->ego.left45_dist < param->th_offset_dist)) {
+        auto diff = -(param->sla_wall_ref_l - sensing_result->ego.left45_dist);
         if (diff > param->normal_sla_offset_back) {
           diff = param->normal_sla_offset_back;
         } else if (diff < -param->normal_sla_offset_back) {
@@ -365,8 +375,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
         }
       }
     } else {
-      if (sensing_result->ego.right45_dist < param->th_offset_dist) {
-        auto diff = (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
+      if ((10 < sensing_result->ego.right45_dist) &&
+          (sensing_result->ego.right45_dist < param->th_offset_dist)) {
+        auto diff = -(param->sla_wall_ref_r - sensing_result->ego.right45_dist);
         if (diff > param->normal_sla_offset_back) {
           diff = param->normal_sla_offset_back;
         } else if (diff < -param->normal_sla_offset_back) {
@@ -494,7 +505,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     bool result = wall_off_dia(td, ps_front);
     auto dist = 0;
     if (result) {
-      if (sp.type == TurnType::Dia135_2 || sp.type == TurnType::Dia90) {
+      if (sp.type == TurnType::Dia135_2) {
         if (td == TurnDirection::Right) {
           dist = (param->dia_wall_off_ref_r -
                   sensing_result->sen.r45.sensor_dist) /
@@ -509,6 +520,15 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
         } else if (dist < -param->dia_offset_max_dist) {
           dist = -param->dia_offset_max_dist;
         }
+      } else if (sp.type == TurnType::Dia90) {
+        // if (td == TurnDirection::Right) {
+        // } else {
+        // }
+        // if (dist > param->dia_offset_max_dist) {
+        //   dist = param->dia_offset_max_dist;
+        // } else if (dist < -param->dia_offset_max_dist) {
+        //   dist = -param->dia_offset_max_dist;
+        // }
       }
     }
     ps_front.dist = ps_front.dist - dist;
@@ -686,13 +706,17 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     }
   }
   ps_back.v_max = MAX(sp.v, next_motion.v_max);
+  if (sp.type == TurnType::Normal) {
+    ps_back.v_max = sp.v;
+  }
   ps_back.v_end = next_motion.v_end;
   ps_back.accl = next_motion.accl;
 
   ps_back.accl =
-      ABS((ps_back.v_end + tgt_val->ego_in.v) *
-              (ps_back.v_end - tgt_val->ego_in.v) / (2.0 * ps_back.dist) +
-          500);
+      MAX(ABS((ps_back.v_end + tgt_val->ego_in.v) *
+                  (ps_back.v_end - tgt_val->ego_in.v) / (2.0 * ps_back.dist) +
+              500),
+          next_motion.accl);
 
   ps_back.decel = next_motion.decel;
   ps_back.motion_type = MotionType::SLA_BACK_STR;

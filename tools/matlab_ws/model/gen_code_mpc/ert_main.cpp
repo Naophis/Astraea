@@ -106,6 +106,8 @@ static t_ego arg_ego{
   0.0F,
   0.0F,
   0.0F,
+  0.0F,
+  0.0F,
   0.0F
 };
 

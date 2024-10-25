@@ -178,6 +178,8 @@ private:
   int mode_num;
   float backup_l;
   float backup_r;
+  float backup_l_expand;
+  float backup_r_expand;
   int file_idx;
   slalom_param2_t sla_p;
 

@@ -3,8 +3,8 @@ dt: 0.001
 # tire2: 13.60125
 
 tire_tread: 38.0
-tire: 13.6125
-tire2: 13.6125
+tire: 13.545
+tire2: 13.545
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 4.0
@@ -33,8 +33,9 @@ SuctionResolution: 40
 # roll
 # Ke: 0.00172 # 大：逆起電力大
 Ke: 0.002560632779648483  # 大：逆起電力大
-Km: 0.00260946 # トルク定数：　大-> 縦系の出力小
-Lm: 0.0000145 # 大：横系の出力大
+# Km: 0.00260946 # トルク定数：　大-> 縦系の出力小
+Km: 0.00130473 # トルク定数：　大-> 縦系の出力小
+Lm: 0.00000125 # 大：横系の出力大
 
 Resist: 4.4
 Mass: 0.026
@@ -46,7 +47,7 @@ sakiyomi_time: 6
 
 #ログON_OFF
 logging_time: 1.0
-search_log_enable: 0
+search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
@@ -58,7 +59,7 @@ ff_v_th: 0
 ff_front_dury: 0.95
 
 # fail_safe
-fail_duty_cnt: 2500
+fail_duty_cnt: 150
 fail_v_cnt: 350000
 fail_w_cnt: 2500
 fail_ang_cnt: 500
@@ -114,7 +115,19 @@ gyro_pid_gain_limitter:
   b: 15
   c: 15
 
-motor_pid:
+front_ctrl_roll_pid:
+  mode: 3
+  p: 0.375
+  i: 0.0225
+  b: 0.0195
+  d: 0.225
+  c: 0.0
+  # p: 0.0
+  # i: 0.0
+  # d: 0.0
+  # b: 0
+  # c: 0
+motor_pid: #front_ctrl
   p: 0.00325
   i: 0.0
   d: 0.0
@@ -130,15 +143,11 @@ motor_pid:
 motor_pid2:
   #AS5147P 
   mode: 7
-  p: 0.00225
-  i: 0.00195
+  p: 0.00000625
+  # i: 0.00000175
+  i: 0.000003625
   b: 0.00
-  d: 0.00225
-
-  # p: 0.001975
-  # i: 0.00195
-  # b: 0.00
-  # d: 0.001975
+  d: 0.0000085
 
   # test: 0
   # p: 0.0
@@ -146,7 +155,7 @@ motor_pid2:
   # b: 0.0
   # d: 0.0
 
-  c: 0
+  c: 1
 motor_pid3:
   mode: 0
   p: 0.0
@@ -155,27 +164,20 @@ motor_pid3:
   d: 0.00
   c: 0
 gyro_pid:
-  # mode: 3
-  # p: 0.195
-  # i: 0.0
-  # b: 0.0075
-  # d: 0.125
-  # c: 0.0
-
   mode: 3
-  p: 0.175
-  i: 0.0325
-  b: 0.0175
-  d: 0.175
-  c: 0.0
+  p: 0.00025
+  i: 0.003275
+  b: 0.000025
+  d: 0.000275
+  # c: 0.0
 
   # p: 0.0
   # i: 0.0
   # b: 0.0
   # d: 0.0
-  # c: 0.0
+  c: 1
 
-dist_pid:
+dist_pid:  #front_ctrl(front)
   p: 0.80
   i: 0.0015
   d: -0.0125
@@ -185,7 +187,7 @@ dist_pid:
   # p: 0.0
   # i: 0.0
   # d: 0.0
-angle_pid:
+angle_pid: #front_ctrl(roll)
   p: 0.755
   # i: 0.045
   # p: 0.195
@@ -196,9 +198,9 @@ angle_pid:
   c: 0
 str_agl_pid:
   mode: 1
-  p: 0.095 #search_mode
-  b: 0.125 #!searchm_mode
-  d: 0.0035
+  p: 0.000135 #search_mode
+  b: 0.000135 #!searchm_mode
+  d: 0.00002
 
   # test
   # p: 0.0 
@@ -211,15 +213,15 @@ str_agl_pid:
 str_agl_dia_pid:
   # p: 0.095
   # d: 1.25
-  p: 10.75
-  d: 0.175
+  p: 0.0055
+  d: 0.000275
   # p: 0
   # d: 0
   i: 0.0
   mode: 1
   b: 0
   c: 0
-sensor_pid:
+sensor_pid: #not use
   p: 0.175 #search_mode
   b: 0.175 #!searchm_mode
   # p: 0.00 #search_mode

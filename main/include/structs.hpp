@@ -292,6 +292,7 @@ typedef struct {
   sensor_gain_param_t front2;
   sensor_gain_param_t front3;
   sensor_gain_param_t front4;
+  sensor_gain_param_t front_ctrl_th;
   sensor_gain_param_t r45;
   sensor_gain_param_t r90;
   sensor_gain_param_t l90_far;
@@ -392,6 +393,7 @@ typedef struct {
   float ff_front_gain_14 = 1;
   float ff_roll_gain_before = 1;
   float ff_roll_gain_after = 1;
+  pid_param_t front_ctrl_roll_pid;
   pid_param_t motor_pid;
   pid_param_t motor_pid_gain_limitter;
   pid_param_t motor_pid2;
@@ -533,6 +535,7 @@ typedef struct {
   float normal_sla_r_wall_off_dist = 5;
   float normal_sla_l_wall_off_margin = 10;
   float normal_sla_r_wall_off_margin = 10;
+  char torque_mode = 0;
 } input_param_t;
 
 typedef struct {
@@ -756,6 +759,7 @@ typedef struct {
   float sysid_duty = 0;
   float sysid_time = 0;
   int start_turn = 0;
+  int search_mode = 0;
 } test_mode_t;
 
 typedef struct {

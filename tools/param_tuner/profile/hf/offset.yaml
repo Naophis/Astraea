@@ -8,19 +8,20 @@ pivot_angle_180: 180.0
 # 探索スラローム
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
-front_dist_offset: 96.1250 # 探索時の前壁補正 大→短くなる
+front_dist_offset: 95.1250 # 探索時の前壁補正 大→短くなる
+# front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
 normal_sla_offset_front: 5
 normal_sla_offset_back: 3
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
 pivot_back_enable_front_th: 120 # バック判断のための壁有無しきい値
-pivot_back_offset: 4.0 # pivot時の前壁補正後のバック距離のオフセット
+pivot_back_offset: 0.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist0: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 46.50
-sla_wall_ref_r: 45.50
+sla_wall_ref_l: 43.750 #大→短くなる
+sla_wall_ref_r: 48.750 #大→短くなる
 sla_max_offset_dist: 6
 
 # Orvalスラロームオフセット距離壁補正リファレンス値
@@ -36,8 +37,8 @@ dia135_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
-front_diff_th: 16 # 前壁制御左右偏差条件
-front_dist_offset_pivot_th: 78 #前壁制御接近条件
+front_diff_th: 11 # 前壁制御左右偏差条件
+front_dist_offset_pivot_th: 84 #前壁制御接近条件
 front_dist_offset_pivot: 90
 
 front_dist_offset_dia_front: 139
@@ -48,7 +49,7 @@ front_dist_offset_dia_left45: 50
 
 seach_timer: 450
 
-clear_dist_ragne_from: 27.5
+clear_dist_ragne_from: 25.0
 clear_dist_ragne_to: 55
 clear_dist_ragne_to2: 35 # 探索時制御範囲拡張移動距離
 
@@ -75,10 +76,10 @@ wall_off_hold_noexist_th_r: 60
 wall_off_hold_noexist_th_l2: 60
 wall_off_hold_noexist_th_r2: 60
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -3.50
-wall_off_hold_dist_str_r: -3.50
-wall_off_hold_dist_str_l_exist: -2.750
-wall_off_hold_dist_str_r_exist: -3.50
+wall_off_hold_dist_str_l: -1.0
+wall_off_hold_dist_str_r: -5.0
+wall_off_hold_dist_str_l_exist: -1.0
+wall_off_hold_dist_str_r_exist: -5.0
 
 wall_off_front_move_dist_th: 2
 wall_off_front_move_dia_dist_th: 2
@@ -119,8 +120,8 @@ wall_off_diff_check_dist_dia: 10.5
 wall_off_hold_dist_dia_l: -6.0
 wall_off_hold_dist_dia_r: -7.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 27.5
-dia_wall_off_ref_r: 31.5
+dia_wall_off_ref_l: 28.25
+dia_wall_off_ref_r: 30.125
 dia_offset_max_dist: 10
 
 wall_off_pass_dist: 10

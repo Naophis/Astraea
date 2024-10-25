@@ -160,6 +160,8 @@ class mpc_tgt_calcModelClass final
     real32_T Gain6_Gain_f;
     real32_T Gain1_Gain_i5;
     real32_T Gain3_Gain_k;
+    real32_T Gain_Gain_f;
+    real32_T Gain3_Gain_i;
     int8_T Constant4_Value_m;
     uint8_T ManualSwitch_CurrentSetting;
     uint8_T ManualSwitch_CurrentSetting_o;
