@@ -321,13 +321,13 @@ void SensingTask::task() {
       }
       if (pt->tgt_val->motion_type == MotionType::SLALOM) {
         r90 = l90 = r45 = l45 = false;
-        if (pt->tgt_val->tt == TurnType::Normal) {
-          if (pt->tgt_val->td == TurnDirection::Right) {
-            l45 = true;
-          } else {
-            r45 = true;
-          }
-        }
+        // if (pt->tgt_val->tt == TurnType::Normal) {
+        //   if (pt->tgt_val->td == TurnDirection::Right) {
+        //     l45 = true;
+        //   } else {
+        //     r45 = true;
+        //   }
+        // }
         // if (tgt_val->ego_in.sla_param.counter >
         //     (tgt_val->ego_in.sla_param.limit_time_count / 2)) {
         //   r90 = l90 = r45 = l45 = true;

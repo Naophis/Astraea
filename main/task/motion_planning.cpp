@@ -641,25 +641,25 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     } else {
       if (sp.type == TurnType::Normal && !find_in) {
         if (td == TurnDirection::Right) {
-          if (sensing_result->ego.left90_dist <
+          if (sensing_result->ego.left45_dist <
               param->normal_sla_l_wall_off_th_in) {
             find_in = true;
           }
         } else if (td == TurnDirection::Left) {
-          if (sensing_result->ego.right90_dist <
+          if (sensing_result->ego.right45_dist <
               param->normal_sla_r_wall_off_th_in) {
             find_in = true;
           }
         }
       } else if (sp.type == TurnType::Normal && find_in && !find_out) {
         if (td == TurnDirection::Right) {
-          if (sensing_result->ego.left90_dist >
+          if (sensing_result->ego.left45_dist >
               param->normal_sla_l_wall_off_th_out) {
             find_out = true;
             count_save = count;
           }
         } else {
-          if (sensing_result->ego.right90_dist >
+          if (sensing_result->ego.right45_dist >
               param->normal_sla_r_wall_off_th_out) {
             find_out = true;
             count_save = count;
@@ -677,33 +677,33 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
   if (sp.type == TurnType::Normal && find_in && find_out && count_save > 0) {
-    if (td == TurnDirection::Right) {
-      if (ABS(count_save - param->normal_sla_l_wall_off_ref_cnt) >
-              param->normal_sla_l_wall_off_margin &&
-          (count_save > param->normal_sla_l_wall_off_ref_cnt)) {
-        ps_back.dist -= param->normal_sla_l_wall_off_dist;
-      } else if (ABS(count_save - param->normal_sla_l_wall_off_ref_cnt) >
-                     param->normal_sla_l_wall_off_margin &&
-                 (count_save < param->normal_sla_l_wall_off_ref_cnt)) {
-        ps_back.dist += param->normal_sla_l_wall_off_dist;
-      }
-      if (ps_back.dist < 1) {
-        ps_back.dist = 1;
-      }
-    } else {
-      if (ABS(count_save - param->normal_sla_r_wall_off_ref_cnt) >
-              param->normal_sla_r_wall_off_margin &&
-          (count_save > param->normal_sla_r_wall_off_ref_cnt)) {
-        ps_back.dist -= param->normal_sla_r_wall_off_dist;
-      } else if (ABS(count_save - param->normal_sla_r_wall_off_ref_cnt) >
-                     param->normal_sla_r_wall_off_margin &&
-                 (count_save < param->normal_sla_r_wall_off_ref_cnt)) {
-        ps_back.dist += param->normal_sla_r_wall_off_dist;
-      }
-      if (ps_back.dist < 1) {
-        ps_back.dist = 1;
-      }
-    }
+    // if (td == TurnDirection::Right) {
+    //   if (ABS(count_save - param->normal_sla_l_wall_off_ref_cnt) >
+    //           param->normal_sla_l_wall_off_margin &&
+    //       (count_save > param->normal_sla_l_wall_off_ref_cnt)) {
+    //     ps_back.dist -= param->normal_sla_l_wall_off_dist;
+    //   } else if (ABS(count_save - param->normal_sla_l_wall_off_ref_cnt) >
+    //                  param->normal_sla_l_wall_off_margin &&
+    //              (count_save < param->normal_sla_l_wall_off_ref_cnt)) {
+    //     ps_back.dist += param->normal_sla_l_wall_off_dist;
+    //   }
+    //   if (ps_back.dist < 1) {
+    //     ps_back.dist = 1;
+    //   }
+    // } else {
+    //   if (ABS(count_save - param->normal_sla_r_wall_off_ref_cnt) >
+    //           param->normal_sla_r_wall_off_margin &&
+    //       (count_save > param->normal_sla_r_wall_off_ref_cnt)) {
+    //     ps_back.dist -= param->normal_sla_r_wall_off_dist;
+    //   } else if (ABS(count_save - param->normal_sla_r_wall_off_ref_cnt) >
+    //                  param->normal_sla_r_wall_off_margin &&
+    //              (count_save < param->normal_sla_r_wall_off_ref_cnt)) {
+    //     ps_back.dist += param->normal_sla_r_wall_off_dist;
+    //   }
+    //   if (ps_back.dist < 1) {
+    //     ps_back.dist = 1;
+    //   }
+    // }
   }
   ps_back.v_max = MAX(sp.v, next_motion.v_max);
   if (sp.type == TurnType::Normal) {
