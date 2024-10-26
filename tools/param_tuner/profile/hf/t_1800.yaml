@@ -22,13 +22,13 @@ straight:
     alpha: 10
 orval:
   v: 1800
-  ang: 180
+  ang: 183.0
   pow_n: 4
-  rad: 52.5
-  rad2: 52.5
-  time: 0.06003124999999512
-  time2: 0.06003124999999512
-  front: { left: 8, right: 8 }
+  rad: 51.5
+  time: 0.05987499999999514
+  rad2: 48.0
+  time2: 0.05581249999999559
+  front: { left: 14, right: 14 }
   back: { left: 5, right: 5 }
 normal:
   v: 300.000000

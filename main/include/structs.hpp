@@ -857,6 +857,7 @@ typedef struct {
   float accl = 0;
   float decel = 0;
   bool skip_wall_off = false;
+  float carry_over_dist = 0;
 } next_motion_t;
 
 typedef struct {

@@ -337,7 +337,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   ps_front.wall_off_req = WallOffReq::NONE;
 
   ps_back.dist = (td == TurnDirection::Right) ? sp.back.right : sp.back.left;
-
+  next_motion.carry_over_dist = 0;
   if (sp.type == TurnType::Normal) {
     // search_front_ctrl(ps_front); // 前壁制御
     ps_front.v_max = next_motion.v_max;
@@ -730,6 +730,11 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   ps_back.wall_off_req = WallOffReq::NONE;
   //  : SensorCtrlType::Dia;
   MotionResult res_b = MotionResult::NONE;
+
+  if (!next_motion.is_turn) {
+    next_motion.carry_over_dist = ps_back.dist;
+    return MotionResult::NONE;
+  }
   if (ps_back.dist > 0) {
     res_b = go_straight(ps_back);
     if (res_b != MotionResult::NONE) {
@@ -922,6 +927,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
   dia = false;
   bool fast_mode = false;
   bool start_turn = false;
+  float carry_over_dist = 0;
 
   // default straight parma
   ps.v_max = p_set.str_map[StraightType::FastRun].v_max;
@@ -994,12 +1000,17 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       }
       if (turn_type == TurnType::Finish) {
         ps.dist -= param->cell / 2;
-        ps.v_end = p_set.map[TurnType::Large].v;
+        if (p_set.suction) {
+          ps.v_end = 2500;
+        } else {
+          ps.v_end = p_set.map[TurnType::Large].v;
+        }
       }
       ps.motion_type = MotionType::STRAIGHT;
       ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
-
+      ps.dist += carry_over_dist;
       auto res = go_straight(ps);
+      carry_over_dist = 0;
       if (res == MotionResult::ERROR) {
         break;
       }
@@ -1047,6 +1058,9 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       auto res =
           slalom(fast_mode ? p_set.map[turn_type] : p_set.map_slow[turn_type],
                  turn_dir, nm, dia);
+      if (!nm.is_turn) {
+        carry_over_dist = nm.carry_over_dist;
+      }
       fast_mode = true;
       if (res == MotionResult::ERROR) {
         break;

@@ -130,7 +130,7 @@ MotionResult SearchController::slalom(param_set_t &p_set,
   nm.v_end = p_set.map[TurnType::Normal].v;
   nm.accl = p_set.str_map[StraightType::Search].accl;
   nm.decel = p_set.str_map[StraightType::Search].decel;
-  nm.is_turn = false;
+  nm.is_turn = true;
   nm.skip_wall_off = false;
 
   return mp->slalom(sp, td, nm);

@@ -26,6 +26,8 @@ normal:
     left45: 46.5
     # right45: 60.0 
     # left45: 60.0
+    # right45: 60.0 
+    # left45: 60.0
     # left45: 120.5 #サーキット
     # right45: 48
     # left45: 48
@@ -55,20 +57,20 @@ normal2: #壁なし補正時
 dia:
   ref:
     right90: 125
-    left90: 135
+    left90: 165
     kireme_r: 160 # dia front over th (not use)
     kireme_l: 160 # dia front over th (not use)
   exist:
     right90: 125 # dia.ref.right90と同じ
-    left90: 135 # dia.ref.left90と同じ
+    left90: 165 # dia.ref.left90と同じ
 search:
   ref:
     # right45: 38
     # left45: 38
-    right45: 41
-    left45: 41
-    right90: 49
-    left90: 49
+    right45: 38
+    left45: 38
+    right90: 52
+    left90: 52
     kireme_r: 0
     kireme_l: 0
   exist:
@@ -94,8 +96,8 @@ search:
     kireme_r: +0.75  #前壁補正：角度 +が右、-が左
 gain:
   # F: [70, 1] # 探索時の壁制御上限
-  F: [0.75, 1] # 探索時の壁制御上限
-  F2: [2.75, 0.1] # 最短時の壁制御上限, 壁制御のLPF定数
+  F: [0.00025, 1] # 探索時の壁制御上限
+  F2: [0.00075, 0.1] # 最短時の壁制御上限, 壁制御のLPF定数
   # F: [0, 1] # 探索時の壁制御上限
   # F2: [0, 0.1] # 最短時の壁制御上限, 壁制御のLPF定数
   F3: [1, 3] # 斜め制御th , 固定値

@@ -67,9 +67,10 @@ class Plot:
             else:
                 if hf_cl == 0:
                     # rad = 50.25
-                    rad = 50.0
+                    rad = 48.0
                     n = 4
-                    tgt_ang = 180
+                    tgt_ang = 183.0
+                    # tgt_ang = 180
                     end_pos = {"x": 0, "y": 180}
                     start_ang = 0
                 elif hf_cl == 1:
@@ -103,11 +104,11 @@ class Plot:
                 tgt_ang1 = 45.0 * 1 / 3
                 tgt_ang2 = 45.0 * 2 / 3
                 tgt_ang3 = 45.0
-                tgt_ang = 45
+                tgt_ang = 45.5
                 start_ang = 0
 
                 if hf_cl == 0:
-                    rad = 52.0
+                    rad = 38.0
                     n = 4
                     end_pos = {"x": 90, "y": 45}
                 elif hf_cl == 1:
@@ -142,8 +143,6 @@ class Plot:
                 n = 4
                 tgt_ang = 45
                 end_pos = {"x": 180, "y": 90}
-
-
 
         elif type == "dia135_2":
             start_ang = 45

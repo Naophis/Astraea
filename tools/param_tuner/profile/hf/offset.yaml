@@ -8,11 +8,11 @@ pivot_angle_180: 180.0
 # 探索スラローム
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
-front_dist_offset: 95.1250 # 探索時の前壁補正 大→短くなる
+front_dist_offset: 97.1250 # 探索時の前壁補正 大→短くなる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
-normal_sla_offset_front: 5
-normal_sla_offset_back: 3
+normal_sla_offset_front: 9
+normal_sla_offset_back: 6
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
 pivot_back_enable_front_th: 120 # バック判断のための壁有無しきい値
@@ -20,8 +20,8 @@ pivot_back_offset: 0.0 # pivot時の前壁補正後のバック距離のオフ�
 pivot_back_dist0: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 43.750 #大→短くなる
-sla_wall_ref_r: 48.750 #大→短くなる
+sla_wall_ref_l: 44.750 #大→短くなる
+sla_wall_ref_r: 44.750 #大→短くなる
 sla_max_offset_dist: 6
 
 # Orvalスラロームオフセット距離壁補正リファレンス値
@@ -86,11 +86,10 @@ wall_off_front_move_dia_dist_th: 2
 # 壁切れ街制限距離
 wall_off_wait_dist_dia: 85
 
-diff_dist_th_l: 200
-diff_dist_th_r: 200
-wall_off_diff_check_dist: 90
-
-diff_check_dist_dia_2: 15
+diff_dist_th_l: 18 # 壁切れ偏差チェック 偏差条件
+diff_dist_th_r: 18 # 壁切れ偏差チェック 偏差条件
+wall_off_diff_check_dist: 18 # 壁切れ偏差チェック　距離条件
+diff_check_dist_dia_2: 15 # 壁切れ偏差チェック　距離条件
 
 # 壁切れ：前壁補正　リファレンス値(大：前に近づく)
 front_dist_offset2: 142.0 #ref

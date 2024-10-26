@@ -702,6 +702,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             param_ro->right_keep_dist_th) {
           error += param_ro->sen_ref_p.normal.ref.right45 -
                    sensing_result->ego.right45_dist;
+          // left_keep.star_dist = right_keep.star_dist;
           check++;
         }
       } else if (expand_right &&
@@ -711,6 +712,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             param_ro->right_keep_dist_th) {
           error += param_ro->sen_ref_p.normal.ref.right45 -
                    sensing_result->ego.right45_dist;
+          // left_keep.star_dist = right_keep.star_dist;
           check++;
         }
       } else if (expand_right_2 &&
@@ -720,6 +722,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             param_ro->right_keep_dist_th) {
           error += param_ro->sen_ref_p.normal.ref.right45 -
                    sensing_result->ego.right45_dist;
+          // left_keep.star_dist = right_keep.star_dist;
           check++;
         }
       } else {
@@ -737,6 +740,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             param_ro->left_keep_dist_th) {
           error -= param_ro->sen_ref_p.normal.ref.left45 -
                    sensing_result->ego.left45_dist;
+          // right_keep.star_dist = left_keep.star_dist;
           check++;
         }
       } else if (expand_left &&
@@ -746,6 +750,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             param_ro->left_keep_dist_th) {
           error -= param_ro->sen_ref_p.normal.ref.left45 -
                    sensing_result->ego.left45_dist;
+          // right_keep.star_dist = left_keep.star_dist;
           check++;
         }
       } else if (expand_left_2 &&
@@ -755,6 +760,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             param_ro->left_keep_dist_th) {
           error -= param_ro->sen_ref_p.normal.ref.left45 -
                    sensing_result->ego.left45_dist;
+          // right_keep.star_dist = left_keep.star_dist;
           check++;
         }
       } else {
@@ -1656,6 +1662,11 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
           auto diff_ang =
               (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
           if (tgt_val->motion_type == MotionType::SLALOM) {
+            diff_ang = 0;
+          }
+          if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+                tgt_val->motion_type == MotionType::SLA_BACK_STR ||
+                tgt_val->motion_type == MotionType::PIVOT)) {
             diff_ang = 0;
           }
           auto kp_gain = param_ro->gyro_pid.p * error_entity.w.error_p;

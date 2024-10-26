@@ -2149,7 +2149,7 @@ void MainTask::test_sla() {
   nm.v_end = sla_p.v;
   nm.accl = sys.test.accl;
   nm.decel = sys.test.decel;
-  nm.is_turn = false;
+  nm.is_turn = true;
 
   mp->slalom(sla_p, rorl, nm, false);
 
@@ -2284,7 +2284,7 @@ void MainTask::test_search_sla(bool mode) {
   nm.v_end = sla_p.v;
   nm.accl = str_p.accl;
   nm.decel = str_p.decel;
-  nm.is_turn = false;
+  nm.is_turn = true;
 
   mp->slalom(sla_p, rorl, nm);
   for (int i = 0; i < sys.test.turn_times; i++) {

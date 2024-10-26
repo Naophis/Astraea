@@ -51,7 +51,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 9500
+log_size: 11500
 
 front_ctrl_error_th: 1
 
@@ -79,7 +79,7 @@ axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
-search_sen_ctrl_limitter: 8
+search_sen_ctrl_limitter: 16
 torque_mode: 1
 
 ff_front_gain_14: 0.325
@@ -166,7 +166,8 @@ motor_pid3:
 gyro_pid:
   mode: 3
   p: 0.00025
-  i: 0.003275
+  # i: 0.003275
+  i: 0.0125
   b: 0.000025
   d: 0.000275
   # c: 0.0
@@ -198,9 +199,9 @@ angle_pid: #front_ctrl(roll)
   c: 0
 str_agl_pid:
   mode: 1
-  p: 0.000135 #search_mode
-  b: 0.000135 #!searchm_mode
-  d: 0.00002
+  p: 0.000125 #search_mode
+  b: 0.000125 #!searchm_mode
+  d: 0.0000125
 
   # test
   # p: 0.0 
@@ -287,8 +288,8 @@ kalman_config:
 # led_blight: [0x05, 0x05, 0x08, 0x0d, 0x02, 0x05]
 led_blight: [0x0d, 0x0d, 0x0d, 0x0d, 0x0d, 0x0d]
 
-left_keep_dist_th: 8
-right_keep_dist_th: 8
+left_keep_dist_th: 0
+right_keep_dist_th: 0
 
 normal_sla_l_wall_off_th_in: 100
 normal_sla_r_wall_off_th_in: 110

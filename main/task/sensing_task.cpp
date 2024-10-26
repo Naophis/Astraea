@@ -323,9 +323,9 @@ void SensingTask::task() {
         r90 = l90 = r45 = l45 = false;
         if (pt->tgt_val->tt == TurnType::Normal) {
           if (pt->tgt_val->td == TurnDirection::Right) {
-            l90 = true;
+            l45 = true;
           } else {
-            r90 = true;
+            r45 = true;
           }
         }
         // if (tgt_val->ego_in.sla_param.counter >
