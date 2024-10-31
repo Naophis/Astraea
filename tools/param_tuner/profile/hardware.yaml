@@ -3,8 +3,8 @@ dt: 0.001
 # tire2: 13.60125
 
 tire_tread: 38.0
-tire: 13.545
-tire2: 13.545
+tire: 13.4810
+tire2: 13.4810
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 4.0
@@ -47,7 +47,7 @@ sakiyomi_time: 6
 
 #ログON_OFF
 logging_time: 1.0
-search_log_enable: 1
+search_log_enable: 0
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
@@ -79,7 +79,7 @@ axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
-search_sen_ctrl_limitter: 16
+search_sen_ctrl_limitter: 8
 torque_mode: 1
 
 ff_front_gain_14: 0.325
@@ -199,16 +199,16 @@ angle_pid: #front_ctrl(roll)
   c: 0
 str_agl_pid:
   mode: 1
-  p: 0.000125 #search_mode
-  b: 0.000125 #!searchm_mode
+  p: 0.000235 #search_mode
   d: 0.0000125
+  b: 0.000275 #!searchm_mode
+  i: 0.0000125
 
   # test
   # p: 0.0 
-  # b: 0.0
   # d: 0.0
-
-  i: 0.0
+  # b: 0.0
+  # i: 0.0
   c: 0
 
 str_agl_dia_pid:
@@ -255,8 +255,8 @@ gyro_param:
   # Gray
   # gyro_w_gain_right: 0.002455800
   # gyro_w_gain_left: 0.002456000
-  gyro_w_gain_left: 0.0024720
-  gyro_w_gain_right: 0.0024720
+  gyro_w_gain_left: 0.00245905
+  gyro_w_gain_right: 0.00245905
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -288,8 +288,8 @@ kalman_config:
 # led_blight: [0x05, 0x05, 0x08, 0x0d, 0x02, 0x05]
 led_blight: [0x0d, 0x0d, 0x0d, 0x0d, 0x0d, 0x0d]
 
-left_keep_dist_th: 0
-right_keep_dist_th: 0
+left_keep_dist_th: 8
+right_keep_dist_th: 8
 
 normal_sla_l_wall_off_th_in: 100
 normal_sla_r_wall_off_th_in: 110

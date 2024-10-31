@@ -38,7 +38,8 @@
 # goals: [[8,8],[8,9],[8,10],[9,8],[9,9],[9,10],[10,8],[10,9],[10,10]] # 2023hf
 
 
-goals: [[1, 0], [1, 1], [2, 0], [2, 1]]
+# goals: [[1, 0], [1, 1], [2, 0], [2, 1]]
+goals: [[3, 0], [4, 0]]
 #  27 *55
 maze_size: 32
 give_up_time: 30
@@ -64,14 +65,14 @@ mode: 0 # メイン
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  v_max: 750
+  v_max: 400
   accl: 2800
   decel: -2500
-  dist: 360 #直進
+  dist: 720 #直進
   suction_active: 0
 
-  # v_max: 8500
-  # accl: 36000
+  # v_max: 1550
+  # accl: 30000
   # decel: -28000
   # dist: 180 #直進
   # suction_active: 1
@@ -87,11 +88,11 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty_low: 4.5
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 19
+  file_idx: 22
   sla_dist: 90
   # sla_type: 3
-  sla_type: 4
-  sla_type2: 9 #復路ターン種類
+  sla_type: 2
+  sla_type2: 6 #復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval

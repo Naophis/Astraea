@@ -153,12 +153,20 @@ void IRAM_ATTR UserInterface::LED_on_off(char idx, bool state) {
 
 void IRAM_ATTR UserInterface::LED_bit(int b0, int b1, int b2, int b3, int b4,
                                       int b5) {
-  LED_on_off(1, (b5 == 1));
-  LED_on_off(2, (b4 == 1));
-  LED_on_off(3, (b3 == 1));
-  LED_on_off(4, (b2 == 1));
-  LED_on_off(5, (b1 == 1));
-  LED_on_off(6, (b0 == 1));
+  // LED_on_off(1, (b5 == 1));
+  // LED_on_off(2, (b4 == 1));
+  // LED_on_off(3, (b3 == 1));
+  // LED_on_off(4, (b2 == 1));
+  // LED_on_off(5, (b1 == 1));
+  // LED_on_off(6, (b0 == 1));
+
+  // LED_on_off(1, (b5 == 1));
+  LED_on_off(1, (b4 == 1));
+  LED_on_off(2, (b3 == 1));
+  LED_on_off(3, (b2 == 1));
+  LED_on_off(4, (b1 == 1));
+  LED_on_off(5, (b0 == 1));
+
 }
 void UserInterface::LED_otherwise(int byte, int state) {}
 void UserInterface::LED(int byte, int state) {}
@@ -196,7 +204,7 @@ TurnDirection IRAM_ATTR UserInterface::select_direction() {
     if (sensing_result->ego.v_l > ENC_OPE_V_R_TH) {
       music_sync(MUSIC::C6_, 75);
       td = TurnDirection::Left;
-      LED_bit(0, 0, 0, 0, 0, 1);
+      LED_bit(0, 0, 0, 0, 1, 1);
     }
 
     if (td != TurnDirection::None) {

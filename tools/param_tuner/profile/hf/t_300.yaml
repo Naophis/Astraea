@@ -1,6 +1,6 @@
 straight:
   search:
-    v_max: 380
+    v_max: 425
     # v_max: 385
     # v_max: 550
     accl: 2500
@@ -9,7 +9,7 @@ straight:
     w_end: 0.1
     alpha: 180
   fast_run:
-    v_max: 500
+    v_max: 600
     # v_max: 300
     accl: 1500
     decel: -2500
@@ -17,7 +17,7 @@ straight:
     w_end: 0.1
     alpha: 120
   fast_run_dia:
-    v_max: 500
+    v_max: 550
     # v_max: 300
     accl: 2500
     decel: -2500
@@ -42,8 +42,8 @@ normal:
   pow_n: 2
   rad: 22
   time: 0.09545312500000586
-  front: { left: 9.960502248606609, right: 8.460502248606609 }
-  back: { left: 13.327402340243637, right: 15.827402340243637 }
+  front: { left: 10.460502248606609, right: 9.460502248606609 }
+  back: { left: 12.327402340243637, right: 16.327402340243637 }
 
 # check
 # 2024年  2月  8日 木曜日 21:27:45 JST

@@ -673,7 +673,9 @@ void MainTask::load_offset_param() {
     str += buf;
   }
 
-  cJSON *root = cJSON_CreateObject();
+  cJSON *root = cJSON_CreateObject(), *clear_dist_ragne_dist_list,
+        *clear_dist_ragne_th_list;
+
   root = cJSON_Parse(str.c_str());
   param->cell = getItem(root, "cell")->valuedouble;
   param->cell2 = getItem(root, "cell2")->valuedouble;
@@ -832,6 +834,18 @@ void MainTask::load_offset_param() {
   param->orval_enable = getItem(root, "orval_offset_enable")->valueint;
   param->dia45_offset_enable = getItem(root, "dia45_offset_enable")->valueint;
   param->dia135_offset_enable = getItem(root, "dia135_offset_enable")->valueint;
+
+  clear_dist_ragne_th_list = getItem(root, "clear_dist_ragne_th_list");
+  clear_dist_ragne_dist_list = getItem(root, "clear_dist_ragne_dist_list");
+  int list_size = cJSON_GetArraySize(clear_dist_ragne_th_list);
+  param->clear_dist_ragne_th_list.clear();
+  param->clear_dist_ragne_dist_list.clear();
+  for (int i = 0; i < list_size; i++) {
+    const auto dist = cJSON_GetArrayItem(clear_dist_ragne_th_list, i)->valuedouble;
+    const auto th_value = cJSON_GetArrayItem(clear_dist_ragne_dist_list, i)->valuedouble;
+    param->clear_dist_ragne_dist_list.emplace_back(dist);
+    param->clear_dist_ragne_th_list.emplace_back(th_value);
+  }
 
   param->front_dist_offset_dia_front =
       getItem(root, "front_dist_offset_dia_front")->valuedouble;

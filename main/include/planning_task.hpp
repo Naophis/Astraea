@@ -177,7 +177,13 @@ private:
   // FILE *f;
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
+  std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
+    return sensing_result;
+  }
   std::shared_ptr<input_param_t> param_ro;
+  std::shared_ptr<input_param_t> get_param() {
+    return param_ro; //
+  }
   std::shared_ptr<LoggingTask> lt;
   std::shared_ptr<Sensing> sn;
 
@@ -197,7 +203,8 @@ private:
   float check_sen_error();
   float check_sen_error_dia();
 
-  void calc_front_ctrl_duty(float &duty_c,float &duty_roll,float &duty_c2,float &duty_roll2);
+  void calc_front_ctrl_duty(float &duty_c, float &duty_roll, float &duty_c2,
+                            float &duty_roll2);
   float error_right = 0;
   float error_left = 0;
   bool check_right = false;

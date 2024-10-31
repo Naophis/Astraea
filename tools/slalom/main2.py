@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from slalom import Slalom
-from plot import Plot
+from plot2 import Plot2
 from plotorval import PlotOrval
 
 import sys
@@ -22,15 +21,15 @@ def read_yaml(filename):
 
 data = read_yaml("../param_tuner/profile/hardware.yaml")
 
-p = Plot()
+p = Plot2()
 po = PlotOrval()
 
-v = 1700
+v = 300
 dia45_mode = 0
 
 hf_cl = 0
-# show = True
-show = False
+show = True
+# show = False
 if len(sys.argv) > 1:
     v = int(sys.argv[1])
     dia45_mode = int(sys.argv[2])
@@ -47,7 +46,7 @@ offset = {
     "after_dia": 7,  # not use
 }
 
-# p.exe("normal", v, show, 0, K, list_K_y, offset, hf_cl)
+p.exe("normal", v, show, 0, K, list_K_y, offset, hf_cl)
 # p.exe("large", v, show, 0, K, list_K_y, offset, hf_cl)
 # p.exe("large", v, show, 1, K, list_K_y, offset, hf_cl)
 # p.exe("dia45", v, show, dia45_mode, K, list_K_y, offset, hf_cl)
@@ -56,5 +55,5 @@ offset = {
 # p.exe("dia135_2", v, show, 0,  K, list_K_y, offset, hf_cl)
 # p.exe("dia90", v, show, 0, K, list_K_y, offset, hf_cl)
 
-p.exe("orval", v, show, 0, K, list_K_y, offset, hf_cl)
+# p.exe("orval", v, show, 0, K, list_K_y, offset, hf_cl)
 # p.exe("dia45", v, show, 0, K, list_K_y, offset, hf_cl)

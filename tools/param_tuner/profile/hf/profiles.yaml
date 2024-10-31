@@ -22,7 +22,8 @@ list: [
     "t_1600.hf", #20
     "t_1650.hf", #21
     "t_1700.hf", #22
-    "t_1800.hf", #23
+    "t_1750.hf", #23
+    "t_1800.hf", #24
   ]
 # 限界性能
 # Large: 1800
@@ -304,7 +305,7 @@ profile_idx: [
       orval: 22,
       dia45: 18,
       dia45_2: 22,
-      dia135: 21,
+      dia135: 22,
       dia135_2: 22,
       dia90: 18,
     },
@@ -317,7 +318,7 @@ profile_idx: [
       orval: 22,
       dia45: 18,
       dia45_2: 22,
-      dia135: 21,
+      dia135: 22,
       dia135_2: 22,
       dia90: 18,
     },
@@ -326,11 +327,11 @@ profile_idx: [
       run_param: 22,
       suction: 1,
       normal: 0,
-      large: 23,
+      large: 24,
       orval: 22,
       dia45: 18,
       dia45_2: 22,
-      dia135: 21,
+      dia135: 22,
       dia135_2: 22,
       dia90: 18,
     },
@@ -339,11 +340,11 @@ profile_idx: [
       run_param: 23,
       suction: 1,
       normal: 0,
-      large: 23,
+      large: 24,
       orval: 22,
       dia45: 18,
       dia45_2: 22,
-      dia135: 21,
+      dia135: 22,
       dia135_2: 22,
       dia90: 18,
     },

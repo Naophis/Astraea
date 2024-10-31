@@ -445,6 +445,10 @@ typedef struct {
   float clear_dist_ragne_from = 0;
   float clear_dist_ragne_to = 0;
   float clear_dist_ragne_to2 = 0;
+
+  std::vector<float> clear_dist_ragne_dist_list;
+  std::vector<float> clear_dist_ragne_th_list;
+
   float wall_off_hold_dist;
   wall_off_hold_dist_t wall_off_dist;
 

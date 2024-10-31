@@ -2,15 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-from slalom import Slalom
-from slalom2 import Slalom2
+from slalom3 import Slalom3
 from matplotlib import gridspec
 
 plot_row = 5
 plot_col = 2
 
 
-class Plot:
+class Plot2:
     def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0):
 
         # fig = plt.figure(figsize=(5, 5), dpi=500)
@@ -22,23 +21,27 @@ class Plot:
         # trj.set(facecolor="black")
         v = tgt_v
         rad = 54
+        rad2 = 54
         n = 2
         tgt_ang = 90
         slip_gain = 250
         end_pos = {"x": 90, "y": 90}
         start_ang = 0
 
-        tgt_ang1 = tgt_ang2 = tgt_ang3 = 0
+        tgt_ang1 = tgt_ang2 = 0
         if type == "normal":
             if hf_cl == 0:
                 rad = 22
+                rad2 = 22
                 n = 2
-                tgt_ang = 90
+                tgt_ang1 = 50
+                tgt_ang2 = 40
                 end_pos = {"x": 45, "y": 45}
             elif hf_cl == 1:
                 rad = 48
                 n = 2
-                tgt_ang = 90
+                tgt_ang1 = 50
+                tgt_ang2 = 40
                 end_pos = {"x": 90, "y": 90}
             start_ang = 0
         elif type == "large":
@@ -66,9 +69,9 @@ class Plot:
                 start_ang = 0
             else:
                 if hf_cl == 0:
-                    rad = 47.750
+                    rad = 45.750
                     n = 4
-                    tgt_ang = 181.25
+                    tgt_ang = 180.5
                     # tgt_ang = 180
                     end_pos = {"x": 0, "y": 180}
                     start_ang = 0
@@ -81,39 +84,19 @@ class Plot:
 
         elif type == "dia45":
             end_pos = {"x": 90, "y": 45}
-            if mode > 0:
-                rad = 74
-                n = mode
-                tgt_ang1 = 45.0 * 1 / 3
-                tgt_ang2 = 45.0 * 2 / 3
-                tgt_ang3 = 45.0
-                if mode == 1:
-                    tgt_ang1 = 45.0 * 1 / 3
-                    tgt_ang2 = 45.0 * 2 / 3
-                    tgt_ang3 = 45.0
-                if mode == 2:
-                    tgt_ang1 = 45.0 * 1 / 2
-                    tgt_ang2 = 45.0 * 1 / 2
-                    tgt_ang3 = 45.0
-                    n = 0
+            tgt_ang1 = 45.0 * 1 / 3
+            tgt_ang2 = 45.0 * 2 / 3
+            tgt_ang = 45.5
+            start_ang = 0
 
-                tgt_ang = 45
-                start_ang = 0
-            else:
-                tgt_ang1 = 45.0 * 1 / 3
-                tgt_ang2 = 45.0 * 2 / 3
-                tgt_ang3 = 45.0
-                tgt_ang = 45.5
-                start_ang = 0
-
-                if hf_cl == 0:
-                    rad = 50.5
-                    n = 4
-                    end_pos = {"x": 90, "y": 45}
-                elif hf_cl == 1:
-                    rad = 64
-                    n = 4
-                    end_pos = {"x": 180, "y": 90}
+            if hf_cl == 0:
+                rad = 50.5
+                n = 4
+                end_pos = {"x": 90, "y": 45}
+            elif hf_cl == 1:
+                rad = 64
+                n = 4
+                end_pos = {"x": 180, "y": 90}
 
         elif type == "dia135":
             start_ang = 0
@@ -169,19 +152,17 @@ class Plot:
                 end_pos = {"x": 0, "y": 180}
 
         res = {}
-        if mode > 0:
-            sla = Slalom2(v, rad, n, tgt_ang1, tgt_ang2, tgt_ang3,
-                          end_pos, slip_gain, type, K, list_K_y)
-            res = sla.calc(start_ang)
-        else:
-            sla = Slalom(v, rad, n, tgt_ang, end_pos,
-                         slip_gain, type, K, list_K_y)
-            if hf_cl == 0:
-                sla.set_cell_size(90)
-            elif hf_cl == 1:
-                sla.set_cell_size(180)
-            sla.calc_base_time()
-            res = sla.calc(start_ang)
+        sla = Slalom3(v, rad, rad2, n, tgt_ang1, tgt_ang2, end_pos,
+                      slip_gain, type, K, list_K_y)
+        if hf_cl == 0:
+            sla.set_cell_size(90)
+        elif hf_cl == 1:
+            sla.set_cell_size(180)
+
+        sla.calc_base_time()
+        sla.calc_base_time2()
+
+        res = sla.calc(start_ang)
 
         # sla.calc_offset_front()
         start_pos_x = [0, 0]
