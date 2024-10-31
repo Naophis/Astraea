@@ -63,8 +63,8 @@ wall_off_hold_dist: 88
 ctrl_exist_wall_th_l: 50
 ctrl_exist_wall_th_r: 50
 go_straight_wide_ctrl_th: 75
-search_wall_off_l_dist_offset: 51.75
-search_wall_off_r_dist_offset: 49.0
+search_wall_off_l_dist_offset: 48.5
+search_wall_off_r_dist_offset: 48.85
 search_wall_off_enable: 1
 
 # 壁切れ壁あり判定

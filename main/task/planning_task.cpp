@@ -2233,11 +2233,11 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
     sensing_result->ego.right45_dist_diff = 0;
   }
 
-  sensing_result->ego.left45_dist_diff = ABS(
-      sensing_result->ego.left45_dist - sensing_result->ego.left45_dist_old);
+  sensing_result->ego.left45_dist_diff =
+      sensing_result->ego.left45_dist - sensing_result->ego.left45_dist_old;
 
-  sensing_result->ego.right45_dist_diff = ABS(
-      sensing_result->ego.right45_dist - sensing_result->ego.right45_dist_old);
+  sensing_result->ego.right45_dist_diff =
+      sensing_result->ego.right45_dist - sensing_result->ego.right45_dist_old;
 
   // 壁からの距離に変換。あとで斜め用に変更
   calc_sensor_dist_diff();
