@@ -182,48 +182,18 @@ int16_t IRAM_ATTR LSM6DSR::read_2byte(const uint8_t address) {
                         ((unsigned short)(t.rx_data[1] & 0xff)));
 }
 
-void LSM6DSR::begin() {
-  // int32_t ret = 0;
-
-  // // Disable I3C
-  // lsm6dsr_ctrl9_xl_t ctrl9_xl = {0};
-  // ctrl9_xl.i3c_disable = ((uint8_t)LSM6DSR_I3C_DISABLE & 0x80U) >> 7;
-  // printf("%d\n", *(uint8_t *)&ctrl9_xl);
-  // ret = write1byte(LSM6DSR_CTRL9_XL, *(uint8_t *)&ctrl9_xl);
-  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
-
-  // lsm6dsr_i3c_bus_avb_t i3c_bus_avb = {0};
-  // i3c_bus_avb.i3c_bus_avb_sel = (uint8_t)LSM6DSR_I3C_DISABLE & 0x03U;
-  // printf("%d\n", *(uint8_t *)&i3c_bus_avb);
-  // ret = write1byte(LSM6DSR_I3C_BUS_AVB, *(uint8_t *)&i3c_bus_avb);
-  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
-
-  // /* Enable register address automatically incremented during a multiple byte
-  //  access with a serial interface. */
-  // /* + Enable BDU */
-  // lsm6dsr_ctrl3_c_t ctrl3_c = {0};
-  // ctrl3_c.if_inc = (uint8_t)PROPERTY_ENABLE;
-  // ctrl3_c.bdu = (uint8_t)PROPERTY_ENABLE;
-  // printf("%d\n", *(uint8_t *)&ctrl3_c);
-  // ret = write1byte(LSM6DSR_CTRL3_C, *(uint8_t *)&ctrl3_c);
-  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
-
-  // /* FIFO mode selection */
-  // lsm6dsr_fifo_ctrl4_t fifo_ctrl4 = {0};
-  // fifo_ctrl4.fifo_mode = (uint8_t)LSM6DSR_BYPASS_MODE;
-  // printf("%d\n", *(uint8_t *)&fifo_ctrl4);
-  // ret = write1byte(LSM6DSR_FIFO_CTRL4, *(uint8_t *)&fifo_ctrl4);
-  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
-  // /* Select default output data rate. */
-  // /* Output data rate selection - power down. */
-  // /* Full scale selection. */
-  // lsm6dsr_ctrl2_g_t ctrl2_g = {0};
-  // ctrl2_g.odr_g = LSM6DSR_GY_ODR_OFF;
-  // ctrl2_g.fs_g = LSM6DSR_4000dps;
-  // printf("%d\n", *(uint8_t *)&ctrl2_g);
-  // ret = write1byte(LSM6DSR_CTRL2_G, *(uint8_t *)&ctrl2_g);
-  // vTaskDelay(10.0/ portTICK_PERIOD_MS);
+int16_t IRAM_ATTR LSM6DSR::read_2byte_retry(const uint8_t address) {
+  esp_err_t ret;
+  DRAM_ATTR static spi_transaction_t t;
+  t.tx_data[0] = (address | READ_FLAG);
+  t.tx_data[1] = 0;
+  t.tx_data[2] = 0;
+  ret = spi_device_polling_end(spi, portMAX_DELAY); // Transmit!
+  return (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
+                        ((unsigned short)(t.rx_data[1] & 0xff)));
 }
+
+void LSM6DSR::begin() {}
 void LSM6DSR::enable_g() {}
 #define LSM6DSRX_CTRL1_XL 0x10U
 #define LSM6DSRX_CTRL2_G 0x11U
@@ -231,6 +201,23 @@ void LSM6DSR::enable_g() {}
 #define LSM6DSRX_CTRL4_C 0x13U
 #define LSM6DSRX_CTRL8_XL 0x17U
 #define LSM6DSRX_CTRL9_XL 0x18U
+#define LSM6DSRX_FIFO_CTRL4 0x0AU
+#define LSM6DSRX_CTRL10_C 0x19U
+#define LSM6DSRX_EMB_FUNC_SRC 0x64U
+#define LSM6DSRX_FIFO_STATUS1 0x3AU
+#define LSM6DSRX_FIFO_DATA_OUT_TAG 0x78U
+#define LSM6DSRX_FIFO_DATA_OUT_Z_L 0x7DU
+#define LSM6DSRX_FIFO_DATA_OUT_Z_H 0x7EU
+int LSM6DSR::get_unread_fifo_data_length() {
+  return read1byte(LSM6DSRX_FIFO_STATUS1); //
+}
+int LSM6DSR::get_fifo_data() {
+  return read1byte(LSM6DSRX_FIFO_DATA_OUT_Z_L); //
+}
+int LSM6DSR::get_fifo_tag() {
+  return read1byte(LSM6DSRX_FIFO_DATA_OUT_TAG); //
+}
+
 void LSM6DSR::setup() {
   uint8_t whoami = read1byte(0x0F);
   // begin();
@@ -255,6 +242,10 @@ void LSM6DSR::setup() {
   write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
+  // write1byte(LSM6DSRX_FIFO_CTRL4, 6);      // FIFOの設定
+  // write1byte(LSM6DSRX_CTRL10_C, 0x20);     // timestamp有効
+  // write1byte(LSM6DSRX_EMB_FUNC_SRC, 0x80); // reset
+  // vTaskDelay(10.0 / portTICK_PERIOD_MS);
   // ジャイロの設定
   write1byte(LSM6DSRX_CTRL2_G, 0xA1);
   auto ctrl1 = read1byte(LSM6DSRX_CTRL1_XL);

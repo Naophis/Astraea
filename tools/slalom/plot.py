@@ -30,105 +30,46 @@ class Plot:
 
         tgt_ang1 = tgt_ang2 = tgt_ang3 = 0
         if type == "normal":
-            if hf_cl == 0:
-                rad = 22
-                n = 2
-                tgt_ang = 90
-                end_pos = {"x": 45, "y": 45}
-            elif hf_cl == 1:
-                rad = 48
-                n = 2
-                tgt_ang = 90
-                end_pos = {"x": 90, "y": 90}
+            rad = 22
+            n = 4
+            tgt_ang = 90
+            end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
                 rad = 56.5
                 n = 4
-                tgt_ang = 90
+                tgt_ang = 90.25
                 start_ang = 0
                 end_pos = {"x": 90, "y": 90}
-            elif hf_cl == 1:
-                rad = 57.5
-                n = 4
-                tgt_ang = 90
-                start_ang = 0
-                end_pos = {"x": 180, "y": 180}
         elif type == "orval":
-            if mode == 1:
-                rad = 54
-                n = 0
-                tgt_ang1 = 180.0 * 1 / 3
-                tgt_ang2 = 180.0 * 2 / 3
-                tgt_ang3 = 180.0
-                tgt_ang = 180
-                end_pos = {"x": 90, "y": 90}
+            if hf_cl == 0:
+                rad = 47.750
+                n = 4
+                tgt_ang = 181.25
+                # tgt_ang = 180
+                end_pos = {"x": 0, "y": 180}
                 start_ang = 0
-            else:
-                if hf_cl == 0:
-                    rad = 47.750
-                    n = 4
-                    tgt_ang = 181.25
-                    # tgt_ang = 180
-                    end_pos = {"x": 0, "y": 180}
-                    start_ang = 0
-                elif hf_cl == 1:
-                    rad = 55.25
-                    n = 4
-                    tgt_ang = 180
-                    end_pos = {"x": 0, "y": 360}
-                    start_ang = 0
 
         elif type == "dia45":
             end_pos = {"x": 90, "y": 45}
-            if mode > 0:
-                rad = 74
-                n = mode
-                tgt_ang1 = 45.0 * 1 / 3
-                tgt_ang2 = 45.0 * 2 / 3
-                tgt_ang3 = 45.0
-                if mode == 1:
-                    tgt_ang1 = 45.0 * 1 / 3
-                    tgt_ang2 = 45.0 * 2 / 3
-                    tgt_ang3 = 45.0
-                if mode == 2:
-                    tgt_ang1 = 45.0 * 1 / 2
-                    tgt_ang2 = 45.0 * 1 / 2
-                    tgt_ang3 = 45.0
-                    n = 0
-
-                tgt_ang = 45
-                start_ang = 0
-            else:
-                tgt_ang1 = 45.0 * 1 / 3
-                tgt_ang2 = 45.0 * 2 / 3
-                tgt_ang3 = 45.0
-                tgt_ang = 45.5
-                start_ang = 0
-
-                if hf_cl == 0:
-                    rad = 50.5
-                    n = 4
-                    end_pos = {"x": 90, "y": 45}
-                elif hf_cl == 1:
-                    rad = 64
-                    n = 4
-                    end_pos = {"x": 180, "y": 90}
-
-        elif type == "dia135":
+            tgt_ang = 45.0
             start_ang = 0
 
             if hf_cl == 0:
+                rad = 51.0
+                n = 6
+                end_pos = {"x": 90, "y": 45}
+
+        elif type == "dia135":
+            start_ang = 0
+            tgt_ang = 135.75
+
+            if hf_cl == 0:
                 # rad = 46.0
-                rad = 45.0
-                n = 4
-                tgt_ang = 135.125
+                rad = 44.5
+                n = 6
                 end_pos = {"x": 45, "y": 90}
-            elif hf_cl == 1:
-                rad = 45
-                n = 4
-                tgt_ang = 135
-                end_pos = {"x": 90, "y": 180}
 
         elif type == "dia45_2":
             start_ang = 45
@@ -137,11 +78,6 @@ class Plot:
                 n = 4
                 tgt_ang = 45
                 end_pos = {"x": 90, "y": 45}
-            elif hf_cl == 1:
-                rad = 70
-                n = 4
-                tgt_ang = 45
-                end_pos = {"x": 180, "y": 90}
 
         elif type == "dia135_2":
             start_ang = 45
@@ -150,23 +86,13 @@ class Plot:
                 n = 4
                 tgt_ang = 135.5
                 end_pos = {"x": -45, "y": 90}
-            elif hf_cl == 1:
-                rad = 43
-                n = 4
-                tgt_ang = 135
-                end_pos = {"x": -90, "y": 180}
         elif type == "dia90":
             start_ang = 0
             if hf_cl == 0:
-                rad = 40.0
-                n = 4
+                rad = 45.0
+                n = 6
                 tgt_ang = 90
                 end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
-            elif hf_cl == 1:
-                rad = 45
-                n = 4
-                tgt_ang = 90
-                end_pos = {"x": 0, "y": 180}
 
         res = {}
         if mode > 0:

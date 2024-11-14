@@ -80,10 +80,10 @@ wall_off_hold_noexist_th_r: 60
 wall_off_hold_noexist_th_l2: 69.5
 wall_off_hold_noexist_th_r2: 60
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -5.0
-wall_off_hold_dist_str_r: -5.25
-wall_off_hold_dist_str_l_exist: -5.0
-wall_off_hold_dist_str_r_exist: -5.25
+wall_off_hold_dist_str_l: -4.75
+wall_off_hold_dist_str_r: -4.75
+wall_off_hold_dist_str_l_exist: -4.75
+wall_off_hold_dist_str_r_exist: -4.75
 
 wall_off_front_move_dist_th: 2
 wall_off_front_move_dia_dist_th: 2

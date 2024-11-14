@@ -56,12 +56,16 @@ class Slalom:
         self.slip_gain = slip_gain
         self.K = K
         self.list_K_y = list_K_y
-        if n == 2:
-            self.Et = 0.603450161218938087668
-        elif n == 4:
-            self.Et = 0.763214618198974433973
-        elif n == 6:
-            self.Et = 0.865684377654884109268
+        
+        dx = 0.0001/64
+        def safe_integrand_array(x, n):
+            result = np.zeros_like(x)
+            valid_indices = (np.abs(x) < 1)
+            result[valid_indices] = np.exp(1)*np.exp(-1 / (1 - (x[valid_indices])**n))
+            return result
+        x_values_corrected = np.linspace(0, 1, int(1 / dx))
+        self.Et = np.trapz(safe_integrand_array(x_values_corrected, n), x_values_corrected)
+        # print(self.Et)
         self.base_alpha = v / rad
 
     def set_cell_size(self, size):
@@ -370,14 +374,14 @@ class Slalom:
         P = math.pow((t - z), N - z)
         Q = P * (t - z)
         res = -N * P / ((Q - z) * (Q - z)) * \
-            math.pow(math.exp(1), z + z / (Q - z)) / s
+            (math.exp(z + z / (Q - z)) / s)
         if t == 0:
             return 0
         return res
 
     def calc_neipire_w(self, t, s, N):
         t = t / s
-        res = math.exp(1) * math.pow(math.exp(1), (-1/(1-math.pow(t-1, N))))
+        res = math.exp(-1/(1-math.pow(t-1, N)))
         if t == 0:
             return 0
         return res

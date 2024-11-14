@@ -113,8 +113,8 @@ void IRAM_ATTR MainTask::dump1() {
     // printf("accel_y: %d\n", sensing_result->accel_y.raw);
     printf("battery: %0.3f (%d)\n", sensing_result->ego.battery_lp,
            sensing_result->battery.raw);
-    printf("encoder: %ld, %ld\n", sensing_result->encoder.left,
-           sensing_result->encoder.right);
+    printf("encoder: %ld, %ld\n", (long)sensing_result->encoder.left,
+           (long)sensing_result->encoder.right);
     printf(
         "sensor: %4d, %4d, %4d, %4d, %4d, %4d, %4d\n",
         sensing_result->led_sen.left90.raw, sensing_result->led_sen.left45.raw,
@@ -163,7 +163,8 @@ void IRAM_ATTR MainTask::dump1() {
     printf("ego_v: %4.3f, %4.3f, %4.3f, %4.3f, (%4ld, %4ld)\n",
            sensing_result->ego.v_l, sensing_result->ego.v_c,
            sensing_result->ego.v_r, tgt_val->ego_in.dist,
-           sensing_result->encoder.left, sensing_result->encoder.right);
+           (long)sensing_result->encoder.left,
+           (long)sensing_result->encoder.right);
 
     printf("calc_v: %4.3f, %3.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
@@ -841,8 +842,10 @@ void MainTask::load_offset_param() {
   param->clear_dist_ragne_th_list.clear();
   param->clear_dist_ragne_dist_list.clear();
   for (int i = 0; i < list_size; i++) {
-    const auto dist = cJSON_GetArrayItem(clear_dist_ragne_th_list, i)->valuedouble;
-    const auto th_value = cJSON_GetArrayItem(clear_dist_ragne_dist_list, i)->valuedouble;
+    const auto dist =
+        cJSON_GetArrayItem(clear_dist_ragne_th_list, i)->valuedouble;
+    const auto th_value =
+        cJSON_GetArrayItem(clear_dist_ragne_dist_list, i)->valuedouble;
     param->clear_dist_ragne_dist_list.emplace_back(dist);
     param->clear_dist_ragne_th_list.emplace_back(th_value);
   }
@@ -1155,6 +1158,11 @@ void MainTask::load_sys_param() {
   sys.test.suction_active = getItem(test, "suction_active")->valueint;
   sys.test.suction_duty = getItem(test, "suction_duty")->valuedouble;
   sys.test.suction_duty_low = getItem(test, "suction_duty_low")->valuedouble;
+  sys.test.suction_duty_burst =
+      getItem(test, "suction_duty_burst")->valuedouble;
+  sys.test.suction_duty_burst_low =
+      getItem(test, "suction_duty_burst_low")->valuedouble;
+
   sys.test.suction_gain = getItem(test, "suction_gain")->valuedouble;
   pt->suction_gain = sys.test.suction_gain;
 
@@ -1178,7 +1186,7 @@ void MainTask::load_sys_param() {
   cJSON_Delete(root);
 }
 
-void MainTask::load_turn_param_profiles(bool const_mode) {
+void MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
   string fileName = "/spiflash/profiles.txt";
 
   if (sys.hf_cl == 0) {
@@ -1216,44 +1224,41 @@ void MainTask::load_turn_param_profiles(bool const_mode) {
   tpp.profile_idx_size = getItem(root, "profile_idx_size")->valueint;
   printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
 
-  tpp.profile_list.clear();
+  tpp.profile_map.clear();
   profile_idx = getItem(root, "profile_idx");
   int profile_idx_size = cJSON_GetArraySize(profile_idx);
 
-  for (int i = 0; i < profile_idx_size; i++) {
-    p_idx[TurnType::None] =
-        getItem(getArray(profile_idx, i), "run_param")->valueint;
-    p_idx[TurnType::Finish] =
-        getItem(getArray(profile_idx, i), "suction")->valueint;
-    p_idx[TurnType::Normal] =
-        getItem(getArray(profile_idx, i), "normal")->valueint;
-    p_idx[TurnType::Large] =
-        getItem(getArray(profile_idx, i), "large")->valueint;
-    p_idx[TurnType::Orval] =
-        getItem(getArray(profile_idx, i), "orval")->valueint;
-    p_idx[TurnType::Dia45] =
-        getItem(getArray(profile_idx, i), "dia45")->valueint;
-    p_idx[TurnType::Dia45_2] =
-        getItem(getArray(profile_idx, i), "dia45_2")->valueint;
-    p_idx[TurnType::Dia135] =
-        getItem(getArray(profile_idx, i), "dia135")->valueint;
-    p_idx[TurnType::Dia135_2] =
-        getItem(getArray(profile_idx, i), "dia135_2")->valueint;
-    p_idx[TurnType::Dia90] =
-        getItem(getArray(profile_idx, i), "dia90")->valueint;
-    if (const_mode) {
-      p_idx[TurnType::None] = i;
-      p_idx[TurnType::Finish] = i;
-      p_idx[TurnType::Normal] = i;
-      p_idx[TurnType::Large] = i;
-      p_idx[TurnType::Orval] = i;
-      p_idx[TurnType::Dia45] = i;
-      p_idx[TurnType::Dia45_2] = i;
-      p_idx[TurnType::Dia135] = i;
-      p_idx[TurnType::Dia135_2] = i;
-      p_idx[TurnType::Dia90] = i;
+  if (const_mode) {
+    p_idx[TurnType::None] = p_idx[TurnType::Finish] = p_idx[TurnType::Normal] =
+        p_idx[TurnType::Large] = p_idx[TurnType::Orval] =
+            p_idx[TurnType::Dia45] = p_idx[TurnType::Dia45_2] =
+                p_idx[TurnType::Dia135] = p_idx[TurnType::Dia135_2] =
+                    p_idx[TurnType::Dia90] = const_index;
+    tpp.profile_map[const_index] = p_idx;
+  } else {
+    for (int i = 0; i < profile_idx_size; i++) {
+      p_idx[TurnType::None] =
+          getItem(getArray(profile_idx, i), "run_param")->valueint;
+      p_idx[TurnType::Finish] =
+          getItem(getArray(profile_idx, i), "suction")->valueint;
+      p_idx[TurnType::Normal] =
+          getItem(getArray(profile_idx, i), "normal")->valueint;
+      p_idx[TurnType::Large] =
+          getItem(getArray(profile_idx, i), "large")->valueint;
+      p_idx[TurnType::Orval] =
+          getItem(getArray(profile_idx, i), "orval")->valueint;
+      p_idx[TurnType::Dia45] =
+          getItem(getArray(profile_idx, i), "dia45")->valueint;
+      p_idx[TurnType::Dia45_2] =
+          getItem(getArray(profile_idx, i), "dia45_2")->valueint;
+      p_idx[TurnType::Dia135] =
+          getItem(getArray(profile_idx, i), "dia135")->valueint;
+      p_idx[TurnType::Dia135_2] =
+          getItem(getArray(profile_idx, i), "dia135_2")->valueint;
+      p_idx[TurnType::Dia90] =
+          getItem(getArray(profile_idx, i), "dia90")->valueint;
+      tpp.profile_map[i] = p_idx;
     }
-    tpp.profile_list.emplace_back(p_idx);
   }
   // cJSON_free(profile_list);
   // cJSON_free(profile_idx);
@@ -1379,9 +1384,16 @@ void MainTask::load_slas(
 }
 void MainTask::load_slalom_param(int idx, int idx2) {
   mount();
-  param_set.suction = tpp.profile_list[idx][TurnType::Finish] > 0;
-  param_set.suction_duty = sys.test.suction_duty;
-  param_set.suction_duty_low = sys.test.suction_duty_low;
+  param_set.suction = tpp.profile_map[idx][TurnType::Finish];
+
+  if (param_set.suction == 1) {
+    param_set.suction_duty = sys.test.suction_duty;
+    param_set.suction_duty_low = sys.test.suction_duty_low;
+  } else if (param_set.suction == 2) {
+    param_set.suction_duty = sys.test.suction_duty_burst;
+    param_set.suction_duty_low = sys.test.suction_duty_burst_low;
+  }
+
   param_set.map.clear();
   param_set.map_slow.clear();
   param_set.str_map.clear();
@@ -1391,7 +1403,7 @@ void MainTask::load_slalom_param(int idx, int idx2) {
     if (p.first == TurnType::None) {
       continue;
     }
-    const unsigned char sla_idx = tpp.profile_list[idx][p.first];
+    const unsigned char sla_idx = tpp.profile_map[idx][p.first];
     turn_map[sla_idx].emplace_back(p);
     // load_sla(sla_idx, p.second, param_set.map[p.first]);
   }
@@ -1403,7 +1415,7 @@ void MainTask::load_slalom_param(int idx, int idx2) {
     if (p.first == TurnType::None) {
       continue;
     }
-    const unsigned char sla_idx = tpp.profile_list[idx2][p.first];
+    const unsigned char sla_idx = tpp.profile_map[idx2][p.first];
     turn_map[sla_idx].emplace_back(p);
     // load_sla(sla_idx, p.second, param_set.map_slow[p.first]);
   }
@@ -1420,7 +1432,7 @@ void MainTask::load_param() {
     load_sys_param();
     load_hw_param();
     load_sensor_param();
-    load_turn_param_profiles(false);
+    load_turn_param_profiles(false, 0);
     load_offset_param();
     // load_slalom_param();
   }
@@ -1510,7 +1522,12 @@ void MainTask::task() {
     } else if (sys.user_mode == 11) {
       printf("suction\n");
       mp->reset_gyro_ref_with_check();
-      pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
+      if (sys.test.suction_active == 1) {
+        pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
+      } else if (sys.test.suction_active == 2) {
+        pt->suction_enable(sys.test.suction_duty_burst,
+                           sys.test.suction_duty_burst_low);
+      }
       vTaskDelay(1000.0 * 10 / portTICK_PERIOD_MS);
       pt->suction_disable();
     } else if (sys.user_mode == 12) {
@@ -1766,9 +1783,13 @@ void MainTask::test_system_identification(bool para) {
 void MainTask::test_run() {
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active) {
+  if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-    vTaskDelay(xDelay1000);
+    vTaskDelay(xDelay500);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -1832,9 +1853,13 @@ void MainTask::test_run() {
 void MainTask::test_back() {
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active) {
+  if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-    vTaskDelay(xDelay1000);
+    vTaskDelay(xDelay500);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -1893,9 +1918,13 @@ void MainTask::test_back() {
 void MainTask::test_run_sla() {
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active) {
+  if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-    vTaskDelay(500.0 / portTICK_PERIOD_MS);
+    vTaskDelay(xDelay500);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -2105,7 +2134,7 @@ void MainTask::test_sla() {
     ui->error();
     return;
   }
-  load_turn_param_profiles(true);
+  load_turn_param_profiles(true, file_idx);
   load_slalom_param(file_idx, file_idx);
   sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
   auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
@@ -2131,9 +2160,13 @@ void MainTask::test_sla() {
   // }
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active) {
+  if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay1000);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -2270,9 +2303,13 @@ void MainTask::test_search_sla(bool mode) {
                                          : (TurnDirection::Right);
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active) {
+  if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-    vTaskDelay(xDelay1000);
+    vTaskDelay(xDelay500);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -2388,9 +2425,13 @@ void MainTask::test_front_wall_offset() {
 
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active) {
+  if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-    vTaskDelay(xDelay1000);
+    vTaskDelay(xDelay500);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
   }
 
   reset_tgt_data();
@@ -2890,8 +2931,8 @@ void MainTask::encoder_test() {
   }
   while (1) {
     printf("%lld,%ld,%ld,%f,%f,%f,%f,%f\n", sr->sensing_timestamp,
-           sr->encoder.left, sr->encoder.right, sr->ego.v_l, sr->ego.v_r,
-           sr->ego.v_c,
+           (long)sr->encoder.left, (long)sr->encoder.right, sr->ego.v_l,
+           sr->ego.v_r, sr->ego.v_c,
            std::sin(2.0 * m_PI * sr->encoder.left / ENC_RESOLUTION),
            std::sin(2.0 * m_PI * sr->encoder.right / ENC_RESOLUTION));
     vTaskDelay(1.0 / portTICK_PERIOD_MS);

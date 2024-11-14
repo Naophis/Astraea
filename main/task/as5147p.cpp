@@ -32,26 +32,8 @@ void AS5147P::init() {
   // high keep
   GPIO.out_w1ts = BIT(6);
   GPIO.out1_w1ts.val = BIT(33 - 32);
-
-  // spi_transaction_t t;
-
-  // // 51 64 9.5 6000 0.5
-  // // 68 128 10 3000 1.1
-  // // 85 256 10.5 1500 2.5
-  // // 102 512 11 740 5.5
-  // // 119(default) 1024 11.5 370 12
-
-  // memset(&t, 0, sizeof(t)); // Zero out the transaction
-  // t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
-  // t.length = 16; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-  // t.tx_data[0] = (0x0e | 0b10000000);
-  // t.tx_data[1] = (85);
-  // t.tx_data[2] = 0;
-  // t.tx_data[3] = 0;
-  // spi_device_polling_transmit(spi_l, &t);
-  // spi_device_polling_transmit(spi_r, &t);
-
-  ESP_ERROR_CHECK(ret);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  initialized = true;
 }
 uint8_t AS5147P::write1byte(const uint8_t address, const uint8_t data) {
   return 0;
@@ -102,7 +84,6 @@ uint32_t IRAM_ATTR AS5147P::read2byte(const uint8_t address1,
 
   return (int32_t)((uint16_t)(t.rx_data[0]) << 8) | (uint16_t)(t.rx_data[1]);
 }
-
 
 int16_t AS5147P::read2byte_2(const uint8_t address1, const uint8_t address2) {
   return 0;

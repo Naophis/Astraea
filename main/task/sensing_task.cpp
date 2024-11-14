@@ -4,75 +4,54 @@ SensingTask::SensingTask() {}
 
 SensingTask::~SensingTask() {}
 
-void SensingTask::timer_250us_callback(void *arg) {
-  SensingTask *instance = static_cast<SensingTask *>(arg);
-  instance->timer_250us_callback_main();
-}
 void SensingTask::timer_200us_callback(void *arg) {
   SensingTask *instance = static_cast<SensingTask *>(arg);
   instance->timer_200us_callback_main();
 }
-void SensingTask::timer_10us_callback(void *arg) {
-  SensingTask *instance = static_cast<SensingTask *>(arg);
-  instance->timer_10us_callback_main();
+
+void SensingTask::timer_200us_callback_main() {
+  if (!ready) {
+    return;
+  }
+  const auto se = get_sensing_entity();
+  gyro_timestamp_old = gyro_timestamp_now;
+  enc_r_timestamp_old = enc_r_timestamp_now;
+  enc_l_timestamp_old = enc_l_timestamp_now;
+
+  if (enc_if.initialized) {
+
+    gyro_timestamp_now = esp_timer_get_time();
+    const auto gyro = gyro_if.read_2byte(0x26);
+
+    enc_r_timestamp_now = esp_timer_get_time();
+    const auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+    enc_l_timestamp_now = esp_timer_get_time();
+    const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+
+    gyro_buf.add(gyro);
+    enc_r_buf.add(enc_r);
+    enc_l_buf.add(enc_l);
+
+    gyro_time_buf.add((float)(gyro_timestamp_now - gyro_timestamp_old) /
+                      1000000);
+    enc_r_time_buf.add((float)(enc_r_timestamp_now - enc_r_timestamp_old) /
+                       1000000);
+    enc_l_time_buf.add((float)(enc_l_timestamp_now - enc_l_timestamp_old) /
+                       1000000);
+  }
+
+  // gyro_time_buf.add(gyro_dt);
 }
-std::vector<int> x = {2150, 2210, 2375, 2335, 2305, 2455, 2515, 2555, 2580};
-std::vector<float> y = {7.2, 7.4, 7.6, 7.8, 8.0, 8.2, 8.4, 8.5, 8.6};
-
-float linearInterpolation(const std::vector<int> &x,
-                          const std::vector<float> &y, int x1) {
-  // xとyの要素数が等しく、少なくとも2つ以上の要素が必要です
-  // if (x.size() != y.size() || x.size() < 2) {
-  //   throw std::runtime_error("Invalid input: x and y must have the same size
-  //   "
-  //                            "and at least two elements.");
-  // }
-
-  // x1がxの範囲外の場合、端点の値を返します
-  if (x1 <= x[0]) {
-    return y[0];
-  }
-  if (x1 >= x[x.size() - 1]) {
-    return y[y.size() - 1];
-  }
-
-  // x1がxのどの範囲に含まれるかを見つけます
-  int index = 0;
-  while (x[index] < x1) {
-    index++;
-  }
-
-  // x1がxの範囲内に含まれる場合、線形補間を行います
-  float x0 = x[index - 1];
-  float y0 = y[index - 1];
-  float x2 = x[index];
-  float y2 = y[index];
-
-  return y0 + (y2 - y0) * (x1 - x0) / (x2 - x0);
-}
-
-void SensingTask::timer_10us_callback_main() {}
-
-// 壁切れ時に必要ないセンシング処理をやめて、本来ほしいデータにまわす
-
-void SensingTask::timer_200us_callback_main() {}
-
-void SensingTask::timer_250us_callback_main() {}
 
 void SensingTask::create_task(const BaseType_t xCoreID) {
-  xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192 * 2, this, 2,
+  xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192 * 1, this, 2,
                           &handle, xCoreID);
-  // const esp_timer_create_args_t timer_200us_args = {
-  //     .callback = &SensingTask::timer_200us_callback,
-  //     .arg = this,
-  //     .name = "timer_100us"};
-  // esp_timer_create(&timer_200us_args, &timer_200us);
-
-  // const esp_timer_create_args_t timer_10us_args = {
-  //     .callback = &SensingTask::timer_10us_callback,
-  //     .arg = this,
-  //     .name = "timer_10us"};
-  // esp_timer_create(&timer_10us_args, &timer_10us);
+  const esp_timer_create_args_t timer_200us_args = {
+      .callback = &SensingTask::timer_200us_callback,
+      .arg = this,
+      .dispatch_method = ESP_TIMER_TASK,
+      .name = "timer_200us"};
+  esp_timer_create(&timer_200us_args, &timer_200us);
 }
 void SensingTask::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param) {
@@ -95,23 +74,7 @@ void SensingTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
 void SensingTask::encoder_init(const pcnt_unit_t unit, const gpio_num_t pinA,
-                               const gpio_num_t pinB) {
-  pcnt_config_0.pulse_gpio_num = pinA;
-  pcnt_config_0.ctrl_gpio_num = pinB;
-  pcnt_config_0.unit = unit;
-
-  pcnt_config_1.pulse_gpio_num = pinB;
-  pcnt_config_1.ctrl_gpio_num = pinA;
-  pcnt_config_1.unit = unit;
-
-  pcnt_unit_config(&pcnt_config_0);
-  pcnt_unit_config(&pcnt_config_1);
-
-  pcnt_counter_pause(unit);
-  pcnt_counter_clear(unit);
-
-  pcnt_counter_resume(unit);
-}
+                               const gpio_num_t pinB) {}
 
 void IRAM_ATTR SensingTask::exec_adc(adc2_channel_t channel,
                                      adc_bits_width_t width_bit, int *raw_out) {
@@ -128,7 +91,7 @@ void SensingTask::task() {
     gyro_if.setup();
     enc_if.init();
   }
-  ready = true;
+  esp_timer_start_periodic(timer_200us, 200);
 
   const auto se = get_sensing_entity();
   // sensing init
@@ -180,6 +143,8 @@ void SensingTask::task() {
   int64_t last_enc_l_time = 0;
   int64_t now_enc_l_time = 0;
 
+  ready = true;
+
   while (1) {
 
     last_gyro_time = now_gyro_time;
@@ -197,8 +162,6 @@ void SensingTask::task() {
     start = esp_timer_get_time();
     se->calc_time = (int16_t)(start - start_before);
     se->sensing_timestamp = start;
-    const float tmp_dt = ((float)se->calc_time) / 1000000.0;
-    // gyro_if.req_read2byte_itr(0x26);
     start2 = now_gyro_time; // esp_timer_get_time();
 
     if (skip_sensing) {
@@ -378,9 +341,6 @@ void SensingTask::task() {
     // end2 = esp_timer_get_time();
     set_gpio_state(LED_EN, false);
 
-    // se->battery.data = linearInterpolation(x, y, se->battery.raw);
-    // se->battery.data = linearInterpolation(x, y, se->battery.raw);
-
     se->battery.data = BATTERY_GAIN * 4 * sensing_result->battery.raw / 4096;
     if (led_on) {
       se->led_sen.right90.raw = std::max(
@@ -402,32 +362,28 @@ void SensingTask::task() {
     }
 
     now_gyro_time = esp_timer_get_time();
-    se->gyro_list[4] = gyro_if.read_2byte(0x26);
     const auto gyro_dt = ((float)(now_gyro_time - last_gyro_time)) / 1000000.0;
-    se->gyro.raw = se->gyro_list[4];
-    se->gyro.data = (float)(se->gyro_list[4]);
 
-    now_enc_r_time = esp_timer_get_time();
-    int32_t enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
     auto enc_r_dt = dt;
     auto enc_l_dt = dt;
-    if (enc_r != 0) {
-      enc_r_dt = ((float)(now_enc_r_time - last_enc_r_time)) / 1000000.0;
-      se->encoder.right_old = se->encoder.right;
-      se->encoder.right = enc_r;
-    } else {
-      now_enc_r_time = last_enc_r_time;
-    }
-
-    now_enc_l_time = esp_timer_get_time();
-    int32_t enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
-    if (enc_l != 0) {
-      enc_l_dt = ((float)(now_enc_l_time - last_enc_l_time)) / 1000000.0;
-      se->encoder.left_old = se->encoder.left;
-      se->encoder.left = enc_l;
-    } else {
-      now_enc_l_time = last_enc_l_time;
-    }
+    // now_enc_r_time = esp_timer_get_time();
+    // int32_t enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+    // if (enc_r != 0) {
+    //   enc_r_dt = ((float)(now_enc_r_time - last_enc_r_time)) / 1000000.0;
+    //   se->encoder.right_old = se->encoder.right;
+    //   se->encoder.right = enc_r;
+    // } else {
+    //   now_enc_r_time = last_enc_r_time;
+    // }
+    // now_enc_l_time = esp_timer_get_time();
+    // int32_t enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+    // if (enc_l != 0) {
+    //   enc_l_dt = ((float)(now_enc_l_time - last_enc_l_time)) / 1000000.0;
+    //   se->encoder.left_old = se->encoder.left;
+    //   se->encoder.left = enc_l;
+    // } else {
+    //   now_enc_l_time = last_enc_l_time;
+    // }
 
     calc_vel(gyro_dt, enc_l_dt, enc_r_dt);
 
@@ -437,76 +393,112 @@ void SensingTask::task() {
   }
 }
 
-float SensingTask::calc_sensor(float data, float a, float b) {
-  auto res = a / std::log(data) - b;
-  if (res < 5 || res > 180)
-    return 180;
-  return res;
+float SensingTask::calc_sensor(float data, float a, float b) { return 0; }
+
+float SensingTask::calc_enc_v(float now, float old, float dt) {
+  const float tire = pt->suction_en ? param->tire2 : param->tire;
+  const auto enc_delta = now - old;
+  float enc_ang = 0.f;
+  if (ABS(enc_delta) <
+      MIN(ABS(enc_delta - ENC_RESOLUTION), ABS(enc_delta + ENC_RESOLUTION))) {
+    enc_ang = 2 * m_PI * (float)enc_delta / (float)ENC_RESOLUTION;
+  } else {
+    if (ABS(enc_delta - ENC_RESOLUTION) < ABS(enc_delta + ENC_RESOLUTION)) {
+      enc_ang = 2 * m_PI * (float)(enc_delta - ENC_RESOLUTION) /
+                (float)ENC_RESOLUTION;
+    } else {
+      enc_ang = 2 * m_PI * (float)(enc_delta + ENC_RESOLUTION) /
+                (float)ENC_RESOLUTION;
+    }
+  }
+  return tire * enc_ang / dt / 2;
 }
 
 void SensingTask::calc_vel(float gyro_dt, float enc_r_dt, float enc_l_dt) {
+  const auto se = get_sensing_entity();
   // const float dt = param->dt;
   const float tire = pt->suction_en ? param->tire2 : param->tire;
-  const auto enc_delta_l =
-      sensing_result->encoder.left - sensing_result->encoder.left_old;
-  float enc_ang_l = 0.f;
-  if (ABS(enc_delta_l) < MIN(ABS(enc_delta_l - ENC_RESOLUTION),
-                             ABS(enc_delta_l + ENC_RESOLUTION))) {
-    enc_ang_l = 2 * m_PI * (float)enc_delta_l / (float)ENC_RESOLUTION;
-  } else {
-    if (ABS(enc_delta_l - ENC_RESOLUTION) < ABS(enc_delta_l + ENC_RESOLUTION)) {
-      enc_ang_l = 2 * m_PI * (float)(enc_delta_l - ENC_RESOLUTION) /
-                  (float)ENC_RESOLUTION;
-    } else {
-      enc_ang_l = 2 * m_PI * (float)(enc_delta_l + ENC_RESOLUTION) /
-                  (float)ENC_RESOLUTION;
+  const float tread = param->tire_tread;
+  se->ego.v_l_old = se->ego.v_l;
+  se->ego.v_r_old = se->ego.v_r;
+
+  se->encoder.left_old = se->encoder.left;
+  se->encoder.right_old = se->encoder.right;
+  const auto accl_l = (tgt_val->ego_in.v_l - vl_old) / dt;
+  const auto accl_r = (tgt_val->ego_in.v_r - vr_old) / dt;
+  if (std::isfinite(accl_l) && std::isfinite(accl_l)) {
+    const auto size_l = enc_l_buf.getSize();
+    if (!enc_l_buf.isEmpty() && size_l > 0) {
+      while (!enc_l_buf.isEmpty()) {
+        auto dt = enc_l_time_buf.pop();
+        pt->kf_v_l.dt = dt;
+        se->encoder.left_old = se->encoder.left;
+        const auto data = enc_l_buf.pop();
+        if (data != 0 && dt > 0) {
+          se->encoder.left = data;
+          se->ego.v_l = calc_enc_v(se->encoder.left, se->encoder.left_old, dt);
+        } else {
+          pt->kf_v_l.dt = 0.001 / 5;
+        }
+        pt->kf_v_l.predict(accl_l);
+        pt->kf_v_l.update(se->ego.v_l);
+      }
+    }
+    const auto size_r = enc_r_buf.getSize();
+    if (!enc_r_buf.isEmpty() && size_r > 0) {
+      while (!enc_r_buf.isEmpty()) {
+        auto dt = enc_r_time_buf.pop();
+        pt->kf_v_r.dt = dt;
+        se->encoder.right_old = se->encoder.right;
+        const auto data = enc_r_buf.pop();
+        if (data != 0 && dt > 0) {
+          se->encoder.right = data;
+          se->ego.v_r =
+              -calc_enc_v(se->encoder.right, se->encoder.right_old, dt);
+        } else {
+          pt->kf_v_r.dt = 0.001 / 5;
+        }
+        pt->kf_v_r.predict(accl_r);
+        pt->kf_v_r.update(se->ego.v_r);
+      }
     }
   }
+  se->ego.v_l = pt->kf_v_l.get_state();
+  se->ego.v_r = pt->kf_v_r.get_state();
+  se->ego.v_c = (se->ego.v_l + se->ego.v_r) / 2;
 
-  const auto enc_delta_r =
-      sensing_result->encoder.right - sensing_result->encoder.right_old;
-  float enc_ang_r = 0.f;
-  if (ABS(enc_delta_r) < MIN(ABS(enc_delta_r - ENC_RESOLUTION),
-                             ABS(enc_delta_r + ENC_RESOLUTION))) {
-    enc_ang_r = 2 * m_PI * (float)enc_delta_r / (float)ENC_RESOLUTION;
-  } else {
-    if (ABS(enc_delta_r - ENC_RESOLUTION) < ABS(enc_delta_r + ENC_RESOLUTION)) {
-      enc_ang_r = 2 * m_PI * (float)(enc_delta_r - ENC_RESOLUTION) /
-                  (float)ENC_RESOLUTION;
-    } else {
-      enc_ang_r = 2 * m_PI * (float)(enc_delta_r + ENC_RESOLUTION) /
-                  (float)ENC_RESOLUTION;
-    }
-  }
-
-  sensing_result->ego.v_l_old = sensing_result->ego.v_l;
-  sensing_result->ego.v_r_old = sensing_result->ego.v_r;
-
-  sensing_result->ego.v_l = tire * enc_ang_l / enc_l_dt / 2;
-  sensing_result->ego.v_r = -tire * enc_ang_r / enc_r_dt / 2;
-
-  sensing_result->ego.v_c =
-      (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
-
-  sensing_result->ego.rpm.right =
-      30.0 * sensing_result->ego.v_r / (m_PI * tire / 2);
-  sensing_result->ego.rpm.left =
-      30.0 * sensing_result->ego.v_l / (m_PI * tire / 2);
-
-  if (tgt_val->motion_dir == MotionDirection::LEFT) {
-    sensing_result->ego.w_raw =
-        param->gyro_param.gyro_w_gain_left *
-        (sensing_result->gyro.data - tgt_val->gyro_zero_p_offset);
-  } else {
-    sensing_result->ego.w_raw =
-        param->gyro_param.gyro_w_gain_right *
-        (sensing_result->gyro.data - tgt_val->gyro_zero_p_offset);
-  }
+  se->ego.rpm.right = 30.0 * se->ego.v_r / (m_PI * tire / 2);
+  se->ego.rpm.left = 30.0 * se->ego.v_l / (m_PI * tire / 2);
 
   const auto dt = (enc_l_dt + enc_r_dt) / 2;
 
-  tgt_val->ego_in.dist += sensing_result->ego.v_c * dt;
-  tgt_val->global_pos.dist += sensing_result->ego.v_c * dt;
-  tgt_val->ego_in.ang += sensing_result->ego.w_lp * gyro_dt;
-  tgt_val->global_pos.ang += sensing_result->ego.w_lp * gyro_dt;
+  tgt_val->ego_in.dist += se->ego.v_c * dt;
+  tgt_val->global_pos.dist += se->ego.v_c * dt;
+  se->gyro.raw = se->gyro.data = gyro_buf.getLatest();
+  const auto alpha = (tgt_val->ego_in.w - w_old) / dt;
+  if (std::isfinite(alpha) && std::isfinite(se->ego.w_lp)) {
+    if (!gyro_buf.isEmpty()) {
+      while (!gyro_buf.isEmpty()) {
+        const auto gyro = gyro_buf.pop();
+        // const auto gyro_dt = gyro_time_buf.pop();
+        if (tgt_val->motion_dir == MotionDirection::LEFT) {
+          se->ego.w_raw = param->gyro_param.gyro_w_gain_left *
+                          (gyro - tgt_val->gyro_zero_p_offset);
+        } else {
+          se->ego.w_raw = param->gyro_param.gyro_w_gain_right *
+                          (gyro - tgt_val->gyro_zero_p_offset);
+        }
+        pt->kf_w.predict(alpha);
+        pt->kf_w.update(se->ego.w_raw);
+      }
+      se->ego.w_kf = pt->kf_w.get_state();
+      se->ego.w_raw = se->ego.w_kf;
+    }
+  }
+
+  tgt_val->ego_in.ang += se->ego.w_kf * gyro_dt;
+  tgt_val->global_pos.ang += se->ego.w_kf * gyro_dt;
+  w_old = tgt_val->ego_in.w;
+  vl_old = se->ego.v_l;
+  vr_old = se->ego.v_r;
 }

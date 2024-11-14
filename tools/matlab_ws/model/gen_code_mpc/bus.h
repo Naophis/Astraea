@@ -103,6 +103,8 @@ typedef struct {
 
 typedef struct {
   float v;
+  float v_r;
+  float v_l;
   float accl;
   float w;
   float alpha;

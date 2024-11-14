@@ -12,7 +12,6 @@
 #include "freertos/task.h"
 #include "include/adachi.hpp"
 #include "include/defines.hpp"
-#include "include/sensing.hpp"
 #include "sdkconfig.h"
 #include "soc/adc_channel.h"
 #include "soc/ledc_periph.h"
@@ -119,7 +118,6 @@ DRAM_ATTR std::shared_ptr<PlanningTask> pt = std::make_shared<PlanningTask>();
 DRAM_ATTR std::shared_ptr<LoggingTask> lt = std::make_shared<LoggingTask>();
 DRAM_ATTR std::shared_ptr<MainTask> mt = std::make_shared<MainTask>();
 DRAM_ATTR std::shared_ptr<SensingTask> st = std::make_shared<SensingTask>();
-// std::shared_ptr<Sensing> sn = std::make_shared<Sensing>();
 TaskHandle_t xTaskHandler;
 // SensingTask st;
 
@@ -161,42 +159,16 @@ extern "C" void app_main() {
   init_gpio();
   init_uart();
 
-  // mcpwm_gpio_init(MCPWM_UNIT_1, MCPWM2A, SUCTION_PWM);
-  // mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
-  //                     MCPWM_DUTY_MODE_0);
-
-  // unsigned long MOTOR_HZ = 75000 / 1;
-  // set_motor_hz(MOTOR_HZ, 10);
-
-  // uint32_t high = 0;
-  // uint32_t low = 0;
-  // uint32_t Motor_L_PWM_BIT = BIT(L_CW_CCW1 - 32);
-  // high |= Motor_L_PWM_BIT;
-  // GPIO.out1_w1ts.val = high;
-  // // GPIO.out1_w1tc.val = low;
-
-  // mcpwm_start(MCPWM_UNIT_0, MCPWM_TIMER_0);
+  // LSM6DSR lsm6dsr;
+  // lsm6dsr.init();
+  // lsm6dsr.setup();
   // while (1) {
-  //   if (gpio_get_level(SW1)) {
-  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 10);
-  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
-  //                         MCPWM_DUTY_MODE_0);
-  //     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B);
-  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 0);
-  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
-  //                         MCPWM_DUTY_MODE_0);
-  //   } else {
-  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A, 0);
-  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A,
-  //                         MCPWM_DUTY_MODE_0);
-  //     mcpwm_set_signal_low(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_A);
-  //     mcpwm_set_duty(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B, 10);
-  //     mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_0, MCPWM_OPR_B,
-  //                         MCPWM_DUTY_MODE_0);
-  //   }
-
-  //   vTaskDelay(100 / portTICK_RATE_MS);
-  //   printf("Hello world!\n");
+  //   auto first = lsm6dsr.read_2byte(0x26);
+  //   auto second = lsm6dsr.read_2byte_retry(0x26);
+  //   auto third = lsm6dsr.read_2byte_retry(0x26);
+  //   auto fourth = lsm6dsr.read_2byte_retry(0x26);
+  //   printf("first: %d, second: %d, third: %d, fourth: %d\n", first, second,
+  //          third, fourth);
   // }
 
   QueueHandle_t xQueue;

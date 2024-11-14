@@ -33,10 +33,10 @@ union LED_bit {
 };
 
 typedef struct {
-  int32_t right = 0;
-  int32_t left = 0;
-  int32_t right_old = 0;
-  int32_t left_old = 0;
+  float right = 0;
+  float left = 0;
+  float right_old = 0;
+  float left_old = 0;
 } encoder_data_t;
 
 typedef struct {
@@ -194,6 +194,8 @@ typedef struct {
   sensing_data_t accel_x;
   sensing_data_t accel_y;
   int gyro_list[5];
+  deque<int> enc_r_list;
+  deque<int> enc_l_list;
   sensing_data_t battery;
   encoder_data_t encoder_raw;
   encoder_data_t encoder;
@@ -750,6 +752,8 @@ typedef struct {
   int suction_active = 0;
   float suction_duty = 0;
   float suction_duty_low = 0;
+  float suction_duty_burst = 0;
+  float suction_duty_burst_low = 0;
   float suction_gain = 0;
   float sla_dist = 0;
   int file_idx = 0;
@@ -791,6 +795,7 @@ typedef struct {
   int file_list_size = 0;
   int profile_idx_size = 0;
   std::vector<std::unordered_map<TurnType, int>> profile_list;
+  std::unordered_map<int, std::unordered_map<TurnType, int>> profile_map;
 } turn_param_profile_t;
 
 typedef struct {
@@ -830,7 +835,7 @@ typedef struct {
   std::unordered_map<TurnType, slalom_param2_t> map;
   std::unordered_map<TurnType, slalom_param2_t> map_slow;
   std::unordered_map<StraightType, straight_param_t> str_map;
-  bool suction = false;
+  char suction = 0;
   float suction_duty = 0;
   float suction_duty_low = 0;
   float cell_size = 90;

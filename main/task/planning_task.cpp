@@ -389,8 +389,15 @@ void PlanningTask::task() {
 
   kf_w.init(initial_state, initial_covariance, process_noise,
             measurement_noise);
+  kf_w.dt = 0.001 / 5;
   kf_v.init(initial_state, initial_covariance, process_noise,
             measurement_noise);
+  kf_v_r.init(initial_state, initial_covariance, process_noise,
+            measurement_noise);
+  kf_v_r.dt = 0.001 / 5;
+  kf_v_l.init(initial_state, initial_covariance, process_noise,
+            measurement_noise);
+  kf_v_l.dt = 0.001 / 5;
   kf_batt.init(initial_state, initial_covariance, process_noise,
                measurement_noise);
   kf_dist.init(initial_state, initial_covariance, process_noise,
@@ -907,54 +914,10 @@ float IRAM_ATTR PlanningTask::check_sen_error_dia() {
   return 0;
 }
 
-void IRAM_ATTR PlanningTask::calc_vel() {
-  // const float dt = param_ro->dt;
-  // const float tire = suction_en ? param_ro->tire2 : param_ro->tire;
-  // const auto enc_delta_l =
-  //     sensing_result->encoder.left - sensing_result->encoder.left_old;
-  // float enc_ang_l = 0.f;
-  // if (ABS(enc_delta_l) < MIN(ABS(enc_delta_l - ENC_RESOLUTION),
-  //                            ABS(enc_delta_l + ENC_RESOLUTION))) {
-  //   enc_ang_l = 2 * m_PI * (float)enc_delta_l / (float)ENC_RESOLUTION;
-  // } else {
-  //   if (ABS(enc_delta_l - ENC_RESOLUTION) < ABS(enc_delta_l +
-  //   ENC_RESOLUTION)) {
-  //     enc_ang_l = 2 * m_PI * (float)(enc_delta_l - ENC_RESOLUTION) /
-  //                 (float)ENC_RESOLUTION;
-  //   } else {
-  //     enc_ang_l = 2 * m_PI * (float)(enc_delta_l + ENC_RESOLUTION) /
-  //                 (float)ENC_RESOLUTION;
-  //   }
-  // }
-
-  // const auto enc_delta_r =
-  //     sensing_result->encoder.right - sensing_result->encoder.right_old;
-  // float enc_ang_r = 0.f;
-  // if (ABS(enc_delta_r) < MIN(ABS(enc_delta_r - ENC_RESOLUTION),
-  //                            ABS(enc_delta_r + ENC_RESOLUTION))) {
-  //   enc_ang_r = 2 * m_PI * (float)enc_delta_r / (float)ENC_RESOLUTION;
-  // } else {
-  //   if (ABS(enc_delta_r - ENC_RESOLUTION) < ABS(enc_delta_r +
-  //   ENC_RESOLUTION)) {
-  //     enc_ang_r = 2 * m_PI * (float)(enc_delta_r - ENC_RESOLUTION) /
-  //                 (float)ENC_RESOLUTION;
-  //   } else {
-  //     enc_ang_r = 2 * m_PI * (float)(enc_delta_r + ENC_RESOLUTION) /
-  //                 (float)ENC_RESOLUTION;
-  //   }
-  // }
-
-  // sensing_result->ego.v_l_old = sensing_result->ego.v_l;
-  // sensing_result->ego.v_r_old = sensing_result->ego.v_r;
-
-  // sensing_result->ego.v_l = tire * enc_ang_l / dt / 2;
-  // sensing_result->ego.v_r = -tire * enc_ang_r / dt / 2;
-
-  // sensing_result->ego.v_c =
-  //     (sensing_result->ego.v_l + sensing_result->ego.v_r) / 2;
-}
+void IRAM_ATTR PlanningTask::calc_vel() {}
 
 void IRAM_ATTR PlanningTask::update_ego_motion() {
+  const auto se = get_sensing_entity();
   const float dt = param_ro->dt;
   const float tire = param_ro->tire;
   tgt_val->ego_in.ff_duty_low_th = param_ro->ff_front_dury;
@@ -963,14 +926,12 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     tgt_val->ego_in.v = 0;
     tgt_val->ego_in.w = 0;
   }
-  sensing_result->ego.accel_x_raw =
-      param_ro->accel_x_param.gain *
-      (sensing_result->accel_x.raw - tgt_val->accel_x_zero_p_offset);
+  se->ego.accel_x_raw = param_ro->accel_x_param.gain *
+                        (se->accel_x.raw - tgt_val->accel_x_zero_p_offset);
 
   if (param_ro->comp_param.enable == 1) {
-    sensing_result->ego.v_lp =
-        (1 - param_ro->comp_param.v_lp_gain) * sensing_result->ego.v_c +
-        param_ro->comp_param.v_lp_gain * sensing_result->ego.v_lp;
+    se->ego.v_lp = (1 - param_ro->comp_param.v_lp_gain) * se->ego.v_c +
+                   param_ro->comp_param.v_lp_gain * se->ego.v_lp;
   } else if (param_ro->comp_param.enable == 2) {
     // sensing_result->ego.v_lp =
     //     (1 - param_ro->comp_param.v_lp_gain) * sum_v / enc_v_q.size() +
@@ -991,80 +952,83 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   //   tgt_val->global_pos.dist += sensing_result->ego.main_v * dt;
   // }
 
-  sensing_result->ego.w_lp =
-      sensing_result->ego.w_lp * (1 - param_ro->gyro_param.lp_delay) +
-      sensing_result->ego.w_raw * param_ro->gyro_param.lp_delay;
+  se->ego.w_lp = se->ego.w_lp * (1 - param_ro->gyro_param.lp_delay) +
+                 se->ego.w_raw * param_ro->gyro_param.lp_delay;
 
   // kf_w.predict(sensing_result->ego.w_raw);
   // kf_w.update(sensing_result->ego.w_raw);
 
-  if (std::isfinite(tgt_val->ego_in.alpha) &&
-      std::isfinite(sensing_result->ego.w_lp)) {
-    kf_w.predict(tgt_val->ego_in.alpha);
-    kf_w.update(sensing_result->ego.w_lp);
-    sensing_result->ego.w_kf = kf_w.get_state();
-  }
-  if (std::isfinite(tgt_val->ego_in.accl) &&
-      std::isfinite(sensing_result->ego.v_c)) {
+  // if (std::isfinite(tgt_val->ego_in.alpha) && std::isfinite(se->ego.w_lp)) {
+  //   for (const auto gyro : se->gyro_list) {
+  //     if (tgt_val->motion_dir == MotionDirection::LEFT) {
+  //       se->ego.w_raw = param_ro->gyro_param.gyro_w_gain_left *
+  //                       (gyro - tgt_val->gyro_zero_p_offset);
+  //     } else {
+  //       se->ego.w_raw = param_ro->gyro_param.gyro_w_gain_right *
+  //                       (gyro - tgt_val->gyro_zero_p_offset);
+  //     }
+  //     kf_w.predict(tgt_val->ego_in.alpha);
+  //     kf_w.update(se->ego.w_raw);
+  //   }
+  //   // kf_w.predict(tgt_val->ego_in.alpha);
+  //   // kf_w.update(sensing_result->ego.w_lp);
+  //   se->ego.w_kf = kf_w.get_state();
+  // }
+  if (std::isfinite(tgt_val->ego_in.accl) && std::isfinite(se->ego.v_c)) {
     kf_v.predict(tgt_val->ego_in.accl);
-    kf_v.update(sensing_result->ego.v_c);
-    sensing_result->ego.v_kf = kf_v.get_state();
+    kf_v.update(se->ego.v_c);
+    se->ego.v_kf = kf_v.get_state();
   }
 
   if (std::isfinite(tgt_val->ego_in.v)) {
     kf_dist.predict(tgt_val->ego_in.v);
     kf_dist.update(tgt_val->ego_in.dist);
-    sensing_result->ego.dist_kf = kf_dist.get_state();
+    se->ego.dist_kf = kf_dist.get_state();
   }
   if (std::isfinite(tgt_val->ego_in.w)) {
     kf_ang.predict(tgt_val->ego_in.w);
     kf_ang.update(tgt_val->ego_in.ang);
-    sensing_result->ego.ang_kf = kf_ang.get_state();
+    se->ego.ang_kf = kf_ang.get_state();
   }
 
-  sensing_result->ego.battery_raw = sensing_result->battery.data;
+  se->ego.battery_raw = se->battery.data;
 
-  sensing_result->ego.battery_lp =
-      sensing_result->ego.battery_lp * (1 - param_ro->battery_param.lp_delay) +
-      sensing_result->ego.battery_raw * param_ro->battery_param.lp_delay;
+  se->ego.battery_lp =
+      se->ego.battery_lp * (1 - param_ro->battery_param.lp_delay) +
+      se->ego.battery_raw * param_ro->battery_param.lp_delay;
 
   kf_batt.predict(0);
-  kf_batt.update(sensing_result->ego.battery_raw);
-  sensing_result->ego.batt_kf = kf_batt.get_state();
+  kf_batt.update(se->ego.battery_raw);
+  se->ego.batt_kf = kf_batt.get_state();
 
-  sensing_result->ego.left45_lp_old = sensing_result->ego.left45_lp;
-  sensing_result->ego.left90_lp_old = sensing_result->ego.left90_lp;
-  sensing_result->ego.front_lp_old = sensing_result->ego.front_lp;
-  sensing_result->ego.right45_lp_old = sensing_result->ego.right45_lp;
-  sensing_result->ego.right90_lp_old = sensing_result->ego.right90_lp;
+  se->ego.left45_lp_old = se->ego.left45_lp;
+  se->ego.left90_lp_old = se->ego.left90_lp;
+  se->ego.front_lp_old = se->ego.front_lp;
+  se->ego.right45_lp_old = se->ego.right45_lp;
+  se->ego.right90_lp_old = se->ego.right90_lp;
 
   // sensing_result->ego.right45_2_lp_old = sensing_result->ego.right45_2_lp;
   // sensing_result->ego.left45_2_lp_old = sensing_result->ego.left45_2_lp;
 
-  sensing_result->ego.right90_raw = sensing_result->led_sen.right90.raw;
-  sensing_result->ego.right90_lp =
-      sensing_result->ego.right90_lp * (1 - param_ro->led_param.lp_delay) +
-      sensing_result->ego.right90_raw * param_ro->led_param.lp_delay;
+  se->ego.right90_raw = se->led_sen.right90.raw;
+  se->ego.right90_lp = se->ego.right90_lp * (1 - param_ro->led_param.lp_delay) +
+                       se->ego.right90_raw * param_ro->led_param.lp_delay;
 
-  sensing_result->ego.right45_raw = sensing_result->led_sen.right45.raw;
-  sensing_result->ego.right45_lp =
-      sensing_result->ego.right45_lp * (1 - param_ro->led_param.lp_delay) +
-      sensing_result->ego.right45_raw * param_ro->led_param.lp_delay;
+  se->ego.right45_raw = se->led_sen.right45.raw;
+  se->ego.right45_lp = se->ego.right45_lp * (1 - param_ro->led_param.lp_delay) +
+                       se->ego.right45_raw * param_ro->led_param.lp_delay;
 
-  sensing_result->ego.front_raw = sensing_result->led_sen.front.raw;
-  sensing_result->ego.front_lp =
-      sensing_result->ego.front_lp * (1 - param_ro->led_param.lp_delay) +
-      sensing_result->ego.front_raw * param_ro->led_param.lp_delay;
+  se->ego.front_raw = se->led_sen.front.raw;
+  se->ego.front_lp = se->ego.front_lp * (1 - param_ro->led_param.lp_delay) +
+                     se->ego.front_raw * param_ro->led_param.lp_delay;
 
-  sensing_result->ego.left45_raw = sensing_result->led_sen.left45.raw;
-  sensing_result->ego.left45_lp =
-      sensing_result->ego.left45_lp * (1 - param_ro->led_param.lp_delay) +
-      sensing_result->ego.left45_raw * param_ro->led_param.lp_delay;
+  se->ego.left45_raw = se->led_sen.left45.raw;
+  se->ego.left45_lp = se->ego.left45_lp * (1 - param_ro->led_param.lp_delay) +
+                      se->ego.left45_raw * param_ro->led_param.lp_delay;
 
-  sensing_result->ego.left90_raw = sensing_result->led_sen.left90.raw;
-  sensing_result->ego.left90_lp =
-      sensing_result->ego.left90_lp * (1 - param_ro->led_param.lp_delay) +
-      sensing_result->ego.left90_raw * param_ro->led_param.lp_delay;
+  se->ego.left90_raw = se->led_sen.left90.raw;
+  se->ego.left90_lp = se->ego.left90_lp * (1 - param_ro->led_param.lp_delay) +
+                      se->ego.left90_raw * param_ro->led_param.lp_delay;
 
   // sensing_result->ego.right45_2_raw = sensing_result->led_sen.right45_2.raw;
   // sensing_result->ego.right45_2_lp =
@@ -1076,7 +1040,7 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   //     sensing_result->ego.left45_2_lp * (1 - param_ro->led_param.lp_delay) +
   //     sensing_result->ego.left45_2_raw * param_ro->led_param.lp_delay;
   // コピー
-  tgt_val->ego_in.slip_point.w = sensing_result->ego.w_lp;
+  tgt_val->ego_in.slip_point.w = se->ego.w_lp;
 }
 bool IRAM_ATTR PlanningTask::judge_motor_pwm(float duty, uint8_t type) {
   if (type == 1) {
@@ -1896,6 +1860,10 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     error_entity_ptr->v_val.p_val = 0;
     kf_dist.reset(0);
     kf_ang.reset(0);
+    kf_v.reset(0);
+    kf_w.reset(0);
+    kf_v_l.reset(0);
+    kf_v_r.reset(0);
   }
   sensing_result->ego.duty.duty_r = tgt_duty.duty_r;
   sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
@@ -1920,6 +1888,8 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
 
   const auto tmp_v = tgt_val->ego_in.v;
   tgt_val->ego_in.v = mpc_next_ego.v;
+  tgt_val->ego_in.v_l = mpc_next_ego.v - mpc_next_ego.w * param_ro->tire_tread / 2;
+  tgt_val->ego_in.v_r = mpc_next_ego.v + mpc_next_ego.w * param_ro->tire_tread / 2;
   if (tgt_val->motion_type == MotionType::SLALOM) {
     if (tgt_val->ego_in.v < 10) {
       tgt_val->ego_in.v = tmp_v;

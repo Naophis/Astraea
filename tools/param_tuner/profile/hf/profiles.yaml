@@ -24,6 +24,10 @@ list: [
     "t_1700.hf", #22
     "t_1750.hf", #23
     "t_1800.hf", #24
+    "t_1850.hf", #25
+    "t_1900.hf", #26
+    "t_1950.hf", #27
+    "t_2000.hf", #28
   ]
 # 限界性能
 # Large: 1800
@@ -338,6 +342,19 @@ profile_idx: [
     {
       # 23: 最短パラメータ 1500
       run_param: 23,
+      suction: 1,
+      normal: 0,
+      large: 24,
+      orval: 22,
+      dia45: 18,
+      dia45_2: 22,
+      dia135: 22,
+      dia135_2: 22,
+      dia90: 18,
+    },
+    {
+      # 24: 最短パラメータ 1500
+      run_param: 24,
       suction: 1,
       normal: 0,
       large: 24,

@@ -23,6 +23,8 @@ public:
   int16_t read2byte_2(const uint8_t address);
   int16_t IRAM_ATTR read_2byte(const uint8_t address);
 
+  int16_t IRAM_ATTR read_2byte_retry(const uint8_t address);
+
   void req_read1byte_itr(const uint8_t address);
   uint8_t read_1byte_itr();
 
@@ -35,6 +37,9 @@ public:
   int read_accel_y();
   void begin();
   void enable_g();
+  int get_unread_fifo_data_length();
+  int get_fifo_data();
+  int get_fifo_tag();
 
 private:
   spi_device_handle_t spi;

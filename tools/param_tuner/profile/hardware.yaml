@@ -3,8 +3,8 @@ dt: 0.001
 # tire2: 13.60125
 
 tire_tread: 38.0
-tire: 13.4810
-tire2: 13.4810
+tire: 13.51250
+tire2: 13.51250
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 4.0
@@ -35,7 +35,7 @@ SuctionResolution: 40
 Ke: 0.002560632779648483  # 大：逆起電力大
 # Km: 0.00260946 # トルク定数：　大-> 縦系の出力小
 Km: 0.00130473 # トルク定数：　大-> 縦系の出力小
-Lm: 0.00000125 # 大：横系の出力大
+Lm: 0.00000035 # 大：横系の出力大
 
 Resist: 4.4
 Mass: 0.026
@@ -43,7 +43,7 @@ Mass: 0.026
 slip_param_K: 0.5
 slip_param_k2: 150
 
-sakiyomi_time: 6
+sakiyomi_time: 3
 
 #ログON_OFF
 logging_time: 1.0
@@ -143,8 +143,7 @@ motor_pid: #front_ctrl
 motor_pid2:
   #AS5147P 
   mode: 7
-  p: 0.00000625
-  # i: 0.00000175
+  p: 0.0000075
   i: 0.000003625
   b: 0.00
   d: 0.0000085
@@ -255,8 +254,8 @@ gyro_param:
   # Gray
   # gyro_w_gain_right: 0.002455800
   # gyro_w_gain_left: 0.002456000
-  gyro_w_gain_left: 0.00245905
-  gyro_w_gain_right: 0.00245905
+  gyro_w_gain_left: 0.00245945
+  gyro_w_gain_right: 0.00245945
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g

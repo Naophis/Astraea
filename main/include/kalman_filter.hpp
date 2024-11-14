@@ -8,6 +8,7 @@ private:
   float init_P;
 
 public:
+  float dt = 0.001;
   KalmanFilter();
   void init(float initial_x, float initial_P, float process_noise,
             float measurement_noise);
@@ -18,6 +19,6 @@ public:
   float get_state();
 
   void reset(float reset_val);
-  
+
   void offset(float offset);
 };

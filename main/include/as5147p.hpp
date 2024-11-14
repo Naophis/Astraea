@@ -34,6 +34,7 @@ public:
   int read_gyro_z();
   int read_accel_x();
   int read_accel_y();
+  bool initialized = false;
 
 private:
   spi_device_handle_t spi_l;

@@ -12,7 +12,7 @@ void KalmanFilter::init(float initial_x, float initial_P, float process_noise,
 
 void KalmanFilter::predict(float u) {
   // 予測ステップ
-  x = x + u * 0.001;
+  x = x + u * dt;
   P = P + Q;
 }
 
