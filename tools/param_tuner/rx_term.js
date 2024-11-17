@@ -50,36 +50,63 @@ let ready = function () {
     var s = ("00" + dt.getSeconds()).slice(-2);
     return `${y}${m}${d}_${h}${M}_${s}.csv`;
   }
+  function getNowYMD_maze() {
+    var dt = new Date();
+    var y = dt.getFullYear();
+    var m = ("00" + (dt.getMonth() + 1)).slice(-2);
+    var d = ("00" + dt.getDate()).slice(-2);
+    var h = ("00" + dt.getHours()).slice(-2);
+    var M = ("00" + dt.getMinutes()).slice(-2);
+    var s = ("00" + dt.getSeconds()).slice(-2);
+    return `${y}${m}${d}_${h}${M}_${s}.maze`;
+  }
   let obj = {
     dump_to_csv: false,
+    dump_to_map: false,
     file_name: getNowYMD(),
     record: "",
   };
 
   parser.on("data", function (data) {
     console.log(data);
-
-    if (data.match(/^end___/)) {
-      obj.dump_to_csv = false;
-
-      console.log(`${__dirname}/logs/${obj.file_name}`);
-
-      fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
-        flag: "w+",
-      });
-
-      fs.copyFileSync(
-        `${__dirname}/logs/${obj.file_name}`,
-        `${__dirname}/logs/latest.csv`
-      );
-    }
     if (obj.dump_to_csv) {
-      obj.record += `${data}\n`;
+      if (data.match(/^end___/)) {
+        obj.dump_to_csv = false;
+        console.log(`${__dirname}/logs/${obj.file_name}`);
+        fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
+          flag: "w+",
+        });
+        fs.copyFileSync(
+          `${__dirname}/logs/${obj.file_name}`,
+          `${__dirname}/logs/latest.csv`
+        );
+      }
+      if (obj.dump_to_csv) {
+        obj.record += `${data}\n`;
+      }
+    }
+    if (obj.dump_to_map) {
+      if (data.match(/^end___/)) {
+        obj.dump_to_map = false;
+        console.log(`${__dirname}/maze_logs/${obj.file_name}`);
+        fs.writeFileSync(`${__dirname}/maze_logs/${obj.file_name}`, `${obj.record}`, {
+          flag: "w+",
+        });
+      }
+      if (obj.dump_to_map) {
+        obj.record += `${data}\n`;
+      }
     }
 
     if (data.match(/^start___/)) {
       obj.dump_to_csv = true;
       obj.file_name = getNowYMD();
+      obj.record = "";
+      console.log(obj);
+    }
+    if (data.match(/^map___/)) {
+      obj.dump_to_map = true;
+      obj.file_name = getNowYMD_maze();
       obj.record = "";
       console.log(obj);
     }
@@ -94,7 +121,7 @@ SerialPort.list().then(
       if (
         p.path.match(/usbserial/) ||
         p.path.match(/COM/) ||
-        p.path.match(/ttyUSB/)||
+        p.path.match(/ttyUSB/) ||
         p.path.match(/ttyACM/)
       ) {
         if (p.serialNumber) {

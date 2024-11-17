@@ -41,9 +41,20 @@ const callerFun = async (mode) => {
     var list = ["system.yaml", "hardware.yaml"].concat(files.filter((file) => {
       return file.match(/.yaml$/);
     }));
-
-    for (var i in list) {
-      console.log(` ${i} : ${list[i]}`);
+    let col = 4;
+    for (var i = 0; list.length;) {
+      let str = "";
+      if (list[i] === undefined) {
+        break
+      }
+      for (var j = 0; j < col; j++) {
+        if (list[i + j] === undefined) {
+          break;
+        }
+        str += `[${i + j}]: ${list[i + j]}\t`;
+      }
+      i += col;
+      console.log(str);
     }
     console.log(">");
     var str = fs.readFileSync("/dev/stdin").toString().trim();
@@ -99,7 +110,7 @@ const callerFun = async (mode) => {
         let txt = fs.readFileSync(`${__dirname}/profile/${list[idx]}`, {
           encoding: "utf-8",
         });
-        var file_name = file.replace("yaml","txt");
+        var file_name = file.replace("yaml", "txt");
         var saveData = yaml.load(txt);
         console.log(saveData)
         var str = `${file_name}@${JSON.stringify(saveData)}`;
@@ -111,12 +122,17 @@ const callerFun = async (mode) => {
           encoding: "utf-8",
         });
         var file_name = list[idx].replace("yaml", mode);
-        if (file_name === "maze.txt") {
+        console.log(file_name)
+
+        if (file_name === "maze.hf") {
+          file_name = "maze.txt";
+          let maze_list = txt.split(",").map((e) => { return e.trim(); }).map((e) => { return (parseInt(e) | 0xf0); });
+          txt = maze_list.join(",");
           var str = `${file_name}@${txt}`;
           write(str);
-          console.log(saveData)
+          console.log(txt)
           await sleep2(800);
-          console.log(`${file_name}: finish22!!`);
+          console.log(`${file_name}: finish!!`);
         } else {
           var saveData = yaml.load(txt);
           var str = `${file_name}@${JSON.stringify(saveData)}`;
