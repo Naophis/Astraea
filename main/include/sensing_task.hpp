@@ -125,12 +125,6 @@ public:
 private:
   LSM6DSR gyro_if;
   AS5147P enc_if;
-  RingBuffer gyro_buf;
-  RingBuffer enc_r_buf;
-  RingBuffer enc_l_buf;
-  RingBuffer gyro_time_buf;
-  RingBuffer enc_r_time_buf;
-  RingBuffer enc_l_time_buf;
   float w_old = 0;
   float vr_old = 0;
   float vl_old = 0;

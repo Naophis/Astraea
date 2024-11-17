@@ -60,7 +60,8 @@ public:
   std::vector<unsigned char> path_t;
   std::vector<float> path_time_s;
   std::vector<float> path_time_t;
-  std::vector<float> path_time_total;
+  std::vector<planning_time_t> path_time_total;
+
   vector<float> path_s2;
   vector<unsigned char> path_t2;
 
@@ -96,12 +97,13 @@ public:
   void print_path();
   void print_path2();
 
-  float calc_goal_time(param_set_t &p_set);
+  float calc_goal_time(param_set_t &p_set, bool debug = false);
   float timebase_path_create(bool is_search, param_set_t &p_set, path_set_t &p);
   path_create_status_t pc_result;
   route_t route;
   float go_straight_dummy(float v1, float vmax, float v2, float ac, float diac,
-                          float dist);
+                          float dist, planning_time_t &time,
+                          bool debug = false);
   float slalom_dummy(TurnType turn_type, TurnDirection td, param_set_t &p_set);
 
   char asc(float d, float d2);

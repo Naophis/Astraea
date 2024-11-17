@@ -1306,6 +1306,11 @@ void MainTask::load_straight(
         getItem(getItem(getItem(root, key), p2.second.c_str()), "alpha")
             ->valuedouble;
     str_map[p2.first] = str_p;
+
+    printf("[%d][%d]: (v_max, accl, decel, w_max, w_end, alpha) = (%4.1f, "
+           "%4.1f, %4.1f, %4.1f, %4.1f, %4.1f)\n",
+           idx, (int)p2.first, str_p.v_max, str_p.accl, str_p.decel,
+           str_p.w_max, str_p.w_end, str_p.alpha);
   }
   cJSON_Delete(root);
   umount();
@@ -2829,6 +2834,17 @@ void MainTask::read_maze_data() {
     printf("\n");
   }
   printf("]\n");
+
+  printf("map___\n");
+  vTaskDelay(1.0 / portTICK_PERIOD_MS);
+  for (int x = 0; x < sys.maze_size; x++) {
+    for (int y = 0; y < sys.maze_size; y++) {
+      auto d = lgc->map[x + y * sys.maze_size];
+      printf("%d,", (d & 0xff));
+    }
+  }
+  printf("\n");
+  printf("end___\n"); // ファイル追記終了トリガー
   umount();
 }
 
@@ -2909,8 +2925,9 @@ void MainTask::path_run(int idx, int idx2) {
   } else {
     load_circuit_path();
   }
+  printf("----------------\n");
+  pc->calc_goal_time(param_set, true);
   pc->print_path();
-  printf("%f\n", pc->route.time);
   // printf("after: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
   const auto backup_l45 = param->sen_ref_p.normal.exist.left45;

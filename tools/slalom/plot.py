@@ -39,14 +39,14 @@ class Plot:
             if hf_cl == 0:
                 rad = 56.5
                 n = 4
-                tgt_ang = 90.25
+                tgt_ang = 90.0
                 start_ang = 0
                 end_pos = {"x": 90, "y": 90}
         elif type == "orval":
             if hf_cl == 0:
-                rad = 47.750
+                rad = 47.75
                 n = 4
-                tgt_ang = 181.25
+                tgt_ang = 180.50
                 # tgt_ang = 180
                 end_pos = {"x": 0, "y": 180}
                 start_ang = 0
@@ -55,15 +55,15 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             tgt_ang = 45.0
             start_ang = 0
+            n = 6
 
             if hf_cl == 0:
-                rad = 51.0
-                n = 6
+                rad = 48.0
                 end_pos = {"x": 90, "y": 45}
 
         elif type == "dia135":
             start_ang = 0
-            tgt_ang = 135.75
+            tgt_ang = 135.0
 
             if hf_cl == 0:
                 # rad = 46.0
@@ -73,10 +73,10 @@ class Plot:
 
         elif type == "dia45_2":
             start_ang = 45
+            n = 6
+            rad = 68
+            tgt_ang = 45
             if hf_cl == 0:
-                rad = 70
-                n = 4
-                tgt_ang = 45
                 end_pos = {"x": 90, "y": 45}
 
         elif type == "dia135_2":
@@ -84,15 +84,14 @@ class Plot:
             if hf_cl == 0:
                 rad = 39.50
                 n = 4
-                tgt_ang = 135.5
+                tgt_ang = 135.0
                 end_pos = {"x": -45, "y": 90}
         elif type == "dia90":
             start_ang = 0
-            if hf_cl == 0:
-                rad = 45.0
-                n = 6
-                tgt_ang = 90
-                end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
+            n = 6
+            tgt_ang = 90
+            rad = 40.0
+            end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
 
         res = {}
         if mode > 0:
@@ -189,10 +188,10 @@ class Plot:
                  alpha=trj_alpha, ls="--")
         trj.plot(res2["after_path_x2"], res2["after_path_y2"],
                  ls="--", color="cyan", lw=1, alpha=trj_alpha)
-        if res2["after_path_x2"][1] != end_pos["x"] or \
-                res2["after_path_y2"][1] != end_pos["y"]:
-            print(res2["after_path_x2"])
-            print(res2["after_path_y2"])
+        # if res2["after_path_x2"][1] != end_pos["x"] or \
+        #         res2["after_path_y2"][1] != end_pos["y"]:
+        #     print(res2["after_path_x2"])
+        #     print(res2["after_path_y2"])
         # plV = plt.subplot2grid((plot_row, plot_col), (1, 0), rowspan=plot_col)
         plV = plt.subplot2grid((plot_row, plot_col), (0, 1), rowspan=1)
         plV.plot(res["v"] * 1000)

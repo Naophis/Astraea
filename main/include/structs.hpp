@@ -1034,4 +1034,14 @@ typedef struct {
   float star_dist;
 
 } sensor_ctrl_keep_dist_t;
+
+typedef struct {
+  float v_start = 0;
+  float v_max = 0;
+  float v_end = 0;
+  float dist = 0;
+  float lap_time = 0;
+  float total_time = 0;
+} planning_time_t;
+
 #endif

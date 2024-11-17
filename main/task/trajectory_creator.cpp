@@ -40,11 +40,35 @@ TurnType TrajectoryCreator::get_turn_type(int turn_num, bool dia) {
     return TurnType::Finish;
   return TurnType::Finish;
 }
+string TrajectoryCreator::get_turn_type_string(int turn_num, bool dia) {
+  if (turn_num == 1 || turn_num == 2)
+    return "Normal";
+  if (turn_num == 3 || turn_num == 4)
+    return "Orval";
+  if (turn_num == 5 || turn_num == 6)
+    return "Large";
+  if (turn_num == 7 || turn_num == 8)
+    return !dia ? "Dia45" : "Dia45_2";
+  if (turn_num == 9 || turn_num == 10)
+    return !dia ? "Dia135" : "Dia135_2";
+  if (turn_num == 11 || turn_num == 12)
+    return "Dia90";
+  if (turn_num == 13 || turn_num == 14)
+    return "Kojima";
+  if (turn_num == 255)
+    return "Finish";
+  return "Finish";
+}
 
 TurnDirection TrajectoryCreator::get_turn_dir(int turn_num) {
   if (turn_num == 255 || turn_num == 0)
     return TurnDirection::End;
   return (turn_num & 0x01) == 0x01 ? TurnDirection::Right : TurnDirection::Left;
+}
+string TrajectoryCreator::get_turn_dir_string(int turn_num) {
+  if (turn_num == 255 || turn_num == 0)
+    return "";
+  return (turn_num & 0x01) == 0x01 ? "R" : "L";
 }
 
 float TrajectoryCreator::get_run_dir(Direction dir, float ang) {

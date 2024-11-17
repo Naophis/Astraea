@@ -28,6 +28,10 @@ list: [
     "t_1900.hf", #26
     "t_1950.hf", #27
     "t_2000.hf", #28
+    "t_2050.hf", #29
+    "t_2100.hf", #30
+    "t_2150.hf", #31
+    "t_2200.hf", #32
   ]
 # 限界性能
 # Large: 1800
@@ -344,16 +348,29 @@ profile_idx: [
       run_param: 23,
       suction: 1,
       normal: 0,
-      large: 24,
-      orval: 22,
-      dia45: 18,
-      dia45_2: 22,
-      dia135: 22,
-      dia135_2: 22,
-      dia90: 18,
+      large: 31,
+      orval: 30,
+      dia45: 24,
+      dia45_2: 24,
+      dia135: 24,
+      dia135_2: 24,
+      dia90: 23,
     },
     {
       # 24: 最短パラメータ 1500
+      run_param: 24,
+      suction: 1,
+      normal: 0,
+      large: 31,
+      orval: 30,
+      dia45: 24,
+      dia45_2: 24,
+      dia135: 24,
+      dia135_2: 24,
+      dia90: 23,
+    },
+    {
+      # 25: 最短パラメータ 1500
       run_param: 24,
       suction: 1,
       normal: 0,
@@ -364,5 +381,44 @@ profile_idx: [
       dia135: 22,
       dia135_2: 22,
       dia90: 18,
+    },
+    {
+      # 26: 最短パラメータ 1500
+      run_param: 24,
+      suction: 1,
+      normal: 0,
+      large: 24,
+      orval: 22,
+      dia45: 18,
+      dia45_2: 22,
+      dia135: 22,
+      dia135_2: 22,
+      dia90: 18,
+    },
+    {
+      # 27: 最短パラメータ 1500
+      run_param: 24,
+      suction: 1,
+      normal: 0,
+      large: 24,
+      orval: 22,
+      dia45: 18,
+      dia45_2: 22,
+      dia135: 22,
+      dia135_2: 22,
+      dia90: 18,
+    },
+    {
+      # 28: 最短パラメータ 1500
+      run_param: 24,
+      suction: 1,
+      normal: 0,
+      large: 28,
+      orval: 22,
+      dia45: 25,
+      dia45_2: 25,
+      dia135: 25,
+      dia135_2: 25,
+      dia90: 22,
     },
   ]

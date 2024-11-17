@@ -4,6 +4,7 @@
 #include "maze_solver.hpp"
 #include "stdio.h"
 #include <cmath>
+#include <iostream>
 #include <vector>
 
 using namespace std;
@@ -64,6 +65,8 @@ public:
   Direction get_next_dir(Direction dir, TurnType type, TurnDirection turn_dir);
   TurnType get_turn_type(int turn_num);
   TurnType get_turn_type(int turn_num, bool dia);
+  string get_turn_type_string(int turn_num, bool dia);
+  string get_turn_dir_string(int turn_num);
 
   TurnDirection get_turn_dir(int turn_dir);
   double chop_dt = 3;

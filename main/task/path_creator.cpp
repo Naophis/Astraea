@@ -559,11 +559,23 @@ void PathCreator::pathOffset() {
 
 void PathCreator::print_path() {
   auto size = path_s.size();
+  bool dia = false;
   for (int i = 0; i < size; i++) {
     float dist2 = 0.5 * path_s[i] - 1;
     if (path_time_s.size() > i) {
-      printf("[%d]: %0.2f,\t%d\t(%0.3f, %0.3f, %0.3f)\n", i, dist2, path_t[i],
-             path_time_s[i], path_time_t[i], path_time_total[i]);
+      printf("[%d]: %0.2f,\t%s [%s]\tt=(%0.3f, %0.3f, "
+             "%0.3f)\t[v,d]=(%4.1f, %4.1f, "
+             "%4.1f, "
+             "%4.3f[mm])\n",
+             i, dist2, tc.get_turn_type_string(path_t[i], dia).c_str(),
+             tc.get_turn_dir_string(path_t[i]).c_str(), path_time_s[i],
+             path_time_t[i], path_time_total[i].total_time,
+             path_time_total[i].v_start, path_time_total[i].v_max,
+             path_time_total[i].v_end, path_time_total[i].dist);
+      if (path_t[i] == 7 || path_t[i] == 8 || path_t[i] == 9 ||
+          path_t[i] == 10) {
+        dia = !dia;
+      }
     } else {
       printf("[%d]: %0.2f,\t%d\n", i, dist2, path_t[i]);
     }
@@ -711,7 +723,7 @@ void PathCreator::checkOtherRoot(int x, int y, Direction now_dir, float now) {
   }
 }
 
-float PathCreator::calc_goal_time(param_set_t &p_set) {
+float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
   bool fast_mode = false;
   bool start_turn = false;
   bool dia = false;
@@ -721,14 +733,24 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
   float tmp_str_time = 0;
   float tmp_turn_time = 0;
   Direction ego_dir = Direction::North;
+  planning_time_t tmp_time;
   path_time_s.clear();
   path_time_t.clear();
   path_time_total.clear();
+  float lap_time = 0;
   for (int i = 0; i < path_t.size(); i++) {
-    float dist = (0.5 * path_s[i] - 1) * p_set.cell_size;
+    float dist = !dia ? (0.5 * path_s[i] - 1) * p_set.cell_size
+                      : (0.5 * path_s[i] - 1) * p_set.cell_size * ROOT2;
     auto turn_dir = tc.get_turn_dir(path_t[i]);
     auto turn_type = tc.get_turn_type(path_t[i], dia);
     start_turn = false;
+    lap_time = 0;
+    tmp_time.dist = dist;
+    tmp_time.v_start = v_now;
+    tmp_time.v_max = v_now;
+    tmp_time.v_end = v_now;
+    tmp_time.lap_time = 0;
+    tmp_time.total_time = 0;
     if (dist > 0) {
       fast_mode = true;
     }
@@ -742,6 +764,10 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
           fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
+      ps.dist = dist;
+
+      tmp_time.v_max = ps.v_max;
+      tmp_time.v_end = ps.v_end;
 
       if (i == 0) {
         if (dist == 0) { // 初手ターンの場合は距離合成して加速区間を増やす
@@ -756,12 +782,18 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
       }
       if (turn_type == TurnType::Finish) {
         ps.dist -= p_set.cell_size / 2;
-        ps.v_end = 500;
+        if (p_set.suction) {
+          ps.v_end = 2500;
+        } else {
+          ps.v_end = p_set.map[TurnType::Large].v;
+        }
       }
-      tmp_str_time =
-          go_straight_dummy(v_now, ps.v_max, ps.v_end, ps.accl, ps.decel, dist);
+      tmp_str_time = go_straight_dummy(v_now, ps.v_max, ps.v_end, ps.accl,
+                                       ps.decel, ps.dist, tmp_time, debug);
+
       // printf("%f\n", tmp_str_time);
       time += tmp_str_time;
+      lap_time += tmp_str_time;
       if (time > 100) {
         break;
       }
@@ -770,7 +802,6 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
         break;
       }
     }
-
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
       bool exist_next_idx = (i + 1) < path_t.size(); //絶対true
@@ -783,13 +814,19 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
       // スラロームの後距離の目標速度を指定
       tmp_turn_time = slalom_dummy(turn_type, turn_dir, p_set);
       time += tmp_turn_time;
+      lap_time += tmp_str_time;
+      ego_dir = tc.get_next_dir(ego_dir, turn_type, turn_dir);
       dia =
           (ego_dir == Direction::NorthEast || ego_dir == Direction::NorthWest ||
            ego_dir == Direction::SouthEast || ego_dir == Direction::SouthWest);
     }
+
     path_time_s.push_back(tmp_str_time);
     path_time_t.push_back(tmp_turn_time);
-    path_time_total.push_back(time);
+    tmp_time.total_time = time;
+    tmp_time.lap_time = lap_time;
+    path_time_total.push_back(tmp_time);
+
     if (turn_type == TurnType::None) {
       break;
     }
@@ -797,7 +834,7 @@ float PathCreator::calc_goal_time(param_set_t &p_set) {
       break;
     }
   }
-  return time;
+  return path_time_total.back().total_time;
 }
 
 char PathCreator::asc(float d, float d2) {
@@ -808,8 +845,9 @@ char PathCreator::asc(float d, float d2) {
 }
 
 float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
-                                     float diac, float dist) {
-
+                                     float diac, float dist,
+                                     planning_time_t &planning_time,
+                                     bool debug) {
   float acc = ac;
   float distance = 0;
   float time = 0;
@@ -817,24 +855,30 @@ float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
   int sequence = 1;
   float d2;
 
+  planning_time.v_start = planning_time.v_max = V_now;
+
   float dist2 = std::abs((v1 * v1 - v2 * v2) / (2 * diac));
   if (dist2 > dist) {
     acc = std::abs((v1 * v1 - v2 * v2) / (2 * dist)) + 1000;
   }
 
-  while (distance < dist) {
+  while (distance <= dist) {
     time += 1;
     if (ui->button_state()) {
-      return 100;
+      return 10000;
     }
     d2 = std::abs((V_now + v2) * (V_now - v2) / (2.0 * diac));
+    auto diac2 = -std::abs((V_now + v2) * (V_now - v2)) /
+                 (2 * std::abs(dist - distance));
+
+    auto tmpv = V_now + acc * dt;
     switch (sequence) {
     case 3:
       acc = 0;
       break;
     case 1:
       sequence = asc(dist - distance, d2);
-      if (V_now >= vmax) {
+      if (tmpv >= vmax) {
         acc = 0;
         V_now = vmax;
       } else {
@@ -844,23 +888,32 @@ float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
         break;
       }
     case 2:
-      if (V_now <= v2) {
+      if (tmpv <= v2) {
         acc = 0;
         V_now = v2;
       } else {
-        acc = -diac;
+        acc = diac;
+        if (diac2 < diac) {
+          acc = diac2;
+        }
       }
       break;
     }
     V_now += acc * dt;
     distance += V_now * dt;
+    if (V_now > planning_time.v_max) {
+      planning_time.v_max = V_now;
+    }
+    // if (debug) {
+    //   printf("(v, d, acc, diac, time) = (%4.1f, %4.1f, %4.1f %4.1f %0.3f)\n",
+    //          V_now, distance, acc, diac2, time);
+    // }
     if (V_now < 0) {
       break;
     }
-    // printf("- %0.2f, %0.2f, %0.2f, %0.2f\n", acc, V_now, distance, dist);
   }
-  // printf("%0.2f, %0.2f, %0.2f, %0.2f\n", V_now, ac, diac, dist);
-
+  planning_time.v_end = V_now;
+  planning_time.dist = distance;
   return time / 1000;
 }
 float PathCreator::slalom_dummy(TurnType turn_type, TurnDirection td,
@@ -881,6 +934,9 @@ float PathCreator::slalom_dummy(TurnType turn_type, TurnDirection td,
     turn_front_dist = p_set.map[turn_type].front.left;
     turn_back_dist = p_set.map[turn_type].back.left;
   }
+
+  // turn_front_dist += 15;
+  // turn_back_dist += 15;
 
   // float front_time = go_straight_dummy(v, v, v, 10000, -10000,
   // turn_front_dist); float back_time = go_straight_dummy(v, v, v, 10000,

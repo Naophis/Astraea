@@ -3,8 +3,8 @@ dt: 0.001
 # tire2: 13.60125
 
 tire_tread: 38.0
-tire: 13.51250
-tire2: 13.51250
+tire: 13.62750
+tire2: 13.62750
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 4.0
@@ -76,7 +76,8 @@ led_light_delay_cnt2: 950
 axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]
 # axel_degenerate_y: [1, 1, 0.5, 0.2, 0.2, 0.1, 0.1]
-axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
+# axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
+axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
 search_sen_ctrl_limitter: 8
@@ -254,8 +255,8 @@ gyro_param:
   # Gray
   # gyro_w_gain_right: 0.002455800
   # gyro_w_gain_left: 0.002456000
-  gyro_w_gain_left: 0.00245945
-  gyro_w_gain_right: 0.00245945
+  gyro_w_gain_left: 0.00246085
+  gyro_w_gain_right: 0.00246085
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -296,7 +297,7 @@ normal_sla_l_wall_off_th_out: 135 #[mm]
 normal_sla_r_wall_off_th_out: 135 #[mm]
 
 normal_sla_l_wall_off_ref_cnt: 135 #125~144
-normal_sla_r_wall_off_ref_cnt: 135 #125~144
+normal_sla_r_wall_off_ref_cnt: 127 #125~144
 
 normal_sla_l_wall_off_dist: -5
 normal_sla_r_wall_off_dist: -5
