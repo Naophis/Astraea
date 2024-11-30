@@ -135,6 +135,12 @@ void IRAM_ATTR PlanningTask::motor_disable_main() {
 }
 
 void IRAM_ATTR PlanningTask::motor_enable() {
+  kf_dist.reset(0);
+  kf_ang.reset(0);
+  kf_v.reset(0);
+  kf_w.reset(0);
+  kf_v_l.reset(0);
+  kf_v_r.reset(0);
   motor_enable_send_msg.enable = true;
   motor_enable_send_msg.timestamp++;
   xQueueReset(motor_qh_enable);
@@ -333,6 +339,48 @@ void PlanningTask::set_suction_motor_hz(unsigned long hz, int res) {
   mcpwm_init(MCPWM_UNIT_1, MCPWM_TIMER_2, &suction_pwm_conf);
 }
 
+void PlanningTask::reset_kf_state(bool reset_battery) {
+  float initial_state = 0.0; // 初期姿勢の推定値
+  // float initial_covariance = 0.950; // 初期姿勢の誤差共分散行列
+  // float process_noise = 0.05;       // プロセスノイズの共分散
+  // float measurement_noise = 0.35;   // 観測ノイズの共分散
+
+  kf_w.dt = 0.001 / 5;
+  kf_v_r.dt = 0.001 / 5;
+  kf_v_l.dt = 0.001 / 5;
+
+  if (reset_battery) {
+    kf_batt.init(sensing_result->ego.battery_raw, //
+                 param_ro->battery_init_cov,      //
+                 param_ro->battery_p_noise,       //
+                 param_ro->battery_m_noise);
+  }
+  kf_w.init(initial_state,        //
+            param_ro->w_init_cov, //
+            param_ro->w_p_noise,  //
+            param_ro->w_m_noise);
+  kf_v.init(initial_state,        //
+            param_ro->v_init_cov, //
+            param_ro->v_p_noise,  //
+            param_ro->v_m_noise);
+  kf_v_r.init(initial_state,              //
+              param_ro->encoder_init_cov, //
+              param_ro->encoder_p_noise,  //
+              param_ro->encoder_m_noise);
+  kf_v_l.init(initial_state,              //
+              param_ro->encoder_init_cov, //
+              param_ro->encoder_p_noise,  //
+              param_ro->encoder_m_noise);
+  kf_dist.init(initial_state,           //
+               param_ro->dist_init_cov, //
+               param_ro->dist_p_noise,  //
+               param_ro->dist_m_noise);
+  kf_ang.init(initial_state,          //
+              param_ro->ang_init_cov, //
+              param_ro->ang_p_noise,  //
+              param_ro->ang_m_noise);
+}
+
 void PlanningTask::task() {
   int64_t start = 0;
   int64_t start2 = 0;
@@ -382,34 +430,8 @@ void PlanningTask::task() {
   gyro_pid.initialize();
   ang_pid.initialize();
 
-  float initial_state = 0.0;        // 初期姿勢の推定値
-  float initial_covariance = 0.950; // 初期姿勢の誤差共分散行列
-  float process_noise = 0.05;       // プロセスノイズの共分散
-  float measurement_noise = 0.35;   // 観測ノイズの共分散
+  reset_kf_state(true);
 
-  kf_w.init(initial_state, initial_covariance, process_noise,
-            measurement_noise);
-  kf_w.dt = 0.001 / 5;
-  kf_v.init(initial_state, initial_covariance, process_noise,
-            measurement_noise);
-  kf_v_r.init(initial_state, initial_covariance, process_noise,
-            measurement_noise);
-  kf_v_r.dt = 0.001 / 5;
-  kf_v_l.init(initial_state, initial_covariance, process_noise,
-            measurement_noise);
-  kf_v_l.dt = 0.001 / 5;
-  kf_batt.init(initial_state, initial_covariance, process_noise,
-               measurement_noise);
-  kf_dist.init(initial_state, initial_covariance, process_noise,
-               measurement_noise);
-  kf_ang.init(initial_state, initial_covariance, process_noise,
-              measurement_noise);
-  // dist_pid.initialize();
-  // sen_pid.initialize();
-  // sen_dia_pid.initialize();
-  // angle_pid.initialize();
-  // vel_pid_2dof.initialize();
-  // gyro_pid_2dof.initialize();
   enc_v_q.clear();
   accl_x_q.clear();
   ready = false;
@@ -703,7 +725,8 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
 
   auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
   auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
-
+  float val_left = 1000;
+  float val_right = 1000;
   //前壁が近すぎるときはエスケープ
   if (!(10 < se->ego.left90_mid_dist &&
         se->ego.left90_mid_dist < prm->sen_ref_p.normal.exist.front &&
@@ -716,6 +739,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
             prm->right_keep_dist_th) {
           error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
           // left_keep.star_dist = right_keep.star_dist;
+          val_right = prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
           check++;
         }
       } else if (expand_right &&
@@ -726,6 +750,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
           error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
           // left_keep.star_dist = right_keep.star_dist;
           check++;
+          val_right = prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
         }
       } else {
         right_keep.star_dist = tgt_val->global_pos.dist;
@@ -741,6 +766,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
           error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
           // right_keep.star_dist = left_keep.star_dist;
           check++;
+          val_left = prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
         }
       } else if (expand_left && (1 < se->ego.left45_dist &&
                                  se->ego.left45_dist < exist_left45_expand)) {
@@ -749,6 +775,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
           error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
           // right_keep.star_dist = left_keep.star_dist;
           check++;
+          val_left = prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
         }
       } else {
         left_keep.star_dist = tgt_val->global_pos.dist;
@@ -772,6 +799,8 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
              se->sen.r45.sensor_dist < exist_right45_2)) {
           error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
           check++;
+          val_right =
+              prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
         }
       }
       if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
@@ -780,6 +809,8 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
              se->sen.l45.sensor_dist < exist_left45_2)) {
           error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
           check++;
+          val_left =
+              prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
         }
       }
       error *= prm->sen_ref_p.normal2.exist.front;
@@ -814,7 +845,11 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
   }
 
   if (check == 2) {
-    return error;
+    if (ABS(val_left) > ABS(val_right)) {
+      return val_right * 2;
+    } else {
+      return val_left * 2;
+    }
   } else if (check == 1) {
     return error * 2;
   }
@@ -978,6 +1013,8 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     kf_v.predict(tgt_val->ego_in.accl);
     kf_v.update(se->ego.v_c);
     se->ego.v_kf = kf_v.get_state();
+    // printf("kf_v: %f\n", se->ego.v_kf);
+    // kf_v.print_state();
   }
 
   if (std::isfinite(tgt_val->ego_in.v)) {
@@ -1290,6 +1327,7 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
   error_entity.s_val.p_val = error_entity.s_val.i_val =
       error_entity.s_val.d_val = 0;
   error_entity.s_val.z = error_entity.s_val.zz = 0;
+
   if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
     duty_sen = calc_sensor_pid();
     // if (search_mode) {
@@ -1526,6 +1564,14 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     } else {
       // if (tgt_val->motion_type == MotionType::PIVOT) {
       if (param_ro->motor_pid2.mode == 7) {
+
+        if (tgt_val->motion_type == MotionType::STRAIGHT) {
+          //加速から減速に切り替わったら
+          if (last_accl > 0 && tgt_val->ego_in.accl < 0) {
+            error_entity.v.error_i *= param_ro->ff_front_gain_decel;
+          }
+        }
+
         const auto diff_dist =
             tgt_val->ego_in.img_dist - sensing_result->ego.dist_kf;
         auto kp_gain = param_ro->motor_pid2.p * error_entity.v.error_p;
@@ -1638,6 +1684,7 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
       }
     }
   }
+  last_accl = tgt_val->ego_in.accl;
   sensing_result->ego.duty.sen = duty_roll;
   sensing_result->ego.duty.sen = duty_sen;
   if (tgt_val->motion_type == MotionType::SLALOM) {
@@ -1858,12 +1905,6 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     tgt_val->global_pos.dist = 0;
     tgt_val->global_pos.img_dist = 0;
     error_entity_ptr->v_val.p_val = 0;
-    kf_dist.reset(0);
-    kf_ang.reset(0);
-    kf_v.reset(0);
-    kf_w.reset(0);
-    kf_v_l.reset(0);
-    kf_v_r.reset(0);
   }
   sensing_result->ego.duty.duty_r = tgt_duty.duty_r;
   sensing_result->ego.duty.duty_l = tgt_duty.duty_l;
@@ -1885,11 +1926,14 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
   tgt_val->ego_in.sla_param = mpc_next_ego.sla_param;
   tgt_val->ego_in.state = mpc_next_ego.state;
+  tgt_val->ego_in.decel_delay_cnt = mpc_next_ego.decel_delay_cnt;
 
   const auto tmp_v = tgt_val->ego_in.v;
   tgt_val->ego_in.v = mpc_next_ego.v;
-  tgt_val->ego_in.v_l = mpc_next_ego.v - mpc_next_ego.w * param_ro->tire_tread / 2;
-  tgt_val->ego_in.v_r = mpc_next_ego.v + mpc_next_ego.w * param_ro->tire_tread / 2;
+  tgt_val->ego_in.v_l =
+      mpc_next_ego.v - mpc_next_ego.w * param_ro->tire_tread / 2;
+  tgt_val->ego_in.v_r =
+      mpc_next_ego.v + mpc_next_ego.w * param_ro->tire_tread / 2;
   if (tgt_val->motion_type == MotionType::SLALOM) {
     if (tgt_val->ego_in.v < 10) {
       tgt_val->ego_in.v = tmp_v;

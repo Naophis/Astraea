@@ -35,7 +35,9 @@ const callerFun = async (mode) => {
       setTimeout(() => resolve(result), delay);
     });
   }
-
+  const convert = (filename) => {
+    return filename.split(".")[0];
+  }
   while (true) {
     const files = fs.readdirSync(__dirname + `/profile/${mode}/`);
     var list = ["system.yaml", "hardware.yaml"].concat(files.filter((file) => {
@@ -51,7 +53,7 @@ const callerFun = async (mode) => {
         if (list[i + j] === undefined) {
           break;
         }
-        str += `[${i + j}]: ${list[i + j]}\t`;
+        str += `[${i + j}]: ${convert(list[i + j])}\t`;
       }
       i += col;
       console.log(str);
@@ -69,11 +71,10 @@ const callerFun = async (mode) => {
           });
           var file_name = file.replace("yaml", mode);
           if (file === "maze.yaml") {
-            var str = `${file_name}@${txt}`;
-            write(str);
-            // console.log(saveData)
-            await sleep2(800);
-            console.log(`${file}: finish22!!`);
+            // var str = `${file_name}@${txt}`;
+            // write(str);
+            // await sleep2(800);
+            // console.log(`${file}: finish22!!`);
           } else {
             var saveData = yaml.load(txt);
             // console.log(saveData)

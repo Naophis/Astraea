@@ -22,6 +22,8 @@ static t_tgt arg_tgt{
 
   {
     0.0F,
+    0.0F,
+    0,
     0.0F
   },
   0.0F,
@@ -35,6 +37,8 @@ static t_tgt arg_tgt{
 };
 
 static t_ego arg_ego{
+  0.0F,
+  0.0F,
   0.0F,
   0.0F,
   0.0F,
@@ -108,7 +112,8 @@ static t_ego arg_ego{
   0.0F,
   0.0F,
   0.0F,
-  0.0F
+  0.0F,
+  0
 };
 
 static int32_T arg_mode{ 0 };

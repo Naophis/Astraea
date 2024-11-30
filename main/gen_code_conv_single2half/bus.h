@@ -38,6 +38,8 @@ typedef struct {
 typedef struct {
   float limit;
   float n;
+  int decel_delay_cnt;
+  float decel_delay_n;
 } t_accl_param;
 
 typedef struct {
@@ -57,7 +59,23 @@ typedef struct {
   float slip_gain;
   float limit_accl_ratio_cnt;
   float limit_decel_ratio_cnt;
+  float slip_gain_K1;
+  float slip_gain_K2;
+  int time_step2;
+  float axel_degenerate_gain;
+  char enable_slip_decel;
 } t_tgt;
+
+typedef struct{
+  float mass;
+  float lm;
+  float km;
+  float resist;
+  float tread;
+  float ke;
+  float tire;
+  float gear_ratio;
+} t_dynamics;
 
 typedef struct {
   float base_alpha;
@@ -78,10 +96,21 @@ typedef struct {
 } t_point;
 
 typedef struct {
+  float beta;
+  float vx;
+  float vy;
   float v;
+  float accl;
+} t_slip;
+
+typedef struct {
+  float v;
+  float v_r;
+  float v_l;
   float accl;
   float w;
   float alpha;
+  float alpha2;
   float dist;
   float ang;
   float img_dist;
@@ -97,6 +126,18 @@ typedef struct {
   float delay_v;
   float cnt_delay_accl_ratio;
   float cnt_delay_decel_ratio;
+  t_slip slip;
+  float ff_duty_l;
+  float ff_duty_r;
+  float ff_duty_low_th;
+  float ff_duty_low_v_th;
+  float ff_duty_front;
+  float ff_duty_roll;
+  float ff_duty_rpm_r;
+  float ff_duty_rpm_l;
+  float ff_front_torque;
+  float ff_roll_torque;
+  int decel_delay_cnt;
 } t_ego;
 
 typedef struct {

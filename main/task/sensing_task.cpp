@@ -143,7 +143,7 @@ void SensingTask::task() {
     gyro_if.setup();
     enc_if.init();
   }
-  esp_timer_start_periodic(timer_200us, 100);
+  esp_timer_start_periodic(timer_200us, 200);
 
   const auto se = get_sensing_entity();
   // sensing init

@@ -102,6 +102,11 @@ public:
   std::shared_ptr<motion_tgt_val_t> tgt_val;
   std::shared_ptr<pid_error_entity_t> error_entity_ptr;
   float ideal_v_r, ideal_v_l;
+  std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
+    return sensing_result;
+  }
+
+  void reset_kf_state(bool reset_battery);
 
 private:
   sensor_ctrl_keep_dist_t right_keep;
@@ -177,9 +182,7 @@ private:
   // FILE *f;
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
-  std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
-    return sensing_result;
-  }
+
   std::shared_ptr<input_param_t> param_ro;
   std::shared_ptr<input_param_t> get_param() {
     return param_ro; //
@@ -223,6 +226,8 @@ private:
   float duty_enc_v_l = 0;
   float duty_roll = 0;
   float duty_roll2 = 0;
+
+  float last_accl;
   sen_log2_t sen_log;
   slip_t slip_param;
   std::deque<float> enc_v_q;

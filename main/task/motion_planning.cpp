@@ -771,6 +771,7 @@ void IRAM_ATTR MotionPlanning::reset_tgt_data() {
 }
 
 void IRAM_ATTR MotionPlanning::reset_ego_data() {
+  pt->reset_kf_state(false);
   tgt_val->ego_in.accl = 0;
   tgt_val->ego_in.alpha = 0;
   tgt_val->ego_in.ang = 0;
@@ -822,6 +823,31 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_y_zero_p_offset = accel_y_raw_data_sum / RESET_GYRO_LOOP_CNT;
+
+  printf("gyro initial data : %f\n", pt->get_sensing_entity()->ego.battery_raw);
+
+  printf("kf_batt:\n");
+  pt->kf_batt.print_state();
+
+  printf("kf_v:\n");
+  pt->kf_v.print_state();
+
+  printf("kf_enc_r:\n");
+  pt->kf_v_r.print_state();
+
+  printf("kf_enc_l:\n");
+  pt->kf_v_l.print_state();
+
+  printf("kf_dist:\n");
+  pt->kf_dist.print_state();
+
+  printf("kf_w:\n");
+  pt->kf_w.print_state();
+
+  printf("kf_ang:\n");
+  pt->kf_ang.print_state();
+
+  pt->reset_kf_state(true);
 }
 void IRAM_ATTR MotionPlanning::reset_gyro_ref_with_check() {
   // return;
@@ -925,6 +951,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
   dia = false;
   bool fast_mode = false;
   bool start_turn = false;
+  bool fast_turn_mode = false;
   float carry_over_dist = 0;
 
   // default straight parma
@@ -954,12 +981,13 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
-  auto size = pc->path_s.size();
-  for (int i = 0; i < size; i++) {
+  auto path_size = pc->path_s.size();
+  for (int i = 0; i < path_size; i++) {
     float dist = 0.5 * pc->path_s[i] - 1;
     auto turn_dir = tc.get_turn_dir(pc->path_t[i]);
     auto turn_type = tc.get_turn_type(pc->path_t[i], dia);
     start_turn = false;
+    fast_turn_mode = false;
     if (dist > 0) {
       fast_mode = true;
     }
@@ -968,6 +996,16 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.v_max = p_set.str_map[st].v_max;
       ps.v_end =
           fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
+      bool exist_next_idx = (i + 1) < path_size; //絶対true
+      if (exist_next_idx) {
+        float next_dist = 0.5 * pc->path_s[i + 1] - 1;
+        auto next_turn_type = tc.get_turn_type(pc->path_t[i + 1]);
+        if (next_dist > 0 && (next_turn_type == TurnType::Orval ||
+                              next_turn_type == TurnType::Large)) {
+          ps.v_end = p_set.map_fast[turn_type].v;
+          fast_turn_mode = true;
+        }
+      }
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
       ps.dia_mode = dia;
@@ -1019,7 +1057,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
 
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
-      bool exist_next_idx = (i + 1) < pc->path_size; //絶対true
+      bool exist_next_idx = (i + 1) < path_size; //絶対true
       float dist3 = 0;
       float dist4 = 0;
       if (exist_next_idx) {
@@ -1044,25 +1082,30 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       if (exist_next_idx && !(dist3 > 0 && dist4 > 0)) {
         //連続スラロームのとき、次のスラロームの速度になるように加速
         auto next_turn_type = tc.get_turn_type(pc->path_t[i + 1]);
-        // nm.v_max = fast_mode ? p_set.map[next_turn_type].v
-        //                      : p_set.map_slow[next_turn_type].v;
-        // nm.v_end = fast_mode ? p_set.map[next_turn_type].v
-        //                      : p_set.map_slow[next_turn_type].v;
         nm.is_turn = true;
-        // nm.v_max = p_set.map[next_turn_type].v;
         nm.v_max = MAX(p_set.map[next_turn_type].v, p_set.str_map[st].v_max);
         nm.v_end = p_set.map[next_turn_type].v;
       }
-      auto res =
-          slalom(fast_mode ? p_set.map[turn_type] : p_set.map_slow[turn_type],
-                 turn_dir, nm, dia);
+
+      if (fast_turn_mode) {
+        nm.v_max = MAX(p_set.map_fast[turn_type].v, p_set.str_map[st].v_max);
+        nm.v_end = p_set.map_fast[turn_type].v;
+        auto res = slalom(p_set.map_fast[turn_type], turn_dir, nm, dia);
+        if (res == MotionResult::ERROR) {
+          break;
+        }
+      } else {
+        auto res =
+            slalom(fast_mode ? p_set.map[turn_type] : p_set.map_slow[turn_type],
+                   turn_dir, nm, dia);
+        if (res == MotionResult::ERROR) {
+          break;
+        }
+      }
       if (!nm.is_turn) {
         carry_over_dist = nm.carry_over_dist;
       }
       fast_mode = true;
-      if (res == MotionResult::ERROR) {
-        break;
-      }
       ego.dir = tc.get_next_dir(ego.dir, turn_type, turn_dir);
       // ego.ang = trj_ele.ang;
       dia =

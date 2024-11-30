@@ -154,8 +154,8 @@ class mpc_tgt_calcModelClass {
   self_keep_mpc_tgt_calc_T self_keep_p;
   self_keep_mpc_tgt_calc_T self_keep_h;
   RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
-  static void mpc_tgt_calc_keep(self_keep_mpc_tgt_calc_T *mpc_tgt_calc_self_arg,
-    real32_T *rty_accl_out, int32_T *rty_state_out);
+  // static void mpc_tgt_calc_keep(self_keep_mpc_tgt_calc_T *mpc_tgt_calc_self_arg,
+  //   real32_T *rty_accl_out, int32_T *rty_state_out);
 };
 
 #endif

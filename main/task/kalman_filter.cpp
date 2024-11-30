@@ -10,6 +10,10 @@ void KalmanFilter::init(float initial_x, float initial_P, float process_noise,
   R = measurement_noise;
 }
 
+void KalmanFilter::print_state() {
+  printf("  P:%f, Q:%f, R:%f\n", P, Q, R); //
+}
+
 void KalmanFilter::predict(float u) {
   // 予測ステップ
   x = x + u * dt;

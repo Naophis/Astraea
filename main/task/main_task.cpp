@@ -189,6 +189,27 @@ void IRAM_ATTR MainTask::dump1() {
     printf("planning_time_diff: %d\n", tgt_val->calc_time_diff);
     printf("sensing_time: %d\n", sensing_result->calc_time);
 
+    printf("kf_batt:\n");
+    pt->kf_batt.print_state();
+
+    printf("kf_v:\n");
+    pt->kf_v.print_state();
+
+    printf("kf_enc_r:\n");
+    pt->kf_v_r.print_state();
+
+    printf("kf_enc_l:\n");
+    pt->kf_v_l.print_state();
+
+    printf("kf_dist:\n");
+    pt->kf_dist.print_state();
+
+    printf("kf_w:\n");
+    pt->kf_w.print_state();
+
+    printf("kf_ang:\n");
+    pt->kf_ang.print_state();
+
     if (ui->button_state()) {
       tgt_val->ego_in.ang = tgt_val->ego_in.dist = 0;
     }
@@ -332,11 +353,13 @@ void MainTask::load_hw_param() {
 
   cJSON *root = cJSON_CreateObject(), *front_ctrl_roll_pid, *motor_pid,
         *motor_pid2, *motor_pid3, *gyro_pid, *str_agl_pid, *str_agl_dia_pid,
-        *gyro_param, *kalman_config, *battery_param, *led_param, *angle_pid,
-        *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
-        *axel_degenerate_x, *axel_degenerate_y, *led_blight,
-        *gyro_pid_gain_limitter, *motor_pid_gain_limitter,
-        *motor2_pid_gain_limitter, *motor3_pid_gain_limitter;
+        *gyro_param, *battery_kalman_config, *encoder_kalman_config,
+        *w_kalman_config, *v_kalman_config, *ang_kalman_config,
+        *dist_kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
+        *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
+        *axel_degenerate_y, *led_blight, *gyro_pid_gain_limitter,
+        *motor_pid_gain_limitter, *motor2_pid_gain_limitter,
+        *motor3_pid_gain_limitter;
 
   root = cJSON_Parse(str.c_str());
 
@@ -360,10 +383,18 @@ void MainTask::load_hw_param() {
       getItem(root, "led_light_delay_cnt2")->valuedouble;
   param->search_sen_ctrl_limitter =
       getItem(root, "search_sen_ctrl_limitter")->valuedouble;
+
+  tgt_val->tgt_in.accl_param.decel_delay_cnt =
+      getItem(root, "decel_delay_cnt")->valueint;
+  tgt_val->tgt_in.accl_param.decel_delay_n =
+      getItem(root, "dedel_delay_n")->valuedouble;
+
   param->ff_front_gain_14 = getItem(root, "ff_front_gain_14")->valuedouble;
   param->ff_roll_gain_before =
       getItem(root, "ff_roll_gain_before")->valuedouble;
   param->ff_roll_gain_after = getItem(root, "ff_roll_gain_after")->valuedouble;
+  param->ff_front_gain_decel =
+      getItem(root, "ff_front_gain_decel")->valuedouble;
 
   param->left_keep_dist_th = getItem(root, "left_keep_dist_th")->valuedouble;
 
@@ -605,10 +636,41 @@ void MainTask::load_hw_param() {
   led_param = getItem(root, "led_param");
   param->led_param.lp_delay = getItem(led_param, "lp_delay")->valuedouble;
 
-  kalman_config = getItem(root, "kalman_config");
-  param->Kalman_ang = getItem(kalman_config, "q_ang")->valuedouble;
-  param->Kalman_bias = getItem(kalman_config, "q_bias")->valuedouble;
-  param->Kalman_measure = getItem(kalman_config, "r_measure")->valuedouble;
+  battery_kalman_config = getItem(root, "battery_kalman_config");
+  param->battery_init_cov =
+      getItem(battery_kalman_config, "init_cov")->valuedouble;
+  param->battery_p_noise =
+      getItem(battery_kalman_config, "p_noise")->valuedouble;
+  param->battery_m_noise =
+      getItem(battery_kalman_config, "m_noise")->valuedouble;
+
+  encoder_kalman_config = getItem(root, "encoder_kalman_config");
+  param->encoder_init_cov =
+      getItem(encoder_kalman_config, "init_cov")->valuedouble;
+  param->encoder_p_noise =
+      getItem(encoder_kalman_config, "p_noise")->valuedouble;
+  param->encoder_m_noise =
+      getItem(encoder_kalman_config, "m_noise")->valuedouble;
+
+  w_kalman_config = getItem(root, "w_kalman_config");
+  param->w_init_cov = getItem(w_kalman_config, "init_cov")->valuedouble;
+  param->w_p_noise = getItem(w_kalman_config, "p_noise")->valuedouble;
+  param->w_m_noise = getItem(w_kalman_config, "m_noise")->valuedouble;
+
+  v_kalman_config = getItem(root, "v_kalman_config");
+  param->v_init_cov = getItem(v_kalman_config, "init_cov")->valuedouble;
+  param->v_p_noise = getItem(v_kalman_config, "p_noise")->valuedouble;
+  param->v_m_noise = getItem(v_kalman_config, "m_noise")->valuedouble;
+
+  ang_kalman_config = getItem(root, "ang_kalman_config");
+  param->ang_init_cov = getItem(ang_kalman_config, "init_cov")->valuedouble;
+  param->ang_p_noise = getItem(ang_kalman_config, "p_noise")->valuedouble;
+  param->ang_m_noise = getItem(ang_kalman_config, "m_noise")->valuedouble;
+
+  dist_kalman_config = getItem(root, "dist_kalman_config");
+  param->dist_init_cov = getItem(dist_kalman_config, "init_cov")->valuedouble;
+  param->dist_p_noise = getItem(dist_kalman_config, "p_noise")->valuedouble;
+  param->dist_m_noise = getItem(dist_kalman_config, "m_noise")->valuedouble;
 
   comp_v_param = getItem(root, "comp_v_param");
   param->comp_param.v_lp_gain = getItem(comp_v_param, "enc_v_lp")->valuedouble;
@@ -1387,7 +1449,7 @@ void MainTask::load_slas(
   cJSON_Delete(root);
   umount();
 }
-void MainTask::load_slalom_param(int idx, int idx2) {
+void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
   mount();
   param_set.suction = tpp.profile_map[idx][TurnType::Finish];
 
@@ -1401,8 +1463,10 @@ void MainTask::load_slalom_param(int idx, int idx2) {
 
   param_set.map.clear();
   param_set.map_slow.clear();
+  param_set.map_fast.clear();
   param_set.str_map.clear();
 
+  // load fast param
   turn_map.clear();
   for (const auto &p : turn_name_list) {
     if (p.first == TurnType::None) {
@@ -1410,11 +1474,11 @@ void MainTask::load_slalom_param(int idx, int idx2) {
     }
     const unsigned char sla_idx = tpp.profile_map[idx][p.first];
     turn_map[sla_idx].emplace_back(p);
-    // load_sla(sla_idx, p.second, param_set.map[p.first]);
   }
   for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
-    load_slas(itr->first, itr->second, param_set.map);
+    load_slas(itr->first, itr->second, param_set.map_fast);
   }
+  // load normal param
   turn_map.clear();
   for (const auto &p : turn_name_list) {
     if (p.first == TurnType::None) {
@@ -1422,12 +1486,23 @@ void MainTask::load_slalom_param(int idx, int idx2) {
     }
     const unsigned char sla_idx = tpp.profile_map[idx2][p.first];
     turn_map[sla_idx].emplace_back(p);
-    // load_sla(sla_idx, p.second, param_set.map_slow[p.first]);
+  }
+  for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
+    load_slas(itr->first, itr->second, param_set.map);
+  }
+  // load slow param
+  turn_map.clear();
+  for (const auto &p : turn_name_list) {
+    if (p.first == TurnType::None) {
+      continue;
+    }
+    const unsigned char sla_idx = tpp.profile_map[idx3][p.first];
+    turn_map[sla_idx].emplace_back(p);
   }
   for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
     load_slas(itr->first, itr->second, param_set.map_slow);
   }
-  load_straight(idx, param_set.str_map);
+  load_straight(idx2, param_set.str_map);
   umount();
 }
 void MainTask::load_slalom_param() {}
@@ -1465,6 +1540,8 @@ void MainTask::rx_uart_json() {
     }
   }
   free(data);
+
+  mp->reset_gyro_ref();
   if (update) {
     load_param();
     ui->coin(40);
@@ -1615,7 +1692,7 @@ void MainTask::task() {
         } else {
           idx = 1;
         }
-        load_slalom_param(idx, idx);
+        load_slalom_param(idx, idx, idx);
         sr = search_ctrl->exec(param_set, SearchMode::ALL);
         if (sr == SearchResult::SUCCESS)
           save_maze_data(true);
@@ -1636,7 +1713,7 @@ void MainTask::task() {
           idx = 1;
         }
         sr = SearchResult::SUCCESS;
-        load_slalom_param(idx, idx);
+        load_slalom_param(idx, idx, idx);
         if (rorl == TurnDirection::Right)
           sr = search_ctrl->exec(param_set, SearchMode::Kata);
         else
@@ -1650,29 +1727,29 @@ void MainTask::task() {
         }
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
-        path_run(0, 0);
+        path_run(0, 0, 0);
       } else if (mode_num == 3) {
-        path_run(1, 1);
+        path_run(1, 1, 0);
       } else if (mode_num == 4) {
-        path_run(12, 12);
+        path_run(12, 12, 12);
       } else if (mode_num == 5) {
-        path_run(14, 12);
+        path_run(14, 14, 12);
       } else if (mode_num == 6) {
-        path_run(16, 12);
+        path_run(16, 16, 12);
       } else if (mode_num == 7) {
-        path_run(17, 12);
+        path_run(17, 17, 12);
       } else if (mode_num == 8) {
-        path_run(18, 12);
+        path_run(20, 18, 12);
       } else if (mode_num == 9) {
-        path_run(19, 12);
+        path_run(21, 19, 12);
       } else if (mode_num == 10) {
-        path_run(20, 12);
+        path_run(22, 20, 12);
       } else if (mode_num == 11) {
-        path_run(21, 12);
+        path_run(22, 21, 12);
       } else if (mode_num == 12) {
-        path_run(22, 12);
+        path_run(23, 22, 12);
       } else if (mode_num == 13) {
-        path_run(23, 12);
+        path_run(23, 23, 12);
       } else if (mode_num == 14) {
         printf("keep_pivot\n");
         keep_pivot();
@@ -1710,6 +1787,28 @@ void MainTask::task() {
 void MainTask::recieve_data() {}
 
 void MainTask::req_error_reset() {
+
+  printf("kf_batt:\n");
+  pt->kf_batt.print_state();
+
+  printf("kf_v:\n");
+  pt->kf_v.print_state();
+
+  printf("kf_enc_r:\n");
+  pt->kf_v_r.print_state();
+
+  printf("kf_enc_l:\n");
+  pt->kf_v_l.print_state();
+
+  printf("kf_dist:\n");
+  pt->kf_dist.print_state();
+
+  printf("kf_w:\n");
+  pt->kf_w.print_state();
+
+  printf("kf_ang:\n");
+  pt->kf_ang.print_state();
+  
   tgt_val->pl_req.error_vel_reset = 1;
   tgt_val->pl_req.error_gyro_reset = 1;
   tgt_val->pl_req.error_ang_reset = 1;
@@ -1994,7 +2093,7 @@ void MainTask::test_turn() {
 
   req_error_reset();
 
-  load_slalom_param(0, 0);
+  load_slalom_param(0, 0, 0);
   str_p = param_set.str_map[StraightType::Search];
 
   if (param->test_log_enable > 0) {
@@ -2085,7 +2184,7 @@ void MainTask::test_pivot_n2() {
   search_ctrl->set_motion_plannning(mp);
   pc->set_logic(lgc);
   pc->set_userinterface(ui);
-  load_slalom_param(0, 0);
+  load_slalom_param(0, 0, 0);
   // sr = search_ctrl->exec(param_set, SearchMode::ALL);
 
   mp->reset_gyro_ref_with_check();
@@ -2140,7 +2239,7 @@ void MainTask::test_sla() {
     return;
   }
   load_turn_param_profiles(true, file_idx);
-  load_slalom_param(file_idx, file_idx);
+  load_slalom_param(file_idx, file_idx, file_idx);
   sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
   auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
   printf("slalom params\n");
@@ -2279,7 +2378,7 @@ void MainTask::test_search_sla(bool mode) {
     return;
   }
 
-  load_slalom_param(0, 0);
+  load_slalom_param(0, 0, 0);
   sla_p = param_set.map[TurnType::Normal];
   str_p = param_set.str_map[StraightType::Search];
 
@@ -2848,9 +2947,9 @@ void MainTask::read_maze_data() {
   umount();
 }
 
-void MainTask::path_run(int idx, int idx2) {
+void MainTask::path_run(int idx, int idx2, int idx3) {
   pt->search_mode = false;
-  load_slalom_param(idx, idx2);
+  load_slalom_param(idx, idx2, idx3);
   param_set.cell_size = param->cell;
   param_set.start_offset = param->offset_start_dist;
   if (sys.circuit_mode == 0) {

@@ -241,7 +241,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
            (ld->v_r_enc),                                       //
            (std::sin(2.0 * PI * ld->v_l_enc / ENC_RESOLUTION)), //
            (std::sin(2.0 * PI * ld->v_r_enc / ENC_RESOLUTION)), //
-           halfToFloat(ld->accl),                               //
+           halfToFloat(ld->accl) * 1000,                        //
            halfToFloat(ld->accl_x));                            // 8
     printf(f2,                                                  //
            halfToFloat(ld->img_w),                              //
@@ -411,7 +411,7 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->v_r = floatToHalf(sensing_result->ego.v_r);
   ld->v_r_enc = (sensing_result->encoder.right);
   ld->v_l_enc = (sensing_result->encoder.left);
-  ld->accl = floatToHalf(tgt_val->ego_in.accl);
+  ld->accl = floatToHalf(tgt_val->ego_in.accl / 1000);
   ld->accl_x = floatToHalf(sensing_result->ego.w_kf);
   ld->dist_kf = floatToHalf(sensing_result->ego.dist_kf);
 

@@ -113,7 +113,7 @@ private:
   param_set_t p_set;
 
   const TickType_t xDelay1000 = 1000.0 / portTICK_PERIOD_MS;
-  const TickType_t xDelay500 = 500.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay500 = 750.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay100 = 100.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay50 = 50.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay10 = 10.0 / portTICK_PERIOD_MS;
@@ -142,7 +142,7 @@ private:
   void test_dia_walloff();
   void test_front_ctrl(bool mode);
   void rx_uart_json();
-  void path_run(int idx, int idx2);
+  void path_run(int idx, int idx2, int idx3);
 
   void save_json_data(std::string &str);
   vector<string> split(const string &s, char delim);
@@ -153,7 +153,7 @@ private:
   void load_sys_param();
   void load_turn_param_profiles(bool const_mode, int const_index);
   void load_slalom_param();
-  void load_slalom_param(int idx, int idx2);
+  void load_slalom_param(int idx, int idx2, int idx3);
   void load_sla(int idx, string turn_name, slalom_param2_t &sla_p);
   void load_slas(int idx, vector<pair<TurnType, string>> &turn_name_list,
                  std::unordered_map<TurnType, slalom_param2_t> &turn_map);

@@ -727,6 +727,7 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
   bool fast_mode = false;
   bool start_turn = false;
   bool dia = false;
+  bool fast_turn_mode = false;
   float cell_size = p_set.cell_size;
   float v_now = 0;
   float time = 0;
@@ -738,12 +739,14 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
   path_time_t.clear();
   path_time_total.clear();
   float lap_time = 0;
+  auto path_size = path_s.size();
   for (int i = 0; i < path_t.size(); i++) {
     float dist = !dia ? (0.5 * path_s[i] - 1) * p_set.cell_size
                       : (0.5 * path_s[i] - 1) * p_set.cell_size * ROOT2;
     auto turn_dir = tc.get_turn_dir(path_t[i]);
     auto turn_type = tc.get_turn_type(path_t[i], dia);
     start_turn = false;
+    fast_turn_mode = false;
     lap_time = 0;
     tmp_time.dist = dist;
     tmp_time.v_start = v_now;
@@ -765,6 +768,17 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
       ps.accl = p_set.str_map[st].accl;
       ps.decel = p_set.str_map[st].decel;
       ps.dist = dist;
+
+      bool exist_next_idx = (i + 1) < path_size; //絶対true
+      if (exist_next_idx) {
+        float next_dist = 0.5 * path_s[i + 1] - 1;
+        auto next_turn_type = tc.get_turn_type(path_t[i + 1]);
+        if (next_dist > 0 && (next_turn_type == TurnType::Orval ||
+                              next_turn_type == TurnType::Large)) {
+          ps.v_end = p_set.map_fast[turn_type].v;
+          fast_turn_mode = true;
+        }
+      }
 
       tmp_time.v_max = ps.v_max;
       tmp_time.v_end = ps.v_end;
@@ -804,7 +818,7 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
     }
     if (!((turn_type == TurnType::None) || (turn_type == TurnType::Finish))) {
       auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
-      bool exist_next_idx = (i + 1) < path_t.size(); //絶対true
+      bool exist_next_idx = (i + 1) < path_size; //絶対true
       float dist3 = 0;
       float dist4 = 0;
       if (exist_next_idx) {
@@ -812,7 +826,14 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
         dist4 = 0.5 * path_s[i + 1] - 1;
       }
       // スラロームの後距離の目標速度を指定
-      tmp_turn_time = slalom_dummy(turn_type, turn_dir, p_set);
+
+      if (fast_turn_mode) {
+        tmp_turn_time = slalom_dummy(turn_type, turn_dir, p_set.map_fast);
+      } else if (start_turn) {
+        tmp_turn_time = slalom_dummy(turn_type, turn_dir, p_set.map_slow);
+      } else {
+        tmp_turn_time = slalom_dummy(turn_type, turn_dir, p_set.map);
+      }
       time += tmp_turn_time;
       lap_time += tmp_str_time;
       ego_dir = tc.get_next_dir(ego_dir, turn_type, turn_dir);
@@ -916,26 +937,27 @@ float PathCreator::go_straight_dummy(float v1, float vmax, float v2, float ac,
   planning_time.dist = distance;
   return time / 1000;
 }
-float PathCreator::slalom_dummy(TurnType turn_type, TurnDirection td,
-                                param_set_t &p_set) {
-  float turn_time = p_set.map[turn_type].time * 2;
+float PathCreator::slalom_dummy(
+    TurnType turn_type, TurnDirection td,
+    std::unordered_map<TurnType, slalom_param2_t> &turn_param) {
+  float turn_time = turn_param[turn_type].time * 2;
   float turn_front_dist = 0;
   float turn_back_dist = 0;
-  float v = p_set.map[turn_type].v;
+  float v = turn_param[turn_type].v;
 
   if (turn_type == TurnType::Orval) {
     // TODO
   }
 
   if (td == TurnDirection::Right) {
-    turn_front_dist = p_set.map[turn_type].front.right;
-    turn_back_dist = p_set.map[turn_type].back.right;
+    turn_front_dist = turn_param[turn_type].front.right;
+    turn_back_dist = turn_param[turn_type].back.right;
   } else {
-    turn_front_dist = p_set.map[turn_type].front.left;
-    turn_back_dist = p_set.map[turn_type].back.left;
+    turn_front_dist = turn_param[turn_type].front.left;
+    turn_back_dist = turn_param[turn_type].back.left;
   }
 
-  // turn_front_dist += 15;
+  turn_front_dist += 25; // wall_off
   // turn_back_dist += 15;
 
   // float front_time = go_straight_dummy(v, v, v, 10000, -10000,

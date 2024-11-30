@@ -38,6 +38,8 @@ typedef struct {
 typedef struct {
   float limit;
   float n;
+  int decel_delay_cnt;
+  float decel_delay_n;
 } t_accl_param;
 
 typedef struct {
@@ -135,6 +137,7 @@ typedef struct {
   float ff_duty_rpm_l;
   float ff_front_torque;
   float ff_roll_torque;
+  int decel_delay_cnt;
 } t_ego;
 
 typedef struct {

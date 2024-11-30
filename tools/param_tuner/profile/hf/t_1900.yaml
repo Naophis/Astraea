@@ -8,15 +8,15 @@ straight:
     alpha: 10
   fast_run:
     v_max: 8500
-    accl: 30000
-    decel: -28000
+    accl: 36000
+    decel: -48000
     w_max: 5
     w_end: 0.1
     alpha: 10
   fast_run_dia:
     v_max: 5000
-    accl: 24000
-    decel: -24000
+    accl: 28000
+    decel: -44000
     w_max: 5
     w_end: 0.1
     alpha: 10
@@ -50,12 +50,12 @@ normal:
 # 2024年  2月  8日 木曜日 23:36:58 JST
 large:
   v: 1900
-  ang: 90.25
+  ang: 90.0
   pow_n: 4
-  rad: 56.5
-  time: 0.03068749999999835
-  front: { left: 10.802694878657064, right: 6.302694878657064 }
-  back: { left: 35.59381550343086, right: 35.59381550343086 }
+  rad: 58.5
+  time: 0.031687499999998245
+  front: { left: 9.302694878657064, right: 9.302694878657064 }
+  back: { left: 33.59381550343086, right: 28.59381550343086 }
 dia45:
   v: 1875
   ang: 45.0

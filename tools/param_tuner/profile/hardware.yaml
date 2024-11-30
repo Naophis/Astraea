@@ -2,7 +2,8 @@ dt: 0.001
 # tire: 13.60125
 # tire2: 13.60125
 
-tire_tread: 38.0
+# tire_tread: 38.0
+tire_tread: 37.72230756
 tire: 13.62750
 tire2: 13.62750
 # offset_start_dist: 21.0
@@ -47,7 +48,7 @@ sakiyomi_time: 3
 
 #ログON_OFF
 logging_time: 1.0
-search_log_enable: 0
+search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
@@ -80,12 +81,16 @@ axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
+decel_delay_cnt: 25
+dedel_delay_n: 4
+
 search_sen_ctrl_limitter: 8
 torque_mode: 1
 
 ff_front_gain_14: 0.325
 ff_roll_gain_before: 0.25
 ff_roll_gain_after: 0.145
+ff_front_gain_decel: 0.5
 
 motor_pid_gain_limitter: 
   mode: 0
@@ -165,11 +170,11 @@ motor_pid3:
   c: 0
 gyro_pid:
   mode: 3
-  p: 0.00025
+  p: 0.000325
   # i: 0.003275
-  i: 0.0125
-  b: 0.000025
-  d: 0.000275
+  i: 0.01365
+  b: 0.0000275
+  d: 0.000295
   # c: 0.0
 
   # p: 0.0
@@ -249,14 +254,10 @@ sensor_pid_dia:
   c: 0
   mode: 0
 gyro_param:
-  # Green
-  # gyro_w_gain_right: 0.002476800
-  # gyro_w_gain_left: 0.002476800
-  # Gray
-  # gyro_w_gain_right: 0.002455800
-  # gyro_w_gain_left: 0.002456000
-  gyro_w_gain_left: 0.00246085
-  gyro_w_gain_right: 0.00246085
+  # gyro_w_gain_left: 0.00246095
+  # gyro_w_gain_right: 0.00246095
+  gyro_w_gain_left: 0.00246125
+  gyro_w_gain_right: 0.0024625
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -277,13 +278,40 @@ battery_param:
 led_param:
   lp_delay: 0.995
   # lp_delay: 1
-kalman_config:
-  # q_ang: 0.01 #大：応答早
-  # q_bias: 0.01 # 大：gyro_wの値を類似する
-  # r_measure: 0.8 #大：応答送れ
-  q_ang: 2 #大：応答早
-  q_bias: 0.003 # 大：gyro_wの値を類似する
-  r_measure: 0.03 #大：応答送れ
+
+# float initial_covariance = 0.950; // 初期姿勢の誤差共分散行列
+# float process_noise = 0.05;       // プロセスノイズの共分散
+# float measurement_noise = 0.35;   // 観測ノイズの共分散
+
+battery_kalman_config:
+  init_cov: 0.997 # initial_covariance
+  p_noise: 0.003 # process_noise
+  m_noise: 0.997 # measurement_noise
+
+encoder_kalman_config:
+  init_cov: 0.95 # initial_covariance
+  p_noise: 0.05 # process_noise
+  m_noise: 0.35 # measurement_noise
+
+w_kalman_config:
+  init_cov: 0.995 # initial_covariance
+  p_noise: 0.075 # process_noise
+  m_noise: 0.25 # measurement_noise
+
+v_kalman_config:
+  init_cov: 0.95 # initial_covariance
+  p_noise: 0.05 # process_noise
+  m_noise: 0.35 # measurement_noise
+
+ang_kalman_config:
+  init_cov: 0.95 # initial_covariance
+  p_noise: 0.05 # process_noise
+  m_noise: 0.35 # measurement_noise
+
+dist_kalman_config:
+  init_cov: 0.95 # initial_covariance
+  p_noise: 0.05 # process_noise
+  m_noise: 0.35 # measurement_noise
 
 # led_blight: [0x05, 0x05, 0x08, 0x0d, 0x02, 0x05]
 led_blight: [0x0d, 0x0d, 0x0d, 0x0d, 0x0d, 0x0d]
@@ -296,8 +324,8 @@ normal_sla_r_wall_off_th_in: 100 #[mm]
 normal_sla_l_wall_off_th_out: 135 #[mm]
 normal_sla_r_wall_off_th_out: 135 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 135 #125~144
-normal_sla_r_wall_off_ref_cnt: 127 #125~144
+normal_sla_l_wall_off_ref_cnt: 136 #125~144
+normal_sla_r_wall_off_ref_cnt: 135 #125~144
 
 normal_sla_l_wall_off_dist: -5
 normal_sla_r_wall_off_dist: -5

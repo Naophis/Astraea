@@ -104,7 +104,8 @@ public:
   float go_straight_dummy(float v1, float vmax, float v2, float ac, float diac,
                           float dist, planning_time_t &time,
                           bool debug = false);
-  float slalom_dummy(TurnType turn_type, TurnDirection td, param_set_t &p_set);
+  float slalom_dummy(TurnType turn_type, TurnDirection td,
+                     std::unordered_map<TurnType, slalom_param2_t> &turn_param);
 
   char asc(float d, float d2);
 };

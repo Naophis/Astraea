@@ -376,9 +376,26 @@ typedef struct {
   float Resist = 0;
   float Mass = 0;
   float Lm = 0;
-  float Kalman_ang = 0.0;
-  float Kalman_bias = 0.003f;
-  float Kalman_measure = 0.03f;
+
+  float battery_init_cov = 0.95;
+  float battery_p_noise = 0.05;
+  float battery_m_noise = 0.35f;
+  float encoder_init_cov = 0.95;
+  float encoder_p_noise = 0.05;
+  float encoder_m_noise = 0.035;
+  float w_init_cov = 0.95;
+  float w_p_noise = 0.05;
+  float w_m_noise = 0.035;
+  float v_init_cov = 0.95;
+  float v_p_noise = 0.05;
+  float v_m_noise = 0.035;
+  float ang_init_cov = 0.95;
+  float ang_p_noise = 0.05;
+  float ang_m_noise = 0.035;
+  float dist_init_cov = 0.95;
+  float dist_p_noise = 0.05;
+  float dist_m_noise = 0.035;
+
   float tread = 38;
   int FF_front = 0;
   int FF_roll = 0;
@@ -395,6 +412,7 @@ typedef struct {
   float ff_front_gain_14 = 1;
   float ff_roll_gain_before = 1;
   float ff_roll_gain_after = 1;
+  float ff_front_gain_decel = 1;
   pid_param_t front_ctrl_roll_pid;
   pid_param_t motor_pid;
   pid_param_t motor_pid_gain_limitter;
@@ -834,6 +852,7 @@ typedef struct {
 typedef struct {
   std::unordered_map<TurnType, slalom_param2_t> map;
   std::unordered_map<TurnType, slalom_param2_t> map_slow;
+  std::unordered_map<TurnType, slalom_param2_t> map_fast;
   std::unordered_map<StraightType, straight_param_t> str_map;
   char suction = 0;
   float suction_duty = 0;

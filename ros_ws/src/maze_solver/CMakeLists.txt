@@ -34,9 +34,9 @@ include_directories(
 )
 
 
-add_executable(hello src/hello.cpp)
-ament_target_dependencies(hello rclcpp my_msgs)
-install(TARGETS hello DESTINATION lib/${PROJECT_NAME})
+# add_executable(hello src/hello.cpp)
+# ament_target_dependencies(hello rclcpp my_msgs)
+# install(TARGETS hello DESTINATION lib/${PROJECT_NAME})
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)

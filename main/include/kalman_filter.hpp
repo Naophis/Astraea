@@ -1,3 +1,5 @@
+#include <iostream>
+
 class KalmanFilter {
 private:
   float x; // 状態の推定値
@@ -21,4 +23,6 @@ public:
   void reset(float reset_val);
 
   void offset(float offset);
+
+  void print_state();
 };

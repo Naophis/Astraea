@@ -35,11 +35,6 @@ class mpc_tgt_calcModelClass final
     real32_T Constant2_Value;
   };
 
-  struct P_keep_mpc_tgt_calc_T {
-    real_T Constant_Value;
-    int32_T Constant2_Value;
-  };
-
   struct P_mpc_tgt_calc_T {
     real32_T dt;
     real_T Constant1_Value;
@@ -56,6 +51,7 @@ class mpc_tgt_calcModelClass final
     real_T Gain1_Gain;
     real_T Constant_Value_nl;
     real_T Constant_Value_c;
+    real_T Constant_Value_cm;
     real_T Constant3_Value_a;
     real_T Constant1_Value_a;
     real_T Constant2_Value;
@@ -64,6 +60,7 @@ class mpc_tgt_calcModelClass final
     real_T Gain1_Gain_c;
     real_T Constant_Value_cx;
     real_T Constant_Value_cf;
+    real_T Constant_Value_e;
     int32_T Constant2_Value_g;
     int32_T Constant1_Value_p;
     int32_T Constant2_Value_f;
@@ -73,19 +70,27 @@ class mpc_tgt_calcModelClass final
     int32_T Constant1_Value_o;
     int32_T Constant2_Value_j;
     int32_T Constant1_Value_e;
+    int32_T Constant6_Value;
+    int32_T Constant4_Value;
+    int32_T Constant5_Value;
     int32_T Constant2_Value_p;
     int32_T Constant1_Value_lj;
     int32_T Constant2_Value_gw;
+    int32_T Constant4_Value_f;
+    int32_T Constant2_Value_pg;
+    int32_T Constant4_Value_o;
     int32_T Constant2_Value_i;
     int32_T Constant1_Value_kv;
     int32_T Constant2_Value_d;
+    int32_T Constant2_Value_dw;
+    int32_T Constant1_Value_n;
     int32_T DataStoreMemory_InitialValue;
     int32_T DataStoreMemory1_InitialValue;
-    real32_T Constant4_Value;
-    real32_T Constant6_Value;
+    real32_T Constant4_Value_b;
+    real32_T Constant6_Value_o;
     real32_T Constant_Value_ne;
     real32_T Constant1_Value_mn;
-    real32_T Constant5_Value;
+    real32_T Constant5_Value_i;
     real32_T Constant10_Value;
     real32_T Constant2_Value_e;
     real32_T Constant3_Value_j;
@@ -93,7 +98,7 @@ class mpc_tgt_calcModelClass final
     real32_T Constant8_Value;
     real32_T Gain1_Gain_l;
     real32_T Constant4_Value_d;
-    real32_T Constant6_Value_o;
+    real32_T Constant6_Value_oh;
     real32_T Constant_Value_f;
     real32_T Constant1_Value_i;
     real32_T Constant5_Value_j;
@@ -128,7 +133,7 @@ class mpc_tgt_calcModelClass final
     real32_T Gain1_Gain_hy;
     real32_T Gain_Gain_m;
     real32_T Constant_Value_m;
-    real32_T Constant_Value_e;
+    real32_T Constant_Value_eh;
     real32_T Constant_Value_o;
     real32_T Gain3_Gain_d;
     real32_T Constant1_Value_ih;
@@ -166,11 +171,8 @@ class mpc_tgt_calcModelClass final
     uint8_T ManualSwitch_CurrentSetting;
     uint8_T ManualSwitch_CurrentSetting_o;
     uint8_T ManualSwitch_CurrentSetting_c;
-    uint8_T ManualSwitch_CurrentSetting_i;
     uint8_T ManualSwitch_CurrentSetting_e;
     uint8_T ManualSwitch_CurrentSetting_b;
-    P_keep_mpc_tgt_calc_T keep_p;
-    P_keep_mpc_tgt_calc_T keep_h;
     P_IfActionSubsystem_mpc_tgt_c_T IfActionSubsystem2;
     P_IfActionSubsystem_mpc_tgt_c_T IfActionSubsystem_g;
   };
@@ -197,8 +199,6 @@ class mpc_tgt_calcModelClass final
   static P_mpc_tgt_calc_T mpc_tgt_calc_P;
   static void mpc_tgt_calc_IfActionSubsystem(real32_T rty_Out1[2],
     P_IfActionSubsystem_mpc_tgt_c_T *localP);
-  static void mpc_tgt_calc_keep(real32_T *rty_accl_out, int32_T *rty_state_out,
-    P_keep_mpc_tgt_calc_T *localP);
   RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
 };
 
