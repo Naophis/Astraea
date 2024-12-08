@@ -355,11 +355,11 @@ void MainTask::load_hw_param() {
         *motor_pid2, *motor_pid3, *gyro_pid, *str_agl_pid, *str_agl_dia_pid,
         *gyro_param, *battery_kalman_config, *encoder_kalman_config,
         *w_kalman_config, *v_kalman_config, *ang_kalman_config,
-        *dist_kalman_config, *battery_param, *led_param, *angle_pid, *dist_pid,
-        *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
-        *axel_degenerate_y, *led_blight, *gyro_pid_gain_limitter,
-        *motor_pid_gain_limitter, *motor2_pid_gain_limitter,
-        *motor3_pid_gain_limitter;
+        *dist_kalman_config, *pos_kalman_config, *battery_param, *led_param,
+        *angle_pid, *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
+        *axel_degenerate_x, *axel_degenerate_y, *led_blight,
+        *gyro_pid_gain_limitter, *motor_pid_gain_limitter,
+        *motor2_pid_gain_limitter, *motor3_pid_gain_limitter;
 
   root = cJSON_Parse(str.c_str());
 
@@ -671,6 +671,11 @@ void MainTask::load_hw_param() {
   param->dist_init_cov = getItem(dist_kalman_config, "init_cov")->valuedouble;
   param->dist_p_noise = getItem(dist_kalman_config, "p_noise")->valuedouble;
   param->dist_m_noise = getItem(dist_kalman_config, "m_noise")->valuedouble;
+
+  pos_kalman_config = getItem(root, "pos_kalman_config");
+  param->pos_init_cov = getItem(pos_kalman_config, "init_cov")->valuedouble;
+  param->pos_p_noise = getItem(pos_kalman_config, "p_noise")->valuedouble;
+  param->pos_m_noise = getItem(pos_kalman_config, "m_noise")->valuedouble;
 
   comp_v_param = getItem(root, "comp_v_param");
   param->comp_param.v_lp_gain = getItem(comp_v_param, "enc_v_lp")->valuedouble;
@@ -1212,6 +1217,8 @@ void MainTask::load_sys_param() {
   sys.test.end_v = getItem(test, "end_v")->valuedouble;
   sys.test.accl = getItem(test, "accl")->valuedouble;
   sys.test.decel = getItem(test, "decel")->valuedouble;
+  sys.test.dia_accl = getItem(test, "dia_accl")->valuedouble;
+  sys.test.dia_decel = getItem(test, "dia_decel")->valuedouble;
   sys.test.dist = getItem(test, "dist")->valuedouble;
   sys.test.w_max = getItem(test, "w_max")->valuedouble;
   // sys.test.w_end = getItem(test, "w_end")->valuedouble;
@@ -1733,23 +1740,23 @@ void MainTask::task() {
       } else if (mode_num == 4) {
         path_run(12, 12, 12);
       } else if (mode_num == 5) {
-        path_run(14, 14, 12);
+        path_run(14, 14, 13);
       } else if (mode_num == 6) {
-        path_run(16, 16, 12);
+        path_run(18, 16, 13);
       } else if (mode_num == 7) {
-        path_run(17, 17, 12);
+        path_run(19, 17, 13);
       } else if (mode_num == 8) {
-        path_run(20, 18, 12);
+        path_run(20, 18, 13);
       } else if (mode_num == 9) {
-        path_run(21, 19, 12);
+        path_run(21, 19, 13);
       } else if (mode_num == 10) {
-        path_run(22, 20, 12);
+        path_run(22, 20, 13);
       } else if (mode_num == 11) {
-        path_run(22, 21, 12);
+        path_run(22, 21, 13);
       } else if (mode_num == 12) {
-        path_run(23, 22, 12);
+        path_run(23, 22, 13);
       } else if (mode_num == 13) {
-        path_run(23, 23, 12);
+        path_run(24, 23, 13);
       } else if (mode_num == 14) {
         printf("keep_pivot\n");
         keep_pivot();
@@ -1788,27 +1795,27 @@ void MainTask::recieve_data() {}
 
 void MainTask::req_error_reset() {
 
-  printf("kf_batt:\n");
-  pt->kf_batt.print_state();
+  // printf("kf_batt:\n");
+  // pt->kf_batt.print_state();
 
-  printf("kf_v:\n");
-  pt->kf_v.print_state();
+  // printf("kf_v:\n");
+  // pt->kf_v.print_state();
 
-  printf("kf_enc_r:\n");
-  pt->kf_v_r.print_state();
+  // printf("kf_enc_r:\n");
+  // pt->kf_v_r.print_state();
 
-  printf("kf_enc_l:\n");
-  pt->kf_v_l.print_state();
+  // printf("kf_enc_l:\n");
+  // pt->kf_v_l.print_state();
 
-  printf("kf_dist:\n");
-  pt->kf_dist.print_state();
+  // printf("kf_dist:\n");
+  // pt->kf_dist.print_state();
 
-  printf("kf_w:\n");
-  pt->kf_w.print_state();
+  // printf("kf_w:\n");
+  // pt->kf_w.print_state();
 
-  printf("kf_ang:\n");
-  pt->kf_ang.print_state();
-  
+  // printf("kf_ang:\n");
+  // pt->kf_ang.print_state();
+
   tgt_val->pl_req.error_vel_reset = 1;
   tgt_val->pl_req.error_gyro_reset = 1;
   tgt_val->pl_req.error_ang_reset = 1;
@@ -2248,6 +2255,8 @@ void MainTask::test_sla() {
   printf("radius =  %f\n", sla_p.rad);
   printf("time =  %f\n", sla_p.time);
   printf("n = %d\n", sla_p.pow_n);
+  printf("front = [%f, %f]\n", sla_p.front.left, sla_p.front.right);
+  printf("back = [%f, %f]\n", sla_p.back.left, sla_p.back.right);
 
   rorl = ui->select_direction();
   rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
@@ -2286,11 +2295,26 @@ void MainTask::test_sla() {
   ps.v_max = sla_p.v;
   ps.v_end = sla_p.v;
   ps.dist = param->cell + param->offset_start_dist;
-  if (sys.test.start_turn > 0) {
-    ps.dist = param->offset_start_dist;
-  }
+  nm.skip_wall_off = false;
+
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
+
+  if (sys.test.start_turn > 0) {
+    if (rorl == TurnDirection::Left) {
+      ps.dist = param->offset_start_dist + sla_p.front.left;
+    } else {
+      ps.dist = param->offset_start_dist + sla_p.front.right;
+    }
+    nm.skip_wall_off = true;
+  }
+
+  auto tmp_v2 = 2 * ps.accl * ps.dist;
+  if (ps.v_end * ps.v_end > tmp_v2) {
+    ps.accl = (ps.v_end * ps.v_end) / (2 * ps.dist) + 1000;
+    ps.decel = -ps.accl;
+  }
+
   ps.sct = SensorCtrlType::Straight;
   ps.motion_type = MotionType::STRAIGHT;
   ps.dia_mode = false;
@@ -2339,7 +2363,11 @@ void MainTask::test_sla() {
   }
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
-
+  if (static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia45 ||
+      static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia135) {
+    ps.accl = sys.test.dia_accl;
+    ps.decel = sys.test.dia_decel;
+  }
   mp->go_straight(ps);
 
   vTaskDelay(100.0 / portTICK_RATE_MS);
@@ -2936,11 +2964,16 @@ void MainTask::read_maze_data() {
 
   printf("map___\n");
   vTaskDelay(1.0 / portTICK_PERIOD_MS);
-  for (int x = 0; x < sys.maze_size; x++) {
-    for (int y = 0; y < sys.maze_size; y++) {
+  for (int y = 0; y < sys.maze_size; y++) {
+    for (int x = 0; x < sys.maze_size; x++) {
       auto d = lgc->map[x + y * sys.maze_size];
-      printf("%d,", (d & 0xff));
+      if (x == (sys.maze_size - 1) && y == (sys.maze_size - 1)) {
+        printf("%d", (d & 0x0f));
+      } else {
+        printf("%d,", (d & 0x0f));
+      }
     }
+    printf("\n");
   }
   printf("\n");
   printf("end___\n"); // ファイル追記終了トリガー
@@ -2960,6 +2993,7 @@ void MainTask::path_run(int idx, int idx2, int idx3) {
         lgc->set_param_num(i);
         pc->other_route_map.clear();
         const bool res = pc->path_create(false);
+        printf("other route size = %d\n", pc->other_route_map.size());
         if (!res) {
           ui->error();
           return;
@@ -3025,6 +3059,20 @@ void MainTask::path_run(int idx, int idx2, int idx3) {
     load_circuit_path();
   }
   printf("----------------\n");
+  if (pc->path_s.size() == 0) {
+    ui->error();
+    ui->error();
+    pc->other_route_map.clear();
+    const bool res = pc->path_create(false);
+    if (!res) {
+      ui->error();
+      return;
+    }
+    pc->convert_large_path(true);
+    pc->diagonalPath(true, true);
+    pc->print_path();
+  }
+
   pc->calc_goal_time(param_set, true);
   pc->print_path();
   // printf("after: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));

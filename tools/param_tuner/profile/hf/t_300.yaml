@@ -9,7 +9,7 @@ straight:
     w_end: 0.1
     alpha: 180
   fast_run:
-    v_max: 550
+    v_max: 425
     # v_max: 300
     accl: 1500
     decel: -2500
@@ -17,7 +17,7 @@ straight:
     w_end: 0.1
     alpha: 120
   fast_run_dia:
-    v_max: 500
+    v_max: 425
     # v_max: 300
     accl: 2500
     decel: -2500
@@ -42,8 +42,8 @@ normal:
   pow_n: 2
   rad: 22
   time: 0.09545312500000586
-  front: { left: 11.460502248606609, right: 10.460502248606609 }
-  back: { left: 13.327402340243637, right: 13.327402340243637 }
+  front: { left: 15.060502248606609, right: 12.060502248606609 }
+  back: { left: 8.827402340243637, right: 10.327402340243637 }
 
 # check
 # 2024年  2月  8日 木曜日 21:27:45 JST

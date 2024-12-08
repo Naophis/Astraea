@@ -4,8 +4,10 @@ class KalmanFilter {
 private:
   float x; // 状態の推定値
   float P; // 状態の誤差共分散行列
+  float P2; // 状態の誤差共分散行列
   float Q; // プロセスノイズの共分散
   float R; // 観測ノイズの共分散
+  float R2; // 観測ノイズの共分散
 
   float init_P;
 
@@ -17,6 +19,8 @@ public:
   void predict(float u);
 
   void update(float z);
+
+  void update2(float z, float z2);
 
   float get_state();
 

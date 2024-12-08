@@ -8,8 +8,8 @@ pivot_angle_180: 180.0
 # 探索スラローム
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
-# front_dist_offset: 94.750 # 探索時の前壁補正 大→短くなる
-front_dist_offset: 97.5 # 探索時の前壁補正 大→短くなる
+# front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 91.05 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
 normal_sla_offset_front: 9
@@ -63,8 +63,8 @@ wall_off_hold_dist: 88
 ctrl_exist_wall_th_l: 50
 ctrl_exist_wall_th_r: 50
 go_straight_wide_ctrl_th: 75
-search_wall_off_l_dist_offset: 48.5
-search_wall_off_r_dist_offset: 48.85
+search_wall_off_l_dist_offset: 50.75
+search_wall_off_r_dist_offset: 49.0
 search_wall_off_enable: 1
 
 # 壁切れ壁あり判定
@@ -80,10 +80,10 @@ wall_off_hold_noexist_th_r: 60
 wall_off_hold_noexist_th_l2: 69.5
 wall_off_hold_noexist_th_r2: 60
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -3.75
-wall_off_hold_dist_str_r: -5.25
-wall_off_hold_dist_str_l_exist: -3.75
-wall_off_hold_dist_str_r_exist: -5.25
+wall_off_hold_dist_str_l: -5.75
+wall_off_hold_dist_str_r: -6.25
+wall_off_hold_dist_str_l_exist: -5.75
+wall_off_hold_dist_str_r_exist: -6.25
 
 wall_off_front_move_dist_th: 2
 wall_off_front_move_dia_dist_th: 2
@@ -123,8 +123,8 @@ wall_off_diff_check_dist_dia: 10.5
 wall_off_hold_dist_dia_l: -6.0
 wall_off_hold_dist_dia_r: -7.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 26.850
-dia_wall_off_ref_r: 33.850
+dia_wall_off_ref_l: 28.5
+dia_wall_off_ref_r: 29.5
 dia_offset_max_dist: 10
 
 wall_off_pass_dist: 10

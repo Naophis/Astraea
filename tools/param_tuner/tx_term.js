@@ -12,7 +12,7 @@ function resolveAfter2Seconds(str) {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(str);
-      console.log(str); // 10
+      // console.log(str); // 10
     }, 500);
   });
 }
@@ -43,7 +43,7 @@ const callerFun = async (mode) => {
     var list = ["system.yaml", "hardware.yaml"].concat(files.filter((file) => {
       return file.match(/.yaml$/);
     }));
-    let col = 4;
+    let col = 5;
     for (var i = 0; list.length;) {
       let str = "";
       if (list[i] === undefined) {
@@ -113,7 +113,7 @@ const callerFun = async (mode) => {
         });
         var file_name = file.replace("yaml", "txt");
         var saveData = yaml.load(txt);
-        console.log(saveData)
+        // console.log(saveData)
         var str = `${file_name}@${JSON.stringify(saveData)}`;
         write(str);
         await sleep2(800);
@@ -128,17 +128,35 @@ const callerFun = async (mode) => {
         if (file_name === "maze.hf") {
           file_name = "maze.txt";
           let maze_list = txt.split(",").map((e) => { return e.trim(); }).map((e) => { return (parseInt(e) | 0xf0); });
+          let size = 16;
+          if (maze_list.length > 300) {
+            size = 32;
+          }
+          for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+              // skip excahnged point
+              if (x >= y) {
+                continue;
+              }
+              let idx = y * size + x;
+              let idx2 = x * size + y;
+              let tmp = maze_list[idx];
+              maze_list[idx] = maze_list[idx2];
+              maze_list[idx2] = tmp;
+            }
+          }
+          // console.log(maze_list.join(","));
           txt = maze_list.join(",");
           var str = `${file_name}@${txt}`;
           write(str);
-          console.log(txt)
+          // console.log(txt)
           await sleep2(800);
           console.log(`${file_name}: finish!!`);
         } else {
           var saveData = yaml.load(txt);
           var str = `${file_name}@${JSON.stringify(saveData)}`;
           write(str);
-          console.log(saveData)
+          // console.log(saveData)
           await sleep2(600);
           console.log(`${list[idx]}, ${file_name}: finish!!`);
         }

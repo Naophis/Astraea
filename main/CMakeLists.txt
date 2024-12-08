@@ -25,6 +25,7 @@ set(COMPONENT_SRCS
     "task/sensing_task.cpp"
     "task/as5147p.cpp"
     "task/kalman_filter.cpp"
+    "task/kalman_filter_matrix.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
     "search/search_controller.cpp"

@@ -161,6 +161,9 @@ typedef struct {
   duty_t duty;
   ff_duty_t ff_duty;
   char motion_type = 0;
+
+  float pos_x;
+  float pos_y;
 } ego_entity_t;
 
 typedef struct {
@@ -396,6 +399,10 @@ typedef struct {
   float dist_p_noise = 0.05;
   float dist_m_noise = 0.035;
 
+  float pos_init_cov = 0.95;
+  float pos_p_noise = 0.05;
+  float pos_m_noise = 0.035;
+
   float tread = 38;
   int FF_front = 0;
   int FF_roll = 0;
@@ -546,7 +553,7 @@ typedef struct {
   float go_straight_wide_ctrl_th = 60;
   float wall_off_pass_through_offset_r = 8;
   float wall_off_pass_through_offset_l = 8;
-  float tire_tread;
+  float tire_tread = 38;
   float right_keep_dist_th = 0;
   float left_keep_dist_th = 0;
   float normal_sla_l_wall_off_th_in = 100;
@@ -762,6 +769,8 @@ typedef struct {
   float end_v = 0;
   float accl = 0;
   float decel = 0;
+  float dia_accl = 0;
+  float dia_decel = 0;
   float dist = 0;
   float w_max = 0;
   float w_end = 0;
@@ -919,6 +928,8 @@ typedef struct {
   float duty_ff_front;
   float duty_ff_roll;
   float duty_sensor_ctrl;
+  float pos_x;
+  float pos_y;
 } log_data_t;
 
 union float16_bitmap {
@@ -1020,6 +1031,14 @@ typedef struct {
   real16_T ff_duty_roll;
   real16_T ff_duty_rpm_r;
   real16_T ff_duty_rpm_l;
+
+  real16_T pos_x;
+  real16_T pos_y;
+
+  // real16_T kalman_w;
+  // real16_T kalman_v_r;
+  // real16_T kalman_v_l;
+
 
 } log_data_t2;
 

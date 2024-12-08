@@ -110,6 +110,13 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
       break;
     }
 
+    if (p.motion_type == MotionType::SLA_FRONT_STR) {
+      // 次のタイミングで通り過ぎてしまう場合は早めに切り上げる
+      const auto tmp_dist = tgt_val->ego_in.dist + tgt_val->ego_in.v * dt;
+      if (std::abs(tmp_dist) >= std::abs(p.dist)) {
+        break;
+      }
+    }
     if (search_mode && param->wall_off_dist.search_wall_off_enable) {
       // watch wall off
       if (wall_off_state == 0) {
@@ -389,7 +396,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
         }
       }
     }
-    if (ps_front.dist > 0) {
+    if (ps_front.dist > (sp.v * dt)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
         return MotionResult::ERROR;
@@ -430,10 +437,10 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     }
     ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r2
                                                  : param->offset_after_turn_l2;
-    if (b) {
+    if (b && !next_motion.skip_wall_off) {
       wall_off(td, ps_front);
     }
-    if (ps_front.dist > 0) {
+    if (ps_front.dist > (sp.v * dt) && !next_motion.skip_wall_off) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
         return MotionResult::ERROR;
@@ -468,7 +475,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     if (b) {
       wall_off(td, ps_front);
     }
-    if (ps_front.dist > 0) {
+    if (ps_front.dist > (sp.v * dt)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
         return MotionResult::ERROR;
@@ -486,7 +493,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     //       (param->front_dist_offset2 - sensing_result->ego.front_dist);
     //   b = false;
     // }
-    if (b) {
+    if (b && !next_motion.skip_wall_off) {
       wall_off(td, ps_front);
     }
     if (sp.type == TurnType::Dia135) {
@@ -494,12 +501,14 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     } else if (sp.type == TurnType::Dia45) {
       calc_dia45_offset(ps_front, ps_back, td, !b);
     }
-    res_f = go_straight(ps_front);
+    if (ps_front.dist > (sp.v * dt) && !next_motion.skip_wall_off) {
+      res_f = go_straight(ps_front);
+      if (res_f != MotionResult::NONE) {
+        return MotionResult::ERROR;
+      }
+    }
     ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r
                                                  : param->offset_after_turn_l;
-    if (res_f != MotionResult::NONE) {
-      return MotionResult::ERROR;
-    }
   } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
              sp.type == TurnType::Dia90) {
     bool result = wall_off_dia(td, ps_front);
@@ -540,9 +549,11 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       return MotionResult::ERROR;
     }
   } else {
-    res_f = go_straight(ps_front);
-    if (res_f != MotionResult::NONE) {
-      return MotionResult::ERROR;
+    if (ps_front.dist > (sp.v * dt)) {
+      res_f = go_straight(ps_front);
+      if (res_f != MotionResult::NONE) {
+        return MotionResult::ERROR;
+      }
     }
   }
 
@@ -639,30 +650,37 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
         break;
       }
     } else {
-      if (sp.type == TurnType::Normal && !find_in) {
-        if (td == TurnDirection::Right) {
-          if (sensing_result->ego.left45_dist <
-              param->normal_sla_l_wall_off_th_in) {
-            find_in = true;
+      if (count > limit_count / 2) {
+
+        if (sp.type == TurnType::Normal && !find_in && !find_out) {
+          if (td == TurnDirection::Right) {
+            if (10 < sensing_result->ego.left45_dist &&
+                sensing_result->ego.left45_dist <
+                    param->normal_sla_l_wall_off_th_in) {
+              find_in = true;
+            }
+          } else if (td == TurnDirection::Left) {
+            if (10 < sensing_result->ego.right45_dist &&
+                sensing_result->ego.right45_dist <
+                    param->normal_sla_r_wall_off_th_in) {
+              find_in = true;
+            }
           }
-        } else if (td == TurnDirection::Left) {
-          if (sensing_result->ego.right45_dist <
-              param->normal_sla_r_wall_off_th_in) {
-            find_in = true;
-          }
-        }
-      } else if (sp.type == TurnType::Normal && find_in && !find_out) {
-        if (td == TurnDirection::Right) {
-          if (sensing_result->ego.left45_dist >
-              param->normal_sla_l_wall_off_th_out) {
-            find_out = true;
-            count_save = count;
-          }
-        } else {
-          if (sensing_result->ego.right45_dist >
-              param->normal_sla_r_wall_off_th_out) {
-            find_out = true;
-            count_save = count;
+        } else if (sp.type == TurnType::Normal && find_in && !find_out) {
+          if (td == TurnDirection::Right) {
+            if (sensing_result->ego.left45_dist >
+                    param->normal_sla_l_wall_off_th_out &&
+                sensing_result->ego.left45_dist < 180) {
+              find_out = true;
+              count_save = count;
+            }
+          } else {
+            if (sensing_result->ego.right45_dist >
+                    param->normal_sla_r_wall_off_th_out &&
+                sensing_result->ego.right45_dist < 180) {
+              find_out = true;
+              count_save = count;
+            }
           }
         }
       }
@@ -853,6 +871,8 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref_with_check() {
   // return;
   ui->motion_check();
   reset_gyro_ref();
+  pt->reset_kf_state(true);
+  pt->reset_pos(-param->offset_start_dist, 0, 0);
 }
 
 void IRAM_ATTR MotionPlanning::coin() { ui->coin(120); }
@@ -1045,6 +1065,15 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.motion_type = MotionType::STRAIGHT;
       ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
       ps.dist += carry_over_dist;
+
+      if (i == 0 && start_turn) {
+        if (turn_dir == TurnDirection::Left) {
+          ps.dist = param->offset_start_dist + p_set.map[turn_type].front.left;
+        } else {
+          ps.dist = param->offset_start_dist + p_set.map[turn_type].front.right;
+        }
+      }
+
       auto res = go_straight(ps);
       carry_over_dist = 0;
       if (res == MotionResult::ERROR) {

@@ -90,7 +90,17 @@
         "scoped_allocator": "cpp",
         "syncstream": "cpp",
         "*.ipp": "cpp",
-        "alignedvector3": "cpp"
+        "alignedvector3": "cpp",
+        "core": "cpp",
+        "superlusupport": "cpp",
+        "adolcforward": "cpp",
+        "bvh": "cpp",
+        "fft": "cpp",
+        "mprealsupport": "cpp",
+        "matrixfunctions": "cpp",
+        "nonlinearoptimization": "cpp",
+        "openglsupport": "cpp",
+        "polynomials": "cpp"
     },
     "idf.adapterTargetName": "esp32s3",
     "clang-format.executable": "/usr/bin/clang-format",
@@ -100,7 +110,7 @@
         "editor.defaultFormatter": "xaver.clang-format"
     },
     "[python]": {
-        "editor.defaultFormatter": "ms-python.python"
+        "editor.defaultFormatter": "ms-python.autopep8"
     },
     "python.formatting.provider": "none",
     "cmake.configureOnOpen": false,

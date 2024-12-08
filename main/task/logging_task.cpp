@@ -217,7 +217,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
          "pid_i2_v,m_pid_d_v,g_pid_p,g_pid_i,g_pid_i2,g_pid_d,g_pid_p_v,g_pid_"
          "i_v,g_pid_i2_v,g_pid_d_v,s_pid_p,s_pid_i,s_pid_i2,s_pid_d,s_pid_p_v,"
          "s_pid_i_v,s_pid_i2_v,s_pid_d_v,ff_duty_front,ff_duty_roll,ff_duty_"
-         "rpm_r,ff_duty_rpm_l\n");
+         "rpm_r,ff_duty_rpm_l,x,y\n");
   int c = 0;
   const char *f1 = format1.c_str();
   const char *f2 = format2.c_str();
@@ -358,7 +358,9 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
            halfToFloat(ld->ff_duty_front), //
            halfToFloat(ld->ff_duty_roll),  //
            halfToFloat(ld->ff_duty_rpm_r), //
-           halfToFloat(ld->ff_duty_rpm_l)  //
+           halfToFloat(ld->ff_duty_rpm_l), //
+           halfToFloat(ld->pos_x),         //
+           halfToFloat(ld->pos_y)          //
     );
 
     if (i > 10 && ld->motion_timestamp == 0) {
@@ -499,6 +501,11 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->s_pid_i_v = floatToHalf(error_entity->s_val.i_val);
   ld->s_pid_i2_v = floatToHalf(error_entity->s_val.i2_val);
   ld->s_pid_d_v = floatToHalf(error_entity->s_val.d_val);
+
+  // ld->pos_x = floatToHalf(sensing_result->ego.pos_x);
+  // ld->pos_y = floatToHalf(sensing_result->ego.pos_y);
+  ld->pos_x = floatToHalf(sensing_result->ego.pos_x);
+  ld->pos_y = floatToHalf(sensing_result->ego.pos_y);
 
   if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 10000) {
     log_vec.emplace_back(std::move(ld));

@@ -89,7 +89,27 @@ let ready = function () {
       if (data.match(/^end___/)) {
         obj.dump_to_map = false;
         console.log(`${__dirname}/maze_logs/${obj.file_name}`);
-        fs.writeFileSync(`${__dirname}/maze_logs/${obj.file_name}`, `${obj.record}`, {
+
+        let maze_list = obj.record.split(",").map((e) => { return e.trim(); }).map((e) => { return (parseInt(e)); });
+        let size = 16;
+        if (maze_list.length > 300) {
+          size = 32;
+        }
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            // skip excahnged point
+            if (x >= y) {
+              continue;
+            }
+            let idx = y * size + x;
+            let idx2 = x * size + y;
+            let tmp = maze_list[idx];
+            maze_list[idx] = maze_list[idx2];
+            maze_list[idx2] = tmp;
+          }
+        }
+
+        fs.writeFileSync(`${__dirname}/maze_logs/${obj.file_name}`, `${maze_list.join(",")}`, {
           flag: "w+",
         });
       }

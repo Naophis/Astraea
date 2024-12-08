@@ -56,16 +56,19 @@ class Slalom:
         self.slip_gain = slip_gain
         self.K = K
         self.list_K_y = list_K_y
-        
+
         dx = 0.0001/64
+
         def safe_integrand_array(x, n):
             result = np.zeros_like(x)
             valid_indices = (np.abs(x) < 1)
-            result[valid_indices] = np.exp(1)*np.exp(-1 / (1 - (x[valid_indices])**n))
+            result[valid_indices] = np.exp(
+                1)*np.exp(-1 / (1 - (x[valid_indices])**n))
             return result
         x_values_corrected = np.linspace(0, 1, int(1 / dx))
-        self.Et = np.trapz(safe_integrand_array(x_values_corrected, n), x_values_corrected)
-        # print(self.Et)
+        self.Et = np.trapz(safe_integrand_array(
+            x_values_corrected, n), x_values_corrected)
+        print(self.Et)
         self.base_alpha = v / rad
 
     def set_cell_size(self, size):
@@ -371,16 +374,39 @@ class Slalom:
     def calc_neipire(self, t, s, N):
         z = 1
         t = t / s
-        P = math.pow((t - z), N - z)
-        Q = P * (t - z)
+        t_z = (t - z)
+        P = math.pow(t_z, N - z)
+        Q = P * t_z
         res = -N * P / ((Q - z) * (Q - z)) * \
             (math.exp(z + z / (Q - z)) / s)
-        if t == 0:
-            return 0
         return res
+        # if t < s/2:
+        #     z = 1
+        #     t = t / s
+        #     t_z = math.fabs(t - z)
+        #     P = math.pow(t_z, N - z)
+        #     Q = P * t_z
+        #     res = -N * P / ((Q - z) * (Q - z)) * \
+        #         (math.exp(z + z / (Q - z)) / s)
+        #     return res
+        # else:
+        #     # 折り返す
+        #     z = 1
+        #     t = 1 - t / s
+        #     if (t-z) < 0:
+        #         return 0
+        #     P = math.pow((t - z), N - z)
+        #     Q = P * (t - z)
+        #     res = -N * P / ((Q - z) * (Q - z)) * \
+        #         (math.exp(z + z / (Q - z)) / s)
+        #     if t == 0:
+        #         return 0
+        #     return res
 
     def calc_neipire_w(self, t, s, N):
         t = t / s
+        # if (t-1) < 0:
+        #     return 0
         res = math.exp(-1/(1-math.pow(t-1, N)))
         if t == 0:
             return 0

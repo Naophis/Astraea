@@ -21,6 +21,7 @@
 #include <cmath>
 
 #include "include/kalman_filter.hpp"
+#include "include/kalman_filter_matrix.hpp"
 // #include "hal/mcpwm_ll.h"
 
 class PlanningTask {
@@ -34,6 +35,8 @@ public:
   void motor_disable(bool reset_req);
   void suction_disable();
   bool ready = false;
+
+  void reset_pos(float x, float y, float ang);
 
   void
   set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_sensing_result);
@@ -96,6 +99,7 @@ public:
   KalmanFilter kf_dist;
   KalmanFilter kf_ang;
   KalmanFilter kf_batt;
+  KalmanFilterMatrix pos;
 
   float suction_gain = 200;
 

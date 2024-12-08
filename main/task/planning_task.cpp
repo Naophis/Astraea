@@ -209,6 +209,13 @@ void PlanningTask::set_input_param_entity(
   param_ro = _param_ro;
 }
 
+void PlanningTask::reset_pos(float x, float y, float ang) {
+  tgt_val->ego_in.pos_x = x;
+  tgt_val->ego_in.pos_y = 0;
+  pos.init(x, y, ang, param_ro->pos_init_cov, param_ro->pos_p_noise,
+           param_ro->pos_m_noise);
+}
+
 void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
 }
@@ -379,6 +386,10 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
               param_ro->ang_init_cov, //
               param_ro->ang_p_noise,  //
               param_ro->ang_m_noise);
+  pos.init(-param_ro->offset_start_dist, 0, 0, //
+           param_ro->pos_init_cov,             //
+           param_ro->pos_p_noise,              //
+           param_ro->pos_m_noise);             //
 }
 
 void PlanningTask::task() {
@@ -845,11 +856,7 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
   }
 
   if (check == 2) {
-    if (ABS(val_left) > ABS(val_right)) {
-      return val_right * 2;
-    } else {
-      return val_left * 2;
-    }
+    return error;
   } else if (check == 1) {
     return error * 2;
   }
@@ -1026,6 +1033,25 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     kf_ang.predict(tgt_val->ego_in.w);
     kf_ang.update(tgt_val->ego_in.ang);
     se->ego.ang_kf = kf_ang.get_state();
+    // const auto angle = kf_ang.get_state();
+    // se->ego.ang_kf = fmod(angle + M_PI, 2 * M_PI) - M_PI;
+  }
+
+  if (tgt_val->motion_type != MotionType::NONE) {
+    if (std::isfinite(se->ego.v_kf) && std::isfinite(se->ego.ang_kf)) {
+      pos.ang += se->ego.w_kf * dt;
+      pos.ang = fmod(pos.ang + M_PI, 2 * M_PI) - M_PI;
+      tgt_val->ego_in.pos_x += se->ego.v_kf * cosf(pos.ang) * dt;
+      tgt_val->ego_in.pos_y += se->ego.v_kf * sinf(pos.ang) * dt;
+      pos.predict(tgt_val->ego_in.v, tgt_val->ego_in.w, dt);
+      const std::array<float, 3> z = {tgt_val->ego_in.pos_x, //
+                                      tgt_val->ego_in.pos_y, //
+                                      pos.ang};
+      pos.update(z);
+      const auto pos_state = pos.get_state();
+      se->ego.pos_x = pos_state[0];
+      se->ego.pos_y = pos_state[1];
+    }
   }
 
   se->ego.battery_raw = se->battery.data;
@@ -1643,25 +1669,28 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
           // mode3 main
           auto diff_ang =
               (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
+          auto ang_sum = error_entity.ang.error_i;
           if (tgt_val->motion_type == MotionType::SLALOM) {
             diff_ang = 0;
+            ang_sum = 0;
           }
           if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
                 tgt_val->motion_type == MotionType::SLA_BACK_STR ||
                 tgt_val->motion_type == MotionType::PIVOT)) {
             diff_ang = 0;
+            ang_sum = 0;
           }
           auto kp_gain = param_ro->gyro_pid.p * error_entity.w.error_p;
           auto ki_gain = param_ro->gyro_pid.i * diff_ang;
           auto kb_gain = param_ro->gyro_pid.b * error_entity.w.error_i;
-          auto kc_gain = param_ro->gyro_pid.c * error_entity.w.error_d;
+          auto kc_gain = param_ro->gyro_pid.c * ang_sum;
           auto kd_gain = param_ro->gyro_pid.d * error_entity.w_kf.error_d;
           limitter(kp_gain, ki_gain, kb_gain, kd_gain,
                    param_ro->gyro_pid_gain_limitter);
-          if (param_ro->gyro_pid.c == 1) {
-            error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z = 0;
-            kc_gain = 0;
-          }
+          // if (param_ro->gyro_pid.c == 1) {
+          //   error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z = 0;
+          //   kc_gain = 0;
+          // }
           duty_roll =
               kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
               (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
@@ -2080,6 +2109,11 @@ void IRAM_ATTR PlanningTask::cp_request() {
     tgt_val->ego_in.ang -= tmp_ang;
     tgt_val->ego_in.img_ang = 0;
     kf_ang.offset(-tmp_ang);
+  } else if (tgt_val->motion_type == MotionType::NONE) {
+    tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = 0;
+    kf_ang.reset(0);
+    tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
+    kf_dist.reset(0);
   }
 
   if (tgt_val->motion_type == MotionType::NONE ||

@@ -834,6 +834,12 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
       } else {
         tmp_turn_time = slalom_dummy(turn_type, turn_dir, p_set.map);
       }
+
+      if (i == 0 && start_turn) {
+        auto next_turn_type = tc.get_turn_type(path_t[i + 1]);
+        v_now = ps.v_end = p_set.map[next_turn_type].v;
+      }
+
       time += tmp_turn_time;
       lap_time += tmp_str_time;
       ego_dir = tc.get_next_dir(ego_dir, turn_type, turn_dir);
@@ -842,11 +848,15 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
            ego_dir == Direction::SouthEast || ego_dir == Direction::SouthWest);
     }
 
+    // printf("time: str %f, turn %f, total %f\n", tmp_str_time, tmp_turn_time,
+    //        time);
+
     path_time_s.push_back(tmp_str_time);
     path_time_t.push_back(tmp_turn_time);
     tmp_time.total_time = time;
     tmp_time.lap_time = lap_time;
     path_time_total.push_back(tmp_time);
+    fast_mode = true;
 
     if (turn_type == TurnType::None) {
       break;
@@ -854,6 +864,9 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
     if (turn_type == TurnType::Finish) {
       break;
     }
+  }
+  if (path_time_total.size() == 0) {
+    return 100000;
   }
   return path_time_total.back().total_time;
 }

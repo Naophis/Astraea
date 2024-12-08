@@ -37,8 +37,8 @@ class Plot:
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
-                rad = 58.5
-                n = 4
+                rad = 55.5
+                n = 6
                 tgt_ang = 90.0
                 start_ang = 0
                 end_pos = {"x": 90, "y": 90}
@@ -55,20 +55,20 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             tgt_ang = 45.0
             start_ang = 0
-            n = 6
+            n = 4
 
             if hf_cl == 0:
-                rad = 48.0
+                rad = 50.0
+                # rad = 80.0
                 end_pos = {"x": 90, "y": 45}
 
         elif type == "dia135":
             start_ang = 0
             tgt_ang = 135.0
+            n = 4.0
 
             if hf_cl == 0:
-                # rad = 46.0
-                rad = 44.5
-                n = 4
+                rad = 37.50
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":

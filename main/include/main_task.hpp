@@ -113,7 +113,7 @@ private:
   param_set_t p_set;
 
   const TickType_t xDelay1000 = 1000.0 / portTICK_PERIOD_MS;
-  const TickType_t xDelay500 = 750.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay500 = 800.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay100 = 100.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay50 = 50.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay10 = 10.0 / portTICK_PERIOD_MS;
