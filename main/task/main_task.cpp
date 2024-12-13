@@ -1412,7 +1412,7 @@ void MainTask::load_slas(
     printf(" - %s\n", p.second.c_str());
     turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
-    printf(" - v: %f\n", turn_map[p.first].v);
+    printf("   - v: %f\n", turn_map[p.first].v);
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
     turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
@@ -1421,15 +1421,15 @@ void MainTask::load_slas(
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
     turn_map[p.first].time =
         getItem(getItem(root, p.second.c_str()), "time")->valuedouble;
-    printf("   - rad: %f\n", turn_map[p.first].rad);
-    printf("   - time: %f\n", turn_map[p.first].time);
+    printf("     - rad: %f\n", turn_map[p.first].rad);
+    printf("     - time: %f\n", turn_map[p.first].time);
     if (p.first == TurnType::Orval) {
       turn_map[p.first].rad2 =
           getItem(getItem(root, p.second.c_str()), "rad2")->valuedouble;
       turn_map[p.first].time2 =
           getItem(getItem(root, p.second.c_str()), "time2")->valuedouble;
-      printf("   - rad2: %f\n", turn_map[p.first].rad2);
-      printf("   - time2: %f\n", turn_map[p.first].time2);
+      printf("     - rad2: %f\n", turn_map[p.first].rad2);
+      printf("     - time2: %f\n", turn_map[p.first].time2);
     }
 
     turn_map[p.first].pow_n =
@@ -1447,9 +1447,9 @@ void MainTask::load_slas(
         getItem(getItem(getItem(root, p.second.c_str()), "back"), "left")
             ->valuedouble;
 
-    printf(" - front: [%0.2f, %0.2ff]\n", turn_map[p.first].front.left,
+    printf("     - front: [%0.2f, %0.2ff]\n", turn_map[p.first].front.left,
            turn_map[p.first].front.right);
-    printf(" - back: [%0.2f, %0.2ff]\n", turn_map[p.first].back.left,
+    printf("     - back: [%0.2f, %0.2ff]\n", turn_map[p.first].back.left,
            turn_map[p.first].back.right);
     turn_map[p.first].type = cast_turn_type(p.second);
   }
@@ -2249,14 +2249,25 @@ void MainTask::test_sla() {
   load_slalom_param(file_idx, file_idx, file_idx);
   sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
   auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
-  printf("slalom params\n");
-  printf("v = %f\n", sla_p.v);
-  printf("ang = %f\n", sla_p.ang * 180 / m_PI);
-  printf("radius =  %f\n", sla_p.rad);
-  printf("time =  %f\n", sla_p.time);
-  printf("n = %d\n", sla_p.pow_n);
-  printf("front = [%f, %f]\n", sla_p.front.left, sla_p.front.right);
-  printf("back = [%f, %f]\n", sla_p.back.left, sla_p.back.right);
+  printf("slalom params[0]:\n");
+  printf("  v: %f\n", sla_p.v);
+  printf("  ang: %f\n", sla_p.ang * 180 / m_PI);
+  printf("  rad: %f\n", sla_p.rad);
+  printf("  time:  %f\n", sla_p.time);
+  printf("  n: %d\n", sla_p.pow_n);
+  printf("  front: [%f, %f]\n", sla_p.front.left, sla_p.front.right);
+  printf("  back: [%f, %f]\n", sla_p.back.left, sla_p.back.right);
+
+
+  printf("slalom params[1]:\n");
+  printf("  v: %f\n", sla_p2.v);
+  printf("  ang: %f\n", sla_p2.ang * 180 / m_PI);
+  printf("  rad: %f\n", sla_p2.rad);
+  printf("  time:  %f\n", sla_p2.time);
+  printf("  n: %d\n", sla_p2.pow_n);
+  printf("  front: [%f, %f]\n", sla_p2.front.left, sla_p2.front.right);
+  printf("  back: [%f, %f]\n", sla_p2.back.left, sla_p2.back.right);
+
 
   rorl = ui->select_direction();
   rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
@@ -2368,6 +2379,7 @@ void MainTask::test_sla() {
     ps.accl = sys.test.dia_accl;
     ps.decel = sys.test.dia_decel;
   }
+  ps.motion_type = MotionType::BACK_STRAIGHT;
   mp->go_straight(ps);
 
   vTaskDelay(100.0 / portTICK_RATE_MS);

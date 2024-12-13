@@ -88,19 +88,21 @@ void SensingTask::timer_200us_callback_main() {
         // pt->kf_w.update2(se->ego.w_raw, w_enc);
       }
     }
-    se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
+
+    // se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
+    se->ego.w_kf = pt->kf_w.get_state();
   }
 }
 
 void SensingTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192 * 1, this, 2,
                           &handle, xCoreID);
-  const esp_timer_create_args_t timer_200us_args = {
-      .callback = &SensingTask::timer_200us_callback,
-      .arg = this,
-      .dispatch_method = ESP_TIMER_TASK,
-      .name = "timer_200us"};
-  esp_timer_create(&timer_200us_args, &timer_200us);
+  // const esp_timer_create_args_t timer_200us_args = {
+  //     .callback = &SensingTask::timer_200us_callback,
+  //     .arg = this,
+  //     .dispatch_method = ESP_TIMER_TASK,
+  //     .name = "timer_200us"};
+  // esp_timer_create(&timer_200us_args, &timer_200us);
 }
 void SensingTask::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param) {
@@ -140,7 +142,7 @@ void SensingTask::task() {
     gyro_if.setup();
     enc_if.init();
   }
-  esp_timer_start_periodic(timer_200us, 200);
+  // esp_timer_start_periodic(timer_200us, 200);
 
   const auto se = get_sensing_entity();
   // sensing init
@@ -416,6 +418,8 @@ void SensingTask::task() {
     auto enc_r_dt = dt;
     auto enc_l_dt = dt;
 
+    timer_200us_callback_main();
+
     calc_vel(gyro_dt, enc_l_dt, enc_r_dt);
 
     end = esp_timer_get_time();
@@ -449,8 +453,8 @@ void SensingTask::calc_vel(float gyro_dt, float enc_r_dt, float enc_l_dt) {
   const auto se = get_sensing_entity();
   const float tire = pt->suction_en ? param->tire2 : param->tire;
 
-  se->ego.v_l = pt->kf_v_l.get_state();
-  se->ego.v_r = pt->kf_v_r.get_state();
+  // se->ego.v_l = pt->kf_v_l.get_state();
+  // se->ego.v_r = pt->kf_v_r.get_state();
   se->ego.v_c = (se->ego.v_l + se->ego.v_r) / 2;
 
   se->ego.rpm.right = 30.0 * se->ego.v_r / (m_PI * tire / 2);

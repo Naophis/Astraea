@@ -76,23 +76,24 @@ if 'x' in data.columns and 'y' in data.columns:
     lw = 6
 
     # 走行経路に合わせて線の本数を増やす
-    for i in range(0, int(x_max), 90):
-        plt.plot([i, i], [90, y_min-90], color=(1, 0, 0, alpha), linewidth=lw)
-    for i in range(0, int(-y_min), 90):
-        plt.plot([0, x_max], [-i+45, -i+45],
-                 color=(1, 0, 0, alpha), linewidth=lw)
+    for i in range(0, int(x_max+90), 90):
+        if y_max < 45:
+            plt.plot([i, i], [45, y_min-45],
+                     color=(1, 0, 0, alpha), linewidth=lw)
+        else:
+            plt.plot([i, i], [45, y_max+45],
+                     color=(1, 0, 0, alpha), linewidth=lw)
 
-    # plt.plot([0, 540], [-45, -45], color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([0, 540], [45, 45],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([0, 540], [135, 135],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([0, 540], [-135, -135],  color=(1, 0, 0, alpha), linewidth=lw)
+            # plt.plot([i, i], [90, y_min-90], color=(1, 0, 0, alpha), linewidth=lw)
 
-    # plt.plot([90, 90], [135, -135],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([180, 180], [135, -135],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([270, 270], [135, -135],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([360, 360], [135, -135],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([450, 450], [135, -135],  color=(1, 0, 0, alpha), linewidth=lw)
-    # plt.plot([0, 0], [-135, 135],  color=(1, 0, 0, alpha), linewidth=lw)
+    for i in range(0, int(max(-y_min, y_max)), 90):
+        if y_max < 45:
+            plt.plot([0, x_max+90], [-i+45, -i+45],
+                     color=(1, 0, 0, alpha), linewidth=lw)
+        else:
+            plt.plot([0, x_max+90], [i+45, i+45],
+                     color=(1, 0, 0, alpha), linewidth=lw)
+
 
     plt.grid(True, color='gray', linestyle='--', linewidth=0.5)
 

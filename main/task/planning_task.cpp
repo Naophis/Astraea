@@ -739,58 +739,54 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
   float val_left = 1000;
   float val_right = 1000;
   //前壁が近すぎるときはエスケープ
-  if (!(10 < se->ego.left90_mid_dist &&
-        se->ego.left90_mid_dist < prm->sen_ref_p.normal.exist.front &&
-        10 < se->ego.right90_mid_dist &&
-        se->ego.right90_mid_dist < prm->sen_ref_p.normal.exist.front)) {
-    if (std::abs(se->ego.right45_dist - se->ego.right45_dist_old) <
-        prm->sen_ref_p.normal.ref.kireme_r) {
-      if ((1 < se->ego.right45_dist && se->ego.right45_dist < exist_right45)) {
-        if (ABS(tgt_val->global_pos.dist - right_keep.star_dist) >
-            prm->right_keep_dist_th) {
-          error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-          // left_keep.star_dist = right_keep.star_dist;
-          val_right = prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-          check++;
-        }
-      } else if (expand_right &&
-                 (1 < se->ego.right45_dist &&
-                  se->ego.right45_dist < exist_right45_expand)) {
-        if (ABS(tgt_val->global_pos.dist - right_keep.star_dist) >
-            prm->right_keep_dist_th) {
-          error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-          // left_keep.star_dist = right_keep.star_dist;
-          check++;
-          val_right = prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-        }
-      } else {
-        right_keep.star_dist = tgt_val->global_pos.dist;
+
+  bool range_check_right =
+      (1 < se->ego.right45_dist) && (se->ego.right45_dist < exist_right45);
+  bool range_check_left =
+      (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45);
+  bool range_check_right_expand = (1 < se->ego.right45_dist) &&
+                                  (se->ego.right45_dist < exist_right45_expand);
+  bool range_check_left_expand =
+      (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45_expand);
+  bool dist_check_right = ABS(tgt_val->global_pos.dist - right_keep.star_dist) >
+                          prm->right_keep_dist_th;
+  bool dist_check_left = ABS(tgt_val->global_pos.dist - left_keep.star_dist) >
+                         prm->left_keep_dist_th;
+  bool check_diff_right = ABS(se->ego.right45_dist - se->ego.right45_dist_old) <
+                          prm->sen_ref_p.normal.ref.kireme_r;
+  bool check_diff_left = ABS(se->ego.left45_dist - se->ego.left45_dist_old) <
+                         prm->sen_ref_p.normal.ref.kireme_l;
+  bool check_front_left =
+      (10 < se->ego.left90_mid_dist) &&
+      (se->ego.left90_mid_dist < prm->sen_ref_p.normal.exist.front);
+  bool check_front_right =
+      (10 < se->ego.right90_mid_dist) &&
+      (se->ego.right90_mid_dist < prm->sen_ref_p.normal.exist.front);
+
+  if (!(check_front_left && check_front_right)) {
+    if (range_check_right) {
+      if (dist_check_right && check_diff_right) {
+        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
       }
+      check++;
+    } else if (expand_right && range_check_right_expand) {
+      if (dist_check_right && check_diff_right) {
+        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+      }
+      check++;
     } else {
       right_keep.star_dist = tgt_val->global_pos.dist;
     }
-    if (std::abs(se->ego.left45_dist - se->ego.left45_dist_old) <
-        prm->sen_ref_p.normal.ref.kireme_l) {
-      if ((1 < se->ego.left45_dist && se->ego.left45_dist < exist_left45)) {
-        if (ABS(tgt_val->global_pos.dist - left_keep.star_dist) >
-            prm->left_keep_dist_th) {
-          error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-          // right_keep.star_dist = left_keep.star_dist;
-          check++;
-          val_left = prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-        }
-      } else if (expand_left && (1 < se->ego.left45_dist &&
-                                 se->ego.left45_dist < exist_left45_expand)) {
-        if (ABS(tgt_val->global_pos.dist - left_keep.star_dist) >
-            param_ro->left_keep_dist_th) {
-          error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-          // right_keep.star_dist = left_keep.star_dist;
-          check++;
-          val_left = prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-        }
-      } else {
-        left_keep.star_dist = tgt_val->global_pos.dist;
+    if (range_check_left) {
+      if (dist_check_left && check_diff_left) {
+        error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
       }
+      check++;
+    } else if (expand_left && range_check_left_expand) {
+      if (dist_check_left && check_diff_left) {
+        error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+      }
+      check++;
     } else {
       left_keep.star_dist = tgt_val->global_pos.dist;
     }
@@ -800,18 +796,13 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
     error_entity.sen_log.gain_zz = 0;
     error_entity.sen_log.gain_z = 0;
 
-    if (!(10 < se->ego.left90_mid_dist &&
-          se->ego.left90_mid_dist < prm->sen_ref_p.normal.exist.front &&
-          10 < se->ego.right90_mid_dist &&
-          se->ego.right90_mid_dist < prm->sen_ref_p.normal.exist.front)) {
+    if (!(check_front_left && check_front_right)) {
       if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
           se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l) {
         if ((1 < se->sen.r45.sensor_dist &&
              se->sen.r45.sensor_dist < exist_right45_2)) {
           error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
           check++;
-          val_right =
-              prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
         }
       }
       if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
@@ -820,8 +811,6 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
              se->sen.l45.sensor_dist < exist_left45_2)) {
           error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
           check++;
-          val_left =
-              prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
         }
       }
       error *= prm->sen_ref_p.normal2.exist.front;
@@ -1017,8 +1006,10 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   //   se->ego.w_kf = kf_w.get_state();
   // }
   if (std::isfinite(tgt_val->ego_in.accl) && std::isfinite(se->ego.v_c)) {
+    auto tmp_v_l = kf_v_l.get_state();
+    auto tmp_v_r = kf_v_r.get_state();
     kf_v.predict(tgt_val->ego_in.accl);
-    kf_v.update(se->ego.v_c);
+    kf_v.update((tmp_v_l + tmp_v_r) / 2);
     se->ego.v_kf = kf_v.get_state();
     // printf("kf_v: %f\n", se->ego.v_kf);
     // kf_v.print_state();
