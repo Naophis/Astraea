@@ -250,7 +250,11 @@ void LSM6DSR::setup() {
   // ジャイロの設定
   // write1byte(LSM6DSRX_CTRL2_G, 0xA1);
   write1byte(0x15, 0x0c);
+
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(0x11, 0x0c);
+
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   auto ctrl1 = read1byte(LSM6DSRX_CTRL1_XL);
   auto ctrl2 = read1byte(LSM6DSRX_CTRL2_G);
   auto ctrl3 = read1byte(LSM6DSRX_CTRL3_C);
