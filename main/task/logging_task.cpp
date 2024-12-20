@@ -70,6 +70,7 @@ void LoggingTask::task() {
   const TickType_t xDelay1 = 1.0 / portTICK_PERIOD_MS;
   BaseType_t queue_recieved;
   logging_active = false;
+  bool first = true;
   // 1,4MByteぐらいまで行ける
   // for (int i = 0; i < 26000; i++) {
   //   log_data_t2 *structPtr =
@@ -93,8 +94,14 @@ void LoggingTask::task() {
     if (log_mode) {
       if (logging_active) {
         if (idx_slalom_log <= param->log_size) {
-          // auto ld = std::make_shared<log_data_t2>();
-          set_data();
+          if (idx_slalom_log < 10 &&
+              (ABS(error_entity->s_val.p) > 5 ||
+               sensing_result->sen.r45.sensor_dist > 179 ||
+               sensing_result->sen.l45.sensor_dist > 179)) {
+            first = false;
+          } else {
+            set_data();
+          }
         }
         if (param->set_param) {
           vTaskDelay(param->logging_time);
@@ -340,19 +347,19 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
            halfToFloat(ld->g_pid_i2),          //
            halfToFloat(ld->g_pid_d));          //
 
-    printf(f6,                                 //
-           halfToFloat(ld->g_pid_p_v) * 1000,  //
-           halfToFloat(ld->g_pid_i_v) * 1000,  //
-           halfToFloat(ld->g_pid_i2_v) * 1000, //
-           halfToFloat(ld->g_pid_d_v) * 1000,  //
-           halfToFloat(ld->s_pid_p),           //
-           halfToFloat(ld->s_pid_i),           //
-           halfToFloat(ld->s_pid_i2),          //
-           halfToFloat(ld->s_pid_d),           //
-           halfToFloat(ld->s_pid_p_v) * 1000,  //
-           halfToFloat(ld->s_pid_i_v) * 1000,  //
-           halfToFloat(ld->s_pid_i2_v) * 1000, //
-           halfToFloat(ld->s_pid_d_v) * 1000); //
+    printf(f6,                                   //
+           halfToFloat(ld->g_pid_p_v) * 1000,    //
+           halfToFloat(ld->g_pid_i_v) * 1000,    //
+           halfToFloat(ld->g_pid_i2_v) * 1000,   //
+           halfToFloat(ld->g_pid_d_v) * 1000,    //
+           halfToFloat(ld->s_pid_p),             //
+           halfToFloat(ld->s_pid_i),             //
+           halfToFloat(ld->s_pid_i2),            //
+           halfToFloat(ld->s_pid_d),             //
+           halfToFloat(ld->s_pid_p_v) * 10000,   //
+           halfToFloat(ld->s_pid_i_v) * 100000,  //
+           halfToFloat(ld->s_pid_i2_v) * 100000, //
+           halfToFloat(ld->s_pid_d_v) * 100000); //
 
     printf(f7,                             //
            halfToFloat(ld->ff_duty_front), //
@@ -454,7 +461,7 @@ void IRAM_ATTR LoggingTask::set_data() {
 
   ld->motion_type = static_cast<int>(tgt_val->motion_type);
 
-  ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen);
+  ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen * 1000);
 
   ld->sen_log_l45 = floatToHalf(sensing_result->sen.l45.sensor_dist);
   ld->sen_log_r45 = floatToHalf(sensing_result->sen.r45.sensor_dist);

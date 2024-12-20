@@ -247,6 +247,8 @@ typedef struct {
   float front;
   float kireme_r;
   float kireme_l;
+  float kireme_r_fast;
+  float kireme_l_fast;
 } sen_ref_param3_t;
 
 typedef struct {
@@ -273,6 +275,7 @@ typedef struct {
 
 typedef struct {
   sen_ref_param3_t ref;
+  sen_ref_param3_t ref_search;
   sen_ref_param3_t exist;
   sen_expand_param_t expand;
 } sen_ref_param2_t;
@@ -433,7 +436,7 @@ typedef struct {
   pid_param_t str_ang_pid;
   pid_param_t str_ang_dia_pid;
   pid_param_t angle_pid;
-  pid_param_t sensor_pid;
+  // pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;
   gyro_param_t gyro_param;
   accel_param_t accel_x_param;
@@ -537,7 +540,7 @@ typedef struct {
   float pivot_back_enable_front_th = 100;
   float search_front_ctrl_th = 60;
   float judge_pivot = 110;
-  float sensor_range_min = 20;
+  float sensor_range_min = 5;
   float sensor_range_max = 180;
   float sensor_range_mid_max = 150;
   float sensor_range_far_max = 150;
@@ -567,6 +570,8 @@ typedef struct {
   float normal_sla_l_wall_off_margin = 10;
   float normal_sla_r_wall_off_margin = 10;
   char torque_mode = 0;
+  char enable_kalman_gyro = 0;
+  char enable_kalman_encoder = 0;
 } input_param_t;
 
 typedef struct {
@@ -1038,7 +1043,6 @@ typedef struct {
   // real16_T kalman_w;
   // real16_T kalman_v_r;
   // real16_T kalman_v_l;
-
 
 } log_data_t2;
 

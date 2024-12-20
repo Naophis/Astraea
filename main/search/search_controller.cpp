@@ -534,9 +534,10 @@ MotionResult SearchController::finish(param_set_t &p_set) {
 SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
   unsigned long long start_time = pt->global_msec_timer;
   unsigned long long end_time = pt->global_msec_timer;
-  pt->search_mode = true;
+
   adachi->lgc->reset_dist_map();
   mp->reset_gyro_ref_with_check();
+  pt->search_mode = true;
   if (param->search_log_enable > 0)
     lt->start_slalom_log();
   reset();

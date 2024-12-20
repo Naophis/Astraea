@@ -27,7 +27,7 @@ data = read_yaml("../param_tuner/profile/hardware.yaml")
 p = Plot()
 po = PlotOrval()
 
-v =  300
+v =  1750
 dia45_mode = 0
 
 hf_cl = 0
@@ -49,11 +49,11 @@ offset = {
     "after_dia": 7,  # not use
 }
 
-p.exe("normal", v, show, 0, K, list_K_y, offset, hf_cl)
+# p.exe("normal", v, show, 0, K, list_K_y, offset, hf_cl)
 # p.exe("large", v, show, 0, K, list_K_y, offset, hf_cl)
 # p.exe("dia45",v, show, dia45_mode, K, list_K_y, offset, hf_cl)
 # p.exe("dia45_2", v, show, 0, K, list_K_y, offset, hf_cl)
-# p.exe("dia135",v, show, 0,  K, list_K_y, offset, hf_cl)
+p.exe("dia135",v, show, 0,  K, list_K_y, offset, hf_cl)
 # p.exe("dia135_2", v, show, 0,  K, list_K_y, offset, hf_cl)
 # p.exe("dia90", v, show, 0, K, list_K_y, offset, hf_cl)
 

@@ -400,6 +400,10 @@ void MainTask::load_hw_param() {
 
   param->torque_mode = getItem(root, "torque_mode")->valueint;
 
+  param->enable_kalman_gyro = getItem(root, "enable_kalman_gyro")->valueint;
+  param->enable_kalman_encoder =
+      getItem(root, "enable_kalman_encoder")->valueint;
+
   param->normal_sla_l_wall_off_th_in =
       getItem(root, "normal_sla_l_wall_off_th_in")->valueint;
   param->normal_sla_r_wall_off_th_in =
@@ -586,12 +590,12 @@ void MainTask::load_hw_param() {
   param->motor_pid3.c = getItem(motor_pid3, "c")->valuedouble;
   param->motor_pid3.mode = getItem(motor_pid3, "mode")->valueint;
 
-  sen_pid = getItem(root, "sensor_pid");
-  param->sensor_pid.p = getItem(sen_pid, "p")->valuedouble;
-  param->sensor_pid.i = getItem(sen_pid, "i")->valuedouble;
-  param->sensor_pid.d = getItem(sen_pid, "d")->valuedouble;
-  param->sensor_pid.b = getItem(sen_pid, "b")->valuedouble;
-  param->sensor_pid.mode = getItem(sen_pid, "mode")->valueint;
+  // sen_pid = getItem(root, "sensor_pid");
+  // param->sensor_pid.p = getItem(sen_pid, "p")->valuedouble;
+  // param->sensor_pid.i = getItem(sen_pid, "i")->valuedouble;
+  // param->sensor_pid.d = getItem(sen_pid, "d")->valuedouble;
+  // param->sensor_pid.b = getItem(sen_pid, "b")->valuedouble;
+  // param->sensor_pid.mode = getItem(sen_pid, "mode")->valueint;
 
   sen_pid_dia = getItem(root, "sensor_pid_dia");
   param->sensor_pid_dia.p = getItem(sen_pid_dia, "p")->valuedouble;
@@ -964,10 +968,10 @@ void MainTask::load_sensor_param() {
       getItem(normal_expand, "right45")->valuedouble;
   param->sen_ref_p.normal.expand.left45 =
       getItem(normal_expand, "left45")->valuedouble;
-  param->sen_ref_p.normal.expand.right45_2 =
-      getItem(normal_expand, "right45_2")->valuedouble;
-  param->sen_ref_p.normal.expand.left45_2 =
-      getItem(normal_expand, "left45_2")->valuedouble;
+  // param->sen_ref_p.normal.expand.right45_2 =
+  //     getItem(normal_expand, "right45_2")->valuedouble;
+  // param->sen_ref_p.normal.expand.left45_2 =
+  //     getItem(normal_expand, "left45_2")->valuedouble;
   param->sen_ref_p.normal.expand.dist =
       getItem(normal_expand, "dist")->valuedouble;
 
@@ -979,6 +983,10 @@ void MainTask::load_sensor_param() {
       getItem(normal_ref, "kireme_r")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_l =
       getItem(normal_ref, "kireme_l")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_r_fast =
+      getItem(normal_ref, "kireme_r_fast")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_l_fast =
+      getItem(normal_ref, "kireme_l_fast")->valuedouble;
 
   param->sen_ref_p.normal.exist.right45 =
       getItem(normal_exist, "right45")->valuedouble;
@@ -2258,7 +2266,6 @@ void MainTask::test_sla() {
   printf("  front: [%f, %f]\n", sla_p.front.left, sla_p.front.right);
   printf("  back: [%f, %f]\n", sla_p.back.left, sla_p.back.right);
 
-
   printf("slalom params[1]:\n");
   printf("  v: %f\n", sla_p2.v);
   printf("  ang: %f\n", sla_p2.ang * 180 / m_PI);
@@ -2267,7 +2274,6 @@ void MainTask::test_sla() {
   printf("  n: %d\n", sla_p2.pow_n);
   printf("  front: [%f, %f]\n", sla_p2.front.left, sla_p2.front.right);
   printf("  back: [%f, %f]\n", sla_p2.back.left, sla_p2.back.right);
-
 
   rorl = ui->select_direction();
   rorl2 = (rorl == TurnDirection::Right) ? (TurnDirection::Left)
@@ -3094,6 +3100,7 @@ void MainTask::path_run(int idx, int idx2, int idx3) {
 
   mp->exec_path_running(param_set);
 
+  pc->print_path();
   param->sen_ref_p.normal.exist.left45 = backup_l45;
   param->sen_ref_p.normal.exist.right45 = backup_r45;
 

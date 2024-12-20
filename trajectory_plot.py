@@ -66,6 +66,11 @@ if 'x' in data.columns and 'y' in data.columns:
     y_min = min(data['y'])
     y_max = max(data['y'])
 
+    x_min_abs = min(abs(data['x']))
+    x_max_abs = max(abs(data['x']))
+    y_min_abs = min(abs(data['y']))
+    y_max_abs = max(abs(data['y']))
+
     gs = 45
     plt.xticks(np.arange(np.floor(x_min / gs) * gs,
                np.ceil(x_max / gs) * gs + 1, gs), color='white')
@@ -77,7 +82,7 @@ if 'x' in data.columns and 'y' in data.columns:
 
     # 走行経路に合わせて線の本数を増やす
     for i in range(0, int(x_max+90), 90):
-        if y_max < 45:
+        if y_max_abs > 100 and y_min < 0:
             plt.plot([i, i], [45, y_min-45],
                      color=(1, 0, 0, alpha), linewidth=lw)
         else:
@@ -86,14 +91,13 @@ if 'x' in data.columns and 'y' in data.columns:
 
             # plt.plot([i, i], [90, y_min-90], color=(1, 0, 0, alpha), linewidth=lw)
 
-    for i in range(0, int(max(-y_min, y_max)), 90):
-        if y_max < 45:
+    for i in range(0, int(max(-y_min, y_max)+90), 90):
+        if y_max_abs > 100 and y_min < 0:
             plt.plot([0, x_max+90], [-i+45, -i+45],
                      color=(1, 0, 0, alpha), linewidth=lw)
         else:
             plt.plot([0, x_max+90], [i+45, i+45],
                      color=(1, 0, 0, alpha), linewidth=lw)
-
 
     plt.grid(True, color='gray', linestyle='--', linewidth=0.5)
 

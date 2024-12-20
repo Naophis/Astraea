@@ -239,7 +239,7 @@ void LSM6DSR::setup() {
   // write1byte(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
   // 加速度計のスケールを±8gに設定
   // 加速度計の出力データレートを416Hzに設定
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  // vTaskDelay(10.0 / portTICK_PERIOD_MS);
   // write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
   // vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
@@ -249,17 +249,27 @@ void LSM6DSR::setup() {
   // vTaskDelay(10.0 / portTICK_PERIOD_MS);
   // ジャイロの設定
   // write1byte(LSM6DSRX_CTRL2_G, 0xA1);
-  write1byte(0x15, 0x0c);
 
+  write1byte(0x15, 0x0c);  //4000deg/s,  LPF 279hz
+  // write1byte(0x15, 0x1c);  //4000deg/s,  LPF 212hz
+  // write1byte(0x15, 0x2c);  //4000deg/s,  LPF 156hz
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  write1byte(0x11, 0x0c);
 
+  write1byte(0x11, 0x0c); // 7.68kHz
+  // write1byte(0x11, 0x0b); // 3.84kHz
+  // write1byte(0x11, 0x0a); // 1.92kHz
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
+
   auto ctrl1 = read1byte(LSM6DSRX_CTRL1_XL);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   auto ctrl2 = read1byte(LSM6DSRX_CTRL2_G);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   auto ctrl3 = read1byte(LSM6DSRX_CTRL3_C);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   auto ctrl4 = read1byte(LSM6DSRX_CTRL4_C);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   auto ctrl9 = read1byte(LSM6DSRX_CTRL9_XL);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
   // ジャイロのスケールを±4000deg/sに設定
   // ジャイロの出力データレートを6.66Hzに設定

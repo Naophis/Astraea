@@ -187,9 +187,12 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
         break;
       }
     }
+
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      if (p.motion_type == MotionType::SLA_FRONT_STR ||
-          p.motion_type == MotionType::SLA_BACK_STR) {
+      if (p.motion_type == MotionType::STRAIGHT &&
+          p.wall_ctrl_mode == WallCtrlMode::LEFT_ONLY && p.dist < 90) {
+      } else if (p.motion_type == MotionType::SLA_FRONT_STR ||
+                 p.motion_type == MotionType::SLA_BACK_STR) {
       } else {
         param->sen_ref_p.normal.exist.left45 = left;
         param->sen_ref_p.normal.exist.right45 = right;
@@ -199,10 +202,10 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
         tgt_val->nmr.accl = 1000;
         tgt_val->nmr.decel = p.decel;
         tgt_val->nmr.dist = 10;
-        tgt_val->nmr.timstamp++;
+        tgt_val->nmr.timstamp += 10;
 
         xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
-        vTaskDelay(100.0 / portTICK_RATE_MS);
+        vTaskDelay(1.0 / portTICK_RATE_MS);
 
         return MotionResult::ERROR;
       }
@@ -1017,7 +1020,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
 
   if (p_set.suction) {
     pt->suction_enable(p_set.suction_duty, p_set.suction_duty_low);
-    vTaskDelay(750.0 / portTICK_PERIOD_MS);
+    vTaskDelay(800.0 / portTICK_PERIOD_MS);
   }
   if (param->fast_log_enable > 0) {
     tgt_val->global_pos.ang = 0;
@@ -1066,13 +1069,13 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
         tgt_val->global_pos.ang = 0;
         if (dist == 0) { // 初手ターンの場合は距離合成して加速区間を増やす
           if (fast_mode) {
-            dist = (turn_dir == TurnDirection::Left)
-                       ? p_set.map[turn_type].front.left
-                       : p_set.map[turn_type].front.right;
+            ps.dist = (turn_dir == TurnDirection::Left)
+                          ? p_set.map[turn_type].front.left
+                          : p_set.map[turn_type].front.right;
           } else {
-            dist = (turn_dir == TurnDirection::Left)
-                       ? p_set.map_slow[turn_type].front.left
-                       : p_set.map_slow[turn_type].front.right;
+            ps.dist = (turn_dir == TurnDirection::Left)
+                          ? p_set.map_slow[turn_type].front.left
+                          : p_set.map_slow[turn_type].front.right;
           }
           start_turn = true;
         }
@@ -1095,14 +1098,15 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       ps.sct = !dia ? SensorCtrlType::Straight : SensorCtrlType::Dia;
       ps.dist += carry_over_dist;
 
-      if (i == 0 && start_turn) {
-        if (turn_dir == TurnDirection::Left) {
-          ps.dist = param->offset_start_dist + p_set.map[turn_type].front.left;
-        } else {
-          ps.dist = param->offset_start_dist + p_set.map[turn_type].front.right;
-        }
-      }
+      // if (i == 0 && start_turn) {
+      //   if (turn_dir == TurnDirection::Left) {
+      //     ps.dist = param->offset_start_dist + p_set.map[turn_type].front.left;
+      //   } else {
+      //     ps.dist = param->offset_start_dist + p_set.map[turn_type].front.right;
+      //   }
+      // }
 
+      // printf("%f %f %f %f\n", ps.dist, ps.v_max, ps.v_end, ps.accl);
       auto res = go_straight(ps);
       carry_over_dist = 0;
       if (res == MotionResult::ERROR) {

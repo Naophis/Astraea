@@ -734,8 +734,8 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
   auto exist_right45_expand = wall_th;
   auto exist_left45_expand = wall_th;
 
-  auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
-  auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
+  // auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
+  // auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
   float val_left = 1000;
   float val_right = 1000;
   //前壁が近すぎるときはエスケープ
@@ -756,6 +756,13 @@ float IRAM_ATTR PlanningTask::check_sen_error() {
                           prm->sen_ref_p.normal.ref.kireme_r;
   bool check_diff_left = ABS(se->ego.left45_dist - se->ego.left45_dist_old) <
                          prm->sen_ref_p.normal.ref.kireme_l;
+  if (!search_mode) {
+    check_diff_right = ABS(se->ego.right45_dist - se->ego.right45_dist_old) <
+                       prm->sen_ref_p.normal.ref.kireme_r_fast;
+    check_diff_left = ABS(se->ego.left45_dist - se->ego.left45_dist_old) <
+                      prm->sen_ref_p.normal.ref.kireme_l_fast;
+  }
+
   bool check_front_left =
       (10 < se->ego.left90_mid_dist) &&
       (se->ego.left90_mid_dist < prm->sen_ref_p.normal.exist.front);
@@ -1028,7 +1035,8 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     // se->ego.ang_kf = fmod(angle + M_PI, 2 * M_PI) - M_PI;
   }
 
-  if (tgt_val->motion_type != MotionType::NONE) {
+  if (!(tgt_val->motion_type == MotionType::NONE ||
+        tgt_val->motion_type == MotionType::FRONT_CTRL)) {
     if (std::isfinite(se->ego.v_kf) && std::isfinite(se->ego.ang_kf)) {
       pos.ang += se->ego.w_kf * dt;
       pos.ang = fmod(pos.ang + M_PI, 2 * M_PI) - M_PI;
