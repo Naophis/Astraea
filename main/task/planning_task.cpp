@@ -1355,18 +1355,10 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
 
   if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
     duty_sen = calc_sensor_pid();
-    // if (search_mode) {
-    // } else {
-    //   sen_ang = calc_sensor_pid();
-    // }
     error_entity.sen_dia.error_i = 0;
     error_entity.sen_log_dia.gain_zz = 0;
     error_entity.sen_log_dia.gain_z = 0;
   } else if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
-    // if (param_ro->angle_pid.c == 0) {
-    //   duty_sen = calc_sensor_pid_dia();
-    // } else {
-    // }
     sen_ang = calc_sensor_pid_dia();
     error_entity.sen.error_i = 0;
     error_entity.sen_log.gain_zz = 0;
@@ -1412,13 +1404,6 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_kf;
   }
 
-  // tgt_val->global_pos.img_ang += mpc_next_ego.w;
-  // tgt_val->global_pos.img_dist += mpc_next_ego.v;
-
-  // error_entity.dist.error_p = tgt_val->ego_in.img_dist -
-  // tgt_val->ego_in.dist; error_entity.ang.error_p = tgt_val->ego_in.img_ang
-  // - tgt_val->ego_in.ang;
-
   error_entity.dist.error_p =
       tgt_val->global_pos.img_dist - tgt_val->global_pos.dist;
   if (error_entity.dist.error_p > param_ro->front_ctrl_error_th) {
@@ -1436,8 +1421,6 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     error_entity.v_r.error_i = error_entity.v_r.error_d = 0;
     error_entity.v_l.error_i = error_entity.v_l.error_d = 0;
 
-    // error_entity.v.error_i = 0;
-    // error_entity.w.error_i = 0;
     if (sensing_result->ego.front_dist < param_ro->cell) {
       error_entity.dist.error_p = sensing_result->ego.front_dist -
                                   param_ro->sen_ref_p.search_exist.front_ctrl;
@@ -1445,36 +1428,11 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
           (sensing_result->ego.right90_dist - sensing_result->ego.left90_dist) /
               2 -
           param_ro->sen_ref_p.search_exist.kireme_r;
-
-      // if (error_entity.dist.error_p > param_ro->sensor_gain.front_ctrl_th.a)
-      // {
-      //   error_entity.dist.error_p = param_ro->sensor_gain.front_ctrl_th.a;
-      // } else if (error_entity.dist.error_p <
-      //            -param_ro->sensor_gain.front_ctrl_th.a) {
-      //   error_entity.dist.error_p = -param_ro->sensor_gain.front_ctrl_th.a;
-      // }
-
-      // if (error_entity.ang.error_p > param_ro->sensor_gain.front_ctrl_th.b) {
-      //   error_entity.ang.error_p = param_ro->sensor_gain.front_ctrl_th.b;
-      // } else if (error_entity.ang.error_p <
-      //            -param_ro->sensor_gain.front_ctrl_th.b) {
-      //   error_entity.ang.error_p = -param_ro->sensor_gain.front_ctrl_th.b;
-      // }
-      // error_entity.v.error_p = sensing_result->ego.front_dist - 45;
-      // error_entity.w.error_p =
-      //     (sensing_result->ego.right90_dist -
-      //     sensing_result->ego.left90_dist) / 2;
     } else {
       error_entity.dist.error_p = error_entity.dist.error_i =
           error_entity.dist.error_d = 0;
       error_entity.ang.error_p = error_entity.ang.error_i =
           error_entity.ang.error_d = 0;
-      // error_entity.v.error_p = error_entity.v.error_i =
-      // error_entity.v.error_d =
-      //     0;
-      // error_entity.w.error_p = error_entity.w.error_i =
-      // error_entity.w.error_d =
-      //     0;
     }
   }
 
@@ -1516,14 +1474,8 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
   tgt_val->v_error = error_entity.v.error_i;
   tgt_val->w_error = error_entity.w.error_i;
 
-  // float duty_rpm_r = get_rpm_ff_val(TurnDirection::Right);
-  // float duty_rpm_l = get_rpm_ff_val(TurnDirection::Left);
-  // float duty_rpm_r = get_feadforward_front(TurnDirection::Right);
-  // float duty_rpm_l = get_feadforward_front(TurnDirection::Left);
   float duty_ff_front = 0;
   float duty_ff_roll = 0;
-  // duty_ff_front = get_feadforward_front();
-  // duty_ff_roll = get_feadforward_roll();
 
   duty_c = 0;
   duty_c2 = 0;
@@ -1545,21 +1497,6 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     error_entity.sen_dia.error_i = error_entity.sen_dia.error_d = 0;
     error_entity.sen_log_dia.gain_zz = error_entity.sen_log_dia.gain_z = 0;
   }
-
-  // if (param_ro->motor_pid.mode == 1) {
-  //   duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
-  //            param_ro->motor_pid.i * error_entity.v.error_i +
-  //            param_ro->motor_pid.d * error_entity.v.error_d +
-  //            (error_entity.v_log.gain_z - error_entity.v_log.gain_zz) * dt;
-  //   error_entity.v_log.gain_zz = error_entity.v_log.gain_z;
-  //   error_entity.v_log.gain_z = duty_c;
-  // } else {
-  //   duty_c = param_ro->motor_pid.p * error_entity.v.error_p +
-  //            param_ro->motor_pid.i * error_entity.v.error_i +
-  //            param_ro->motor_pid.d * error_entity.v.error_d;
-  //   error_entity.v_log.gain_zz = 0;
-  //   error_entity.v_log.gain_z = 0;
-  // }
   const unsigned char reset_req = motor_en ? 1 : 0;
   const unsigned char reset = 0;
   const unsigned char enable = 1;
