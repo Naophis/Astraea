@@ -1552,82 +1552,7 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
       error_entity.w.error_i = error_entity.w.error_d = 0;
       error_entity.w_log.gain_z = error_entity.w_log.gain_zz = 0;
     }
-    if (param_ro->gyro_pid.mode == 3) {
-      if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
-        duty_roll =
-            param_ro->str_ang_dia_pid.p * error_entity.ang.error_p -
-            param_ro->str_ang_dia_pid.d * sensing_result->ego.w_lp +
-            (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
-        error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
-        error_entity.ang_log.gain_z = duty_roll;
-
-        set_ctrl_val(error_entity.w_val, error_entity.ang.error_p, 0, 0,
-                     sensing_result->ego.w_lp,
-                     param_ro->gyro_pid.p * error_entity.w.error_p, 0, 0,
-                     param_ro->str_ang_dia_pid.d * sensing_result->ego.w_lp, 0,
-                     0);
-
-      } else {
-        if (tgt_val->motion_type == MotionType::NONE) {
-          duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
-                      param_ro->gyro_pid.b * error_entity.w.error_i +
-                      param_ro->gyro_pid.c * error_entity.w.error_d;
-          // (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
-          error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
-          error_entity.ang_log.gain_z = duty_roll;
-
-          set_ctrl_val(error_entity.w_val, error_entity.w.error_p,
-                       error_entity.w.error_i, 0, error_entity.w.error_d,
-                       param_ro->gyro_pid.p * error_entity.w.error_p,
-                       param_ro->gyro_pid.b * error_entity.w.error_i,
-                       param_ro->gyro_pid.b * 0,
-                       param_ro->gyro_pid.c * error_entity.w.error_d,
-                       error_entity.ang_log.gain_zz,
-                       error_entity.ang_log.gain_z);
-
-        } else {
-          // mode3 main
-          auto diff_ang =
-              (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-          auto ang_sum = error_entity.ang.error_i;
-          if (tgt_val->motion_type == MotionType::SLALOM) {
-            diff_ang = 0;
-            ang_sum = 0;
-          }
-          if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-                tgt_val->motion_type == MotionType::SLA_BACK_STR ||
-                tgt_val->motion_type == MotionType::PIVOT)) {
-            diff_ang = 0;
-            ang_sum = 0;
-          }
-          auto kp_gain = param_ro->gyro_pid.p * error_entity.w.error_p;
-          auto ki_gain = param_ro->gyro_pid.i * diff_ang;
-          auto kb_gain = param_ro->gyro_pid.b * error_entity.w.error_i;
-          auto kc_gain = param_ro->gyro_pid.c * ang_sum;
-          auto kd_gain = param_ro->gyro_pid.d * error_entity.w_kf.error_d;
-          limitter(kp_gain, ki_gain, kb_gain, kd_gain,
-                   param_ro->gyro_pid_gain_limitter);
-          duty_roll =
-              kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
-              (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
-
-          error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
-          error_entity.ang_log.gain_z = duty_roll;
-
-          set_ctrl_val(error_entity.w_val,
-                       error_entity.w.error_p,                        // p
-                       diff_ang,                                      // i
-                       error_entity.w.error_i,                        // i2
-                       error_entity.w_kf.error_d,                     // d
-                       param_ro->gyro_pid.p * error_entity.w.error_p, // kp*p
-                       param_ro->gyro_pid.i * diff_ang,               // ki*i
-                       param_ro->gyro_pid.b * error_entity.w.error_i, // kb*i2
-                       param_ro->gyro_pid.d * error_entity.w_kf.error_d, // kd*d
-                       error_entity.ang_log.gain_zz,
-                       error_entity.ang_log.gain_z);
-        }
-      }
-    }
+    calc_angle_velocity_ctrl(duty_roll);
   }
   last_accl = tgt_val->ego_in.accl;
   sensing_result->ego.duty.sen = duty_roll;
@@ -1753,48 +1678,7 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
   }
 
   // Duty limitter
-  if (tgt_val->motion_type == MotionType::STRAIGHT ||
-      tgt_val->motion_type == MotionType::SLALOM ||
-      tgt_val->motion_type == MotionType::SLA_BACK_STR ||
-      tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-      tgt_val->motion_type == MotionType::PIVOT) {
-    const auto min_duty = param_ro->min_duty;
-
-    if (0 <= tgt_duty.duty_r && tgt_duty.duty_r < min_duty) {
-      tgt_duty.duty_r = min_duty;
-    } else if (-min_duty < tgt_duty.duty_r && tgt_duty.duty_r <= 0) {
-      tgt_duty.duty_r = -min_duty;
-    }
-    if (0 <= tgt_duty.duty_l && tgt_duty.duty_l < min_duty) {
-      tgt_duty.duty_l = min_duty;
-    } else if (-min_duty < tgt_duty.duty_l && tgt_duty.duty_l <= 0) {
-      tgt_duty.duty_l = -min_duty;
-    }
-  } else if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
-    const auto max_duty = param_ro->sen_ref_p.search_exist.offset_l;
-    if (tgt_duty.duty_r > max_duty) {
-      tgt_duty.duty_r = max_duty;
-    } else if (tgt_duty.duty_r < -max_duty) {
-      tgt_duty.duty_r = -max_duty;
-    }
-    if (tgt_duty.duty_l > max_duty) {
-      tgt_duty.duty_l = max_duty;
-    } else if (tgt_duty.duty_l < -max_duty) {
-      tgt_duty.duty_l = -max_duty;
-    }
-  } else {
-    const auto max_duty = param_ro->max_duty;
-    if (tgt_duty.duty_r > max_duty) {
-      tgt_duty.duty_r = max_duty;
-    } else if (tgt_duty.duty_r < -max_duty) {
-      tgt_duty.duty_r = -max_duty;
-    }
-    if (tgt_duty.duty_l > max_duty) {
-      tgt_duty.duty_l = max_duty;
-    } else if (tgt_duty.duty_l < -max_duty) {
-      tgt_duty.duty_l = -max_duty;
-    }
-  }
+  apply_duty_limitter();
 
   if (tgt_val->motion_type == MotionType::NONE) {
     tgt_duty.duty_l = tgt_duty.duty_r = 0;
@@ -2324,5 +2208,122 @@ void IRAM_ATTR PlanningTask::calc_front_ctrl_duty(float &duty_c,
                  param_ro->angle_pid.d * error_entity.w_kf.error_p;
     error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
     error_entity.ang_log.gain_z = duty_roll2;
+  }
+}
+void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl(float &duty_roll) {
+  if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
+    duty_roll =
+        param_ro->str_ang_dia_pid.p * error_entity.ang.error_p -
+        param_ro->str_ang_dia_pid.d * sensing_result->ego.w_lp +
+        (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+    error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
+    error_entity.ang_log.gain_z = duty_roll;
+
+    set_ctrl_val(error_entity.w_val, error_entity.ang.error_p, 0, 0,
+                 sensing_result->ego.w_lp,
+                 param_ro->gyro_pid.p * error_entity.w.error_p, 0, 0,
+                 param_ro->str_ang_dia_pid.d * sensing_result->ego.w_lp, 0, 0);
+
+  } else {
+    if (tgt_val->motion_type == MotionType::NONE) {
+      duty_roll = param_ro->gyro_pid.p * error_entity.w.error_p +
+                  param_ro->gyro_pid.b * error_entity.w.error_i +
+                  param_ro->gyro_pid.c * error_entity.w.error_d;
+      // (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+      error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
+      error_entity.ang_log.gain_z = duty_roll;
+
+      set_ctrl_val(error_entity.w_val, error_entity.w.error_p,
+                   error_entity.w.error_i, 0, error_entity.w.error_d,
+                   param_ro->gyro_pid.p * error_entity.w.error_p,
+                   param_ro->gyro_pid.b * error_entity.w.error_i,
+                   param_ro->gyro_pid.b * 0,
+                   param_ro->gyro_pid.c * error_entity.w.error_d,
+                   error_entity.ang_log.gain_zz, error_entity.ang_log.gain_z);
+
+    } else {
+      // mode3 main
+      auto diff_ang = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
+      auto ang_sum = error_entity.ang.error_i;
+      if (tgt_val->motion_type == MotionType::SLALOM) {
+        diff_ang = 0;
+        ang_sum = 0;
+      }
+      if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+            tgt_val->motion_type == MotionType::SLA_BACK_STR ||
+            tgt_val->motion_type == MotionType::PIVOT)) {
+        diff_ang = 0;
+        ang_sum = 0;
+      }
+      auto kp_gain = param_ro->gyro_pid.p * error_entity.w.error_p;
+      auto ki_gain = param_ro->gyro_pid.i * diff_ang;
+      auto kb_gain = param_ro->gyro_pid.b * error_entity.w.error_i;
+      auto kc_gain = param_ro->gyro_pid.c * ang_sum;
+      auto kd_gain = param_ro->gyro_pid.d * error_entity.w_kf.error_d;
+      limitter(kp_gain, ki_gain, kb_gain, kd_gain,
+               param_ro->gyro_pid_gain_limitter);
+      duty_roll =
+          kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
+          (error_entity.ang_log.gain_z - error_entity.ang_log.gain_zz) * dt;
+
+      error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
+      error_entity.ang_log.gain_z = duty_roll;
+
+      set_ctrl_val(error_entity.w_val,
+                   error_entity.w.error_p,                           // p
+                   diff_ang,                                         // i
+                   error_entity.w.error_i,                           // i2
+                   error_entity.w_kf.error_d,                        // d
+                   param_ro->gyro_pid.p * error_entity.w.error_p,    // kp*p
+                   param_ro->gyro_pid.i * diff_ang,                  // ki*i
+                   param_ro->gyro_pid.b * error_entity.w.error_i,    // kb*i2
+                   param_ro->gyro_pid.d * error_entity.w_kf.error_d, // kd*d
+                   error_entity.ang_log.gain_zz, error_entity.ang_log.gain_z);
+    }
+  }
+}
+
+void IRAM_ATTR PlanningTask::apply_duty_limitter() {
+  if (tgt_val->motion_type == MotionType::STRAIGHT ||
+      tgt_val->motion_type == MotionType::SLALOM ||
+      tgt_val->motion_type == MotionType::SLA_BACK_STR ||
+      tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+      tgt_val->motion_type == MotionType::PIVOT) {
+    const auto min_duty = param_ro->min_duty;
+
+    if (0 <= tgt_duty.duty_r && tgt_duty.duty_r < min_duty) {
+      tgt_duty.duty_r = min_duty;
+    } else if (-min_duty < tgt_duty.duty_r && tgt_duty.duty_r <= 0) {
+      tgt_duty.duty_r = -min_duty;
+    }
+    if (0 <= tgt_duty.duty_l && tgt_duty.duty_l < min_duty) {
+      tgt_duty.duty_l = min_duty;
+    } else if (-min_duty < tgt_duty.duty_l && tgt_duty.duty_l <= 0) {
+      tgt_duty.duty_l = -min_duty;
+    }
+  } else if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
+    const auto max_duty = param_ro->sen_ref_p.search_exist.offset_l;
+    if (tgt_duty.duty_r > max_duty) {
+      tgt_duty.duty_r = max_duty;
+    } else if (tgt_duty.duty_r < -max_duty) {
+      tgt_duty.duty_r = -max_duty;
+    }
+    if (tgt_duty.duty_l > max_duty) {
+      tgt_duty.duty_l = max_duty;
+    } else if (tgt_duty.duty_l < -max_duty) {
+      tgt_duty.duty_l = -max_duty;
+    }
+  } else {
+    const auto max_duty = param_ro->max_duty;
+    if (tgt_duty.duty_r > max_duty) {
+      tgt_duty.duty_r = max_duty;
+    } else if (tgt_duty.duty_r < -max_duty) {
+      tgt_duty.duty_r = -max_duty;
+    }
+    if (tgt_duty.duty_l > max_duty) {
+      tgt_duty.duty_l = max_duty;
+    } else if (tgt_duty.duty_l < -max_duty) {
+      tgt_duty.duty_l = -max_duty;
+    }
   }
 }

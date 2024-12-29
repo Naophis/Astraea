@@ -63,8 +63,8 @@ constexpr gpio_num_t R_CW_CCW2 = GPIO_NUM_46;
 constexpr uint32_t L_CW_CCW1_BIT = BIT(GPIO_NUM_38 - 32);
 constexpr uint32_t L_CW_CCW2_BIT = BIT(GPIO_NUM_38 - 32);
 
-constexpr uint32_t R_CW_CCW1_BIT = BIT(GPIO_NUM_46 - 32);
-constexpr uint32_t R_CW_CCW2_BIT = BIT(GPIO_NUM_46 - 32);
+constexpr uint32_t R_CW_CCW1_BIT = BIT(GPIO_NUM_38 - 32);
+constexpr uint32_t R_CW_CCW2_BIT = BIT(GPIO_NUM_38 - 32);
 
 constexpr gpio_num_t Motor_L_PWM = GPIO_NUM_39;
 constexpr gpio_num_t Motor_L_PWM2 = GPIO_NUM_40;
@@ -87,7 +87,7 @@ constexpr gpio_num_t ENC_CLK = GPIO_NUM_7;
 constexpr gpio_num_t ENC_MISO = GPIO_NUM_8; // B
 constexpr gpio_num_t ENC_MOSI = GPIO_NUM_9; // A
 
-constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_35;
+constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_46;
 
 //Banshee
 // #define SEN_R90 ADC2_CHANNEL_2

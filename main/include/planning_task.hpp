@@ -130,6 +130,10 @@ private:
                     float error_i2, float error_d, float val_p, float val_i,
                     float val_i2, float val_d, float zz, float z);
 
+  void calc_angle_velocity_ctrl(float &duty);
+
+  void apply_duty_limitter();
+
   void set_gpio_state(gpio_num_t gpio_num, int state);
   float diff_old = 0;
   float diff = 0;

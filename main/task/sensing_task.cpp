@@ -29,33 +29,36 @@ void SensingTask::timer_200us_callback_main() {
   enc_r_timestamp_old = enc_r_timestamp_now;
   enc_l_timestamp_old = enc_l_timestamp_now;
 
-  if (enc_if.initialized) {
-    gyro_timestamp_now = esp_timer_get_time();
-    const auto gyro = gyro_if.read_2byte(0x26);
-    enc_r_timestamp_now = esp_timer_get_time();
-    const auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
-    enc_l_timestamp_now = esp_timer_get_time();
-    const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+  if (!enc_if.initialized) {
+    return;
+  }
+  gyro_timestamp_now = esp_timer_get_time();
+  const auto gyro = gyro_if.read_2byte(0x26);
+  enc_r_timestamp_now = esp_timer_get_time();
+  const auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+  enc_l_timestamp_now = esp_timer_get_time();
+  const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
 
-    const auto gyro_dt =
-        (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
-    const auto enc_r_dt =
-        (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
-    const auto enc_l_dt =
-        (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
+  const auto gyro_dt =
+      (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
+  const auto enc_r_dt =
+      (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
+  const auto enc_l_dt =
+      (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
-    pt->kf_w.dt = gyro_dt;
-    pt->kf_v_r.dt = enc_r_dt;
-    pt->kf_v_l.dt = enc_l_dt;
+  pt->kf_w.dt = gyro_dt;
+  pt->kf_v_r.dt = enc_r_dt;
+  pt->kf_v_l.dt = enc_l_dt;
 
-    const auto accl_l = (tgt_val->ego_in.v_l - vl_old) / dt;
-    const auto accl_r = (tgt_val->ego_in.v_r - vr_old) / dt;
-    if (std::isfinite(accl_l) && std::isfinite(accl_r)) {
-      auto tmp_l_v =
-          ABS(calc_enc_v(enc_l, se->encoder.left_old, pt->kf_v_l.dt));
+  if (std::isfinite(accl_l) && std::isfinite(accl_r)) {
+    auto tmp_l_v = ABS(calc_enc_v(enc_l, se->encoder.left_old, pt->kf_v_l.dt));
 
+    if (enc_l == 0 && ABS(tmp_l_v - ABS(se->ego.v_l)) > 500) {
+      enc_l_timestamp_now = esp_timer_get_time();
+      const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+      const auto enc_l_dt =
+          (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
       if (enc_l == 0 && ABS(tmp_l_v - ABS(se->ego.v_l)) > 500) {
-
       } else if (enc_l_dt > 0) {
         se->encoder.left = enc_l;
         se->ego.v_l =
@@ -64,46 +67,52 @@ void SensingTask::timer_200us_callback_main() {
         pt->kf_v_l.predict(accl_l);
         pt->kf_v_l.update(se->ego.v_l);
       }
-      auto tmp_r_v =
-          ABS(calc_enc_v(enc_r, se->encoder.right_old, pt->kf_v_r.dt));
-      if (enc_r != 0 && enc_r_dt > 0
-          // &&(ABS(tmp_r_v - ABS(se->ego.v_r)) < 500)
-      ) {
-        se->encoder.right = enc_r;
-        se->ego.v_r = -calc_enc_v(se->encoder.right, se->encoder.right_old,
-                                  pt->kf_v_r.dt);
-        pt->kf_v_r.dt = enc_r_dt;
-        pt->kf_v_r.predict(accl_r);
-        pt->kf_v_r.update(se->ego.v_r);
+    } else if (enc_l_dt > 0) {
+      se->encoder.left = enc_l;
+      se->ego.v_l =
+          calc_enc_v(se->encoder.left, se->encoder.left_old, pt->kf_v_l.dt);
+      pt->kf_v_l.dt = enc_l_dt;
+      pt->kf_v_l.predict(accl_l);
+      pt->kf_v_l.update(se->ego.v_l);
+    }
+    auto tmp_r_v = ABS(calc_enc_v(enc_r, se->encoder.right_old, pt->kf_v_r.dt));
+    if (enc_r == 0 && (ABS(tmp_r_v - ABS(se->ego.v_r)) > 500)) {
+      //
+    } else if (enc_l_dt > 0) {
+      se->encoder.right = enc_r;
+      se->ego.v_r =
+          -calc_enc_v(se->encoder.right, se->encoder.right_old, pt->kf_v_r.dt);
+      pt->kf_v_r.dt = enc_r_dt;
+      pt->kf_v_r.predict(accl_r);
+      pt->kf_v_r.update(se->ego.v_r);
+    }
+  }
+  if (param->enable_kalman_encoder > 0) {
+    se->ego.v_l = pt->kf_v_l.get_state();
+    se->ego.v_r = pt->kf_v_r.get_state();
+  }
+  const auto alpha = (tgt_val->ego_in.w - w_old) / dt;
+  if (std::isfinite(alpha) && std::isfinite(se->ego.w_lp)) {
+    se->gyro.raw = se->gyro.data = gyro;
+    if (gyro_dt > 0) {
+      if (tgt_val->motion_dir == MotionDirection::LEFT) {
+        se->ego.w_raw = param->gyro_param.gyro_w_gain_left *
+                        (gyro - tgt_val->gyro_zero_p_offset);
+      } else {
+        se->ego.w_raw = param->gyro_param.gyro_w_gain_right *
+                        (gyro - tgt_val->gyro_zero_p_offset);
       }
+      pt->kf_w.predict(alpha);
+      const float tread = param->tire_tread;
+      const float w_enc = -(se->ego.v_r - se->ego.v_l) / tread;
+      pt->kf_w.update(se->ego.w_raw);
+      // pt->kf_w.update2(se->ego.w_raw, w_enc);
     }
-    if (param->enable_kalman_encoder > 0) {
-      se->ego.v_l = pt->kf_v_l.get_state();
-      se->ego.v_r = pt->kf_v_r.get_state();
-    }
-    const auto alpha = (tgt_val->ego_in.w - w_old) / dt;
-    if (std::isfinite(alpha) && std::isfinite(se->ego.w_lp)) {
-      se->gyro.raw = se->gyro.data = gyro;
-      if (gyro_dt > 0) {
-        if (tgt_val->motion_dir == MotionDirection::LEFT) {
-          se->ego.w_raw = param->gyro_param.gyro_w_gain_left *
-                          (gyro - tgt_val->gyro_zero_p_offset);
-        } else {
-          se->ego.w_raw = param->gyro_param.gyro_w_gain_right *
-                          (gyro - tgt_val->gyro_zero_p_offset);
-        }
-        pt->kf_w.predict(alpha);
-        const float tread = param->tire_tread;
-        const float w_enc = -(se->ego.v_r - se->ego.v_l) / tread;
-        pt->kf_w.update(se->ego.w_raw);
-        // pt->kf_w.update2(se->ego.w_raw, w_enc);
-      }
-    }
-    if (param->enable_kalman_gyro > 0) {
-      se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
-    } else {
-      se->ego.w_kf = pt->kf_w.get_state();
-    }
+  }
+  if (param->enable_kalman_gyro > 0) {
+    se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
+  } else {
+    se->ego.w_kf = pt->kf_w.get_state();
   }
 }
 

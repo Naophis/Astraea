@@ -71,19 +71,19 @@ search_wall_off_enable: 1
 wall_off_exist_wall_th_l: 50
 wall_off_exist_wall_th_r: 50
 # 壁切れ In
-wall_off_hold_exist_dist_l: 63
-wall_off_hold_exist_dist_r: 58
+wall_off_hold_exist_dist_l: 58
+wall_off_hold_exist_dist_r: 54
 # 壁切れ Out
-wall_off_hold_noexist_th_l: 69.5
-wall_off_hold_noexist_th_r: 60
+wall_off_hold_noexist_th_l: 60
+wall_off_hold_noexist_th_r: 57
 # 壁切れ Out(最初からあるとき)
-wall_off_hold_noexist_th_l2: 69.5
-wall_off_hold_noexist_th_r2: 60
+wall_off_hold_noexist_th_l2: 60
+wall_off_hold_noexist_th_r2: 57
 # 壁切れ オフセット距離
-wall_off_hold_dist_str_l: -5.75
-wall_off_hold_dist_str_r: -6.125
-wall_off_hold_dist_str_l_exist: -5.75
-wall_off_hold_dist_str_r_exist: -6.125
+wall_off_hold_dist_str_l: -4.75
+wall_off_hold_dist_str_r: -6.0
+wall_off_hold_dist_str_l_exist: -4.75
+wall_off_hold_dist_str_r_exist: -6.0
 
 wall_off_front_move_dist_th: 2
 wall_off_front_move_dia_dist_th: 2

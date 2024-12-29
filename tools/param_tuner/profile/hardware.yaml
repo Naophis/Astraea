@@ -219,7 +219,7 @@ str_agl_pid:
   mode: 1
   p: 0.000235 #search_mode
   d: 0.0000125
-  b: 0.000375 #!searchm_mode
+  b: 0.000275 #!searchm_mode
   i: 0.0000075
 
   # test
@@ -240,23 +240,6 @@ str_agl_dia_pid:
   mode: 1
   b: 0
   c: 0
-# sensor_pid: #not use
-#   p: 0.175 #search_mode
-#   b: 0.175 #!searchm_mode
-#   # p: 0.00 #search_mode
-#   # b: 0.0 #!searchm_mode
-
-#   # p: 0.5 #search_mode
-#   # b: 0.1 #!searchm_mode
-
-#   # p: 0.075
-#   # i: 0.0
-#   # d: 0.045
-#   # p: 0.0
-#   i: 0.0
-#   d: 0.0
-#   c: 0
-#   mode: 1
 sensor_pid_dia:
   p: 0.0975
   # p: 0.15
@@ -269,8 +252,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.00244895
-  gyro_w_gain_right: 0.00244865
+  gyro_w_gain_left: 0.00244925
+  gyro_w_gain_right: 0.00244925
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
