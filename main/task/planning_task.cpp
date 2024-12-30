@@ -1379,6 +1379,8 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
   sensing_result->ego.duty.sen_ang = sen_ang;
 
   calc_pid_val();
+  calc_pid_val_ang();
+  calc_pid_val_front_ctrl();
 
   duty_c = 0;
   duty_c2 = 0;
@@ -1888,6 +1890,8 @@ void IRAM_ATTR PlanningTask::calc_front_ctrl_duty(float &duty_c,
   }
 }
 
+void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl_old() {}
+
 void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
   if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
     duty_roll =
@@ -2116,7 +2120,6 @@ void IRAM_ATTR PlanningTask::summation_duty() {
     tgt_duty.duty_r = req_v_r / sensing_result->ego.battery_lp * 100;
     tgt_duty.duty_l = req_v_l / sensing_result->ego.battery_lp * 100;
   }
-
 }
 
 void IRAM_ATTR PlanningTask::reset_pid_val() {
@@ -2190,21 +2193,15 @@ void IRAM_ATTR PlanningTask::calc_pid_val() {
   error_entity.v.error_dd = error_entity.v.error_d;
   error_entity.v_kf.error_dd = error_entity.v_kf.error_d;
   error_entity.dist.error_dd = error_entity.dist.error_d;
-  error_entity.w.error_dd = error_entity.w.error_d;
-  error_entity.w_kf.error_dd = error_entity.w_kf.error_d;
-  error_entity.ang.error_dd = error_entity.ang.error_d;
 
   error_entity.v.error_d = error_entity.v.error_p;
   error_entity.v_r.error_d = error_entity.v_r.error_p;
   error_entity.v_l.error_d = error_entity.v_l.error_p;
   error_entity.v_kf.error_d = error_entity.v_kf.error_p;
   error_entity.dist.error_d = error_entity.dist.error_p;
-  error_entity.w.error_d = error_entity.w.error_p;
-  error_entity.w_kf.error_d = error_entity.w_kf.error_p;
-  error_entity.ang.error_d = error_entity.ang.error_p;
 
   error_entity.v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
-  error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
+
   error_entity.v_r.error_p = ideal_v_r - sensing_result->ego.v_r;
   error_entity.v_l.error_p = ideal_v_l - sensing_result->ego.v_l;
   error_entity.v_kf.error_p = tgt_val->ego_in.v - sensing_result->ego.v_kf;
@@ -2219,9 +2216,63 @@ void IRAM_ATTR PlanningTask::calc_pid_val() {
     error_entity.dist.error_p = -param_ro->front_ctrl_error_th;
   }
 
+  error_entity.v_kf.error_d =
+      error_entity.v_kf.error_p - error_entity.v_kf.error_d;
+  error_entity.v.error_d = error_entity.v.error_p - error_entity.v.error_d;
+  error_entity.dist.error_d =
+      error_entity.dist.error_p - error_entity.dist.error_d;
+
+  error_entity.v_l.error_d =
+      error_entity.v_l.error_p - error_entity.v_l.error_d;
+  error_entity.v_r.error_d =
+      error_entity.v_r.error_p - error_entity.v_r.error_d;
+
+  error_entity.v_kf.error_dd =
+      error_entity.v_kf.error_d - error_entity.v_kf.error_dd;
+  error_entity.v.error_dd = error_entity.v.error_d - error_entity.v.error_dd;
+  error_entity.dist.error_dd =
+      error_entity.dist.error_d - error_entity.dist.error_dd;
+
+  error_entity.v.error_i += error_entity.v.error_p;
+  error_entity.dist.error_i += error_entity.dist.error_p;
+
+  error_entity.v_l.error_i += error_entity.v_l.error_p;
+  error_entity.v_r.error_i += error_entity.v_r.error_p;
+
+  tgt_val->v_error = error_entity.v.error_i;
+}
+void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
+  error_entity.w.error_dd = error_entity.w.error_d;
+  error_entity.w_kf.error_dd = error_entity.w_kf.error_d;
+  error_entity.ang.error_dd = error_entity.ang.error_d;
+  error_entity.w.error_d = error_entity.w.error_p;
+  error_entity.w_kf.error_d = error_entity.w_kf.error_p;
+  error_entity.ang.error_d = error_entity.ang.error_p;
+
+  // カスケード制御条件分岐
+  error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
   error_entity.ang.error_p =
       (tgt_val->global_pos.img_ang + sen_ang) - tgt_val->global_pos.ang;
 
+  error_entity.w.error_d = error_entity.w.error_p - error_entity.w.error_d;
+  error_entity.w_kf.error_d =
+      error_entity.w_kf.error_p - error_entity.w_kf.error_d;
+  error_entity.ang.error_d =
+      error_entity.ang.error_p - error_entity.ang.error_d;
+
+  error_entity.w.error_dd = error_entity.w.error_d - error_entity.w.error_dd;
+  error_entity.w_kf.error_dd =
+      error_entity.w_kf.error_d - error_entity.w_kf.error_dd;
+  error_entity.ang.error_dd =
+      error_entity.ang.error_d - error_entity.ang.error_dd;
+
+  error_entity.w.error_i += error_entity.w.error_p;
+  error_entity.ang.error_i += error_entity.ang.error_p;
+
+  tgt_val->w_error = error_entity.w.error_i;
+}
+
+void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     error_entity.v.error_i = error_entity.v.error_d = 0;
     error_entity.w.error_i = error_entity.w.error_d = 0;
@@ -2242,42 +2293,4 @@ void IRAM_ATTR PlanningTask::calc_pid_val() {
           error_entity.ang.error_d = 0;
     }
   }
-
-  error_entity.v_kf.error_d =
-      error_entity.v_kf.error_p - error_entity.v_kf.error_d;
-  error_entity.v.error_d = error_entity.v.error_p - error_entity.v.error_d;
-  error_entity.dist.error_d =
-      error_entity.dist.error_p - error_entity.dist.error_d;
-  error_entity.w.error_d = error_entity.w.error_p - error_entity.w.error_d;
-  error_entity.w_kf.error_d =
-      error_entity.w_kf.error_p - error_entity.w_kf.error_d;
-  error_entity.ang.error_d =
-      error_entity.ang.error_p - error_entity.ang.error_d;
-
-  error_entity.v_l.error_d =
-      error_entity.v_l.error_p - error_entity.v_l.error_d;
-  error_entity.v_r.error_d =
-      error_entity.v_r.error_p - error_entity.v_r.error_d;
-
-  error_entity.v_kf.error_dd =
-      error_entity.v_kf.error_d - error_entity.v_kf.error_dd;
-  error_entity.v.error_dd = error_entity.v.error_d - error_entity.v.error_dd;
-  error_entity.dist.error_dd =
-      error_entity.dist.error_d - error_entity.dist.error_dd;
-  error_entity.w.error_dd = error_entity.w.error_d - error_entity.w.error_dd;
-  error_entity.w_kf.error_dd =
-      error_entity.w_kf.error_d - error_entity.w_kf.error_dd;
-  error_entity.ang.error_dd =
-      error_entity.ang.error_d - error_entity.ang.error_dd;
-
-  error_entity.v.error_i += error_entity.v.error_p;
-  error_entity.dist.error_i += error_entity.dist.error_p;
-  error_entity.w.error_i += error_entity.w.error_p;
-  error_entity.ang.error_i += error_entity.ang.error_p;
-
-  error_entity.v_l.error_i += error_entity.v_l.error_p;
-  error_entity.v_r.error_i += error_entity.v_r.error_p;
-
-  tgt_val->v_error = error_entity.v.error_i;
-  tgt_val->w_error = error_entity.w.error_i;
 }
