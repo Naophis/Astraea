@@ -116,6 +116,14 @@ private:
   sensor_ctrl_keep_dist_t right_keep;
   sensor_ctrl_keep_dist_t left_keep;
 
+  void clear_ctrl_val();
+  void reset_pid_val();
+  void summation_duty();
+  void calc_translational_ctrl();
+  void calc_angle_velocity_ctrl();
+
+  void calc_pid_val();
+
   void limitter(float &kp, float &ki, float &kb, float &kd,
                 pid_param_t &limitter);
 
@@ -129,8 +137,6 @@ private:
   void set_ctrl_val(pid_error2_t &val, float error_p, float error_i,
                     float error_i2, float error_d, float val_p, float val_i,
                     float val_i2, float val_d, float zz, float z);
-
-  void calc_angle_velocity_ctrl(float &duty);
 
   void apply_duty_limitter();
 
@@ -230,10 +236,10 @@ private:
   mcpwm_config_t suction_pwm_conf;
   float duty_c = 0;
   float duty_c2 = 0;
-  float duty_enc_v_r = 0;
-  float duty_enc_v_l = 0;
   float duty_roll = 0;
   float duty_roll2 = 0;
+  float duty_sen = 0;
+  float sen_ang = 0;
 
   float last_accl;
   sen_log2_t sen_log;
