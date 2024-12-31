@@ -1920,7 +1920,6 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
                    param_ro->gyro_pid.b * 0,
                    param_ro->gyro_pid.c * error_entity.w.error_d,
                    error_entity.ang_log.gain_zz, error_entity.ang_log.gain_z);
-
     } else {
       // mode3 main
       auto diff_ang = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
@@ -1948,7 +1947,6 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
 
       error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
       error_entity.ang_log.gain_z = duty_roll;
-
       set_ctrl_val(error_entity.w_val,
                    error_entity.w.error_p,                           // p
                    diff_ang,                                         // i
@@ -2241,33 +2239,52 @@ void IRAM_ATTR PlanningTask::calc_pid_val() {
   tgt_val->v_error = error_entity.v.error_i;
 }
 void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
-  error_entity.w.error_dd = error_entity.w.error_d;
-  error_entity.w_kf.error_dd = error_entity.w_kf.error_d;
+
+  const auto tgt = get_tgt_entity();
+  const auto se = get_sensing_entity();
+
   error_entity.ang.error_dd = error_entity.ang.error_d;
-  error_entity.w.error_d = error_entity.w.error_p;
-  error_entity.w_kf.error_d = error_entity.w_kf.error_p;
   error_entity.ang.error_d = error_entity.ang.error_p;
 
-  // カスケード制御条件分岐
-  error_entity.w.error_p = tgt_val->ego_in.w - sensing_result->ego.w_lp;
+  // TODO カスケード制御条件分岐
+
+  float offset = sen_ang;
+
+  // if (tgt->motion_type == MotionType::STRAIGHT) {
+  // }
+
   error_entity.ang.error_p =
-      (tgt_val->global_pos.img_ang + sen_ang) - tgt_val->global_pos.ang;
+      (tgt->global_pos.img_ang + offset) - tgt->global_pos.ang;
+
+  error_entity.ang.error_d =
+      error_entity.ang.error_p - error_entity.ang.error_d;
+
+  error_entity.ang.error_dd =
+      error_entity.ang.error_d - error_entity.ang.error_dd;
+
+  error_entity.ang.error_i += error_entity.ang.error_p;
+}
+
+void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
+  const auto tgt = get_tgt_entity();
+  const auto se = get_sensing_entity();
+
+  error_entity.w.error_dd = error_entity.w.error_d;
+  error_entity.w_kf.error_dd = error_entity.w_kf.error_d;
+  error_entity.w.error_d = error_entity.w.error_p;
+  error_entity.w_kf.error_d = error_entity.w_kf.error_p;
+
+  error_entity.w.error_p = tgt->ego_in.w - se->ego.w_lp;
 
   error_entity.w.error_d = error_entity.w.error_p - error_entity.w.error_d;
   error_entity.w_kf.error_d =
       error_entity.w_kf.error_p - error_entity.w_kf.error_d;
-  error_entity.ang.error_d =
-      error_entity.ang.error_p - error_entity.ang.error_d;
 
   error_entity.w.error_dd = error_entity.w.error_d - error_entity.w.error_dd;
   error_entity.w_kf.error_dd =
       error_entity.w_kf.error_d - error_entity.w_kf.error_dd;
-  error_entity.ang.error_dd =
-      error_entity.ang.error_d - error_entity.ang.error_dd;
 
   error_entity.w.error_i += error_entity.w.error_p;
-  error_entity.ang.error_i += error_entity.ang.error_p;
-
   tgt_val->w_error = error_entity.w.error_i;
 }
 

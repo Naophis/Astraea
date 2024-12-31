@@ -109,6 +109,7 @@ public:
   std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
     return sensing_result;
   }
+  std::shared_ptr<motion_tgt_val_t> get_tgt_entity() { return tgt_val; }
 
   void reset_kf_state(bool reset_battery);
 
@@ -123,6 +124,7 @@ private:
   void calc_angle_velocity_ctrl();
   void calc_angle_velocity_ctrl_old();
   void calc_pid_val_ang();
+  void calc_pid_val_ang_vel();
   void calc_pid_val_front_ctrl();
 
   void calc_pid_val();
