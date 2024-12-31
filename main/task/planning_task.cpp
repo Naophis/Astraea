@@ -1397,8 +1397,6 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
     // 角速度制御
     calc_angle_velocity_ctrl();
   }
-  last_accl = tgt_val->ego_in.accl;
-  sensing_result->ego.duty.sen = duty_roll;
   sensing_result->ego.duty.sen = duty_sen;
 
   summation_duty();
@@ -2187,6 +2185,7 @@ void IRAM_ATTR PlanningTask::calc_translational_ctrl() {
     error_entity.w.error_i = error_entity.w.error_d = 0;
     error_entity.w_log.gain_z = error_entity.w_log.gain_zz = 0;
   }
+  last_accl = tgt_val->ego_in.accl;
 }
 void IRAM_ATTR PlanningTask::calc_pid_val() {
   error_entity.v.error_dd = error_entity.v.error_d;
