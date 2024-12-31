@@ -141,19 +141,7 @@ front_ctrl_roll_pid:
   # d: 0.0
   # b: 0
   # c: 0
-motor_pid: #front_ctrl
-  p: 0.00325
-  i: 0.0
-  d: 0.0
-  b: 0
-  c: 0
 
-  # p: 0.0
-  # i: 0.0
-  # d: 0.0
-  # b: 0
-  # c: 0
-  mode: 1
 motor_pid2:
   #AS5147P 
   mode: 7
@@ -195,8 +183,26 @@ gyro_pid:
   # b: 0.0
   # d: 0.0
   c: 0
+angle_pid: # pid for angle
+  p: 0.755
+  # i: 0.045
+  # p: 0.195
+  i: 0.0
+  d: -0.245
+  mode: 0
+  b: 0
+  c: 0
 
-dist_pid:  #front_ctrl(front)
+
+###### front_ctrl #######
+motor_pid: #front_ctrl
+  p: 0.00325
+  i: 0.0
+  d: 0.0
+  b: 0
+  c: 0
+  mode: 1
+front_ctrl_dist_pid:  #front_ctrl(front)
   p: 0.80
   i: 0.0015
   d: -0.0125
@@ -206,7 +212,7 @@ dist_pid:  #front_ctrl(front)
   # p: 0.0
   # i: 0.0
   # d: 0.0
-angle_pid: #front_ctrl(roll)
+front_ctrl_angle_pid: #front_ctrl(roll)
   p: 0.755
   # i: 0.045
   # p: 0.195
@@ -215,7 +221,19 @@ angle_pid: #front_ctrl(roll)
   mode: 2
   b: 10
   c: 0
-str_agl_pid:
+front_ctrl_keep_angle_pid: # pid for angle
+  p: 0.755
+  # i: 0.045
+  # p: 0.195
+  i: 0.0
+  d: -0.245
+  mode: 2
+  b: 10
+  c: 0
+####################################
+
+# 光センサー制御
+str_ang_pid:
   mode: 1
   p: 0.000235 #search_mode
   d: 0.0000125
@@ -229,7 +247,7 @@ str_agl_pid:
   # i: 0.0
   c: 0
 
-str_agl_dia_pid:
+str_ang_dia_pid:
   # p: 0.095
   # d: 1.25
   p: 0.0055

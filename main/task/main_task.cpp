@@ -352,11 +352,12 @@ void MainTask::load_hw_param() {
   // printf("%s\n", str.c_str());
 
   cJSON *root = cJSON_CreateObject(), *front_ctrl_roll_pid, *motor_pid,
-        *motor_pid2, *motor_pid3, *gyro_pid, *str_agl_pid, *str_agl_dia_pid,
+        *motor_pid2, *motor_pid3, *gyro_pid, *str_ang_pid, *str_ang_dia_pid,
         *gyro_param, *battery_kalman_config, *encoder_kalman_config,
         *w_kalman_config, *v_kalman_config, *ang_kalman_config,
         *dist_kalman_config, *pos_kalman_config, *battery_param, *led_param,
-        *angle_pid, *dist_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
+        *angle_pid, *front_ctrl_dist_pid, *front_ctrl_keep_angle_pid,
+        *front_ctrl_angle_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
         *axel_degenerate_x, *axel_degenerate_y, *led_blight,
         *gyro_pid_gain_limitter, *motor_pid_gain_limitter,
         *motor2_pid_gain_limitter, *motor3_pid_gain_limitter;
@@ -558,21 +559,21 @@ void MainTask::load_hw_param() {
   param->gyro_pid_gain_limitter.mode =
       getItem(gyro_pid_gain_limitter, "mode")->valueint;
 
-  str_agl_pid = getItem(root, "str_agl_pid");
-  param->str_ang_pid.p = getItem(str_agl_pid, "p")->valuedouble;
-  param->str_ang_pid.i = getItem(str_agl_pid, "i")->valuedouble;
-  param->str_ang_pid.d = getItem(str_agl_pid, "d")->valuedouble;
-  param->str_ang_pid.b = getItem(str_agl_pid, "b")->valuedouble;
-  param->str_ang_pid.c = getItem(str_agl_pid, "c")->valuedouble;
-  param->str_ang_pid.mode = getItem(str_agl_pid, "mode")->valueint;
+  str_ang_pid = getItem(root, "str_ang_pid");
+  param->str_ang_pid.p = getItem(str_ang_pid, "p")->valuedouble;
+  param->str_ang_pid.i = getItem(str_ang_pid, "i")->valuedouble;
+  param->str_ang_pid.d = getItem(str_ang_pid, "d")->valuedouble;
+  param->str_ang_pid.b = getItem(str_ang_pid, "b")->valuedouble;
+  param->str_ang_pid.c = getItem(str_ang_pid, "c")->valuedouble;
+  param->str_ang_pid.mode = getItem(str_ang_pid, "mode")->valueint;
 
-  str_agl_dia_pid = getItem(root, "str_agl_dia_pid");
-  param->str_ang_dia_pid.p = getItem(str_agl_dia_pid, "p")->valuedouble;
-  param->str_ang_dia_pid.i = getItem(str_agl_dia_pid, "i")->valuedouble;
-  param->str_ang_dia_pid.d = getItem(str_agl_dia_pid, "d")->valuedouble;
-  param->str_ang_dia_pid.b = getItem(str_agl_dia_pid, "b")->valuedouble;
-  param->str_ang_dia_pid.c = getItem(str_agl_dia_pid, "c")->valuedouble;
-  param->str_ang_dia_pid.mode = getItem(str_agl_dia_pid, "mode")->valueint;
+  str_ang_dia_pid = getItem(root, "str_ang_dia_pid");
+  param->str_ang_dia_pid.p = getItem(str_ang_dia_pid, "p")->valuedouble;
+  param->str_ang_dia_pid.i = getItem(str_ang_dia_pid, "i")->valuedouble;
+  param->str_ang_dia_pid.d = getItem(str_ang_dia_pid, "d")->valuedouble;
+  param->str_ang_dia_pid.b = getItem(str_ang_dia_pid, "b")->valuedouble;
+  param->str_ang_dia_pid.c = getItem(str_ang_dia_pid, "c")->valuedouble;
+  param->str_ang_dia_pid.mode = getItem(str_ang_dia_pid, "mode")->valueint;
 
   motor_pid2 = getItem(root, "motor_pid2");
   param->motor_pid2.p = getItem(motor_pid2, "p")->valuedouble;
@@ -603,11 +604,32 @@ void MainTask::load_hw_param() {
   param->sensor_pid_dia.d = getItem(sen_pid_dia, "d")->valuedouble;
   param->sensor_pid_dia.mode = getItem(sen_pid_dia, "mode")->valueint;
 
-  dist_pid = getItem(root, "dist_pid");
-  param->dist_pid.p = getItem(dist_pid, "p")->valuedouble;
-  param->dist_pid.i = getItem(dist_pid, "i")->valuedouble;
-  param->dist_pid.d = getItem(dist_pid, "d")->valuedouble;
-  param->dist_pid.mode = getItem(dist_pid, "mode")->valueint;
+  front_ctrl_dist_pid = getItem(root, "front_ctrl_dist_pid");
+  param->front_ctrl_dist_pid.p = getItem(front_ctrl_dist_pid, "p")->valuedouble;
+  param->front_ctrl_dist_pid.i = getItem(front_ctrl_dist_pid, "i")->valuedouble;
+  param->front_ctrl_dist_pid.d = getItem(front_ctrl_dist_pid, "d")->valuedouble;
+  param->front_ctrl_dist_pid.mode =
+      getItem(front_ctrl_dist_pid, "mode")->valueint;
+
+  front_ctrl_keep_angle_pid = getItem(root, "front_ctrl_keep_angle_pid");
+  param->front_ctrl_keep_angle_pid.p =
+      getItem(front_ctrl_keep_angle_pid, "p")->valuedouble;
+  param->front_ctrl_keep_angle_pid.i =
+      getItem(front_ctrl_keep_angle_pid, "i")->valuedouble;
+  param->front_ctrl_keep_angle_pid.d =
+      getItem(front_ctrl_keep_angle_pid, "d")->valuedouble;
+  param->front_ctrl_keep_angle_pid.mode =
+      getItem(front_ctrl_keep_angle_pid, "mode")->valueint;
+
+  front_ctrl_angle_pid = getItem(root, "front_ctrl_angle_pid");
+  param->front_ctrl_angle_pid.p =
+      getItem(front_ctrl_angle_pid, "p")->valuedouble;
+  param->front_ctrl_angle_pid.i =
+      getItem(front_ctrl_angle_pid, "i")->valuedouble;
+  param->front_ctrl_angle_pid.d =
+      getItem(front_ctrl_angle_pid, "d")->valuedouble;
+  param->front_ctrl_angle_pid.mode =
+      getItem(front_ctrl_angle_pid, "mode")->valueint;
 
   gyro_pid = getItem(root, "gyro_pid");
   param->gyro_pid.p = getItem(gyro_pid, "p")->valuedouble;

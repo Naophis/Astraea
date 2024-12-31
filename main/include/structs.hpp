@@ -430,12 +430,14 @@ typedef struct {
   pid_param_t motor2_pid_gain_limitter;
   pid_param_t motor_pid3;
   pid_param_t motor3_pid_gain_limitter;
-  pid_param_t dist_pid;
   pid_param_t gyro_pid;
   pid_param_t gyro_pid_gain_limitter;
   pid_param_t str_ang_pid;
   pid_param_t str_ang_dia_pid;
   pid_param_t angle_pid;
+  pid_param_t front_ctrl_angle_pid;
+  pid_param_t front_ctrl_dist_pid;
+  pid_param_t front_ctrl_keep_angle_pid;
   // pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;
   gyro_param_t gyro_param;

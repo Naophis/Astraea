@@ -1380,17 +1380,20 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
 
   calc_pid_val();
   calc_pid_val_ang();
+  calc_pid_val_ang_vel();
   calc_pid_val_front_ctrl();
 
   duty_c = 0;
   duty_c2 = 0;
   duty_roll = 0;
-  duty_roll2 = 0;
-
+  duty_front_ctrl_roll_keep = 0;
+  duty_roll_ang = 0;
+  duty_front_ctrl_trans = 0;
+  duty_front_ctrl_roll = 0;
   reset_pid_val();
 
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
-    calc_front_ctrl_duty(duty_c, duty_roll, duty_c2, duty_roll2);
+    calc_front_ctrl_duty();
   } else {
     // 重心速度制御
     calc_translational_ctrl();
@@ -1821,10 +1824,7 @@ void IRAM_ATTR PlanningTask::recv_notify() {
     first_req = true;
   }
 }
-void IRAM_ATTR PlanningTask::calc_front_ctrl_duty(float &duty_c,
-                                                  float &duty_roll,
-                                                  float &duty_c2,
-                                                  float &duty_roll2) {
+void IRAM_ATTR PlanningTask::calc_front_ctrl_duty() {
   const unsigned char reset = 0;
   vel_pid.step(&error_entity.v.error_p, &param_ro->motor_pid.p,
                &param_ro->motor_pid.i, &param_ro->motor_pid.d, &reset, &dt,
@@ -1869,23 +1869,20 @@ void IRAM_ATTR PlanningTask::calc_front_ctrl_duty(float &duty_c,
   }
   sensing_result->ego.duty.sen = duty_roll;
   sensing_result->ego.duty.sen = 0;
-  if (param_ro->dist_pid.mode == 1) {
-    duty_c2 = param_ro->dist_pid.p * error_entity.dist.error_p +
-              param_ro->dist_pid.i * error_entity.dist.error_i +
-              // param_ro->dist_pid.d * error_entity.dist.error_d +
-              param_ro->dist_pid.d * sensing_result->ego.v_c;
-
-    // (error_entity.dist_log.gain_z - error_entity.dist_log.gain_zz) * dt;
-    error_entity.dist_log.gain_zz = error_entity.dist_log.gain_z;
-    error_entity.dist_log.gain_z = duty_c;
-  }
-  if (param_ro->angle_pid.mode == 2) {
-    duty_roll2 = param_ro->angle_pid.p * error_entity.ang.error_p +
-                 param_ro->angle_pid.i * error_entity.ang.error_i +
-                 param_ro->angle_pid.d * error_entity.w_kf.error_p;
-    error_entity.ang_log.gain_zz = error_entity.ang_log.gain_z;
-    error_entity.ang_log.gain_z = duty_roll2;
-  }
+  // calc front dist ctrl
+  duty_front_ctrl_trans =
+      param_ro->front_ctrl_dist_pid.p * error_entity.dist.error_p +
+      param_ro->front_ctrl_dist_pid.i * error_entity.dist.error_i +
+      param_ro->front_ctrl_dist_pid.d * sensing_result->ego.v_c;
+  // calc front roll ctrl
+  duty_front_ctrl_roll =
+      param_ro->front_ctrl_angle_pid.p * error_entity.ang.error_p +
+      param_ro->front_ctrl_angle_pid.i * error_entity.ang.error_i +
+      param_ro->front_ctrl_angle_pid.d * error_entity.w_kf.error_p;
+  duty_front_ctrl_roll_keep =
+      param_ro->front_ctrl_keep_angle_pid.p * error_entity.ang.error_p +
+      param_ro->front_ctrl_keep_angle_pid.i * error_entity.ang.error_i +
+      param_ro->front_ctrl_keep_angle_pid.d * error_entity.w_kf.error_p;
 }
 
 void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl_old() {}
@@ -2006,7 +2003,7 @@ void IRAM_ATTR PlanningTask::apply_duty_limitter() {
   }
 }
 void IRAM_ATTR PlanningTask::clear_ctrl_val() {
-  duty_c = duty_c2 = duty_roll = duty_roll2 = 0;
+  duty_c = duty_c2 = duty_roll = duty_front_ctrl_roll_keep = duty_roll_ang = 0;
   error_entity.v.error_i = 0;
   error_entity.v.error_d = 0;
   error_entity.v.error_dd = 0;
@@ -2089,11 +2086,13 @@ void IRAM_ATTR PlanningTask::summation_duty() {
   if (param_ro->torque_mode == 0 ||
       tgt_val->motion_type == MotionType::FRONT_CTRL) {
     tgt_duty.duty_r =
-        (duty_c + duty_c2 + duty_roll + duty_roll2 + ff_duty_r + duty_sen) /
+        (duty_c + duty_front_ctrl_trans + duty_roll + duty_front_ctrl_roll +
+         duty_front_ctrl_roll_keep + ff_duty_r) /
         sensing_result->ego.battery_lp * 100;
 
     tgt_duty.duty_l =
-        (duty_c + duty_c2 - duty_roll - duty_roll2 + ff_duty_l - duty_sen) /
+        (duty_c + duty_front_ctrl_trans - duty_roll - duty_front_ctrl_roll -
+         duty_front_ctrl_roll_keep + ff_duty_l) /
         sensing_result->ego.battery_lp * 100;
 
   } else if (param_ro->torque_mode == 1) {
@@ -2104,10 +2103,25 @@ void IRAM_ATTR PlanningTask::summation_duty() {
     if (param_ro->FF_keV == 0) {
       ff_front = ff_roll = ff_duty_r = ff_duty_l = 0;
     }
-    float torque_r = (ff_front + ff_roll + duty_c + duty_c2 + duty_roll +
-                      duty_roll2 + duty_sen);
-    float torque_l = (ff_front - ff_roll + duty_c + duty_c2 - duty_roll -
-                      duty_roll2 - duty_sen);
+    float torque_r = (ff_front + ff_roll + duty_c + duty_roll + duty_sen);
+    float torque_l = (ff_front - ff_roll + duty_c - duty_roll - duty_sen);
+
+    const float km_gear = param_ro->Km * (param_ro->gear_a / param_ro->gear_b);
+    float req_v_r = torque_r * param_ro->Resist / km_gear + ff_duty_r;
+    float req_v_l = torque_l * param_ro->Resist / km_gear + ff_duty_l;
+
+    tgt_duty.duty_r = req_v_r / sensing_result->ego.battery_lp * 100;
+    tgt_duty.duty_l = req_v_l / sensing_result->ego.battery_lp * 100;
+  } else if (param_ro->torque_mode == 2) {
+    auto ff_front = mpc_next_ego.ff_front_torque;
+    auto ff_roll = mpc_next_ego.ff_roll_torque;
+    auto ff_duty_r = mpc_next_ego.ff_duty_rpm_r;
+    auto ff_duty_l = mpc_next_ego.ff_duty_rpm_l;
+    if (param_ro->FF_keV == 0) {
+      ff_front = ff_roll = ff_duty_r = ff_duty_l = 0;
+    }
+    float torque_r = (ff_front + ff_roll + duty_c + duty_roll);
+    float torque_l = (ff_front - ff_roll + duty_c - duty_roll);
 
     const float km_gear = param_ro->Km * (param_ro->gear_a / param_ro->gear_b);
     float req_v_r = torque_r * param_ro->Resist / km_gear + ff_duty_r;
@@ -2248,10 +2262,11 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
 
   // TODO カスケード制御条件分岐
 
-  float offset = sen_ang;
+  float offset = 0;
 
-  // if (tgt->motion_type == MotionType::STRAIGHT) {
-  // }
+  if (tgt->motion_type != MotionType::FRONT_CTRL) {
+    offset += sen_ang;
+  }
 
   error_entity.ang.error_p =
       (tgt->global_pos.img_ang + offset) - tgt->global_pos.ang;
@@ -2263,6 +2278,10 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
       error_entity.ang.error_d - error_entity.ang.error_dd;
 
   error_entity.ang.error_i += error_entity.ang.error_p;
+
+  duty_roll_ang = param_ro->angle_pid.p * error_entity.ang.error_p +
+                  param_ro->angle_pid.i * error_entity.ang.error_i +
+                  param_ro->angle_pid.d * error_entity.w_kf.error_p;
 }
 
 void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
@@ -2274,7 +2293,13 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
   error_entity.w.error_d = error_entity.w.error_p;
   error_entity.w_kf.error_d = error_entity.w_kf.error_p;
 
-  error_entity.w.error_p = tgt->ego_in.w - se->ego.w_lp;
+  float offset = 0;
+
+  if (param_ro->torque_mode == 2) {
+    offset += duty_roll_ang;
+  }
+
+  error_entity.w.error_p = (tgt->ego_in.w + offset) - se->ego.w_lp;
 
   error_entity.w.error_d = error_entity.w.error_p - error_entity.w.error_d;
   error_entity.w_kf.error_d =
@@ -2294,7 +2319,6 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
     error_entity.w.error_i = error_entity.w.error_d = 0;
     error_entity.v_r.error_i = error_entity.v_r.error_d = 0;
     error_entity.v_l.error_i = error_entity.v_l.error_d = 0;
-
     if (sensing_result->ego.front_dist < param_ro->cell) {
       error_entity.dist.error_p = sensing_result->ego.front_dist -
                                   param_ro->sen_ref_p.search_exist.front_ctrl;

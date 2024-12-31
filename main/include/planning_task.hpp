@@ -224,8 +224,7 @@ private:
   float check_sen_error();
   float check_sen_error_dia();
 
-  void calc_front_ctrl_duty(float &duty_c, float &duty_roll, float &duty_c2,
-                            float &duty_roll2);
+  void calc_front_ctrl_duty();
   float error_right = 0;
   float error_left = 0;
   bool check_right = false;
@@ -242,7 +241,10 @@ private:
   float duty_c = 0;
   float duty_c2 = 0;
   float duty_roll = 0;
-  float duty_roll2 = 0;
+  float duty_roll_ang = 0;
+  float duty_front_ctrl_roll = 0;
+  float duty_front_ctrl_trans = 0;
+  float duty_front_ctrl_roll_keep = 0;
   float duty_sen = 0;
   float sen_ang = 0;
 
