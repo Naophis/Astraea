@@ -95,8 +95,6 @@ public:
   std::vector<float> sensor_deg_limitter_dia;
   std::vector<float> sensor_deg_limitter_piller;
 
-  // pid_error_entity_t error_entity;
-
   KalmanFilter kf_w;
   KalmanFilter kf_v;
   KalmanFilter kf_v_r;
@@ -109,7 +107,7 @@ public:
   float suction_gain = 200;
 
   std::shared_ptr<motion_tgt_val_t> tgt_val;
-  std::shared_ptr<pid_error_entity_t> error_entity;
+  std::shared_ptr<pid_error_entity_t> ee;
   float ideal_v_r, ideal_v_l;
   std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
     return sensing_result;
