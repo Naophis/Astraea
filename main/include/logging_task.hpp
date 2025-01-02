@@ -11,6 +11,7 @@
 
 #include <esp_heap_caps.h>
 #include <fstream>
+#include <driver/uart.h>
 
 class LoggingTask {
 public:

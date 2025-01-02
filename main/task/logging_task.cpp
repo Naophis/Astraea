@@ -241,29 +241,32 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   int i = 0;
 
   for (const auto &ld : log_vec) {
-    printf(f1,                                                  //
-           i++,                                                 //
-           halfToFloat(ld->img_v),                              //
-           halfToFloat(ld->v_c),                                //
-           halfToFloat(ld->v_c2),                               //
-           halfToFloat(ld->v_l),                                //
-           halfToFloat(ld->v_r),                                //
-           (ld->v_l_enc),                                       //
-           (ld->v_r_enc),                                       //
-           (std::sin(2.0 * PI * ld->v_l_enc / ENC_RESOLUTION)), //
-           (std::sin(2.0 * PI * ld->v_r_enc / ENC_RESOLUTION)), //
-           halfToFloat(ld->accl) * 1000,                        //
-           halfToFloat(ld->accl_x));                            // 8
-    printf(f2,                                                  //
-           halfToFloat(ld->img_w),                              //
-           halfToFloat(ld->w_lp),                               //
-           halfToFloat(ld->alpha),                              //
-           halfToFloat(ld->img_dist),                           //
-           halfToFloat(ld->dist),                               //
-           halfToFloat(ld->dist_kf),                            //
-           halfToFloat(ld->img_ang),                            //
-           halfToFloat(ld->ang),                                //
-           halfToFloat(ld->ang_kf));                            // 7
+    int len = 0;
+
+    len += snprintf(line_buf + len, sizeof(line_buf) - len, f1,          //
+                    i++,                                                 //
+                    halfToFloat(ld->img_v),                              //
+                    halfToFloat(ld->v_c),                                //
+                    halfToFloat(ld->v_c2),                               //
+                    halfToFloat(ld->v_l),                                //
+                    halfToFloat(ld->v_r),                                //
+                    (ld->v_l_enc),                                       //
+                    (ld->v_r_enc),                                       //
+                    (std::sin(2.0 * PI * ld->v_l_enc / ENC_RESOLUTION)), //
+                    (std::sin(2.0 * PI * ld->v_r_enc / ENC_RESOLUTION)), //
+                    halfToFloat(ld->accl) * 1000,                        //
+                    halfToFloat(ld->accl_x));                            //
+
+    len += snprintf(line_buf + len, sizeof(line_buf) - len, f2, //
+                    halfToFloat(ld->img_w),                     //
+                    halfToFloat(ld->w_lp),                      //
+                    halfToFloat(ld->alpha),                     //
+                    halfToFloat(ld->img_dist),                  //
+                    halfToFloat(ld->dist),                      //
+                    halfToFloat(ld->dist_kf),                   //
+                    halfToFloat(ld->img_ang),                   //
+                    halfToFloat(ld->ang),                       //
+                    halfToFloat(ld->ang_kf));                   //
 
     auto l90 = calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90.a,
                            param->sensor_gain.l90.b, ld->motion_type);
@@ -309,8 +312,8 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     float dist_mod = (int)(dist / param->dist_mod_num);
     float tmp_dist = dist - param->dist_mod_num * dist_mod;
 
-    printf(
-        f3,                                                               //
+    len += snprintf(
+        line_buf + len, sizeof(line_buf) - len, f3,                       //
         halfToFloat(ld->left90_lp),                                       //
         halfToFloat(ld->left45_lp),                                       //
         ((halfToFloat(ld->left90_lp) + halfToFloat(ld->right90_lp)) / 2), //
@@ -325,62 +328,63 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
         halfToFloat(ld->duty_r),     //
         (ld->motion_type));          // 16
 
-    printf(f4,                                //
-           halfToFloat(ld->duty_sensor_ctrl), //
-           tmp_dist,                          //
-           halfToFloat(ld->sen_log_l45),      //
-           halfToFloat(ld->sen_log_r45),      //
-           ld->motion_timestamp,              //
-           ld->sen_calc_time,                 //
-           ld->sen_calc_time2,                //
-           ld->pln_calc_time,                 //
-           ld->pln_calc_time2,                //
-           ld->pln_time_diff);                // 4
+    len += snprintf(line_buf + len, sizeof(line_buf) - len, f4, //
+                    halfToFloat(ld->duty_sensor_ctrl),          //
+                    tmp_dist,                                   //
+                    halfToFloat(ld->sen_log_l45),               //
+                    halfToFloat(ld->sen_log_r45),               //
+                    ld->motion_timestamp,                       //
+                    ld->sen_calc_time,                          //
+                    ld->sen_calc_time2,                         //
+                    ld->pln_calc_time,                          //
+                    ld->pln_calc_time2,                         //
+                    ld->pln_time_diff);                         // 4
 
-    printf(f5,                                 //
-           halfToFloat(ld->m_pid_p),           //
-           halfToFloat(ld->m_pid_i),           //
-           halfToFloat(ld->m_pid_i2),          //
-           halfToFloat(ld->m_pid_d),           //
-           halfToFloat(ld->m_pid_p_v) * 1000,  //
-           halfToFloat(ld->m_pid_i_v) * 1000,  //
-           halfToFloat(ld->m_pid_i2_v) * 1000, //
-           halfToFloat(ld->m_pid_d_v) * 1000,  //
-           halfToFloat(ld->g_pid_p),           //
-           halfToFloat(ld->g_pid_i),           //
-           halfToFloat(ld->g_pid_i2),          //
-           halfToFloat(ld->g_pid_d));          //
+    len += snprintf(line_buf + len, sizeof(line_buf) - len, f5, //
+                    halfToFloat(ld->m_pid_p),                   //
+                    halfToFloat(ld->m_pid_i),                   //
+                    halfToFloat(ld->m_pid_i2),                  //
+                    halfToFloat(ld->m_pid_d),                   //
+                    halfToFloat(ld->m_pid_p_v) * 1000,          //
+                    halfToFloat(ld->m_pid_i_v) * 1000,          //
+                    halfToFloat(ld->m_pid_i2_v) * 1000,         //
+                    halfToFloat(ld->m_pid_d_v) * 1000,          //
+                    halfToFloat(ld->g_pid_p),                   //
+                    halfToFloat(ld->g_pid_i),                   //
+                    halfToFloat(ld->g_pid_i2),                  //
+                    halfToFloat(ld->g_pid_d));                  //
 
-    printf(f6,                                 //
-           halfToFloat(ld->g_pid_p_v) * 1000,  //
-           halfToFloat(ld->g_pid_i_v) * 1000,  //
-           halfToFloat(ld->g_pid_i2_v) * 1000, //
-           halfToFloat(ld->g_pid_d_v) * 1000,  //
-           halfToFloat(ld->s_pid_p),           //
-           halfToFloat(ld->s_pid_i),           //
-           halfToFloat(ld->s_pid_i2),          //
-           halfToFloat(ld->s_pid_d),           //
-           halfToFloat(ld->s_pid_p_v),         //
-           halfToFloat(ld->s_pid_i_v),         //
-           halfToFloat(ld->s_pid_i2_v),        //
-           halfToFloat(ld->s_pid_d_v),         //
-           halfToFloat(ld->ang_pid_p),         //
-           halfToFloat(ld->ang_pid_i),         //
-           halfToFloat(ld->ang_pid_d),         //
-           halfToFloat(ld->ang_pid_p_v),       //
-           halfToFloat(ld->ang_pid_i_v),       //
-           halfToFloat(ld->ang_pid_d_v)        //
-    );                                         //
-
-    printf(f7,                             //
-           halfToFloat(ld->ff_duty_front), //
-           halfToFloat(ld->ff_duty_roll),  //
-           halfToFloat(ld->ff_duty_rpm_r), //
-           halfToFloat(ld->ff_duty_rpm_l), //
-           halfToFloat(ld->pos_x),         //
-           halfToFloat(ld->pos_y)          //
+    len += snprintf(line_buf + len, sizeof(line_buf) - len, f6, //
+                    halfToFloat(ld->g_pid_p_v) * 1000,          //
+                    halfToFloat(ld->g_pid_i_v) * 1000,          //
+                    halfToFloat(ld->g_pid_i2_v) * 1000,         //
+                    halfToFloat(ld->g_pid_d_v) * 1000,          //
+                    halfToFloat(ld->s_pid_p),                   //
+                    halfToFloat(ld->s_pid_i),                   //
+                    halfToFloat(ld->s_pid_i2),                  //
+                    halfToFloat(ld->s_pid_d),                   //
+                    halfToFloat(ld->s_pid_p_v),                 //
+                    halfToFloat(ld->s_pid_i_v),                 //
+                    halfToFloat(ld->s_pid_i2_v),                //
+                    halfToFloat(ld->s_pid_d_v),                 //
+                    halfToFloat(ld->ang_pid_p),                 //
+                    halfToFloat(ld->ang_pid_i),                 //
+                    halfToFloat(ld->ang_pid_d),                 //
+                    halfToFloat(ld->ang_pid_p_v),               //
+                    halfToFloat(ld->ang_pid_i_v),               //
+                    halfToFloat(ld->ang_pid_d_v)                //
     );
 
+    len += snprintf(line_buf + len, sizeof(line_buf) - len, f7, //
+                    halfToFloat(ld->ff_duty_front),             //
+                    halfToFloat(ld->ff_duty_roll),              //
+                    halfToFloat(ld->ff_duty_rpm_r),             //
+                    halfToFloat(ld->ff_duty_rpm_l),             //
+                    halfToFloat(ld->pos_x),                     //
+                    halfToFloat(ld->pos_y)                      //
+    );
+
+    printf("%s", line_buf);
     if (i > 10 && ld->motion_timestamp == 0) {
       break;
     }

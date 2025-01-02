@@ -59,10 +59,11 @@ void init_uart() {
   uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
   // uart_config.rx_flow_ctrl_thresh = 122;
   uart_config.source_clk = UART_SCLK_APB;
-  int intr_alloc_flags = 0;
+  int intr_alloc_flags = ESP_INTR_FLAG_IRAM;
   uart_param_config(UART_NUM_0, &uart_config);
-  uart_driver_install(UART_NUM_0, BUF_SIZE * 2, 0, 0, NULL, intr_alloc_flags);
-  uart_param_config(UART_NUM_0, &uart_config);
+  uart_driver_install(UART_NUM_0, BUF_SIZE, BUF_SIZE, 0, NULL,
+                      intr_alloc_flags);
+  // uart_param_config(UART_NUM_0, &uart_config);
   // uart_set_pin(UART_NUM_0, TXD, RXD, RTS, CTS);
 }
 

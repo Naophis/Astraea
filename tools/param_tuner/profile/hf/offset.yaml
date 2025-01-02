@@ -38,7 +38,7 @@ dia135_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
-front_diff_th: 11 # 前壁制御左右偏差条件
+front_diff_th: 14 # 前壁制御左右偏差条件
 front_dist_offset_pivot_th: 84 #前壁制御接近条件
 front_dist_offset_pivot: 90
 
@@ -63,8 +63,8 @@ wall_off_hold_dist: 88
 ctrl_exist_wall_th_l: 50
 ctrl_exist_wall_th_r: 50
 go_straight_wide_ctrl_th: 75
-search_wall_off_l_dist_offset: 50.75
-search_wall_off_r_dist_offset: 49.0
+search_wall_off_l_dist_offset: 50.25
+search_wall_off_r_dist_offset: 50.0
 search_wall_off_enable: 1
 
 # 壁切れ壁あり判定
