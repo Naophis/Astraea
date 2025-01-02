@@ -21,8 +21,8 @@ pivot_back_offset: 6.0 # pivot時の前壁補正後のバック距離のオフ�
 pivot_back_dist0: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 44.750 #大→短くなる
-sla_wall_ref_r: 44.750 #大→短くなる
+sla_wall_ref_l: 45.950 #大→短くなる
+sla_wall_ref_r: 44.950 #大→短くなる
 sla_max_offset_dist: 6
 
 # Orvalスラロームオフセット距離壁補正リファレンス値

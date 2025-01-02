@@ -223,8 +223,7 @@ void PlanningTask::set_error_entity(
     std::shared_ptr<pid_error_entity_t> &_error_entity) {
   ee = _error_entity;
 }
-void PlanningTask::copy_error_entity(pid_error_entity_t &in) {
-}
+void PlanningTask::copy_error_entity(pid_error_entity_t &in) {}
 void PlanningTask::active_logging(FILE *_f) {
   log_active = true;
   log_list2_size = 0;
@@ -785,28 +784,46 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     ee->sen.error_i = 0;
     ee->sen_log.gain_zz = 0;
     ee->sen_log.gain_z = 0;
-
+    bool right_check = false;
+    bool left_check = false;
+    float right_error = 0;
+    float left_error = 0;
     if (!(check_front_left && check_front_right)) {
       if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
           se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l) {
         if ((1 < se->sen.r45.sensor_dist &&
              se->sen.r45.sensor_dist < exist_right45_2)) {
           error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
+          right_error =
+              prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
           check++;
+          right_check = true;
         }
       }
       if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
           se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l) {
         if ((1 < se->sen.l45.sensor_dist &&
              se->sen.l45.sensor_dist < exist_left45_2)) {
-          error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
+          error -= prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
+          left_error -=
+              (prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist);
+          error = left_error;
           check++;
+          left_check = true;
         }
       }
+      // if (right_check && left_check) {
+      //   if (ABS(right_error) < ABS(left_error)) {
+      //     error = right_error;
+      //   } else {
+      //     error = left_error;
+      //   }
+      // }
+
       if (check != 0) {
         type = SensingControlType::Piller;
       }
-      error *= prm->sen_ref_p.normal2.exist.front;
+      // error *= prm->sen_ref_p.normal2.exist.front;
     }
   } else {
     // TODO Uターン字は別ロジックに修正
@@ -816,12 +833,12 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
         if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
              m_PI) < prm->clear_angle) {
           tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
-          // ee->w.error_i = 0;
-          // ee->w.error_d = 0;
-          // ee->w.error_dd = 0;
-          // ee->ang.error_i = 0;
-          // ee->ang.error_d = 0;
-          // ee->ang.error_dd = 0;
+          ee->w.error_i = 0;
+          ee->w.error_d = 0;
+          ee->w.error_dd = 0;
+          ee->ang.error_i = 0;
+          ee->ang.error_d = 0;
+          ee->ang.error_dd = 0;
           w_reset = 0;
         }
       } else {

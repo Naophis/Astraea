@@ -41,14 +41,14 @@ normal:
     left90: 60
 normal2: #壁なし補正時
   ref:
-    right45: 49.0
-    left45: 50.25
+    right45: 58.50
+    left45: 57.75
     # front: 47
-    kireme_r: 46.5
-    kireme_l: 46.5
+    kireme_r: 58.50
+    kireme_l: 57.75
   exist:
-    right45: 55.0
-    left45: 55.0
+    right45: 60.0
+    left45: 60.0
     # right45: 48
     # left45: 48
     front: 0.125 #80

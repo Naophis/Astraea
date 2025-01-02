@@ -132,6 +132,7 @@ gyro_pid_gain_limitter:
 sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000]
 sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125]
 sensor_deg_limitter_dia: [3, 3, 3, 3, 3, 3, 3]
+# sensor_deg_limitter_piller: [10, 10, 10, 10, 10, 10, 10]
 sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
@@ -356,11 +357,11 @@ right_keep_dist_th: 8
 
 normal_sla_l_wall_off_th_in: 70 #[mm]
 normal_sla_r_wall_off_th_in: 70 #[mm]
-normal_sla_l_wall_off_th_out: 100 #[mm]
-normal_sla_r_wall_off_th_out: 100 #[mm]
+normal_sla_l_wall_off_th_out: 90 #[mm]
+normal_sla_r_wall_off_th_out: 90 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 139 #125~144
-normal_sla_r_wall_off_ref_cnt: 130 #125~144
+normal_sla_l_wall_off_ref_cnt: 140 #125~144
+normal_sla_r_wall_off_ref_cnt: 136 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6
