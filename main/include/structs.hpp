@@ -626,6 +626,7 @@ typedef struct {
 
   pid_error2_t v_val;
   pid_error2_t w_val;
+  pid_error2_t ang_val;
   pid_error2_t s_val;
 
 } pid_error_entity_t;
@@ -1024,6 +1025,13 @@ typedef struct {
   real16_T g_pid_i_v;
   real16_T g_pid_i2_v;
   real16_T g_pid_d_v;
+
+  real16_T ang_pid_p;
+  real16_T ang_pid_i;
+  real16_T ang_pid_d;
+  real16_T ang_pid_p_v;
+  real16_T ang_pid_i_v;
+  real16_T ang_pid_d_v;
 
   real16_T s_pid_p;
   real16_T s_pid_i;

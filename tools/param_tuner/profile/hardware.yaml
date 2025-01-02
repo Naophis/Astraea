@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.465 #新品 13.6165
-tire2: 13.465 #新品 13.6165
+tire: 13.555 #新品 13.6165
+tire2: 13.555 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -90,7 +90,7 @@ decel_delay_cnt: 5
 dedel_delay_n: 4
 
 search_sen_ctrl_limitter: 8
-torque_mode: 1
+torque_mode: 2
 
 ff_front_gain_14: 0.325
 ff_roll_gain_before: 0.25
@@ -128,6 +128,11 @@ gyro_pid_gain_limitter:
   d: 15
   b: 15
   c: 15
+
+sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000]
+sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125]
+sensor_deg_limitter_dia: [3, 3, 3, 3, 3, 3, 3]
+sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
   mode: 3
@@ -184,11 +189,11 @@ gyro_pid:
   # d: 0.0
   c: 0
 angle_pid: # pid for angle
-  p: 0.755
+  p: 37.5
   # i: 0.045
   # p: 0.195
   i: 0.0
-  d: -0.245
+  d: 40.0
   mode: 0
   b: 0
   c: 0
@@ -235,16 +240,16 @@ front_ctrl_keep_angle_pid: # pid for angle
 # 光センサー制御
 str_ang_pid:
   mode: 1
-  p: 0.000235 #search_mode
-  d: 0.0000125
-  b: 0.000275 #!searchm_mode
-  i: 0.0000075
+  # p: 0.000235 #search_mode
+  # d: 0.0000125
+  # b: 0.000275 #!searchm_mode
+  # i: 0.0000075
 
   # test
-  # p: 0.0 
-  # d: 0.0
-  # b: 0.0
-  # i: 0.0
+  p: 0.4975
+  d: 0.0
+  b: 0.4975
+  i: 0.0
   c: 0
 
 str_ang_dia_pid:
@@ -270,8 +275,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.00244925
-  gyro_w_gain_right: 0.00244925
+  gyro_w_gain_left: 0.0024505
+  gyro_w_gain_right: 0.0024505
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g

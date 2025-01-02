@@ -22,6 +22,7 @@
 
 #include "include/kalman_filter.hpp"
 #include "include/kalman_filter_matrix.hpp"
+#include <algorithm>
 // #include "hal/mcpwm_ll.h"
 
 class PlanningTask {
@@ -89,6 +90,10 @@ public:
 
   std::vector<float> axel_degenerate_x;
   std::vector<float> axel_degenerate_y;
+  std::vector<float> sensor_deg_limitter_v;
+  std::vector<float> sensor_deg_limitter_str;
+  std::vector<float> sensor_deg_limitter_dia;
+  std::vector<float> sensor_deg_limitter_piller;
 
   pid_error_entity_t error_entity;
 
@@ -221,8 +226,8 @@ private:
   float get_rpm_ff_val(TurnDirection td);
   float calc_sensor_pid();
   float calc_sensor_pid_dia();
-  float check_sen_error();
-  float check_sen_error_dia();
+  float check_sen_error(SensingControlType &type);
+  float check_sen_error_dia(SensingControlType &type);
 
   void calc_front_ctrl_duty();
   float error_right = 0;

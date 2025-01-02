@@ -144,6 +144,13 @@ enum class TurnDirection : int {
   End = 256,
 };
 
+enum class SensingControlType : int {
+  None = 0,
+  Wall = 1,
+  Piller = 2,
+  DiaPiller = 3,
+};
+
 enum class PathMotion : int {
   Right = 1,
   Left = 2,

@@ -360,7 +360,9 @@ void MainTask::load_hw_param() {
         *front_ctrl_angle_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
         *axel_degenerate_x, *axel_degenerate_y, *led_blight,
         *gyro_pid_gain_limitter, *motor_pid_gain_limitter,
-        *motor2_pid_gain_limitter, *motor3_pid_gain_limitter;
+        *motor2_pid_gain_limitter, *motor3_pid_gain_limitter,
+        *sensor_deg_limitter_v, *sensor_deg_limitter_str,
+        *sensor_deg_limitter_dia, *sensor_deg_limitter_piller;
 
   root = cJSON_Parse(str.c_str());
 
@@ -446,11 +448,37 @@ void MainTask::load_hw_param() {
   axel_degenerate_x = getItem(root, "axel_degenerate_x");
   axel_degenerate_y = getItem(root, "axel_degenerate_y");
   int list_size = cJSON_GetArraySize(axel_degenerate_x);
+  pt->axel_degenerate_x.clear();
+  pt->axel_degenerate_y.clear();
   for (int i = 0; i < list_size; i++) {
     const auto x = cJSON_GetArrayItem(axel_degenerate_x, i)->valuedouble;
     const auto y = cJSON_GetArrayItem(axel_degenerate_y, i)->valuedouble;
     pt->axel_degenerate_x.emplace_back(x);
     pt->axel_degenerate_y.emplace_back(y);
+  }
+
+  pt->sensor_deg_limitter_v.clear();
+  pt->sensor_deg_limitter_str.clear();
+  pt->sensor_deg_limitter_dia.clear();
+  pt->sensor_deg_limitter_piller.clear();
+
+  sensor_deg_limitter_v = getItem(root, "sensor_deg_limitter_v");
+  sensor_deg_limitter_str = getItem(root, "sensor_deg_limitter_str");
+  sensor_deg_limitter_dia = getItem(root, "sensor_deg_limitter_dia");
+  sensor_deg_limitter_piller = getItem(root, "sensor_deg_limitter_piller");
+  list_size = cJSON_GetArraySize(sensor_deg_limitter_v);
+  for (int i = 0; i < list_size; i++) {
+    const auto v = cJSON_GetArrayItem(sensor_deg_limitter_v, i)->valuedouble;
+    const auto str =
+        cJSON_GetArrayItem(sensor_deg_limitter_str, i)->valuedouble;
+    const auto dia =
+        cJSON_GetArrayItem(sensor_deg_limitter_dia, i)->valuedouble;
+    const auto piller =
+        cJSON_GetArrayItem(sensor_deg_limitter_piller, i)->valuedouble;
+    pt->sensor_deg_limitter_v.emplace_back(v);
+    pt->sensor_deg_limitter_str.emplace_back(str * m_PI / 180);
+    pt->sensor_deg_limitter_dia.emplace_back(dia * m_PI / 180);
+    pt->sensor_deg_limitter_piller.emplace_back(piller * m_PI / 180);
   }
 
   led_blight = getItem(root, "led_blight");

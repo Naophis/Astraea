@@ -94,10 +94,13 @@ void LoggingTask::task() {
     if (log_mode) {
       if (logging_active) {
         if (idx_slalom_log <= param->log_size) {
-          if (idx_slalom_log < 10 &&
-              (ABS(error_entity->s_val.p) > 5 ||
-               sensing_result->sen.r45.sensor_dist > 179 ||
-               sensing_result->sen.l45.sensor_dist > 179)) {
+          if (tgt_val->motion_type == MotionType::PIVOT) {
+            first = false;
+            set_data();
+          } else if (idx_slalom_log < 10 &&
+                     (ABS(error_entity->s_val.p) > 5 ||
+                      sensing_result->sen.r45.sensor_dist > 179 ||
+                      sensing_result->sen.l45.sensor_dist > 179)) {
             first = false;
           } else {
             set_data();
@@ -223,7 +226,8 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
          "m_pid_i_v,m_"
          "pid_i2_v,m_pid_d_v,g_pid_p,g_pid_i,g_pid_i2,g_pid_d,g_pid_p_v,g_pid_"
          "i_v,g_pid_i2_v,g_pid_d_v,s_pid_p,s_pid_i,s_pid_i2,s_pid_d,s_pid_p_v,"
-         "s_pid_i_v,s_pid_i2_v,s_pid_d_v,ff_duty_front,ff_duty_roll,ff_duty_"
+         "s_pid_i_v,s_pid_i2_v,s_pid_d_v,ang_pid_p,ang_pid_i,ang_pid_d,ang_pid_"
+         "p_v,ang_pid_i_v,ang_pid_d_v,ff_duty_front,ff_duty_roll,ff_duty_"
          "rpm_r,ff_duty_rpm_l,x,y\n");
   int c = 0;
   const char *f1 = format1.c_str();
@@ -347,19 +351,26 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
            halfToFloat(ld->g_pid_i2),          //
            halfToFloat(ld->g_pid_d));          //
 
-    printf(f6,                                   //
-           halfToFloat(ld->g_pid_p_v) * 1000,    //
-           halfToFloat(ld->g_pid_i_v) * 1000,    //
-           halfToFloat(ld->g_pid_i2_v) * 1000,   //
-           halfToFloat(ld->g_pid_d_v) * 1000,    //
-           halfToFloat(ld->s_pid_p),             //
-           halfToFloat(ld->s_pid_i),             //
-           halfToFloat(ld->s_pid_i2),            //
-           halfToFloat(ld->s_pid_d),             //
-           halfToFloat(ld->s_pid_p_v) * 10000,   //
-           halfToFloat(ld->s_pid_i_v) * 100000,  //
-           halfToFloat(ld->s_pid_i2_v) * 100000, //
-           halfToFloat(ld->s_pid_d_v) * 100000); //
+    printf(f6,                                 //
+           halfToFloat(ld->g_pid_p_v) * 1000,  //
+           halfToFloat(ld->g_pid_i_v) * 1000,  //
+           halfToFloat(ld->g_pid_i2_v) * 1000, //
+           halfToFloat(ld->g_pid_d_v) * 1000,  //
+           halfToFloat(ld->s_pid_p),           //
+           halfToFloat(ld->s_pid_i),           //
+           halfToFloat(ld->s_pid_i2),          //
+           halfToFloat(ld->s_pid_d),           //
+           halfToFloat(ld->s_pid_p_v),         //
+           halfToFloat(ld->s_pid_i_v),         //
+           halfToFloat(ld->s_pid_i2_v),        //
+           halfToFloat(ld->s_pid_d_v),         //
+           halfToFloat(ld->ang_pid_p),         //
+           halfToFloat(ld->ang_pid_i),         //
+           halfToFloat(ld->ang_pid_d),         //
+           halfToFloat(ld->ang_pid_p_v),       //
+           halfToFloat(ld->ang_pid_i_v),       //
+           halfToFloat(ld->ang_pid_d_v)        //
+    );                                         //
 
     printf(f7,                             //
            halfToFloat(ld->ff_duty_front), //
@@ -461,7 +472,7 @@ void IRAM_ATTR LoggingTask::set_data() {
 
   ld->motion_type = static_cast<int>(tgt_val->motion_type);
 
-  ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen * 1000);
+  ld->duty_sensor_ctrl = floatToHalf(sensing_result->ego.duty.sen);
 
   ld->sen_log_l45 = floatToHalf(sensing_result->sen.l45.sensor_dist);
   ld->sen_log_r45 = floatToHalf(sensing_result->sen.r45.sensor_dist);
@@ -500,6 +511,14 @@ void IRAM_ATTR LoggingTask::set_data() {
   } else {
     ld->g_pid_d_v = floatToHalf(error_entity->w_val.d_val);
   }
+
+  ld->ang_pid_p = floatToHalf(error_entity->ang_val.p);
+  ld->ang_pid_i = floatToHalf(error_entity->ang_val.i);
+  ld->ang_pid_d = floatToHalf(error_entity->ang_val.d);
+  ld->ang_pid_p_v = floatToHalf(error_entity->ang_val.p_val);
+  ld->ang_pid_i_v = floatToHalf(error_entity->ang_val.i_val);
+  ld->ang_pid_d_v = floatToHalf(error_entity->ang_val.d_val);
+
   ld->s_pid_p = floatToHalf(error_entity->s_val.p);
   ld->s_pid_i = floatToHalf(error_entity->s_val.i);
   ld->s_pid_i2 = floatToHalf(error_entity->s_val.i2);

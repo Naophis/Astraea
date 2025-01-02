@@ -39,10 +39,10 @@ constexpr int GY_CYCLE = 2500; // 2500=1/4msec
 constexpr int GY_MODE = 0;
 constexpr float cell_size = 90;
 
-//Banshee
-// constexpr gpio_num_t SDA_PIN = GPIO_NUM_16;
-// constexpr gpio_num_t SCL_PIN = GPIO_NUM_14;
-//Exia
+// Banshee
+//  constexpr gpio_num_t SDA_PIN = GPIO_NUM_16;
+//  constexpr gpio_num_t SCL_PIN = GPIO_NUM_14;
+// Exia
 constexpr gpio_num_t SDA_PIN = GPIO_NUM_15;
 constexpr gpio_num_t SCL_PIN = GPIO_NUM_14;
 
@@ -89,26 +89,26 @@ constexpr gpio_num_t ENC_MOSI = GPIO_NUM_9; // A
 
 constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_46;
 
-//Banshee
-// #define SEN_R90 ADC2_CHANNEL_2
-// #define SEN_L90 ADC2_CHANNEL_4
-// #define SEN_R45 ADC2_CHANNEL_6
-// #define SEN_L45 ADC2_CHANNEL_7
-// #define BATTERY ADC2_CHANNEL_9
-//Exia
+// Banshee
+//  #define SEN_R90 ADC2_CHANNEL_2
+//  #define SEN_L90 ADC2_CHANNEL_4
+//  #define SEN_R45 ADC2_CHANNEL_6
+//  #define SEN_L45 ADC2_CHANNEL_7
+//  #define BATTERY ADC2_CHANNEL_9
+// Exia
 #define SEN_R90 ADC2_CHANNEL_2
 #define SEN_L90 ADC2_CHANNEL_5
 #define SEN_R45 ADC2_CHANNEL_7
 #define SEN_L45 ADC2_CHANNEL_6
 #define BATTERY ADC2_CHANNEL_9
 
-//Banshee
-// #define SEN_R90_GPIO GPIO_NUM_13
-// #define SEN_L90_GPIO GPIO_NUM_15
-// #define SEN_R45_GPIO GPIO_NUM_17
-// #define SEN_L45_GPIO GPIO_NUM_18
-// #define BATTERY_GPIO GPIO_NUM_20
-//Exia
+// Banshee
+//  #define SEN_R90_GPIO GPIO_NUM_13
+//  #define SEN_L90_GPIO GPIO_NUM_15
+//  #define SEN_R45_GPIO GPIO_NUM_17
+//  #define SEN_L45_GPIO GPIO_NUM_18
+//  #define BATTERY_GPIO GPIO_NUM_20
+// Exia
 #define SEN_R90_GPIO GPIO_NUM_13
 #define SEN_L90_GPIO GPIO_NUM_16
 #define SEN_R45_GPIO GPIO_NUM_18
@@ -164,8 +164,9 @@ static const std::string format3("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0."
 static const std::string format4("%0.3f,%0.3f,%0.3f,%0.3f,%d,%d,%d,%d,%d,%d,");
 static const std::string format5(
     "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
-static const std::string format6(
-    "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
+static const std::string
+    format6("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,"
+            "%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,");
 static const std::string format7("%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
 static const std::string
     formatsysid("%d,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f,%0.3f\n");
