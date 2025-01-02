@@ -224,45 +224,6 @@ void PlanningTask::set_error_entity(
   ee = _error_entity;
 }
 void PlanningTask::copy_error_entity(pid_error_entity_t &in) {
-  // error_entity_ptr->v_val.p = in.v_val.p;
-  // error_entity_ptr->v_val.i = in.v_val.i;
-  // error_entity_ptr->v_val.i2 = in.v_val.i2;
-  // error_entity_ptr->v_val.d = in.v_val.d;
-  // error_entity_ptr->v_val.p_val = in.v_val.p_val;
-  // error_entity_ptr->v_val.i_val = in.v_val.i_val;
-  // error_entity_ptr->v_val.i2_val = in.v_val.i2_val;
-  // error_entity_ptr->v_val.d_val = in.v_val.d_val;
-  // error_entity_ptr->v_val.zz = in.v_val.zz;
-  // error_entity_ptr->v_val.z = in.v_val.z;
-
-  // error_entity_ptr->w_val.p = in.w_val.p;
-  // error_entity_ptr->w_val.i = in.w_val.i;
-  // error_entity_ptr->w_val.i2 = in.w_val.i2;
-  // error_entity_ptr->w_val.d = in.w_val.d;
-  // error_entity_ptr->w_val.p_val = in.w_val.p_val;
-  // error_entity_ptr->w_val.i_val = in.w_val.i_val;
-  // error_entity_ptr->w_val.i2_val = in.w_val.i2_val;
-  // error_entity_ptr->w_val.d_val = in.w_val.d_val;
-  // error_entity_ptr->w_val.zz = in.w_val.zz;
-  // error_entity_ptr->w_val.z = in.w_val.z;
-
-  // error_entity_ptr->s_val.p = in.s_val.p;
-  // error_entity_ptr->s_val.i = in.s_val.i;
-  // error_entity_ptr->s_val.i2 = in.s_val.i2;
-  // error_entity_ptr->s_val.d = in.s_val.d;
-  // error_entity_ptr->s_val.p_val = in.s_val.p_val;
-  // error_entity_ptr->s_val.i_val = in.s_val.i_val;
-  // error_entity_ptr->s_val.i2_val = in.s_val.i2_val;
-  // error_entity_ptr->s_val.d_val = in.s_val.d_val;
-  // error_entity_ptr->s_val.zz = in.s_val.zz;
-  // error_entity_ptr->s_val.z = in.s_val.z;
-
-  // error_entity_ptr->ang_val.p = in.ang_val.p;
-  // error_entity_ptr->ang_val.i = in.ang_val.i;
-  // error_entity_ptr->ang_val.d = in.ang_val.d;
-  // error_entity_ptr->ang_val.p_val = in.ang_val.p_val;
-  // error_entity_ptr->ang_val.i_val = in.ang_val.i_val;
-  // error_entity_ptr->ang_val.d_val = in.ang_val.d_val;
 }
 void PlanningTask::active_logging(FILE *_f) {
   log_active = true;
