@@ -33,6 +33,7 @@ public:
   void stop_slalom_log();
 
   void dump_log(const std::string file_name);
+  void dump_log2(const std::string file_name);
   void dump_log_sysid(const std::string file_name);
 
   void save(const std::string file_name);
@@ -43,11 +44,21 @@ public:
   void exec_log();
   void set_data();
 
+  void print_header();
+
   bool active_slalom_log = false;
   std::vector<std::shared_ptr<log_data_t2>> log_vec;
   std::vector<std::shared_ptr<sysid_log>> sysidlog_vec;
 
 private:
+  LogStruct1 ls1;
+  LogStruct2 ls2;
+  LogStruct3 ls3;
+  LogStruct4 ls4;
+  LogStruct5 ls5;
+  LogStruct6 ls6;
+  LogStruct7 ls7;
+
   bool logging_active = false;
   bool log_mode = true;
   bool req_logging_active = false;

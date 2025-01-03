@@ -57,7 +57,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 11500
+log_size: 10500
 
 front_ctrl_error_th: 1
 

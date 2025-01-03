@@ -1096,4 +1096,121 @@ typedef struct {
   float total_time = 0;
 } planning_time_t;
 
+typedef struct {
+  int index = 1;
+  float ideal_v = 2;
+  float v_c = 3;
+  float v_c2 = 4;
+  float v_l = 5;
+  float v_r = 6;
+  int v_l_enc = 7;
+  int v_r_enc = 8;
+  float v_l_enc_sin = 9;
+  float v_r_enc_sin = 10;
+  float accl = 11;
+  float accl_x = 12;
+} LogStruct1 __attribute__((packed));
+
+typedef struct {
+  float ideal_w = 13;
+  float w_lp = 14;
+  float alpha = 15;
+  float ideal_dist = 16;
+
+  float dist = 17;
+  float dist_kf = 18;
+  float ideal_ang = 19;
+  float ang = 20;
+
+  float ang_kf = 21;
+  float left90 = 22;
+  float left45 = 23;
+  float front = 24;
+} LogStruct2 __attribute__((packed));
+
+typedef struct {
+  float right45 = 25;
+  float right90 = 26;
+  float left90_d = 27;
+  float left45_d = 28;
+
+  float front_d = 29;
+  float right45_d = 30;
+  float right90_d = 31;
+  float left90_far_d = 32;
+
+  float front_far_d = 33;
+  float right90_far_d = 34;
+  float battery = 35;
+  float duty_l = 36;
+} LogStruct3 __attribute__((packed));
+
+typedef struct {
+  float duty_r = 37;
+  int motion_state = 38;
+  float duty_sen = 39;
+  float dist_mod90 = 40;
+
+  float sen_dist_l45 = 41;
+  float sen_dist_r45 = 42;
+  int timestamp = 43;
+  int sen_calc_time = 44;
+
+  int sen_calc_time2 = 45;
+  int pln_calc_time = 46;
+  int pln_calc_time2 = 47;
+  int pln_time_diff = 48;
+} LogStruct4 __attribute__((packed));
+
+typedef struct {
+  float m_pid_p = 49;
+  float m_pid_i = 50;
+  float m_pid_i2 = 51;
+  float m_pid_d = 52;
+
+  float m_pid_p_v = 53;
+  float m_pid_i_v = 54;
+  float m_pid_i2_v = 55;
+  float m_pid_d_v = 56;
+
+  float g_pid_p = 57;
+  float g_pid_i = 58;
+  float g_pid_i2 = 59;
+  float g_pid_d = 60;
+} LogStruct5 __attribute__((packed));
+
+typedef struct {
+  float g_pid_p_v = 61;
+  float g_pid_i_v = 62;
+  float g_pid_i2_v = 63;
+  float g_pid_d_v = 64;
+
+  float s_pid_p = 65;
+  float s_pid_i = 66;
+  float s_pid_i2 = 67;
+  float s_pid_d = 68;
+
+  float s_pid_p_v = 69;
+  float s_pid_i_v = 70;
+  float s_pid_i2_v = 71;
+  float s_pid_d_v = 72;
+} LogStruct6 __attribute__((packed));
+
+typedef struct {
+  float ang_pid_p = 73;
+  float ang_pid_i = 74;
+  float ang_pid_d = 75;
+  float ang_pid_p_v = 76;
+
+  float ang_pid_i_v = 77;
+  float ang_pid_d_v = 78;
+  float ff_duty_front = 79;
+  float ff_duty_roll = 80;
+
+  float ff_duty_rpm_r = 81;
+  float ff_duty_rpm_l = 82;
+  float x = 83;
+  float y = 84;
+} LogStruct7 __attribute__((packed));
+
 #endif

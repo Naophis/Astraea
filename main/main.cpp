@@ -49,7 +49,6 @@
 #include <eigen3/Eigen/Eigen>
 
 // #include <Eigen/Core>
-
 void init_uart() {
   uart_config_t uart_config;
   uart_config.baud_rate = 3 * 1000 * 1000;
@@ -57,14 +56,14 @@ void init_uart() {
   uart_config.parity = UART_PARITY_DISABLE;
   uart_config.stop_bits = UART_STOP_BITS_1;
   uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
-  // uart_config.rx_flow_ctrl_thresh = 122;
   uart_config.source_clk = UART_SCLK_APB;
-  int intr_alloc_flags = ESP_INTR_FLAG_IRAM;
+  int intr_alloc_flags = 0; // ESP_INTR_FLAG_IRAM;
+  uart_driver_delete(UART_NUM_0);
+  // uart_driver_delete(UART_NUM_1);
   uart_param_config(UART_NUM_0, &uart_config);
-  uart_driver_install(UART_NUM_0, BUF_SIZE, BUF_SIZE, 0, NULL,
+  uart_driver_install(UART_NUM_0, BUF_SIZE * 4, BUF_SIZE * 4, 0, NULL,
                       intr_alloc_flags);
-  // uart_param_config(UART_NUM_0, &uart_config);
-  // uart_set_pin(UART_NUM_0, TXD, RXD, RTS, CTS);
+  uart_set_pin(UART_NUM_0, TXD, RXD, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
 void init_gpio() {
@@ -154,6 +153,17 @@ void set_motor_hz(unsigned long hz, int res) {
   // mcpwm_set_duty_type(MCPWM_UNIT_0, MCPWM_TIMER_1, MCPWM_OPR_B,
   //                     MCPWM_DUTY_MODE_0);
 }
+
+// LogStruct1 ls1;
+// LogStruct2 ls2;
+// LogStruct3 ls3;
+// LogStruct4 ls4;
+// LogStruct5 ls5;
+// LogStruct6 ls6;
+// LogStruct7 ls7;
+
+// void IRAM_ATTR print_log() {}
+
 extern "C" void app_main() {
   // Adachi adachi;
 
@@ -170,6 +180,30 @@ extern "C" void app_main() {
   //   auto fourth = lsm6dsr.read_2byte_retry(0x26);
   //   printf("first: %d, second: %d, third: %d, fourth: %d\n", first, second,
   //          third, fourth);
+  // }
+
+  // print_log();
+
+  // printf("test: %d\n", sizeof(LogStruct1));
+  // vTaskDelay(500.0 / portTICK_RATE_MS);
+  // lt->print_header();
+  // int cnt = 0;
+  // while (1) {
+  //   ls1.index = cnt++;
+  //   uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
+  //   vTaskDelay(1.0 / portTICK_RATE_MS);
+  //   uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
+  //   vTaskDelay(1.0 / portTICK_RATE_MS);
+  //   uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
+  //   vTaskDelay(1.0 / portTICK_RATE_MS);
+  //   uart_write_bytes(UART_NUM_0, &ls4, sizeof(LogStruct4));
+  //   vTaskDelay(1.0 / portTICK_RATE_MS);
+  //   uart_write_bytes(UART_NUM_0, &ls5, sizeof(LogStruct5));
+  //   vTaskDelay(1.0 / portTICK_RATE_MS);
+  //   uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
+  //   vTaskDelay(1.0 / portTICK_RATE_MS);
+  //   uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
+  //   vTaskDelay(100.0 / portTICK_RATE_MS);
   // }
 
   QueueHandle_t xQueue;

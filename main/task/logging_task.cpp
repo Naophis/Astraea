@@ -207,7 +207,317 @@ void LoggingTask::save_sysid(std::string file_name) {
 //   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
 // }
 
+void IRAM_ATTR LoggingTask::print_header() {
+  const TickType_t xDelay2 = 50.0 / portTICK_PERIOD_MS;
+
+  const int size = sizeof(LogStruct1) + sizeof(LogStruct2) +
+                   sizeof(LogStruct3) + sizeof(LogStruct4) +
+                   sizeof(LogStruct5) + sizeof(LogStruct6) + sizeof(LogStruct7);
+  printf("ready___:%d\n", size);
+  vTaskDelay(xDelay2);
+
+  // LogStruct1
+  printf("index:int:%d\n", sizeof(ls1.index));
+  printf("ideal_v:float:%d\n", sizeof(ls1.ideal_v));
+  printf("v_c:float:%d\n", sizeof(ls1.v_c));
+  printf("v_c2:float:%d\n", sizeof(ls1.v_c2));
+
+  printf("v_l:float:%d\n", sizeof(ls1.v_l));
+  printf("v_r:float:%d\n", sizeof(ls1.v_r));
+  printf("v_l_enc:int:%d\n", sizeof(ls1.v_l_enc));
+  printf("v_r_enc:int:%d\n", sizeof(ls1.v_r_enc));
+
+  printf("v_l_enc_sin:float:%d\n", sizeof(ls1.v_l_enc_sin));
+  printf("v_r_enc_sin:float:%d\n", sizeof(ls1.v_r_enc_sin));
+  printf("accl:float:%d\n", sizeof(ls1.accl));
+  printf("accl_x:float:%d\n", sizeof(ls1.accl_x));
+
+  // LogStruct2
+  printf("ideal_w:float:%d\n", sizeof(ls2.ideal_w));
+  printf("w_lp:float:%d\n", sizeof(ls2.w_lp));
+  printf("alpha:float:%d\n", sizeof(ls2.alpha));
+  printf("ideal_dist:float:%d\n", sizeof(ls2.ideal_dist));
+
+  printf("dist:float:%d\n", sizeof(ls2.dist));
+  printf("dist_kf:float:%d\n", sizeof(ls2.dist_kf));
+  printf("ideal_ang:float:%d\n", sizeof(ls2.ideal_ang));
+  printf("ang:float:%d\n", sizeof(ls2.ang));
+
+  printf("ang_kf:float:%d\n", sizeof(ls2.ang_kf));
+  printf("left90:float:%d\n", sizeof(ls2.left90));
+  printf("left45:float:%d\n", sizeof(ls2.left45));
+  printf("front:float:%d\n", sizeof(ls2.front));
+
+  // LogStruct3
+  printf("right45:float:%d\n", sizeof(ls3.right45));
+  printf("right90:float:%d\n", sizeof(ls3.right90));
+  printf("left90_d:float:%d\n", sizeof(ls3.left90_d));
+  printf("left45_d:float:%d\n", sizeof(ls3.left45_d));
+
+  printf("front_d:float:%d\n", sizeof(ls3.front_d));
+  printf("right45_d:float:%d\n", sizeof(ls3.right45_d));
+  printf("right90_d:float:%d\n", sizeof(ls3.right90_d));
+  printf("left90_far_d:float:%d\n", sizeof(ls3.left90_far_d));
+
+  printf("front_far_d:float:%d\n", sizeof(ls3.front_far_d));
+  printf("right90_far_d:float:%d\n", sizeof(ls3.right90_far_d));
+  printf("battery:float:%d\n", sizeof(ls3.battery));
+  printf("duty_l:float:%d\n", sizeof(ls3.duty_l));
+
+  // LogStruct4
+  printf("duty_r:float:%d\n", sizeof(ls4.duty_r));
+  printf("motion_state:int:%d\n", sizeof(ls4.motion_state));
+  printf("duty_sen:float:%d\n", sizeof(ls4.duty_sen));
+  printf("dist_mod90:float:%d\n", sizeof(ls4.dist_mod90));
+
+  printf("sen_dist_l45:float:%d\n", sizeof(ls4.sen_dist_l45));
+  printf("sen_dist_r45:float:%d\n", sizeof(ls4.sen_dist_r45));
+  printf("timestamp:int:%d\n", sizeof(ls4.timestamp));
+  printf("sen_calc_time:int:%d\n", sizeof(ls4.sen_calc_time));
+
+  printf("sen_calc_time2:int:%d\n", sizeof(ls4.sen_calc_time2));
+  printf("pln_calc_time:int:%d\n", sizeof(ls4.pln_calc_time));
+  printf("pln_calc_time2:int:%d\n", sizeof(ls4.pln_calc_time2));
+  printf("pln_time_diff:int:%d\n", sizeof(ls4.pln_time_diff));
+
+  // LogStruct5
+  printf("m_pid_p:float:%d\n", sizeof(ls5.m_pid_p));
+  printf("m_pid_i:float:%d\n", sizeof(ls5.m_pid_i));
+  printf("m_pid_i2:float:%d\n", sizeof(ls5.m_pid_i2));
+  printf("m_pid_d:float:%d\n", sizeof(ls5.m_pid_d));
+
+  printf("m_pid_p_v:float:%d\n", sizeof(ls5.m_pid_p_v));
+  printf("m_pid_i_v:float:%d\n", sizeof(ls5.m_pid_i_v));
+  printf("m_pid_i2_v:float:%d\n", sizeof(ls5.m_pid_i2_v));
+  printf("m_pid_d_v:float:%d\n", sizeof(ls5.m_pid_d_v));
+
+  printf("g_pid_p:float:%d\n", sizeof(ls5.g_pid_p));
+  printf("g_pid_i:float:%d\n", sizeof(ls5.g_pid_i));
+  printf("g_pid_i2:float:%d\n", sizeof(ls5.g_pid_i2));
+  printf("g_pid_d:float:%d\n", sizeof(ls5.g_pid_d));
+
+  // LogStruct6
+  printf("g_pid_p_v:float:%d\n", sizeof(ls6.g_pid_p_v));
+  printf("g_pid_i_v:float:%d\n", sizeof(ls6.g_pid_i_v));
+  printf("g_pid_i2_v:float:%d\n", sizeof(ls6.g_pid_i2_v));
+  printf("g_pid_d_v:float:%d\n", sizeof(ls6.g_pid_d_v));
+
+  printf("s_pid_p:float:%d\n", sizeof(ls6.s_pid_p));
+  printf("s_pid_i:float:%d\n", sizeof(ls6.s_pid_i));
+  printf("s_pid_i2:float:%d\n", sizeof(ls6.s_pid_i2));
+  printf("s_pid_d:float:%d\n", sizeof(ls6.s_pid_d));
+
+  printf("s_pid_p_v:float:%d\n", sizeof(ls6.s_pid_p_v));
+  printf("s_pid_i_v:float:%d\n", sizeof(ls6.s_pid_i_v));
+  printf("s_pid_i2_v:float:%d\n", sizeof(ls6.s_pid_i2_v));
+  printf("s_pid_d_v:float:%d\n", sizeof(ls6.s_pid_d_v));
+
+  // LogStruct7
+  printf("ang_pid_p:float:%d\n", sizeof(ls7.ang_pid_p));
+  printf("ang_pid_i:float:%d\n", sizeof(ls7.ang_pid_i));
+  printf("ang_pid_d:float:%d\n", sizeof(ls7.ang_pid_d));
+  printf("ang_pid_p_v:float:%d\n", sizeof(ls7.ang_pid_p_v));
+
+  printf("ang_pid_i_v:float:%d\n", sizeof(ls7.ang_pid_i_v));
+  printf("ang_pid_d_v:float:%d\n", sizeof(ls7.ang_pid_d_v));
+  printf("ff_duty_front:float:%d\n", sizeof(ls7.ff_duty_front));
+  printf("ff_duty_roll:float:%d\n", sizeof(ls7.ff_duty_roll));
+
+  printf("ff_duty_rpm_r:float:%d\n", sizeof(ls7.ff_duty_rpm_r));
+  printf("ff_duty_rpm_l:float:%d\n", sizeof(ls7.ff_duty_rpm_l));
+  printf("x:float:%d\n", sizeof(ls7.x));
+  printf("y:float:%d\n", sizeof(ls7.y));
+
+  vTaskDelay(xDelay2);
+  printf("start___\n");
+  vTaskDelay(xDelay2);
+}
+
 void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
+  const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
+  const float PI = 3.141592653589793238;
+  int i = 0;
+  int c = 0;
+  print_header();
+
+  const auto len = log_vec.size();
+  for (const auto &ld : log_vec) {
+    ls1.index = i++;
+    if (i == len) {
+      break;
+    }
+    ls1.ideal_v = halfToFloat(ld->img_v);
+    ls1.v_c = halfToFloat(ld->v_c);
+    ls1.v_c2 = halfToFloat(ld->v_c2);
+    ls1.v_l = halfToFloat(ld->v_l);
+    ls1.v_r = halfToFloat(ld->v_r);
+    ls1.v_l_enc = ld->v_l_enc;
+    ls1.v_r_enc = ld->v_r_enc;
+    ls1.v_l_enc_sin = std::sin(2.0 * PI * ld->v_l_enc / ENC_RESOLUTION);
+    ls1.v_r_enc_sin = std::sin(2.0 * PI * ld->v_r_enc / ENC_RESOLUTION);
+    ls1.accl = halfToFloat(ld->accl) * 1000;
+    ls1.accl_x = halfToFloat(ld->accl_x);
+
+    ls2.ideal_w = halfToFloat(ld->img_w);
+    ls2.w_lp = halfToFloat(ld->w_lp);
+    ls2.alpha = halfToFloat(ld->alpha);
+    ls2.ideal_dist = halfToFloat(ld->img_dist);
+    ls2.dist = halfToFloat(ld->dist);
+    ls2.dist_kf = halfToFloat(ld->dist_kf);
+    ls2.ideal_ang = halfToFloat(ld->img_ang);
+    ls2.ang = halfToFloat(ld->ang);
+    ls2.ang_kf = halfToFloat(ld->ang_kf);
+    ls2.left90 = halfToFloat(ld->left90_lp);
+    ls2.left45 = halfToFloat(ld->left45_lp);
+    ls2.front =
+        ((halfToFloat(ld->left90_lp) + halfToFloat(ld->right90_lp)) / 2);
+
+    ls3.right45 = halfToFloat(ld->right45_lp);
+    ls3.right90 = halfToFloat(ld->right90_lp);
+
+    auto l90 = calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90.a,
+                           param->sensor_gain.l90.b, ld->motion_type);
+    auto l45 = calc_sensor(halfToFloat(ld->left45_lp), param->sensor_gain.l45.a,
+                           param->sensor_gain.l45.b, ld->motion_type);
+    auto r45 =
+        calc_sensor(halfToFloat(ld->right45_lp), param->sensor_gain.r45.a,
+                    param->sensor_gain.r45.b, ld->motion_type);
+    auto r90 =
+        calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90.a,
+                    param->sensor_gain.r90.b, ld->motion_type);
+
+    auto l90_far =
+        calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90_far.a,
+                    param->sensor_gain.l90_far.b, ld->motion_type);
+    auto r90_far =
+        calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90_far.a,
+                    param->sensor_gain.r90_far.b, ld->motion_type);
+    float front = 0;
+    if (l90 > 0 && r90 > 0) {
+      front = (l90 + r90) / 2;
+    } else if (l90 == 0 && r90 > 0) {
+      front = r90;
+    } else if (l90 > 0 && r90 == 0) {
+      front = l90;
+    } else {
+      front = 0;
+    }
+    float front_far = 0;
+    if (l90_far > 0 && r90_far > 0) {
+      front_far = (l90_far + r90_far) / 2;
+    } else if (l90_far > 0 && r90_far == 0) {
+      front_far = l90_far;
+    } else if (l90_far == 0 && r90_far > 0) {
+      front_far = r90_far;
+    } else {
+      front_far = 0;
+    }
+    auto dist = halfToFloat(ld->img_dist);
+    float dist_mod = (int)(dist / param->dist_mod_num);
+    float tmp_dist = dist - param->dist_mod_num * dist_mod;
+
+    ls3.left90_d = l90;
+    ls3.left45_d = l45;
+    ls3.front_d = front;
+    ls3.right45_d = r45;
+    ls3.right90_d = r90;
+    ls3.left90_far_d = l90_far;
+    ls3.front_far_d = front_far;
+    ls3.right90_far_d = r90_far;
+    ls3.battery = halfToFloat(ld->battery_lp);
+    ls3.duty_l = halfToFloat(ld->duty_l);
+
+    ls4.duty_r = halfToFloat(ld->duty_r);
+    ls4.motion_state = ld->motion_type;
+
+    ls4.duty_sen = halfToFloat(ld->duty_sensor_ctrl);
+    ls4.dist_mod90 = dist_mod;
+    ls4.sen_dist_l45 = halfToFloat(ld->sen_log_l45);
+    ls4.sen_dist_r45 = halfToFloat(ld->sen_log_r45);
+
+    ls4.timestamp = ld->motion_timestamp;
+    ls4.sen_calc_time = ld->sen_calc_time;
+    ls4.sen_calc_time2 = ld->sen_calc_time2;
+    ls4.pln_calc_time = ld->pln_calc_time;
+    ls4.pln_calc_time2 = ld->pln_calc_time2;
+    ls4.pln_time_diff = ld->pln_time_diff;
+
+    ls5.m_pid_p = halfToFloat(ld->m_pid_p);
+    ls5.m_pid_i = halfToFloat(ld->m_pid_i);
+    ls5.m_pid_i2 = halfToFloat(ld->m_pid_i2);
+    ls5.m_pid_d = halfToFloat(ld->m_pid_d);
+    ls5.m_pid_p_v = halfToFloat(ld->m_pid_p_v);
+    ls5.m_pid_i_v = halfToFloat(ld->m_pid_i_v);
+    ls5.m_pid_i2_v = halfToFloat(ld->m_pid_i2_v);
+    ls5.m_pid_d_v = halfToFloat(ld->m_pid_d_v);
+
+    ls5.g_pid_p = halfToFloat(ld->g_pid_p);
+    ls5.g_pid_i = halfToFloat(ld->g_pid_i);
+    ls5.g_pid_i2 = halfToFloat(ld->g_pid_i2);
+    ls5.g_pid_d = halfToFloat(ld->g_pid_d);
+
+    ls6.g_pid_p_v = halfToFloat(ld->g_pid_p_v);
+    ls6.g_pid_i_v = halfToFloat(ld->g_pid_i_v);
+    ls6.g_pid_i2_v = halfToFloat(ld->g_pid_i2_v);
+    ls6.g_pid_d_v = halfToFloat(ld->g_pid_d_v);
+
+    ls6.s_pid_p = halfToFloat(ld->s_pid_p);
+    ls6.s_pid_i = halfToFloat(ld->s_pid_i);
+    ls6.s_pid_i2 = halfToFloat(ld->s_pid_i2);
+    ls6.s_pid_d = halfToFloat(ld->s_pid_d);
+    ls6.s_pid_p_v = halfToFloat(ld->s_pid_p_v);
+    ls6.s_pid_i_v = halfToFloat(ld->s_pid_i_v);
+    ls6.s_pid_i2_v = halfToFloat(ld->s_pid_i2_v);
+    ls6.s_pid_d_v = halfToFloat(ld->s_pid_d_v);
+
+    ls7.ang_pid_p = halfToFloat(ld->ang_pid_p);
+    ls7.ang_pid_i = halfToFloat(ld->ang_pid_i);
+    ls7.ang_pid_d = halfToFloat(ld->ang_pid_d);
+    ls7.ang_pid_p_v = halfToFloat(ld->ang_pid_p_v);
+    ls7.ang_pid_i_v = halfToFloat(ld->ang_pid_i_v);
+    ls7.ang_pid_d_v = halfToFloat(ld->ang_pid_d_v);
+
+    ls7.ff_duty_front = halfToFloat(ld->ff_duty_front);
+    ls7.ff_duty_roll = halfToFloat(ld->ff_duty_roll);
+    ls7.ff_duty_rpm_r = halfToFloat(ld->ff_duty_rpm_r);
+    ls7.ff_duty_rpm_l = halfToFloat(ld->ff_duty_rpm_l);
+    ls7.x = halfToFloat(ld->pos_x);
+    ls7.y = halfToFloat(ld->pos_y);
+
+    uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
+    uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
+    uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
+    uart_write_bytes(UART_NUM_0, &ls4, sizeof(LogStruct4));
+    uart_write_bytes(UART_NUM_0, &ls5, sizeof(LogStruct5));
+    uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
+    uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
+    c++;
+    if (c == 50) {
+      c = 0;
+      vTaskDelay(1.0 / portTICK_PERIOD_MS);
+    }
+  }
+
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  ls1.index = -1;
+  uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
+  uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
+  uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
+  uart_write_bytes(UART_NUM_0, &ls4, sizeof(LogStruct4));
+  uart_write_bytes(UART_NUM_0, &ls5, sizeof(LogStruct5));
+  uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
+  uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+
+  printf("end___\n"); // csvファイル追記終了トリガー
+
+  printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+  log_vec.clear();
+  // umount();
+  // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
+}
+
+void IRAM_ATTR LoggingTask::dump_log2(std::string file_name) {
   const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
   char line_buf[LINE_BUF_SIZE];
   printf("start___\n"); // csvファイル作成トリガー
@@ -242,6 +552,29 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
 
   for (const auto &ld : log_vec) {
     int len = 0;
+    // printf(f1,                                                  //
+    //        i++,                                                 //
+    //        halfToFloat(ld->img_v),                              //
+    //        halfToFloat(ld->v_c),                                //
+    //        halfToFloat(ld->v_c2),                               //
+    //        halfToFloat(ld->v_l),                                //
+    //        halfToFloat(ld->v_r),                                //
+    //        (ld->v_l_enc),                                       //
+    //        (ld->v_r_enc),                                       //
+    //        (std::sin(2.0 * PI * ld->v_l_enc / ENC_RESOLUTION)), //
+    //        (std::sin(2.0 * PI * ld->v_r_enc / ENC_RESOLUTION)), //
+    //        halfToFloat(ld->accl) * 1000,                        //
+    //        halfToFloat(ld->accl_x));                            // 8
+    // printf(f2,                                                  //
+    //        halfToFloat(ld->img_w),                              //
+    //        halfToFloat(ld->w_lp),                               //
+    //        halfToFloat(ld->alpha),                              //
+    //        halfToFloat(ld->img_dist),                           //
+    //        halfToFloat(ld->dist),                               //
+    //        halfToFloat(ld->dist_kf),                            //
+    //        halfToFloat(ld->img_ang),                            //
+    //        halfToFloat(ld->ang),                                //
+    //        halfToFloat(ld->ang_kf));                            // 7
 
     len += snprintf(line_buf + len, sizeof(line_buf) - len, f1,          //
                     i++,                                                 //
@@ -312,6 +645,20 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     float dist_mod = (int)(dist / param->dist_mod_num);
     float tmp_dist = dist - param->dist_mod_num * dist_mod;
 
+    // printf(
+    //     f3,                                                               //
+    //     halfToFloat(ld->left90_lp),                                       //
+    //     halfToFloat(ld->left45_lp),                                       //
+    //     ((halfToFloat(ld->left90_lp) + halfToFloat(ld->right90_lp)) / 2), //
+    //     halfToFloat(ld->right45_lp),                                      //
+    //     halfToFloat(ld->right90_lp),                                      //
+    //     //  halfToFloat(ld->left45_2_lp), //
+    //     //  halfToFloat(ld->right45_2_lp), // l90, l45, front, r45, r90,   //
+    //     l90_far, front_far, r90_far, //
+    //     halfToFloat(ld->battery_lp), //
+    //     halfToFloat(ld->duty_l),     //
+    //     halfToFloat(ld->duty_r),     //
+    //     (ld->motion_type));          // 16
     len += snprintf(
         line_buf + len, sizeof(line_buf) - len, f3,                       //
         halfToFloat(ld->left90_lp),                                       //
@@ -328,6 +675,18 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
         halfToFloat(ld->duty_r),     //
         (ld->motion_type));          // 16
 
+    // printf(f4,                                //
+    //        halfToFloat(ld->duty_sensor_ctrl), //
+    //        tmp_dist,                          //
+    //        halfToFloat(ld->sen_log_l45),      //
+    //        halfToFloat(ld->sen_log_r45),      //
+    //        ld->motion_timestamp,              //
+    //        ld->sen_calc_time,                 //
+    //        ld->sen_calc_time2,                //
+    //        ld->pln_calc_time,                 //
+    //        ld->pln_calc_time2,                //
+    //        ld->pln_time_diff);                // 4
+
     len += snprintf(line_buf + len, sizeof(line_buf) - len, f4, //
                     halfToFloat(ld->duty_sensor_ctrl),          //
                     tmp_dist,                                   //
@@ -339,6 +698,20 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
                     ld->pln_calc_time,                          //
                     ld->pln_calc_time2,                         //
                     ld->pln_time_diff);                         // 4
+
+    // printf(f5,                                 //
+    //        halfToFloat(ld->m_pid_p),           //
+    //        halfToFloat(ld->m_pid_i),           //
+    //        halfToFloat(ld->m_pid_i2),          //
+    //        halfToFloat(ld->m_pid_d),           //
+    //        halfToFloat(ld->m_pid_p_v) * 1000,  //
+    //        halfToFloat(ld->m_pid_i_v) * 1000,  //
+    //        halfToFloat(ld->m_pid_i2_v) * 1000, //
+    //        halfToFloat(ld->m_pid_d_v) * 1000,  //
+    //        halfToFloat(ld->g_pid_p),           //
+    //        halfToFloat(ld->g_pid_i),           //
+    //        halfToFloat(ld->g_pid_i2),          //
+    //        halfToFloat(ld->g_pid_d));          //
 
     len += snprintf(line_buf + len, sizeof(line_buf) - len, f5, //
                     halfToFloat(ld->m_pid_p),                   //
@@ -353,6 +726,27 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
                     halfToFloat(ld->g_pid_i),                   //
                     halfToFloat(ld->g_pid_i2),                  //
                     halfToFloat(ld->g_pid_d));                  //
+
+    // printf(f6,                                 //
+    //        halfToFloat(ld->g_pid_p_v) * 1000,  //
+    //        halfToFloat(ld->g_pid_i_v) * 1000,  //
+    //        halfToFloat(ld->g_pid_i2_v) * 1000, //
+    //        halfToFloat(ld->g_pid_d_v) * 1000,  //
+    //        halfToFloat(ld->s_pid_p),           //
+    //        halfToFloat(ld->s_pid_i),           //
+    //        halfToFloat(ld->s_pid_i2),          //
+    //        halfToFloat(ld->s_pid_d),           //
+    //        halfToFloat(ld->s_pid_p_v),         //
+    //        halfToFloat(ld->s_pid_i_v),         //
+    //        halfToFloat(ld->s_pid_i2_v),        //
+    //        halfToFloat(ld->s_pid_d_v),         //
+    //        halfToFloat(ld->ang_pid_p),         //
+    //        halfToFloat(ld->ang_pid_i),         //
+    //        halfToFloat(ld->ang_pid_d),         //
+    //        halfToFloat(ld->ang_pid_p_v),       //
+    //        halfToFloat(ld->ang_pid_i_v),       //
+    //        halfToFloat(ld->ang_pid_d_v)        //
+    // );                                         //
 
     len += snprintf(line_buf + len, sizeof(line_buf) - len, f6, //
                     halfToFloat(ld->g_pid_p_v) * 1000,          //
@@ -374,6 +768,14 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
                     halfToFloat(ld->ang_pid_i_v),               //
                     halfToFloat(ld->ang_pid_d_v)                //
     );
+    // printf(f7,                                                  //
+    //        halfToFloat(ld->ff_duty_front),                      //
+    //        halfToFloat(ld->ff_duty_roll),                       //
+    //        halfToFloat(ld->ff_duty_rpm_r),                      //
+    //        halfToFloat(ld->ff_duty_rpm_l),                      //
+    //        halfToFloat(ld->pos_x),                              //
+    //        halfToFloat(ld->pos_y)                               //
+    // );
 
     len += snprintf(line_buf + len, sizeof(line_buf) - len, f7, //
                     halfToFloat(ld->ff_duty_front),             //

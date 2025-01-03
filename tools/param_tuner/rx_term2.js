@@ -11,12 +11,13 @@ let port;
 let parser;
 let binaryMode = false;
 
+
 let ready = function () {
   port = new SerialPort(
     comport,
     {
-      // baudRate: 3000000,
-      baudRate: 115200,
+      baudRate: 3000000,
+      // baudRate: 115200,
     },
     (e) => {
       if (e) {
@@ -157,7 +158,7 @@ let ready = function () {
 };
 
 const switchToBinaryMode = (obj) => {
-  const dataSize = obj.byte_size
+  const dataSize = 48;//obj.byte_size
   const dataSize2 = obj.data_struct.reduce((prev, cur) => {
     return prev + cur.size;
   }, 0);
@@ -176,47 +177,75 @@ const switchToBinaryMode = (obj) => {
   }).join(',');
   obj.record += `${header}\n`;
   console.log('header:', header);
-
+  let cnt = 0;
+  let record = [];
+  let finish = false;
+  let index = 0;
   parser.on('data', (binaryData) => {
     let offset = 0;
-    // console.log(binaryData)
-    const result = binaryData.toString('hex').match(/.{1,4}/g).map((hex) => {
-      const upper = hex.slice(0, 2);
-      const lower = hex.slice(2, 4);
-      return parseInt(lower + upper, 16);
-    });
-    // for (let i = 0; i < result.length; i++) {
-    //   console.log(result[i]);
-    // }
-    const decodedData = obj.data_struct.map((data) => {
-      let decodedValue;
+    cnt++;
+    index++;
+    // console.log(cnt, binaryData);
+    const start_idx = (cnt - 1) * 12;
+    const end_idx = start_idx + 12;
+
+    for (let i = start_idx; i < end_idx; i++) {
+      const data = obj.data_struct[i];
+      if (data === undefined) {
+        continue;
+      }
       switch (data.type) {
         case 'float':
-          decodedValue = binaryData.readFloatLE(offset);
+          record.push(binaryData.readFloatLE(offset));
           offset += data.size;
           break;
         case 'int':
-          decodedValue = binaryData.readInt32LE(offset);
+          record.push(binaryData.readInt32LE(offset));
           offset += data.size;
           break;
         default:
           throw new Error(`Unsupported data type: ${data.type}`);
       }
-      return decodedValue;
-    });
-    const str = decodedData.join(',');
-    if (decodedData[0] === -1) {
-      fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
-        flag: "w+",
-      });
-      fs.copyFileSync(
-        `${__dirname}/logs/${obj.file_name}`,
-        `${__dirname}/logs/latest.csv`
-      );
-      console.log("end");
-    } else {
-      console.log(str)
-      obj.record += `${str}\n`;
+    }
+    if (cnt == 7) {
+      cnt = 0;
+      if (index > 10 && record[0] <= 0 && !finish) {
+        fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
+          flag: "w+",
+        });
+        fs.copyFileSync(
+          `${__dirname}/logs/${obj.file_name}`,
+          `${__dirname}/logs/latest.csv`
+        );
+        finish = true;
+        console.log("end");
+      } else if (!finish) {
+        let valid = obj.data_struct.every((data, i) => {
+          let res = true;
+          if (data.name === "index")
+            if (record[i] < 0)
+              res = false;
+          if (data.name === "m_pid_p")
+            if (record[i] > 100000 || record[i] < -100000)
+              res = false;
+          if (data.name === "g_pid_d_v")
+            if (record[i] > 100000 || record[i] < -100000)
+              res = false;
+          if (data.name === "x")
+            if (record[i] > 100000 || record[i] < -100000)
+              res = false;
+          if (data.name === "y")
+            if (record[i] > 100000 || record[i] < -100000)
+              res = false;
+          return res;
+        });
+        if (valid) {
+          const str = record.join(',');
+          console.log(str)
+          obj.record += `${str}\n`;
+        }
+        record = [];
+      }
     }
   });
 }
