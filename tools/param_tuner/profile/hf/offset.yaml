@@ -21,7 +21,7 @@ pivot_back_offset: 6.0 # pivot時の前壁補正後のバック距離のオフ�
 pivot_back_dist0: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 45.950 #大→短くなる
+sla_wall_ref_l: 44.750 #大→短くなる
 sla_wall_ref_r: 44.950 #大→短くなる
 sla_max_offset_dist: 6
 
@@ -38,7 +38,7 @@ dia135_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
-front_diff_th: 14 # 前壁制御左右偏差条件
+front_diff_th: 7 # 前壁制御左右偏差条件
 front_dist_offset_pivot_th: 84 #前壁制御接近条件
 front_dist_offset_pivot: 90
 

@@ -9,7 +9,7 @@ straight:
     w_end: 0.1
     alpha: 180
   fast_run:
-    v_max: 475
+    v_max: 525
     # v_max: 300
     accl: 1500
     decel: -2500
@@ -17,7 +17,7 @@ straight:
     w_end: 0.1
     alpha: 120
   fast_run_dia:
-    v_max: 525
+    v_max: 475
     # v_max: 300
     accl: 2500
     decel: -2500
@@ -43,7 +43,7 @@ normal:
   rad: 22
   time: 0.09545312500000586
   front: { left: 12.560502248606609, right: 9.560502248606609 }
-  back: { left: 10.827402340243637, right: 15.827402340243637 }
+  back: { left: 10.827402340243637, right: 12.827402340243637 }
 
 
 # normal:

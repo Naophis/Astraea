@@ -704,8 +704,6 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
 
   auto exist_right45 = prm->sen_ref_p.normal.exist.right45;
   auto exist_left45 = prm->sen_ref_p.normal.exist.left45;
-  auto exist_right45_2 = prm->sen_ref_p.normal2.exist.right45;
-  auto exist_left45_2 = prm->sen_ref_p.normal2.exist.left45;
   // auto exist_right45_expand = prm->sen_ref_p.normal.expand.right45;
   // auto exist_left45_expand = prm->sen_ref_p.normal.expand.left45;
   auto exist_right45_expand = wall_th;
@@ -788,22 +786,32 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     bool left_check = false;
     float right_error = 0;
     float left_error = 0;
+
+    auto exist_right45_2 = prm->sen_ref_p.normal2.exist.right45;
+    auto exist_left45_2 = prm->sen_ref_p.normal2.exist.left45;
+
+    const bool range_check_passed_right =
+        se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r;
+    const bool range_check_passed_left =
+        se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l;
+    const bool valid_passed_right45 =
+        (1 < se->sen.r45.sensor_dist &&
+         se->sen.r45.sensor_dist < exist_right45_2);
+    const bool valid_passed_left45 = (1 < se->sen.l45.sensor_dist &&
+                                      se->sen.l45.sensor_dist < exist_left45_2);
+
     if (!(check_front_left && check_front_right)) {
-      if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
-          se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l) {
-        if ((1 < se->sen.r45.sensor_dist &&
-             se->sen.r45.sensor_dist < exist_right45_2)) {
+      if (range_check_passed_right) {
+        if (valid_passed_right45) {
           error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
-          right_error =
+          right_error +=
               prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
           check++;
           right_check = true;
         }
       }
-      if (se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r &&
-          se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l) {
-        if ((1 < se->sen.l45.sensor_dist &&
-             se->sen.l45.sensor_dist < exist_left45_2)) {
+      if (range_check_passed_left) {
+        if (valid_passed_left45) {
           error -= prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
           left_error -=
               (prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist);
@@ -812,16 +820,23 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
           left_check = true;
         }
       }
-      // if (right_check && left_check) {
-      //   if (ABS(right_error) < ABS(left_error)) {
-      //     error = right_error;
-      //   } else {
-      //     error = left_error;
-      //   }
-      // }
+      if (right_check && left_check) {
+        if (ABS(right_error) < ABS(left_error)) {
+          error = 2 * right_error;
+        } else {
+          error = 2 * left_error;
+        }
+      }
 
       if (check != 0) {
         type = SensingControlType::Piller;
+        // tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+        // ee->w.error_i = 0;
+        // ee->w.error_d = 0;
+        // ee->w.error_dd = 0;
+        // ee->ang.error_i = 0;
+        // ee->ang.error_d = 0;
+        // ee->ang.error_dd = 0;
       }
       // error *= prm->sen_ref_p.normal2.exist.front;
     }
@@ -1437,6 +1452,7 @@ void IRAM_ATTR PlanningTask::calc_tgt_duty() {
 }
 
 void IRAM_ATTR PlanningTask::cp_tgt_val() {
+  const auto se = get_sensing_entity();
   tgt_val->ego_in.accl = mpc_next_ego.accl;
   tgt_val->ego_in.alpha = mpc_next_ego.alpha;
   tgt_val->ego_in.pivot_state = mpc_next_ego.pivot_state;
@@ -1454,10 +1470,9 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
     if (tgt_val->ego_in.v < 10) {
       tgt_val->ego_in.v = tmp_v;
     }
-    sensing_result->sen.r45.sensor_dist = 0;
-    sensing_result->sen.l45.sensor_dist = 0;
+    se->sen.r45.sensor_dist = 0;
+    se->sen.l45.sensor_dist = 0;
   }
-
   tgt_val->ego_in.w = mpc_next_ego.w;
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
   tgt_val->ego_in.sla_param.counter = mpc_next_ego.sla_param.counter;
@@ -1531,6 +1546,7 @@ void IRAM_ATTR PlanningTask::check_fail_safe() {
 void IRAM_ATTR PlanningTask::cp_request() {
   // tgt_val->tgt_in.mass = param_ro->Mass;
 
+  const auto se = get_sensing_entity();
   pl_req_activate();
   if (motion_req_timestamp == receive_req->nmr.timstamp) {
     return;
@@ -1649,6 +1665,19 @@ void IRAM_ATTR PlanningTask::cp_request() {
   if (receive_req->nmr.motion_type == MotionType::SLALOM) {
     tgt_val->ego_in.v = receive_req->nmr.v_max;
   }
+
+  if (receive_req->nmr.motion_type == MotionType::STRAIGHT) {
+    if (se->sen.r45.sensor_dist == 0 || se->sen.r45.sensor_dist == 180) {
+      se->sen.r45.sensor_dist = param_ro->sen_ref_p.normal.ref.right45;
+      se->sen.r45.global_run_dist =
+          tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
+    }
+    if (se->sen.l45.sensor_dist == 0 || se->sen.l45.sensor_dist == 180) {
+      se->sen.l45.sensor_dist = param_ro->sen_ref_p.normal.ref.left45;
+      se->sen.l45.global_run_dist =
+          tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
+    }
+  }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
   int idx = (int)data;
@@ -1666,144 +1695,124 @@ float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
 }
 
 void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
+  const auto se = get_sensing_entity();
   if (!(tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::PIVOT)) {
-    sensing_result->ego.left90_dist_old = sensing_result->ego.left90_dist;
-    sensing_result->ego.left45_dist_old = sensing_result->ego.left45_dist;
-    sensing_result->ego.front_dist_old = sensing_result->ego.front_dist;
-    sensing_result->ego.right45_dist_old = sensing_result->ego.right45_dist;
-    sensing_result->ego.right90_dist_old = sensing_result->ego.right90_dist;
+    se->ego.left90_dist_old = se->ego.left90_dist;
+    se->ego.left45_dist_old = se->ego.left45_dist;
+    se->ego.front_dist_old = se->ego.front_dist;
+    se->ego.right45_dist_old = se->ego.right45_dist;
+    se->ego.right90_dist_old = se->ego.right90_dist;
 
-    sensing_result->ego.left90_dist =
-        calc_sensor(sensing_result->ego.left90_lp, param_ro->sensor_gain.l90.a,
+    se->ego.left90_dist =
+        calc_sensor(se->ego.left90_lp, param_ro->sensor_gain.l90.a,
                     param_ro->sensor_gain.l90.b);
-    sensing_result->ego.left45_dist =
-        calc_sensor(sensing_result->ego.left45_lp, param_ro->sensor_gain.l45.a,
+    se->ego.left45_dist =
+        calc_sensor(se->ego.left45_lp, param_ro->sensor_gain.l45.a,
                     param_ro->sensor_gain.l45.b);
-    sensing_result->ego.right45_dist =
-        calc_sensor(sensing_result->ego.right45_lp, param_ro->sensor_gain.r45.a,
+    se->ego.right45_dist =
+        calc_sensor(se->ego.right45_lp, param_ro->sensor_gain.r45.a,
                     param_ro->sensor_gain.r45.b);
-    sensing_result->ego.right90_dist =
-        calc_sensor(sensing_result->ego.right90_lp, param_ro->sensor_gain.r90.a,
+    se->ego.right90_dist =
+        calc_sensor(se->ego.right90_lp, param_ro->sensor_gain.r90.a,
                     param_ro->sensor_gain.r90.b);
 
-    sensing_result->ego.left90_far_dist = calc_sensor(
-        sensing_result->ego.left90_lp, param_ro->sensor_gain.l90_far.a,
-        param_ro->sensor_gain.l90_far.b);
-    sensing_result->ego.right90_far_dist = calc_sensor(
-        sensing_result->ego.right90_lp, param_ro->sensor_gain.r90_far.a,
-        param_ro->sensor_gain.r90_far.b);
+    se->ego.left90_far_dist =
+        calc_sensor(se->ego.left90_lp, param_ro->sensor_gain.l90_far.a,
+                    param_ro->sensor_gain.l90_far.b);
+    se->ego.right90_far_dist =
+        calc_sensor(se->ego.right90_lp, param_ro->sensor_gain.r90_far.a,
+                    param_ro->sensor_gain.r90_far.b);
 
-    sensing_result->ego.left90_mid_dist = calc_sensor(
-        sensing_result->ego.left90_lp, param_ro->sensor_gain.l90_mid.a,
-        param_ro->sensor_gain.l90_mid.b);
-    sensing_result->ego.right90_mid_dist = calc_sensor(
-        sensing_result->ego.right90_lp, param_ro->sensor_gain.r90_mid.a,
-        param_ro->sensor_gain.r90_mid.b);
+    se->ego.left90_mid_dist =
+        calc_sensor(se->ego.left90_lp, param_ro->sensor_gain.l90_mid.a,
+                    param_ro->sensor_gain.l90_mid.b);
+    se->ego.right90_mid_dist =
+        calc_sensor(se->ego.right90_lp, param_ro->sensor_gain.r90_mid.a,
+                    param_ro->sensor_gain.r90_mid.b);
 
-    if (sensing_result->ego.left90_dist < param_ro->sensor_range_far_max &&
-        sensing_result->ego.right90_dist < param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_dist =
-          (sensing_result->ego.left90_dist + sensing_result->ego.right90_dist) /
-          2;
-    } else if (sensing_result->ego.left90_dist >
-                   param_ro->sensor_range_far_max &&
-               sensing_result->ego.right90_dist <
-                   param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_dist = sensing_result->ego.right90_dist;
-    } else if (sensing_result->ego.left90_dist <
-                   param_ro->sensor_range_far_max &&
-               sensing_result->ego.right90_dist >
-                   param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_dist = sensing_result->ego.left90_dist;
+    if (se->ego.left90_dist < param_ro->sensor_range_far_max &&
+        se->ego.right90_dist < param_ro->sensor_range_far_max) {
+      se->ego.front_dist = (se->ego.left90_dist + se->ego.right90_dist) / 2;
+    } else if (se->ego.left90_dist > param_ro->sensor_range_far_max &&
+               se->ego.right90_dist < param_ro->sensor_range_far_max) {
+      se->ego.front_dist = se->ego.right90_dist;
+    } else if (se->ego.left90_dist < param_ro->sensor_range_far_max &&
+               se->ego.right90_dist > param_ro->sensor_range_far_max) {
+      se->ego.front_dist = se->ego.left90_dist;
     } else {
-      sensing_result->ego.front_dist = param_ro->sensor_range_max;
+      se->ego.front_dist = param_ro->sensor_range_max;
     }
 
-    if (sensing_result->ego.left90_far_dist < param_ro->sensor_range_far_max &&
-        sensing_result->ego.right90_far_dist < param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_far_dist =
-          (sensing_result->ego.left90_far_dist +
-           sensing_result->ego.right90_far_dist) /
-          2;
-    } else if (sensing_result->ego.left90_far_dist >
-                   param_ro->sensor_range_far_max &&
-               sensing_result->ego.right90_far_dist <
-                   param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_far_dist = sensing_result->ego.right90_far_dist;
-    } else if (sensing_result->ego.left90_far_dist <
-                   param_ro->sensor_range_far_max &&
-               sensing_result->ego.right90_far_dist >
-                   param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_far_dist = sensing_result->ego.left90_far_dist;
+    if (se->ego.left90_far_dist < param_ro->sensor_range_far_max &&
+        se->ego.right90_far_dist < param_ro->sensor_range_far_max) {
+      se->ego.front_far_dist =
+          (se->ego.left90_far_dist + se->ego.right90_far_dist) / 2;
+    } else if (se->ego.left90_far_dist > param_ro->sensor_range_far_max &&
+               se->ego.right90_far_dist < param_ro->sensor_range_far_max) {
+      se->ego.front_far_dist = se->ego.right90_far_dist;
+    } else if (se->ego.left90_far_dist < param_ro->sensor_range_far_max &&
+               se->ego.right90_far_dist > param_ro->sensor_range_far_max) {
+      se->ego.front_far_dist = se->ego.left90_far_dist;
     } else {
-      sensing_result->ego.front_far_dist = param_ro->sensor_range_max;
+      se->ego.front_far_dist = param_ro->sensor_range_max;
     }
-    if (sensing_result->ego.left90_mid_dist < param_ro->sensor_range_far_max &&
-        sensing_result->ego.right90_mid_dist < param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_mid_dist =
-          (sensing_result->ego.left90_mid_dist +
-           sensing_result->ego.right90_mid_dist) /
-          2;
-    } else if (sensing_result->ego.left90_mid_dist >
-                   param_ro->sensor_range_far_max &&
-               sensing_result->ego.right90_mid_dist <
-                   param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_mid_dist = sensing_result->ego.right90_mid_dist;
-    } else if (sensing_result->ego.left90_mid_dist <
-                   param_ro->sensor_range_far_max &&
-               sensing_result->ego.right90_mid_dist >
-                   param_ro->sensor_range_far_max) {
-      sensing_result->ego.front_mid_dist = sensing_result->ego.left90_mid_dist;
+    if (se->ego.left90_mid_dist < param_ro->sensor_range_far_max &&
+        se->ego.right90_mid_dist < param_ro->sensor_range_far_max) {
+      se->ego.front_mid_dist =
+          (se->ego.left90_mid_dist + se->ego.right90_mid_dist) / 2;
+    } else if (se->ego.left90_mid_dist > param_ro->sensor_range_far_max &&
+               se->ego.right90_mid_dist < param_ro->sensor_range_far_max) {
+      se->ego.front_mid_dist = se->ego.right90_mid_dist;
+    } else if (se->ego.left90_mid_dist < param_ro->sensor_range_far_max &&
+               se->ego.right90_mid_dist > param_ro->sensor_range_far_max) {
+      se->ego.front_mid_dist = se->ego.left90_mid_dist;
     } else {
-      sensing_result->ego.front_mid_dist = param_ro->sensor_range_max;
+      se->ego.front_mid_dist = param_ro->sensor_range_max;
     }
   } else {
-    sensing_result->ego.left90_dist        //
-        = sensing_result->ego.left45_dist  //
-        = sensing_result->ego.front_dist   //
-        = sensing_result->ego.right45_dist //
-        = sensing_result->ego.right90_dist = param_ro->sensor_range_max;
-    sensing_result->ego.left45_dist_diff = 0;
-    sensing_result->ego.right45_dist_diff = 0;
+    se->ego.left90_dist        //
+        = se->ego.left45_dist  //
+        = se->ego.front_dist   //
+        = se->ego.right45_dist //
+        = se->ego.right90_dist = param_ro->sensor_range_max;
+    se->ego.left45_dist_diff = 0;
+    se->ego.right45_dist_diff = 0;
   }
 
-  sensing_result->ego.left45_dist_diff =
-      sensing_result->ego.left45_dist - sensing_result->ego.left45_dist_old;
+  se->ego.left45_dist_diff = se->ego.left45_dist - se->ego.left45_dist_old;
 
-  sensing_result->ego.right45_dist_diff =
-      sensing_result->ego.right45_dist - sensing_result->ego.right45_dist_old;
+  se->ego.right45_dist_diff = se->ego.right45_dist - se->ego.right45_dist_old;
 
   // 壁からの距離に変換。あとで斜め用に変更
   calc_sensor_dist_diff();
 }
 
 void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
-  if (sensing_result->sen.l45.sensor_dist > sensing_result->ego.left45_dist) {
-    sensing_result->sen.l45.sensor_dist = sensing_result->ego.left45_dist;
-    sensing_result->sen.l45.global_run_dist = tgt_val->global_pos.dist;
+  const auto se = get_sensing_entity();
+  if (se->sen.l45.sensor_dist > se->ego.left45_dist) {
+    se->sen.l45.sensor_dist = se->ego.left45_dist;
+    se->sen.l45.global_run_dist = tgt_val->global_pos.dist;
   } else {
-    if (((tgt_val->global_pos.dist - sensing_result->sen.l45.global_run_dist) >
+    if (((tgt_val->global_pos.dist - se->sen.l45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
-        sensing_result->ego.left45_dist <
-            param_ro->sen_ref_p.normal2.exist.left90) {
-      sensing_result->sen.l45.sensor_dist = sensing_result->ego.left45_dist;
+        se->ego.left45_dist < param_ro->sen_ref_p.normal2.exist.left90) {
+      se->sen.l45.sensor_dist = se->ego.left45_dist;
     }
   }
 
-  if (sensing_result->sen.r45.sensor_dist > sensing_result->ego.right45_dist) {
-    sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
-    sensing_result->sen.r45.global_run_dist = tgt_val->global_pos.dist;
+  if (se->sen.r45.sensor_dist > se->ego.right45_dist) {
+    se->sen.r45.sensor_dist = se->ego.right45_dist;
+    se->sen.r45.global_run_dist = tgt_val->global_pos.dist;
   } else {
-    if (((tgt_val->global_pos.dist - sensing_result->sen.r45.global_run_dist) >
+    if (((tgt_val->global_pos.dist - se->sen.r45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
-        sensing_result->ego.right45_dist <
-            param_ro->sen_ref_p.normal2.exist.right90) {
-      sensing_result->sen.r45.sensor_dist = sensing_result->ego.right45_dist;
+        se->ego.right45_dist < param_ro->sen_ref_p.normal2.exist.right90) {
+      se->sen.r45.sensor_dist = se->ego.right45_dist;
     }
   }
-  sen_log.r45_dist = sensing_result->sen.r45.sensor_dist;
-  sen_log.l45_dist = sensing_result->sen.r45.sensor_dist;
+  sen_log.r45_dist = se->sen.r45.sensor_dist;
+  sen_log.l45_dist = se->sen.l45.sensor_dist;
   sen_log.global_run_dist = tgt_val->global_pos.dist;
   // sensing_result->sen_dist_log.list.push_back(sen_log);
   // if (sensing_result->sen_dist_log.list.size() > param_ro->sen_log_size)
@@ -1843,35 +1852,32 @@ void IRAM_ATTR PlanningTask::calc_front_ctrl_duty() {
   ee->w.error_i = ee->w.error_d = 0;
   ee->w_log.gain_z = ee->w_log.gain_zz = 0;
 
-  if (param_ro->front_ctrl_roll_pid.mode == 3) {
-    auto diff_ang = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-    if (tgt_val->motion_type == MotionType::SLALOM) {
-      diff_ang = 0;
-    }
-    auto kp_gain = param_ro->front_ctrl_roll_pid.p * ee->w.error_p;
-    auto ki_gain = param_ro->front_ctrl_roll_pid.i * diff_ang;
-    auto kb_gain = param_ro->front_ctrl_roll_pid.b * ee->w.error_i;
-    auto kc_gain = param_ro->front_ctrl_roll_pid.c * ee->w.error_d;
-    auto kd_gain = param_ro->front_ctrl_roll_pid.d * ee->w_kf.error_d;
-    limitter(kp_gain, ki_gain, kb_gain, kd_gain,
-             param_ro->gyro_pid_gain_limitter);
-    duty_roll = kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
-                (ee->ang_log.gain_z - ee->ang_log.gain_zz) * dt;
+  auto diff_ang = 0.0f;
+  auto kp_gain = param_ro->front_ctrl_roll_pid.p * ee->w.error_p;
+  auto ki_gain = 0.0f;
+  auto kb_gain = 0.0f;
+  auto kc_gain = 0.0f;
+  auto kd_gain = param_ro->front_ctrl_roll_pid.d * ee->w_kf.error_d;
 
-    ee->ang_log.gain_zz = ee->ang_log.gain_z;
-    ee->ang_log.gain_z = duty_roll;
+  limitter(kp_gain, ki_gain, kb_gain, kd_gain,
+           param_ro->gyro_pid_gain_limitter);
+  duty_roll = kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
+              (ee->ang_log.gain_z - ee->ang_log.gain_zz) * dt;
 
-    set_ctrl_val(ee->w_val,
-                 ee->w.error_p,                           // p
-                 diff_ang,                                // i
-                 ee->w.error_i,                           // i2
-                 ee->w_kf.error_d,                        // d
-                 param_ro->gyro_pid.p * ee->w.error_p,    // kp*p
-                 param_ro->gyro_pid.i * diff_ang,         // ki*i
-                 param_ro->gyro_pid.b * ee->w.error_i,    // kb*i2
-                 param_ro->gyro_pid.d * ee->w_kf.error_d, // kd*d
-                 ee->ang_log.gain_zz, ee->ang_log.gain_z);
-  }
+  ee->ang_log.gain_zz = ee->ang_log.gain_z;
+  ee->ang_log.gain_z = duty_roll;
+
+  set_ctrl_val(ee->w_val,
+               ee->w.error_p,                           // p
+               diff_ang,                                // i
+               ee->w.error_i,                           // i2
+               ee->w_kf.error_d,                        // d
+               param_ro->gyro_pid.p * ee->w.error_p,    // kp*p
+               param_ro->gyro_pid.i * diff_ang,         // ki*i
+               param_ro->gyro_pid.b * ee->w.error_i,    // kb*i2
+               param_ro->gyro_pid.d * ee->w_kf.error_d, // kd*d
+               ee->ang_log.gain_zz, ee->ang_log.gain_z);
+
   sensing_result->ego.duty.sen = duty_roll;
   sensing_result->ego.duty.sen = 0;
   // calc front dist ctrl
@@ -2262,7 +2268,7 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
   ee->ang.error_p = (tgt->ego_in.img_ang + offset) - se->ego.ang_kf;
 
   // tgt_val->ego_in.ang
-  ee->ang.error_d = ee->ang.error_p - ee->ang.error_d;
+  ee->ang.error_d = ee->ang.error_p - (ee->ang.error_d + offset);
 
   ee->ang.error_dd = ee->ang.error_d - ee->ang.error_dd;
 
@@ -2296,15 +2302,19 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
   float offset = 0;
 
   if (param_ro->torque_mode == 2) {
-    if (!(tgt->motion_type == MotionType::SLALOM)) {
-      offset += duty_sen;
+    if (!(tgt->motion_type == MotionType::PIVOT ||
+          tgt->motion_type == MotionType::FRONT_CTRL
+          //
+          )) {
+      offset += duty_roll_ang;
     }
+    // offset += duty_roll_ang;
   }
 
   ee->w.error_p = (tgt->ego_in.w + offset) - se->ego.w_lp;
 
   ee->w.error_d = ee->w.error_p - ee->w.error_d;
-  ee->w_kf.error_d = ee->w_kf.error_p - ee->w_kf.error_d;
+  ee->w_kf.error_d = ee->w_kf.error_p - (ee->w_kf.error_d + offset);
 
   ee->w.error_dd = ee->w.error_d - ee->w.error_dd;
   ee->w_kf.error_dd = ee->w_kf.error_d - ee->w_kf.error_dd;
@@ -2314,18 +2324,17 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
 }
 
 void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
+  const auto se = get_sensing_entity();
   if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     ee->v.error_i = ee->v.error_d = 0;
     ee->w.error_i = ee->w.error_d = 0;
     ee->v_r.error_i = ee->v_r.error_d = 0;
     ee->v_l.error_i = ee->v_l.error_d = 0;
-    if (sensing_result->ego.front_dist < param_ro->cell) {
-      ee->dist.error_p = sensing_result->ego.front_dist -
-                         param_ro->sen_ref_p.search_exist.front_ctrl;
-      ee->ang.error_p =
-          (sensing_result->ego.right90_dist - sensing_result->ego.left90_dist) /
-              2 -
-          param_ro->sen_ref_p.search_exist.kireme_r;
+    if (se->ego.front_dist < param_ro->cell) {
+      ee->dist.error_p =
+          se->ego.front_dist - param_ro->sen_ref_p.search_exist.front_ctrl;
+      ee->ang.error_p = (se->ego.right90_dist - se->ego.left90_dist) / 2 -
+                        param_ro->sen_ref_p.search_exist.kireme_r;
       ee->dist.error_i += ee->dist.error_p;
     } else {
       ee->dist.error_p = ee->dist.error_i = ee->dist.error_d = 0;

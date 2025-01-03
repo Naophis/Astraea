@@ -97,10 +97,7 @@ void LoggingTask::task() {
           if (tgt_val->motion_type == MotionType::PIVOT) {
             first = false;
             set_data();
-          } else if (idx_slalom_log < 10 &&
-                     (ABS(error_entity->s_val.p) > 5 ||
-                      sensing_result->sen.r45.sensor_dist > 179 ||
-                      sensing_result->sen.l45.sensor_dist > 179)) {
+          } else if (idx_slalom_log < 10 && (ABS(error_entity->s_val.p) > 5)) {
             first = false;
           } else {
             set_data();
@@ -825,6 +822,11 @@ void LoggingTask::dump_log_sysid(std::string file_name) {
 }
 
 void IRAM_ATTR LoggingTask::set_data() {
+
+  if (tgt_val->calc_time_diff > 3000) {
+    return;
+  }
+
   log_data_t2 *structPtr =
       (log_data_t2 *)heap_caps_malloc(sizeof(log_data_t2), MALLOC_CAP_SPIRAM);
   auto ld = std::shared_ptr<log_data_t2>(structPtr, heap_caps_free);

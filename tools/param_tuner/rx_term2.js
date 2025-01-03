@@ -181,11 +181,12 @@ const switchToBinaryMode = (obj) => {
   let record = [];
   let finish = false;
   let index = 0;
+  let last_index = 0;
   parser.on('data', (binaryData) => {
     let offset = 0;
     cnt++;
     index++;
-    // console.log(cnt, binaryData);
+
     const start_idx = (cnt - 1) * 12;
     const end_idx = start_idx + 12;
 
@@ -222,13 +223,16 @@ const switchToBinaryMode = (obj) => {
       } else if (!finish) {
         let valid = obj.data_struct.every((data, i) => {
           let res = true;
-          if (data.name === "index")
-            if (record[i] < 0)
+          if (data.name === "index") {
+            if (record[i] < 0 || record[i] > 100000)
               res = false;
-          if (data.name === "m_pid_p")
+            if (Math.abs(record[0] - last_index) > 100)
+              res = false;
+          }
+          if (data.name.match(/_pid_/) !== null)
             if (record[i] > 100000 || record[i] < -100000)
               res = false;
-          if (data.name === "g_pid_d_v")
+          if (data.name.match(/ff_/) !== null)
             if (record[i] > 100000 || record[i] < -100000)
               res = false;
           if (data.name === "x")
@@ -237,9 +241,16 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "y")
             if (record[i] > 100000 || record[i] < -100000)
               res = false;
+          if (data.name === "battery")
+            if (record[i] > 15 || record[i] < 0)
+              res = false;
+          if (data.name === "alpha")
+            if (record[i] > 100000 || record[i] < -100000)
+              res = false;
           return res;
         });
         if (valid) {
+          last_index = record[0];
           const str = record.join(',');
           console.log(str)
           obj.record += `${str}\n`;
