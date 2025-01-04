@@ -97,8 +97,9 @@ void LoggingTask::task() {
           if (tgt_val->motion_type == MotionType::PIVOT) {
             first = false;
             set_data();
-          } else if (idx_slalom_log < 10 && (ABS(error_entity->s_val.p) > 5)) {
+          } else if (idx_slalom_log < 4) {
             first = false;
+            idx_slalom_log++;
           } else {
             set_data();
           }

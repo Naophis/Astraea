@@ -65,10 +65,10 @@ class Plot:
         elif type == "dia135":
             start_ang = 0
             tgt_ang = 135.0
-            n = 6.0
+            n = 4.0
 
             if hf_cl == 0:
-                rad = 44.0
+                rad = 42.0
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":

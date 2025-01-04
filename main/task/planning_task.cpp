@@ -727,15 +727,15 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
                           prm->right_keep_dist_th;
   bool dist_check_left = ABS(tgt_val->global_pos.dist - left_keep.star_dist) >
                          prm->left_keep_dist_th;
-  bool check_diff_right = ABS(se->ego.right45_dist - se->ego.right45_dist_old) <
-                          prm->sen_ref_p.normal.ref.kireme_r;
-  bool check_diff_left = ABS(se->ego.left45_dist - se->ego.left45_dist_old) <
-                         prm->sen_ref_p.normal.ref.kireme_l;
+  bool check_diff_right =
+      ABS(se->ego.right45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_r;
+  bool check_diff_left =
+      ABS(se->ego.left45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_l;
   if (!search_mode) {
-    check_diff_right = ABS(se->ego.right45_dist - se->ego.right45_dist_old) <
+    check_diff_right = ABS(se->ego.right45_dist_diff) <
                        prm->sen_ref_p.normal.ref.kireme_r_fast;
-    check_diff_left = ABS(se->ego.left45_dist - se->ego.left45_dist_old) <
-                      prm->sen_ref_p.normal.ref.kireme_l_fast;
+    check_diff_left =
+        ABS(se->ego.left45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_l_fast;
   }
 
   bool check_front_left =
@@ -787,46 +787,36 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     float right_error = 0;
     float left_error = 0;
 
-    auto exist_right45_2 = prm->sen_ref_p.normal2.exist.right45;
-    auto exist_left45_2 = prm->sen_ref_p.normal2.exist.left45;
-
     const bool range_check_passed_right =
-        se->ego.right45_dist > prm->sen_ref_p.normal2.ref.kireme_r;
+        (prm->sen_ref_p.normal2.ref.kireme_r < se->sen.r45.sensor_dist) &&
+        (se->sen.r45.sensor_dist < prm->sen_ref_p.normal2.exist.right45);
+
     const bool range_check_passed_left =
-        se->ego.left45_dist > prm->sen_ref_p.normal2.ref.kireme_l;
-    const bool valid_passed_right45 =
-        (1 < se->sen.r45.sensor_dist &&
-         se->sen.r45.sensor_dist < exist_right45_2);
-    const bool valid_passed_left45 = (1 < se->sen.l45.sensor_dist &&
-                                      se->sen.l45.sensor_dist < exist_left45_2);
+        (prm->sen_ref_p.normal2.ref.kireme_l < se->sen.l45.sensor_dist) &&
+        (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.exist.left45);
 
     if (!(check_front_left && check_front_right)) {
       if (range_check_passed_right) {
-        if (valid_passed_right45) {
-          error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
-          right_error +=
-              prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
-          check++;
-          right_check = true;
-        }
+        error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
+        right_error +=
+            prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
+        check++;
+        right_check = true;
       }
       if (range_check_passed_left) {
-        if (valid_passed_left45) {
-          error -= prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
-          left_error -=
-              (prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist);
-          error = left_error;
-          check++;
-          left_check = true;
-        }
+        error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
+        left_error -=
+            (prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist);
+        check++;
+        left_check = true;
       }
-      if (right_check && left_check) {
-        if (ABS(right_error) < ABS(left_error)) {
-          error = 2 * right_error;
-        } else {
-          error = 2 * left_error;
-        }
-      }
+      // if (right_check && left_check) {
+      //   if (ABS(right_error) < ABS(left_error)) {
+      //     error = 2 * right_error;
+      //   } else {
+      //     error = 2 * left_error;
+      //   }
+      // }
 
       if (check != 0) {
         type = SensingControlType::Piller;
@@ -2264,15 +2254,23 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
   if (tgt->motion_type != MotionType::FRONT_CTRL) {
     offset += duty_sen;
   }
-
+  // 壁制御できないときは角度を固定
+  if ((tgt->motion_type == MotionType::STRAIGHT) ||
+      tgt->motion_type == MotionType::SLA_FRONT_STR ||
+      tgt->motion_type == MotionType::SLA_BACK_STR ||
+      tgt->motion_type == MotionType::WALL_OFF ||
+      tgt->motion_type == MotionType::WALL_OFF_DIA) {
+  }
   ee->ang.error_p = (tgt->ego_in.img_ang + offset) - se->ego.ang_kf;
 
   // tgt_val->ego_in.ang
-  ee->ang.error_d = ee->ang.error_p - (ee->ang.error_d + offset);
+  ee->ang.error_d = ee->ang.error_p - ee->ang.error_d;
+  // ee->ang.error_d = (ee->ang.error_p - offset) - ee->ang.error_d;
 
   ee->ang.error_dd = ee->ang.error_d - ee->ang.error_dd;
 
-  ee->ang.error_i += ee->ang.error_p;
+  ee->ang.error_i += (ee->ang.error_p);
+  // ee->ang.error_i += (ee->ang.error_p - offset);
 
   duty_roll_ang = param_ro->angle_pid.p * ee->ang.error_p +
                   param_ro->angle_pid.i * ee->ang.error_i +
@@ -2312,13 +2310,18 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
   }
 
   ee->w.error_p = (tgt->ego_in.w + offset) - se->ego.w_lp;
+  ee->w_kf.error_p = (tgt_val->ego_in.w + offset) - se->ego.w_kf;
+
+  // ee->w.error_d = (ee->w.error_p - offset) - ee->w.error_d;
+  // ee->w_kf.error_d = (ee->w_kf.error_p - offset) - ee->w_kf.error_d;
 
   ee->w.error_d = ee->w.error_p - ee->w.error_d;
-  ee->w_kf.error_d = ee->w_kf.error_p - (ee->w_kf.error_d + offset);
+  ee->w_kf.error_d = ee->w_kf.error_p - ee->w_kf.error_d;
 
   ee->w.error_dd = ee->w.error_d - ee->w.error_dd;
   ee->w_kf.error_dd = ee->w_kf.error_d - ee->w_kf.error_dd;
 
+  // ee->w.error_i += (ee->w.error_p - offset);
   ee->w.error_i += ee->w.error_p;
   tgt_val->w_error = ee->w.error_i;
 }

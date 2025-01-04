@@ -1057,6 +1057,10 @@ void MainTask::load_sensor_param() {
       getItem(normal2_ref, "kireme_r")->valuedouble;
   param->sen_ref_p.normal2.ref.kireme_l =
       getItem(normal2_ref, "kireme_l")->valuedouble;
+  param->sen_ref_p.normal2.ref.right90 =
+      getItem(normal2_ref, "right90")->valuedouble;
+  param->sen_ref_p.normal2.ref.left90 =
+      getItem(normal2_ref, "left90")->valuedouble;
 
   param->sen_ref_p.normal2.exist.right45 =
       getItem(normal2_exist, "right45")->valuedouble;

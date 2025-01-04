@@ -182,11 +182,34 @@ const switchToBinaryMode = (obj) => {
   let finish = false;
   let index = 0;
   let last_index = 0;
+  let last_recived = new Date().getTime();
+  let now = new Date().getTime();
+
+  let interval = setInterval(() => {
+    console.log("force save");
+    if (now - last_recived > 1000) {
+      console.log('timeout');
+      fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
+        flag: "w+",
+      });
+      fs.copyFileSync(
+        `${__dirname}/logs/${obj.file_name}`,
+        `${__dirname}/logs/latest.csv`
+      );
+      finish = true;
+      port.unpipe(parser);
+      clearInterval(interval);
+    }
+    now = new Date().getTime();
+  }, 1000);
+
+
+
   parser.on('data', (binaryData) => {
     let offset = 0;
     cnt++;
     index++;
-
+    last_recived = new Date().getTime();
     const start_idx = (cnt - 1) * 12;
     const end_idx = start_idx + 12;
 
@@ -211,6 +234,7 @@ const switchToBinaryMode = (obj) => {
     if (cnt == 7) {
       cnt = 0;
       if (index > 10 && record[0] <= 0 && !finish) {
+        clearInterval(interval);
         fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
           flag: "w+",
         });

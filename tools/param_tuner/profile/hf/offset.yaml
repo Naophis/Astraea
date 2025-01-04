@@ -55,6 +55,7 @@ clear_dist_ragne_to: 55
 
 clear_dist_ragne_dist_list: [0, 20, 25, 55, 60, 90]
 clear_dist_ragne_th_list: [60, 60, 46.0, 46.5, 60, 60]
+# clear_dist_ragne_th_list: [46, 46, 46.0, 46.0, 46, 46]
 clear_dist_ragne_to2: 35 # 探索時制御範囲拡張移動距離
 
 wall_off_hold_dist: 88

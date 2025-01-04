@@ -53,7 +53,7 @@ void SensingTask::timer_200us_callback_main() {
   if (std::isfinite(accl_l) && std::isfinite(accl_r)) {
     auto tmp_l_v = ABS(calc_enc_v(enc_l, se->encoder.left_old, pt->kf_v_l.dt));
 
-    if (enc_l == 0 && ABS(tmp_l_v - ABS(se->ego.v_l)) > 500) {
+    if (enc_l == 0 && ABS(tmp_l_v - ABS(se->ego.v_l)) > 50) {
       enc_l_timestamp_now = esp_timer_get_time();
       const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
       const auto enc_l_dt =
@@ -76,9 +76,21 @@ void SensingTask::timer_200us_callback_main() {
       pt->kf_v_l.update(se->ego.v_l);
     }
     auto tmp_r_v = ABS(calc_enc_v(enc_r, se->encoder.right_old, pt->kf_v_r.dt));
-    if (enc_r == 0 && (ABS(tmp_r_v - ABS(se->ego.v_r)) > 500)) {
-      //
-    } else if (enc_l_dt > 0) {
+    if (enc_r == se->encoder.right_old) {
+      enc_r_timestamp_now = esp_timer_get_time();
+      const auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+      const auto enc_r_dt =
+          (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
+      if (enc_r == 0 && ABS(tmp_r_v - ABS(se->ego.v_r)) > 500) {
+      } else if (enc_r_dt > 0) {
+        se->encoder.right = enc_r;
+        se->ego.v_r = -calc_enc_v(se->encoder.right, se->encoder.right_old,
+                                  pt->kf_v_r.dt);
+        pt->kf_v_r.dt = enc_r_dt;
+        pt->kf_v_r.predict(accl_r);
+        pt->kf_v_r.update(se->ego.v_r);
+      }
+    } else if (enc_r_dt > 0) {
       se->encoder.right = enc_r;
       se->ego.v_r =
           -calc_enc_v(se->encoder.right, se->encoder.right_old, pt->kf_v_r.dt);
