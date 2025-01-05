@@ -271,6 +271,15 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "alpha")
             if (record[i] > 100000 || record[i] < -100000)
               res = false;
+          if (data.name === "timestamp")
+            if (record[i] > 10000 || record[i] < 0)
+              res = false;
+          if (data.name === "dist")
+            if (record[i] > 180 * 64 || record[i] < 0)
+              res = false;
+          if (data.name === "dideal_ang")
+            if (record[i] > 180 * 64 || record[i] < 0)
+              res = false;
           return res;
         });
         if (valid) {

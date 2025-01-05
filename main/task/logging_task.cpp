@@ -855,9 +855,7 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->img_dist = floatToHalf(tgt_val->ego_in.img_dist);
   ld->dist = floatToHalf(tgt_val->ego_in.dist);
 
-  ld->img_ang =
-      floatToHalf((tgt_val->ego_in.img_ang + sensing_result->ego.duty.sen_ang) *
-                  180 / m_PI);
+  ld->img_ang = floatToHalf((tgt_val->ego_in.img_ang) * 180 / m_PI);
   ld->ang = floatToHalf(tgt_val->ego_in.ang * 180 / m_PI);
   ld->ang_kf = floatToHalf(sensing_result->ego.ang_kf * 180 / m_PI);
 

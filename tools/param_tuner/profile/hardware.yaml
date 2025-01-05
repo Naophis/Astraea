@@ -129,14 +129,14 @@ gyro_pid_gain_limitter:
   b: 15
   c: 15
 
-sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000]
-# sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125]
-sensor_deg_limitter_str: [75, 75, 75, 75, 75, 75, 75]
-# sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25]
-# sensor_deg_limitter_str: [3, 3, 3, 3, 3, 3, 3]
-sensor_deg_limitter_dia: [3, 3, 3, 3, 3, 3, 3]
-sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3]
-# sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3]
+sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000, 8000,12000]
+# sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125, 125, 125]
+sensor_deg_limitter_str: [75, 25, 50, 75, 75, 75, 75, 75, 75]
+# sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25, 25, 25]
+# sensor_deg_limitter_str: [3, 3, 3, 3, 3, 3, 3, 3, 3]
+sensor_deg_limitter_dia: [3, 3, 6, 8, 8, 6, 4.5, 4.5, 4.5]
+sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3]
+# sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
   mode: 3
@@ -272,13 +272,13 @@ str_ang_pid:
   # i: 0.125
   # c: 0
 
-str_ang_dia_pid:
+str_ang_dia_pid: #not use
   # p: 0.095
   # d: 1.25
-  p: 0.0055
-  d: 0.000275
+  p: 0.0125
+  # d: 0.000275
   # p: 0
-  # d: 0
+  d: 0
   i: 0.0
   mode: 1
   b: 0
@@ -288,7 +288,7 @@ sensor_pid_dia:
   # p: 0.15
   # p: 0.0
   i: 0.0
-  d: 0.0
+  d: 0.015
   b: 0
   c: 0
   mode: 0

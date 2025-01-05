@@ -33,18 +33,15 @@ void SensingTask::timer_200us_callback_main() {
     return;
   }
   gyro_timestamp_now = esp_timer_get_time();
-  const auto gyro = gyro_if.read_2byte(0x26);
+  auto gyro = gyro_if.read_2byte(0x26);
   enc_r_timestamp_now = esp_timer_get_time();
-  const auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+  auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
   enc_l_timestamp_now = esp_timer_get_time();
-  const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+  auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
 
-  const auto gyro_dt =
-      (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
-  const auto enc_r_dt =
-      (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
-  const auto enc_l_dt =
-      (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
+  auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
+  auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
+  auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
   pt->kf_w.dt = gyro_dt;
   pt->kf_v_r.dt = enc_r_dt;
@@ -53,12 +50,14 @@ void SensingTask::timer_200us_callback_main() {
   if (std::isfinite(accl_l) && std::isfinite(accl_r)) {
     auto tmp_l_v = ABS(calc_enc_v(enc_l, se->encoder.left_old, pt->kf_v_l.dt));
 
-    if (enc_l == 0 && ABS(tmp_l_v - ABS(se->ego.v_l)) > 50) {
+    if ((enc_l == se->encoder.left_old) || (enc_l == 0) ||
+        (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50)) {
       enc_l_timestamp_now = esp_timer_get_time();
-      const auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
-      const auto enc_l_dt =
-          (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
-      if (enc_l == 0 && ABS(tmp_l_v - ABS(se->ego.v_l)) > 500) {
+      enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+      enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
+      if (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50) {
+        // エンコーダ取得失敗時更新中止
+        enc_l_timestamp_now = enc_l_timestamp_old;
       } else if (enc_l_dt > 0) {
         se->encoder.left = enc_l;
         se->ego.v_l =
@@ -76,12 +75,14 @@ void SensingTask::timer_200us_callback_main() {
       pt->kf_v_l.update(se->ego.v_l);
     }
     auto tmp_r_v = ABS(calc_enc_v(enc_r, se->encoder.right_old, pt->kf_v_r.dt));
-    if (enc_r == se->encoder.right_old) {
+    if ((enc_r == se->encoder.right_old) || (enc_r == 0) ||
+        (enc_r == 0 && ABS(ABS(tmp_r_v) - ABS(se->ego.v_r)) > 50)) {
       enc_r_timestamp_now = esp_timer_get_time();
-      const auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
-      const auto enc_r_dt =
-          (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
-      if (enc_r == 0 && ABS(tmp_r_v - ABS(se->ego.v_r)) > 500) {
+      enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
+      enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
+      if (enc_r == 0 && ABS(ABS(tmp_r_v) - ABS(se->ego.v_r)) > 50) {
+        // エンコーダ取得失敗時更新中止
+        enc_r_timestamp_now = enc_r_timestamp_old;
       } else if (enc_r_dt > 0) {
         se->encoder.right = enc_r;
         se->ego.v_r = -calc_enc_v(se->encoder.right, se->encoder.right_old,

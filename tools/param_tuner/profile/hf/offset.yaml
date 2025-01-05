@@ -38,7 +38,7 @@ dia135_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
-front_diff_th: 7 # 前壁制御左右偏差条件
+front_diff_th: 9 # 前壁制御左右偏差条件
 front_dist_offset_pivot_th: 84 #前壁制御接近条件
 front_dist_offset_pivot: 90
 
