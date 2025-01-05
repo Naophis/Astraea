@@ -79,6 +79,7 @@ public:
   bool ready = false;
 
 private:
+  bool silent_load = false;
   int test_search_mode = 0;
   SearchResult sr;
   xTaskHandle handle = 0;
@@ -168,6 +169,9 @@ private:
 
   void test_system_identification(bool para);
   void encoder_test();
+
+  void sim_run_time_all();
+  void sim_run_time(int mode_num, int idx, int idx2, int idx3, bool dump_all);
 
   std::vector<param_set_t> paramset_list;
   param_set_t param_set;

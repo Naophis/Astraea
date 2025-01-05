@@ -59,7 +59,7 @@ let ready = function () {
   };
 
   parser.on("data", function (data) {
-    console.log(data, obj.dump_to_csv_ready);
+    console.log(data);
     if (obj.dump_to_csv_ready) {
       const d = data.split(":");
       console.log(d);

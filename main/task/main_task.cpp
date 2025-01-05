@@ -248,8 +248,8 @@ int MainTask::select_mode() {
     int res = ui->encoder_operation();
     mode_num += res;
     if (mode_num == -1) {
-      mode_num = 16;
-    } else if (mode_num == 17) {
+      mode_num = 17;
+    } else if (mode_num == 18) {
       mode_num = (int)(MODE::SEARCH);
     }
     lbit.byte = mode_num + 1;
@@ -1343,17 +1343,20 @@ void MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
   tpp.file_list.clear();
   profile_list = getItem(root, "list");
   int profile_list_size = cJSON_GetArraySize(profile_list);
-  printf("profile_list\n");
+  if (!silent_load)
+    printf("profile_list\n");
   tpp.file_list_size = 0;
   for (int i = 0; i < profile_list_size; i++) {
     tpp.file_list.emplace_back(
         cJSON_GetArrayItem(profile_list, i)->valuestring);
     tpp.file_list_size++;
   }
-  printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
+  if (!silent_load)
+    printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
 
   tpp.profile_idx_size = getItem(root, "profile_idx_size")->valueint;
-  printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
+  if (!silent_load)
+    printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
 
   tpp.profile_map.clear();
   profile_idx = getItem(root, "profile_idx");
@@ -1437,11 +1440,12 @@ void MainTask::load_straight(
         getItem(getItem(getItem(root, key), p2.second.c_str()), "alpha")
             ->valuedouble;
     str_map[p2.first] = str_p;
-
-    printf("[%d][%d]: (v_max, accl, decel, w_max, w_end, alpha) = (%4.1f, "
-           "%4.1f, %4.1f, %4.1f, %4.1f, %4.1f)\n",
-           idx, (int)p2.first, str_p.v_max, str_p.accl, str_p.decel,
-           str_p.w_max, str_p.w_end, str_p.alpha);
+    if (!silent_load) {
+      printf("[%d][%d]: (v_max, accl, decel, w_max, w_end, alpha) = (%4.1f, "
+             "%4.1f, %4.1f, %4.1f, %4.1f, %4.1f)\n",
+             idx, (int)p2.first, str_p.v_max, str_p.accl, str_p.decel,
+             str_p.w_max, str_p.w_end, str_p.alpha);
+    }
   }
   cJSON_Delete(root);
   umount();
@@ -1469,31 +1473,24 @@ void MainTask::load_slas(
   cJSON *root = cJSON_CreateObject();
   root = cJSON_Parse(str.c_str());
   str.shrink_to_fit();
-  printf("%s\n", file_name.c_str());
+  if (!silent_load)
+    printf("%s\n", file_name.c_str());
   for (const auto &p : turn_list) {
-    printf(" - %s\n", p.second.c_str());
     turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
-    printf("   - v: %f\n", turn_map[p.first].v);
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
     turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
-
     turn_map[p.first].rad =
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
     turn_map[p.first].time =
         getItem(getItem(root, p.second.c_str()), "time")->valuedouble;
-    printf("     - rad: %f\n", turn_map[p.first].rad);
-    printf("     - time: %f\n", turn_map[p.first].time);
     if (p.first == TurnType::Orval) {
       turn_map[p.first].rad2 =
           getItem(getItem(root, p.second.c_str()), "rad2")->valuedouble;
       turn_map[p.first].time2 =
           getItem(getItem(root, p.second.c_str()), "time2")->valuedouble;
-      printf("     - rad2: %f\n", turn_map[p.first].rad2);
-      printf("     - time2: %f\n", turn_map[p.first].time2);
     }
-
     turn_map[p.first].pow_n =
         getItem(getItem(root, p.second.c_str()), "pow_n")->valueint;
     turn_map[p.first].front.right =
@@ -1509,10 +1506,20 @@ void MainTask::load_slas(
         getItem(getItem(getItem(root, p.second.c_str()), "back"), "left")
             ->valuedouble;
 
-    printf("     - front: [%0.2f, %0.2ff]\n", turn_map[p.first].front.left,
-           turn_map[p.first].front.right);
-    printf("     - back: [%0.2f, %0.2ff]\n", turn_map[p.first].back.left,
-           turn_map[p.first].back.right);
+    if (!silent_load) {
+      printf(" - %s\n", p.second.c_str());
+      printf("   - v: %f\n", turn_map[p.first].v);
+      printf("     - rad: %f\n", turn_map[p.first].rad);
+      printf("     - time: %f\n", turn_map[p.first].time);
+      if (p.first == TurnType::Orval) {
+        printf("     - rad2: %f\n", turn_map[p.first].rad2);
+        printf("     - time2: %f\n", turn_map[p.first].time2);
+      }
+      printf("     - front: [%0.2f, %0.2ff]\n", turn_map[p.first].front.left,
+             turn_map[p.first].front.right);
+      printf("     - back: [%0.2f, %0.2ff]\n", turn_map[p.first].back.left,
+             turn_map[p.first].back.right);
+    }
     turn_map[p.first].type = cast_turn_type(p.second);
   }
   cJSON_Delete(root);
@@ -1830,6 +1837,8 @@ void MainTask::task() {
         vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
         pt->suction_disable();
       } else if (mode_num == 16) {
+        sim_run_time_all();
+      } else if (mode_num == 17) {
         save_maze_data(false);
         save_maze_kata_data(false);
         save_maze_return_data(false);
@@ -3050,6 +3059,101 @@ void MainTask::read_maze_data() {
   printf("\n");
   printf("end___\n"); // ファイル追記終了トリガー
   umount();
+}
+
+void MainTask::sim_run_time(int mode_num, int idx, int idx2, int idx3,
+                            bool dump_all) {
+  pt->search_mode = false;
+  printf("[sim_run_time] mode_num = %d\n", mode_num);
+  load_slalom_param(idx, idx2, idx3);
+  for (int i = 1; i <= 5; i++) {
+    lgc->set_param_num(i);
+    pc->other_route_map.clear();
+    const bool res = pc->path_create(false);
+    if (dump_all) {
+      printf("other route size = %d\n", pc->other_route_map.size());
+    }
+    if (!res) {
+      ui->error();
+      return;
+    }
+    pc->convert_large_path(true);
+    pc->diagonalPath(true, true);
+    if (i == 0) {
+      pc->path_s2.clear();
+      pc->path_t2.clear();
+      for (int i = 0; i < pc->path_t.size(); i++) {
+        pc->path_s2.push_back(pc->path_s[i]);
+        pc->path_t2.push_back(pc->path_t[i]);
+      }
+    }
+    path_set_t p;
+    p.type = i;
+    p.time = 10000;
+    pc->timebase_path_create(false, param_set, p);
+    pc->path_set_map.push(p);
+  }
+
+  // 先頭に最適な経路を持ってくる
+  const auto top_p = pc->path_set_map.top();
+  if (top_p.result) { //成功
+    pc->path_s.clear();
+    pc->path_t.clear();
+    for (int i = 0; i < top_p.path_s.size(); i++) {
+      pc->path_s.push_back(top_p.path_s[i]);
+      pc->path_t.push_back(top_p.path_t[i]);
+    }
+    // clear map
+    while (!pc->path_set_map.empty()) {
+      auto p2 = pc->path_set_map.top();
+      p2.path_s.clear();
+      p2.path_t.clear();
+      pc->path_set_map.pop();
+    }
+
+  } else { //失敗
+    pc->other_route_map.clear();
+    const bool res = pc->path_create(false);
+    if (!res) {
+      ui->error();
+      return;
+    }
+    pc->convert_large_path(true);
+    pc->diagonalPath(true, true);
+  }
+  if (pc->path_s.size() == 0) {
+    pc->other_route_map.clear();
+    const bool res = pc->path_create(false);
+    if (!res) {
+      ui->error();
+      return;
+    }
+    pc->convert_large_path(true);
+    pc->diagonalPath(true, true);
+    pc->print_path();
+  }
+
+  pc->calc_goal_time(param_set, true);
+  pc->print_path();
+
+  printf("----------------\n");
+}
+
+void MainTask::sim_run_time_all() {
+  param_set.cell_size = param->cell;
+  param_set.start_offset = param->offset_start_dist;
+  const auto rorl = ui->select_direction2();
+  silent_load = true;
+  sim_run_time(5, 12, 12, 12, false);
+  sim_run_time(6, 14, 14, 13, false);
+  sim_run_time(7, 18, 16, 13, false);
+  sim_run_time(8, 19, 17, 13, false);
+  sim_run_time(9, 20, 18, 13, false);
+  sim_run_time(10, 21, 19, 13, false);
+  sim_run_time(11, 22, 21, 13, false);
+  sim_run_time(12, 23, 22, 13, false);
+  silent_load = false;
+  sim_run_time(13, 24, 23, 13, true);
 }
 
 void MainTask::path_run(int idx, int idx2, int idx3) {

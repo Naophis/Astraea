@@ -18,14 +18,14 @@ void mount() {
   mount_config.allocation_unit_size = CONFIG_WL_SECTOR_SIZE;
   const char *base_path = "/spiflash";
 
-  printf("storage0: try mount\n");
+  // printf("storage0: try mount\n");
   esp_err_t err = esp_vfs_fat_spiflash_mount_rw_wl(base_path, "storage0",
                                                    &mount_config, &s_wl_handle);
   if (err != ESP_OK) {
     printf("storage0: Failed to mount FATFS (%s)\n", esp_err_to_name(err));
     return;
   } else {
-    printf("storage0: mount OK\n");
+    // printf("storage0: mount OK\n");
     mount_state = true;
   }
 }
