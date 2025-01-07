@@ -760,13 +760,13 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
     tmp_str_time = 0;
     tmp_turn_time = 0;
 
+    auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
+    ps.v_max = p_set.str_map[st].v_max;
+    ps.v_end = fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
+    ps.accl = p_set.str_map[st].accl;
+    ps.decel = p_set.str_map[st].decel;
     if ((dist > 0) || i == 0) {
-      auto st = !dia ? StraightType::FastRun : StraightType::FastRunDia;
-      ps.v_max = p_set.str_map[st].v_max;
-      ps.v_end =
-          fast_mode ? p_set.map[turn_type].v : p_set.map_slow[turn_type].v;
-      ps.accl = p_set.str_map[st].accl;
-      ps.decel = p_set.str_map[st].decel;
+
       ps.dist = dist;
 
       bool exist_next_idx = (i + 1) < path_size; //絶対true
@@ -838,7 +838,15 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
       if (i == 0 && start_turn) {
         auto next_turn_type = tc.get_turn_type(path_t[i + 1]);
         v_now = ps.v_end = p_set.map[next_turn_type].v;
+      } else if (dist3 == 0) {
+        auto next_turn_type = tc.get_turn_type(path_t[i + 1]);
+        tmp_time.v_max = tmp_time.v_end = ps.v_end =
+            p_set.map[next_turn_type].v;
+      } else if (dist == 0) {
+        auto turn_type = tc.get_turn_type(path_t[i]);
+        tmp_time.v_max = tmp_time.v_end = ps.v_end = p_set.map[turn_type].v;
       }
+      v_now = ps.v_end;
 
       time += tmp_turn_time;
       lap_time += tmp_str_time;
