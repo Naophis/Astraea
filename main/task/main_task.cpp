@@ -898,6 +898,11 @@ void MainTask::load_offset_param() {
       getItem(root, "wall_off_hold_exist_dist_l")->valuedouble;
   param->wall_off_dist.exist_dist_r =
       getItem(root, "wall_off_hold_exist_dist_r")->valuedouble;
+  param->wall_off_dist.exist_dist_l2 =
+      getItem(root, "wall_off_hold_exist_dist_l2")->valuedouble;
+  param->wall_off_dist.exist_dist_r2 =
+      getItem(root, "wall_off_hold_exist_dist_r2")->valuedouble;
+
   param->wall_off_dist.wall_off_exist_wall_th_l =
       getItem(root, "wall_off_exist_wall_th_l")->valuedouble;
   param->wall_off_dist.wall_off_exist_wall_th_r =
@@ -1506,20 +1511,25 @@ void MainTask::load_slas(
         getItem(getItem(getItem(root, p.second.c_str()), "back"), "left")
             ->valuedouble;
 
-    if (!silent_load) {
-      printf(" - %s\n", p.second.c_str());
-      printf("   - v: %f\n", turn_map[p.first].v);
-      printf("     - rad: %f\n", turn_map[p.first].rad);
-      printf("     - time: %f\n", turn_map[p.first].time);
-      if (p.first == TurnType::Orval) {
-        printf("     - rad2: %f\n", turn_map[p.first].rad2);
-        printf("     - time2: %f\n", turn_map[p.first].time2);
-      }
-      printf("     - front: [%0.2f, %0.2ff]\n", turn_map[p.first].front.left,
-             turn_map[p.first].front.right);
-      printf("     - back: [%0.2f, %0.2ff]\n", turn_map[p.first].back.left,
-             turn_map[p.first].back.right);
-    }
+    // if (!silent_load) {
+    //   printf(" - %s\n", p.second.c_str());
+    //   printf("   - v: %f\n", turn_map[p.first].v);
+    //   printf("     - rad: %f\n", turn_map[p.first].rad);
+    //   printf("     - time: %f\n", turn_map[p.first].time);
+    //   if (p.first == TurnType::Orval) {
+    //     printf("     - rad2: %f\n", turn_map[p.first].rad2);
+    //     printf("     - time2: %f\n", turn_map[p.first].time2);
+    //   }
+    //   printf("     - front: [%0.2f, %0.2f]\n", turn_map[p.first].front.left,
+    //          turn_map[p.first].front.right);
+    //   printf("     - back: [%0.2f, %0.2f]\n", turn_map[p.first].back.left,
+    //          turn_map[p.first].back.right);
+    // }
+
+    // if (!silent_load) {
+    //   printf(" - %s: v= %0.2f\n", p.second.c_str(), turn_map[p.first].v);
+    // }
+
     turn_map[p.first].type = cast_turn_type(p.second);
   }
   cJSON_Delete(root);
@@ -3066,6 +3076,39 @@ void MainTask::sim_run_time(int mode_num, int idx, int idx2, int idx3,
   pt->search_mode = false;
   printf("[sim_run_time] mode_num = %d\n", mode_num);
   load_slalom_param(idx, idx2, idx3);
+
+  if (!silent_load) {
+    // fast
+    printf("fast: \n");
+    printf("  - Large: %0.2f\n", param_set.map_fast[TurnType::Large].v);
+    printf("  - Orval: %0.2f\n", param_set.map_fast[TurnType::Orval].v);
+    printf("  - Dia45: %0.2f\n", param_set.map_fast[TurnType::Dia45].v);
+    printf("  - Dia45_2: %0.2f\n", param_set.map_fast[TurnType::Dia45_2].v);
+    printf("  - Dia135: %0.2f\n", param_set.map_fast[TurnType::Dia135].v);
+    printf("  - Dia135_2: %0.2f\n", param_set.map_fast[TurnType::Dia135_2].v);
+    printf("  - Dia90: %0.2f\n", param_set.map_fast[TurnType::Dia90].v);
+
+    // normal
+    printf("normal: \n");
+    printf("  - Large: %0.2f\n", param_set.map[TurnType::Large].v);
+    printf("  - Orval: %0.2f\n", param_set.map[TurnType::Orval].v);
+    printf("  - Dia45: %0.2f\n", param_set.map[TurnType::Dia45].v);
+    printf("  - Dia45_2: %0.2f\n", param_set.map[TurnType::Dia45_2].v);
+    printf("  - Dia135: %0.2f\n", param_set.map[TurnType::Dia135].v);
+    printf("  - Dia135_2: %0.2f\n", param_set.map[TurnType::Dia135_2].v);
+    printf("  - Dia90: %0.2f\n", param_set.map[TurnType::Dia90].v);
+
+    // slow
+    printf("slow: \n");
+    printf("  - Large: %0.2f\n", param_set.map_slow[TurnType::Large].v);
+    printf("  - Orval: %0.2f\n", param_set.map_slow[TurnType::Orval].v);
+    printf("  - Dia45: %0.2f\n", param_set.map_slow[TurnType::Dia45].v);
+    printf("  - Dia45_2: %0.2f\n", param_set.map_slow[TurnType::Dia45_2].v);
+    printf("  - Dia135: %0.2f\n", param_set.map_slow[TurnType::Dia135].v);
+    printf("  - Dia135_2: %0.2f\n", param_set.map_slow[TurnType::Dia135_2].v);
+    printf("  - Dia90: %0.2f\n", param_set.map_slow[TurnType::Dia90].v);
+  }
+
   for (int i = 1; i <= 5; i++) {
     lgc->set_param_num(i);
     pc->other_route_map.clear();
@@ -3154,6 +3197,7 @@ void MainTask::sim_run_time_all() {
   sim_run_time(12, 23, 22, 13, false);
   silent_load = false;
   sim_run_time(13, 24, 23, 13, true);
+  // sim_run_time(14, 24, 23, 13, true);
 }
 
 void MainTask::path_run(int idx, int idx2, int idx3) {

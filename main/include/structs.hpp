@@ -324,6 +324,8 @@ typedef struct {
   float right_dia2;
   float exist_dist_l;
   float exist_dist_r;
+  float exist_dist_l2;
+  float exist_dist_r2;
   float noexist_th_l;
   float noexist_th_r;
   float noexist_th_l2;
