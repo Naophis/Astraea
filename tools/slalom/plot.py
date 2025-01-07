@@ -56,9 +56,9 @@ class Plot:
             tgt_ang = 45.0
             start_ang = 0
             n = 6
+            rad = 56.0
 
             if hf_cl == 0:
-                rad = 50.0
                 # rad = 80.0
                 end_pos = {"x": 90, "y": 45}
 
@@ -90,7 +90,7 @@ class Plot:
             start_ang = 0
             n = 4
             tgt_ang = 90
-            rad = 42.5
+            rad = 43.5
             end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
 
         res = {}

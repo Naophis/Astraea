@@ -134,9 +134,10 @@ sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000, 8000,12000]
 sensor_deg_limitter_str: [75, 25, 50, 75, 75, 75, 75, 75, 75]
 # sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25, 25, 25]
 # sensor_deg_limitter_str: [3, 3, 3, 3, 3, 3, 3, 3, 3]
-sensor_deg_limitter_dia: [3, 3, 6, 8, 8, 6, 4.5, 4.5, 4.5]
+# sensor_deg_limitter_dia: [3, 3, 6, 8, 8, 6, 4.5, 4.5, 4.5]
+sensor_deg_limitter_dia: [3, 3, 4.5, 4.5, 4.5, 4.6, 4.5, 4.5, 4.5]
 sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3]
-# sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3]
+# sensor_deg_limitter_piller: [0, 0, 0, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
   mode: 3
@@ -204,8 +205,10 @@ angle_pid: # pid for angle
   c: 0
 
   p: 7.50
+  # i: 0.25
+  # i: 0.225
   i: 0.0
-  d: 1.0
+  d: 4.5
 
 
 ###### front_ctrl #######

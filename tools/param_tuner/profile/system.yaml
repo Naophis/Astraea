@@ -51,8 +51,8 @@ give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-# mode: 0 # メイン
-mode: 1 # 最短スローム
+mode: 0 # メイン
+# mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -70,21 +70,21 @@ mode: 1 # 最短スローム
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  # v_max: 400
-  # accl: 2500
-  # decel: -2500 
-  # dia_accl: 2500
-  # dia_decel: -2500
-  # dist: 720 #直進
-  # suction_active: 0
+  v_max: 400
+  accl: 2500
+  decel: -2500 
+  dia_accl: 2500
+  dia_decel: -2500
+  dist: 540 #直進
+  suction_active: 0
 
-  v_max: 9500
-  accl: 35000
-  decel: -35000
-  dia_accl: 35000
-  dia_decel: -35000
-  dist: 720 #直進
-  suction_active: 2
+  # v_max: 1500
+  # accl: 35000
+  # decel: -35000
+  # dia_accl: 35000
+  # dia_decel: -35000
+  # dist: 720 #直進
+  # suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -105,18 +105,18 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty_low: 4.5
   # suction_duty_burst: 6.0
   # suction_duty_burst_low: 5.75
-  suction_duty_burst: 7.75
-  suction_duty_burst_low: 7.5
+  suction_duty_burst: 8.0
+  suction_duty_burst_low: 7.75
   # suction_duty_burst: 4.75
   # suction_duty_burst_low: 4.5
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 22
+  file_idx: 1
   sla_dist: 90
   # sla_type: 3
   sla_type: 4
-  sla_type2: 6 #復路ターン種類
+  sla_type2: 8 #復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval
@@ -128,7 +128,7 @@ test: # テスト走行時に使用するパラメータ群
   # sla_type: 8 #dia45_2
   # sla_type: 9 #dia135_2
   turn_times: 0
-  ignore_opp_sen: 2 #斜めターン後の直進テスト 0無効、1斜め制御なし、2斜め制御あり
+  ignore_opp_sen: 0 #斜めターン後の直進テスト 0無効、1斜め制御なし、2斜め制御あり
   sysid_test_mode: 0 #システム同定のテスト:0 直進、1回転
   sysid_duty: 1.5 #duty 
   sysid_time: 1250 #duty 
