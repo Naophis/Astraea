@@ -68,14 +68,14 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
   const auto right = param->sen_ref_p.normal.exist.right45;
 
   if (adachi != nullptr) {
-    if (p.search_str_wide_ctrl_l) {
-      param->sen_ref_p.normal.exist.left45 =
-          param->wall_off_dist.go_straight_wide_ctrl_th;
-    }
-    if (p.search_str_wide_ctrl_r) {
-      param->sen_ref_p.normal.exist.right45 =
-          param->wall_off_dist.go_straight_wide_ctrl_th;
-    }
+    // if (p.search_str_wide_ctrl_l) {
+    //   param->sen_ref_p.normal.exist.left45 =
+    //       param->wall_off_dist.go_straight_wide_ctrl_th;
+    // }
+    // if (p.search_str_wide_ctrl_r) {
+    //   param->sen_ref_p.normal.exist.right45 =
+    //       param->wall_off_dist.go_straight_wide_ctrl_th;
+    // }
   }
   tgt_val->nmr.sct = p.sct;
   if (p.motion_type != MotionType::NONE) {
@@ -128,6 +128,8 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
       if (std::abs(tmp_dist) >= std::abs(p.dist)) {
         auto diff = std::abs(p.dist - now_dist);
         volatile auto time = diff / tgt_val->ego_in.v * 240000000.0 * dt;
+        param->sen_ref_p.normal.exist.left45 = left;
+        param->sen_ref_p.normal.exist.right45 = right;
         for (int i = 0; i < time; i++)
           ;
         return MotionResult::NONE;
@@ -151,11 +153,15 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
             param->wall_off_dist.noexist_th_r) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
         } else if (sensing_result->ego.left45_dist >
                    param->wall_off_dist.noexist_th_l) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
         }
       } else if (wall_off_state == 1 && exist_right) {
@@ -163,6 +169,8 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
             param->wall_off_dist.noexist_th_r) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
         }
       } else if (wall_off_state == 2 && exist_left) {
@@ -170,6 +178,8 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
             param->wall_off_dist.noexist_th_l) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
         }
       }
