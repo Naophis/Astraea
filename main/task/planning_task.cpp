@@ -679,6 +679,10 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   // auto exist_left45_expand = prm->sen_ref_p.normal.expand.left45;
   auto exist_right45_expand = wall_th;
   auto exist_left45_expand = wall_th;
+  if (exist_right45_expand == 0 && exist_right45_expand == 0) {
+    exist_right45_expand = 0;
+    exist_left45_expand = 0;
+  }
 
   // auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
   // auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
@@ -743,10 +747,9 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     } else {
       left_keep.star_dist = tgt_val->global_pos.dist;
     }
-  }
-
-  if (check != 0) {
-    type = SensingControlType::Wall;
+    if (check != 0) {
+      type = SensingControlType::Wall;
+    }
   }
 
   if (check == 0) {
@@ -781,23 +784,24 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
         check++;
         left_check = true;
       }
-      // if (right_check && left_check) {
-      //   if (ABS(right_error) < ABS(left_error)) {
-      //     error = 2 * right_error;
-      //   } else {
-      //     error = 2 * left_error;
-      //   }
-      // }
 
+      if (check == 0) {
+        const bool range_check_passed_right_near =
+            (prm->sen_ref_p.normal2.ref.right90 < se->sen.r45.sensor_dist) &&
+            (se->sen.r45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_r);
+        const bool range_check_passed_left_near =
+            (prm->sen_ref_p.normal2.ref.left90 < se->sen.l45.sensor_dist) &&
+            (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_l);
+        if (range_check_passed_right_near) {
+          error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
+          check++;
+        } else if (range_check_passed_left_near) {
+          error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
+          check++;
+        }
+      }
       if (check != 0) {
         type = SensingControlType::Piller;
-        // tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
-        // ee->w.error_i = 0;
-        // ee->w.error_d = 0;
-        // ee->w.error_dd = 0;
-        // ee->ang.error_i = 0;
-        // ee->ang.error_d = 0;
-        // ee->ang.error_dd = 0;
       }
       // error *= prm->sen_ref_p.normal2.exist.front;
     }
@@ -1622,16 +1626,16 @@ void IRAM_ATTR PlanningTask::cp_request() {
   }
 
   if (receive_req->nmr.motion_type == MotionType::STRAIGHT) {
-    if (se->sen.r45.sensor_dist == 0 || se->sen.r45.sensor_dist == 180) {
-      se->sen.r45.sensor_dist = param_ro->sen_ref_p.normal.ref.right45;
-      se->sen.r45.global_run_dist =
-          tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
-    }
-    if (se->sen.l45.sensor_dist == 0 || se->sen.l45.sensor_dist == 180) {
-      se->sen.l45.sensor_dist = param_ro->sen_ref_p.normal.ref.left45;
-      se->sen.l45.global_run_dist =
-          tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
-    }
+    // if (se->sen.r45.sensor_dist == 0 || se->sen.r45.sensor_dist == 180) {
+    //   se->sen.r45.sensor_dist = param_ro->sen_ref_p.normal.ref.right45;
+    //   se->sen.r45.global_run_dist =
+    //       tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
+    // }
+    // if (se->sen.l45.sensor_dist == 0 || se->sen.l45.sensor_dist == 180) {
+    //   se->sen.l45.sensor_dist = param_ro->sen_ref_p.normal.ref.left45;
+    //   se->sen.l45.global_run_dist =
+    //       tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
+    // }
   }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
