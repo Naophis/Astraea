@@ -52,11 +52,14 @@ void IRAM_ATTR KalmanFilterMatrix::init(float init_x, float init_y,
   // 座標の初期化
   x = {init_x, init_y, init_theta};
   ang = init_theta;
+  reset_cov(init_cov, p_noise, m_noise);
+}
+
+void IRAM_ATTR KalmanFilterMatrix::reset_cov(float init_cov, float p_noise,
+                                             float m_noise) {
   // 状態共分散行列を初期化
   P = {{{init_cov, 0.0, 0.0}, {0.0, init_cov, 0.0}, {0.0, 0.0, init_cov}}};
-
   Q = {{{p_noise, 0.0, 0.0}, {0.0, p_noise, 0.0}, {0.0, 0.0, p_noise}}};
-
   // 観測ノイズ共分散行列
   R = {{{m_noise, 0.0, 0.0}, {0.0, m_noise, 0.0}, {0.0, 0.0, m_noise}}};
 }

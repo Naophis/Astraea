@@ -19,9 +19,12 @@ public:
 
   const std::array<float, 3> &get_state() const { return x; }
 
+  void reset_cov(float init_cov, float p_noise, float m_noise);
+
   float ang = 0;
+
 private:
-  std::array<float, 3> x; // 状態ベクトル [x, y, θ]
+  std::array<float, 3> x;                // 状態ベクトル [x, y, θ]
   std::array<std::array<float, 3>, 3> F; // 状態遷移行列
   std::array<std::array<float, 2>, 3> B; // 制御入力モデル行列
   std::array<std::array<float, 3>, 3> H; // 観測モデル行列
