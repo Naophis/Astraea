@@ -28,29 +28,8 @@ let ready = function () {
     }
   );
   // switchToBinaryMode(336);
-  parser = port.pipe(new Readline({ delimiter: "\r\n" }));
-  function getNowYMD() {
-    var dt = new Date();
-    var y = dt.getFullYear();
-    var m = ("00" + (dt.getMonth() + 1)).slice(-2);
-    var d = ("00" + dt.getDate()).slice(-2);
-    var h = ("00" + dt.getHours()).slice(-2);
-    var M = ("00" + dt.getMinutes()).slice(-2);
-    var s = ("00" + dt.getSeconds()).slice(-2);
-    return `${y}${m}${d}_${h}${M}_${s}.csv`;
-  }
-  function getNowYMD_maze() {
-    var dt = new Date();
-    var y = dt.getFullYear();
-    var m = ("00" + (dt.getMonth() + 1)).slice(-2);
-    var d = ("00" + dt.getDate()).slice(-2);
-    var h = ("00" + dt.getHours()).slice(-2);
-    var M = ("00" + dt.getMinutes()).slice(-2);
-    var s = ("00" + dt.getSeconds()).slice(-2);
-    return `${y}${m}${d}_${h}${M}_${s}.maze`;
-  }
+
   let obj = {
-    dump_to_csv: false,
     dump_to_csv_ready: false,
     dump_to_map: false,
     data_struct: [],
@@ -58,6 +37,33 @@ let ready = function () {
     record: "",
   };
 
+  switchLineMode(obj, parser);
+};
+
+const getNowYMD = () => {
+  var dt = new Date();
+  var y = dt.getFullYear();
+  var m = ("00" + (dt.getMonth() + 1)).slice(-2);
+  var d = ("00" + dt.getDate()).slice(-2);
+  var h = ("00" + dt.getHours()).slice(-2);
+  var M = ("00" + dt.getMinutes()).slice(-2);
+  var s = ("00" + dt.getSeconds()).slice(-2);
+  return `${y}${m}${d}_${h}${M}_${s}.csv`;
+}
+const getNowYMD_maze = () => {
+  var dt = new Date();
+  var y = dt.getFullYear();
+  var m = ("00" + (dt.getMonth() + 1)).slice(-2);
+  var d = ("00" + dt.getDate()).slice(-2);
+  var h = ("00" + dt.getHours()).slice(-2);
+  var M = ("00" + dt.getMinutes()).slice(-2);
+  var s = ("00" + dt.getSeconds()).slice(-2);
+  return `${y}${m}${d}_${h}${M}_${s}.maze`;
+}
+
+const switchLineMode = (obj) => {
+  port.unpipe(parser);
+  parser = port.pipe(new Readline({ delimiter: "\r\n" }));
   parser.on("data", function (data) {
     console.log(data);
     if (obj.dump_to_csv_ready) {
@@ -73,30 +79,7 @@ let ready = function () {
           size: size
         });
       }
-    } else if (obj.dump_to_csv) {
-      if (data.match(/^end___/)) {
-        obj.dump_to_csv = false;
-        console.log(`${__dirname}/logs/${obj.file_name}`);
-        fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
-          flag: "w+",
-        });
-        fs.copyFileSync(
-          `${__dirname}/logs/${obj.file_name}`,
-          `${__dirname}/logs/latest.csv`
-        );
-        console.log('Switching back to Readline mode');
-        binaryMode = false;
-        // パイプラインをクリア
-        port.unpipe(parser);
-
-        // Readline パーサに戻す
-        parser = port.pipe(new Readline({ delimiter: "\r\n" }));
-      }
-      if (obj.dump_to_csv) {
-        obj.record += `${data}\n`;
-      }
-    }
-    if (obj.dump_to_map) {
+    } else if (obj.dump_to_map) {
       if (data.match(/^end___/)) {
         obj.dump_to_map = false;
         console.log(`${__dirname}/maze_logs/${obj.file_name}`);
@@ -140,7 +123,6 @@ let ready = function () {
     }
 
     if (data.match(/^start/)) {
-      obj.dump_to_csv = true;
       obj.file_name = getNowYMD();
       obj.record = "";
 
@@ -155,7 +137,7 @@ let ready = function () {
       console.log(obj);
     }
   });
-};
+}
 
 const switchToBinaryMode = (obj) => {
   const dataSize = 48;//obj.byte_size
@@ -197,8 +179,15 @@ const switchToBinaryMode = (obj) => {
         `${__dirname}/logs/latest.csv`
       );
       finish = true;
-      port.unpipe(parser);
+      // port.unpipe(parser);
       clearInterval(interval);
+      switchLineMode({
+        dump_to_csv_ready: false,
+        dump_to_map: false,
+        data_struct: [],
+        file_name: getNowYMD(),
+        record: "",
+      });
     }
     now = new Date().getTime();
   }, 1000);
@@ -244,6 +233,14 @@ const switchToBinaryMode = (obj) => {
         );
         finish = true;
         console.log("end");
+        clearInterval(interval);
+        switchLineMode({
+          dump_to_csv_ready: false,
+          dump_to_map: false,
+          data_struct: [],
+          file_name: getNowYMD(),
+          record: "",
+        });
       } else if (!finish) {
         let valid = obj.data_struct.every((data, i) => {
           let res = true;
@@ -279,6 +276,9 @@ const switchToBinaryMode = (obj) => {
               res = false;
           if (data.name === "dideal_ang")
             if (record[i] > 180 * 64 || record[i] < 0)
+              res = false;
+          if (data.name === "v_c")
+            if (record[i] > 10000 || record[i] < -10000)
               res = false;
           return res;
         });
