@@ -328,6 +328,15 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
                  param_ro->battery_init_cov,      //
                  param_ro->battery_p_noise,       //
                  param_ro->battery_m_noise);
+
+    pos.init(-param_ro->offset_start_dist, 0, 0, //
+             param_ro->pos_init_cov,             //
+             param_ro->pos_p_noise,              //
+             param_ro->pos_m_noise);             //
+  } else {
+    pos.reset_cov(param_ro->pos_init_cov, //
+                  param_ro->pos_p_noise,  //
+                  param_ro->pos_m_noise); //
   }
   kf_w.init(initial_state,        //
             param_ro->w_init_cov, //
@@ -353,10 +362,6 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
               param_ro->ang_init_cov, //
               param_ro->ang_p_noise,  //
               param_ro->ang_m_noise);
-  pos.init(-param_ro->offset_start_dist, 0, 0, //
-           param_ro->pos_init_cov,             //
-           param_ro->pos_p_noise,              //
-           param_ro->pos_m_noise);             //
 }
 
 void PlanningTask::task() {
@@ -553,12 +558,12 @@ float IRAM_ATTR PlanningTask::calc_sensor_pid() {
   if (search_mode) {
     if (ee->sen.error_p != 0) {
       duty = param_ro->str_ang_pid.p * ee->sen.error_p -
-             param_ro->str_ang_pid.i * sensing_result->ego.w_kf;
+             param_ro->str_ang_pid.i * ee->sen.error_d;
 
       //  (ee->sen_log.gain_z - ee->sen_log.gain_zz) * dt;
-      set_ctrl_val(ee->s_val, ee->sen.error_p, 0, 0, sensing_result->ego.w_kf,
+      set_ctrl_val(ee->s_val, ee->sen.error_p, 0, 0, ee->sen.error_d,
                    param_ro->str_ang_pid.p * ee->sen.error_p, 0, 0,
-                   -param_ro->str_ang_pid.d * sensing_result->ego.w_kf,
+                   -param_ro->str_ang_pid.d * ee->sen.error_d,
                    ee->sen_log.gain_zz, ee->sen_log.gain_z);
       ee->sen_log.gain_zz = ee->sen_log.gain_z;
       ee->sen_log.gain_z = duty;
@@ -572,13 +577,13 @@ float IRAM_ATTR PlanningTask::calc_sensor_pid() {
 
     if (ee->sen.error_p != 0) {
       duty = param_ro->str_ang_pid.b * ee->sen.error_p -
-             param_ro->str_ang_pid.d * sensing_result->ego.w_kf;
+             param_ro->str_ang_pid.d * ee->sen.error_d;
 
       ee->sen_log.gain_zz = ee->sen_log.gain_z;
       ee->sen_log.gain_z = duty;
-      set_ctrl_val(ee->s_val, ee->sen.error_p, 0, 0, sensing_result->ego.w_kf,
+      set_ctrl_val(ee->s_val, ee->sen.error_p, 0, 0, ee->sen.error_d,
                    param_ro->str_ang_pid.b * ee->sen.error_p, 0, 0,
-                   -param_ro->str_ang_pid.d * sensing_result->ego.w_kf,
+                   -param_ro->str_ang_pid.d * ee->sen.error_d,
                    ee->sen_log.gain_zz, ee->sen_log.gain_z);
     } else {
       duty = 0;
@@ -588,7 +593,6 @@ float IRAM_ATTR PlanningTask::calc_sensor_pid() {
                    ee->sen_log.gain_z);
     }
   }
-
   // if (search_mode) {
   //   if (duty > param_ro->sensor_gain.front.a) {
   //     duty = param_ro->sensor_gain.front.a;
@@ -769,15 +773,20 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
         (prm->sen_ref_p.normal2.ref.kireme_l < se->sen.l45.sensor_dist) &&
         (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.exist.left45);
 
+    const bool exist_right45 =
+        se->ego.right45_dist < prm->sen_ref_p.normal.expand.right45;
+    const bool exist_left45 =
+        se->ego.left45_dist < prm->sen_ref_p.normal.expand.left45;
+
     if (!(check_front_left && check_front_right)) {
-      if (range_check_passed_right) {
+      if (range_check_passed_right && !exist_left45) {
         error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
         right_error +=
             prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
         check++;
         right_check = true;
       }
-      if (range_check_passed_left) {
+      if (range_check_passed_left && !exist_right45) {
         error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
         left_error -=
             (prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist);
@@ -792,15 +801,18 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
         const bool range_check_passed_left_near =
             (prm->sen_ref_p.normal2.ref.left90 < se->sen.l45.sensor_dist) &&
             (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_l);
-        if (range_check_passed_right_near) {
+        if (!range_check_passed_left_near && range_check_passed_right_near &&
+            !exist_left45) {
           error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
           check++;
-        } else if (range_check_passed_left_near) {
+        } else if (range_check_passed_left_near &&
+                   !range_check_passed_right_near && !exist_right45) {
           error -= prm->sen_ref_p.normal2.ref.left45 - se->sen.l45.sensor_dist;
           check++;
         }
       }
-      if (check != 0) {
+      if (check != 0 && //
+          !(tgt_val->motion_type == MotionType::SLA_FRONT_STR)) {
         type = SensingControlType::Piller;
       }
       // error *= prm->sen_ref_p.normal2.exist.front;
@@ -1749,7 +1761,9 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
 
 void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   const auto se = get_sensing_entity();
-  if (se->sen.l45.sensor_dist > se->ego.left45_dist) {
+
+  if (se->sen.l45.sensor_dist > se->ego.left45_dist ||
+      se->sen.l45.sensor_dist == 0) {
     se->sen.l45.sensor_dist = se->ego.left45_dist;
     se->sen.l45.global_run_dist = tgt_val->global_pos.dist;
   } else {
@@ -1760,7 +1774,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     }
   }
 
-  if (se->sen.r45.sensor_dist > se->ego.right45_dist) {
+  if (se->sen.r45.sensor_dist > se->ego.right45_dist ||
+      se->sen.r45.sensor_dist == 0) {
     se->sen.r45.sensor_dist = se->ego.right45_dist;
     se->sen.r45.global_run_dist = tgt_val->global_pos.dist;
   } else {
@@ -1770,14 +1785,6 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
       se->sen.r45.sensor_dist = se->ego.right45_dist;
     }
   }
-  sen_log.r45_dist = se->sen.r45.sensor_dist;
-  sen_log.l45_dist = se->sen.l45.sensor_dist;
-  sen_log.global_run_dist = tgt_val->global_pos.dist;
-  // sensing_result->sen_dist_log.list.push_back(sen_log);
-  // if (sensing_result->sen_dist_log.list.size() > param_ro->sen_log_size)
-  // {
-  //   sensing_result->sen_dist_log.list.pop_front();
-  // }
 }
 
 void IRAM_ATTR PlanningTask::recv_notify() {
