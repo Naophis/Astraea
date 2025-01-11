@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.5925 #新品 13.6165
-tire2: 13.5925 #新品 13.6165
+tire: 13.5825 #新品 13.6165
+tire2: 13.5825 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -251,7 +251,7 @@ front_ctrl_keep_angle_pid: # pid for angle
 
 # 光センサー制御
 str_ang_pid:
-  mode: 1
+  mode: 2
   # p: 0.000235 #search_mode
   # d: 0.0000125
   # b: 0.000275 #!searchm_mode
@@ -259,9 +259,10 @@ str_ang_pid:
 
   # test
   p: 0.035
-  d: 0.0025
+  i: 0.0325
+
   b: 0.035
-  i: 0.0025
+  d: 0.0325
   c: 0
 
   # p: 0.0
