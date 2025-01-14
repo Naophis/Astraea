@@ -421,7 +421,6 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
         }
       }
     }
-    // if (ps_front.dist > (sp.v * dt)) {
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
@@ -466,7 +465,6 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     if (b && !next_motion.skip_wall_off) {
       wall_off(td, ps_front);
     }
-    // if (ps_front.dist > (sp.v * dt) && !next_motion.skip_wall_off) {
     if (ps_front.dist > 0 && !next_motion.skip_wall_off) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
@@ -502,7 +500,6 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     if (b) {
       wall_off(td, ps_front);
     }
-    // if (ps_front.dist > (sp.v * dt)) {
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
@@ -529,7 +526,6 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     } else if (sp.type == TurnType::Dia45) {
       // calc_dia45_offset(ps_front, ps_back, td, !b);
     }
-    // if (ps_front.dist > (sp.v * dt) && !next_motion.skip_wall_off) {
     if (ps_front.dist > (0) && !next_motion.skip_wall_off) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
@@ -570,7 +566,6 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       }
     }
     // ps_front.dist = ps_front.dist - dist;
-    // if (ps_front.dist > (sp.v * dt)) {
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
