@@ -429,7 +429,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls4.motion_state = ld->motion_type;
 
     ls4.duty_sen = halfToFloat(ld->duty_sensor_ctrl);
-    ls4.dist_mod90 = dist_mod;
+    ls4.dist_mod90 = tmp_dist;
     ls4.sen_dist_l45 = halfToFloat(ld->sen_log_l45);
     ls4.sen_dist_r45 = halfToFloat(ld->sen_log_r45);
 
