@@ -386,13 +386,10 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
         param->front_dist_offset_pivot_th <
             sensing_result->ego.right90_mid_dist &&
         sensing_result->ego.right90_mid_dist < param->sla_front_ctrl_th) {
-      auto diff =
+      float diff =
           (sensing_result->ego.front_mid_dist - param->front_dist_offset);
-      if (diff > param->normal_sla_offset_front) {
-        diff = param->normal_sla_offset_front;
-      } else if (diff < -param->normal_sla_offset_front) {
-        diff = -param->normal_sla_offset_front;
-      }
+      diff = std::clamp(diff, -param->normal_sla_offset_front,
+                        param->normal_sla_offset_front);
       ps_front.dist += diff;
       if (ps_front.dist < 0) {
         ps_front.dist = 1;
@@ -403,12 +400,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       if ((10 < sensing_result->ego.left45_dist) &&
           (sensing_result->ego.left45_dist < param->th_offset_dist)) {
         offset_l = true;
-        auto diff = (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
-        if (diff > param->normal_sla_offset_back) {
-          diff = param->normal_sla_offset_back;
-        } else if (diff < -param->normal_sla_offset_back) {
-          diff = -param->normal_sla_offset_back;
-        }
+        float diff = (param->sla_wall_ref_l - sensing_result->ego.left45_dist);
+        diff = std::clamp(diff, -param->normal_sla_offset_back,
+                          param->normal_sla_offset_back);
         ps_back.dist += diff;
         if (ps_back.dist < 0) {
           ps_back.dist = 1;
@@ -418,12 +412,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       if ((10 < sensing_result->ego.right45_dist) &&
           (sensing_result->ego.right45_dist < param->th_offset_dist)) {
         offset_r = true;
-        auto diff = (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
-        if (diff > param->normal_sla_offset_back) {
-          diff = param->normal_sla_offset_back;
-        } else if (diff < -param->normal_sla_offset_back) {
-          diff = -param->normal_sla_offset_back;
-        }
+        float diff = (param->sla_wall_ref_r - sensing_result->ego.right45_dist);
+        diff = std::clamp(diff, -param->normal_sla_offset_back,
+                          param->normal_sla_offset_back);
         ps_back.dist += diff;
         if (ps_back.dist < 0) {
           ps_back.dist = 1;
@@ -550,29 +541,32 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
              sp.type == TurnType::Dia90) {
     bool result = wall_off_dia(td, ps_front);
-    auto dist = 0;
+    float dist = 0;
     if (result) {
       if (sp.type == TurnType::Dia135_2) {
-        // if (td == TurnDirection::Right) {
-        //   dist = (param->dia_wall_off_ref_r -
-        //           sensing_result->sen.r45.sensor_dist) /
-        //          ROOT2;
-        // } else {
-        //   dist = (param->dia_wall_off_ref_l -
-        //           sensing_result->sen.l45.sensor_dist) /
-        //          ROOT2;
-        // }
-        // dist = std::clamp(dist, -param->dia_offset_max_dist,
-        //                   param->dia_offset_max_dist);
+        if (td == TurnDirection::Right) {
+          dist = (param->dia_wall_off_ref_r -
+                  sensing_result->sen.r45.sensor_dist) /
+                 ROOT2;
+        } else {
+          dist = (param->dia_wall_off_ref_l -
+                  sensing_result->sen.l45.sensor_dist) /
+                 ROOT2;
+        }
+        dist = std::clamp(dist, -param->dia_offset_max_dist,
+                          param->dia_offset_max_dist);
       } else if (sp.type == TurnType::Dia90) {
-        // if (td == TurnDirection::Right) {
-        // } else {
-        // }
-        // if (dist > param->dia_offset_max_dist) {
-        //   dist = param->dia_offset_max_dist;
-        // } else if (dist < -param->dia_offset_max_dist) {
-        //   dist = -param->dia_offset_max_dist;
-        // }
+        if (td == TurnDirection::Right) {
+          dist = (param->dia_wall_off_ref_r -
+                  sensing_result->sen.r45.sensor_dist) /
+                 ROOT2;
+        } else {
+          dist = (param->dia_wall_off_ref_l -
+                  sensing_result->sen.l45.sensor_dist) /
+                 ROOT2;
+        }
+        dist = std::clamp(dist, -param->dia_offset_max_dist,
+                          param->dia_offset_max_dist);
       }
     }
     // ps_front.dist = ps_front.dist - dist;
