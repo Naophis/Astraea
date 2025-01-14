@@ -565,6 +565,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
                           param->dia_offset_max_dist);
       }
     }
+    // TODO: ここでdistを使ってps_front.distを調整する
     // ps_front.dist = ps_front.dist - dist;
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
