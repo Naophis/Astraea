@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.5825 #新品 13.6165
-tire2: 13.5825 #新品 13.6165
+tire: 13.635 #新品 13.6165
+tire2: 13.635 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -299,8 +299,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.0024505
-  gyro_w_gain_right: 0.0024505
+  gyro_w_gain_left: 0.0024515
+  gyro_w_gain_right: 0.0024515
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g

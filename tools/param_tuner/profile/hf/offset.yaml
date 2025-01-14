@@ -50,8 +50,8 @@ front_dist_offset_dia_left45: 50
 
 seach_timer: 450
 
-clear_dist_ragne_from: 25.0
-clear_dist_ragne_to: 55
+clear_dist_ragne_from: 22.5
+clear_dist_ragne_to: 50.0
 
 clear_dist_ragne_dist_list: [0, 20, 25, 55, 60, 90]
 clear_dist_ragne_th_list: [60, 60, 46.0, 46.5, 60, 60]
@@ -130,11 +130,11 @@ wall_off_diff_check_dist_dia: 10.5
 wall_off_hold_dist_dia_l: 3.0
 wall_off_hold_dist_dia_r: -5.5
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 40.20
-dia_wall_off_ref_r: 40.75
+dia_wall_off_ref_l: 32.50
+dia_wall_off_ref_r: 34.75
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 10
+dia_offset_max_dist: 4
 
 wall_off_pass_dist: 10
 
