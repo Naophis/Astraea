@@ -860,14 +860,15 @@ float IRAM_ATTR PlanningTask::check_sen_error_dia(SensingControlType &type) {
   float error = 0;
   int check = 0;
 
-  //前壁が近すぎるときはエスケープ
+  // 斜め移動が一定距離以上するとき、かつ、終わりまでの距離が一定距離未満
   if (tgt_val->tgt_in.tgt_dist > param_ro->sen_ctrl_front_th &&
       (tgt_val->tgt_in.tgt_dist - tgt_val->ego_in.dist) >
           param_ro->sen_ctrl_front_diff_th) {
-
+    // 右前センサーが一定距離以内のとき
     const bool valid_right = 1 < sensing_result->ego.right90_mid_dist &&
                              sensing_result->ego.right90_mid_dist <
                                  param_ro->sen_ref_p.dia.exist.right90;
+    // 左前センサーが一定距離以内のとき
     const bool valid_left = 1 < sensing_result->ego.left90_mid_dist &&
                             sensing_result->ego.left90_mid_dist <
                                 param_ro->sen_ref_p.dia.exist.left90;
