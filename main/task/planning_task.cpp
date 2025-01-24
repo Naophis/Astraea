@@ -666,17 +666,6 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   const auto se = get_sensing_entity();
   const auto prm = get_param();
 
-  if (tgt_val->motion_type == MotionType::STRAIGHT) {
-    if ((0 < tmp_dist && tmp_dist < prm->clear_dist_ragne_from) ||
-        (prm->clear_dist_ragne_to < tmp_dist && tmp_dist < 90)) {
-      expand_right =
-          (10 < se->ego.right45_dist) &&
-          (se->ego.right45_dist < prm->sen_ref_p.search_exist.right45);
-      expand_left = (10 < se->ego.left45_dist) &&
-                    (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
-    }
-  }
-
   auto exist_right45 = prm->sen_ref_p.normal.exist.right45;
   auto exist_left45 = prm->sen_ref_p.normal.exist.left45;
   // auto exist_right45_expand = prm->sen_ref_p.normal.expand.right45;
@@ -688,6 +677,12 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     exist_left45_expand = 0;
   }
 
+  if (tgt_val->motion_type == MotionType::STRAIGHT) {
+    expand_right = (10 < se->ego.right45_dist) &&
+                   (se->ego.right45_dist < prm->sen_ref_p.search_exist.right45);
+    expand_left = (10 < se->ego.left45_dist) &&
+                  (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
+  }
   // auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
   // auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
   float val_left = 1000;
@@ -767,16 +762,18 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
 
     const bool range_check_passed_right =
         (prm->sen_ref_p.normal2.ref.kireme_r < se->sen.r45.sensor_dist) &&
-        (se->sen.r45.sensor_dist < prm->sen_ref_p.normal2.exist.right45);
+        (se->sen.r45.sensor_dist < prm->sen_ref_p.normal2.exist.right45) &&
+        (se->sen.r45.sensor_dist + 5) < se->ego.right45_dist;
 
     const bool range_check_passed_left =
         (prm->sen_ref_p.normal2.ref.kireme_l < se->sen.l45.sensor_dist) &&
-        (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.exist.left45);
+        (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.exist.left45) &&
+        (se->sen.l45.sensor_dist + 5) < se->ego.left45_dist;
 
     const bool exist_right45 =
-        se->ego.right45_dist < prm->sen_ref_p.normal.expand.right45;
+        se->ego.right45_dist < prm->sen_ref_p.normal.ref.right45;
     const bool exist_left45 =
-        se->ego.left45_dist < prm->sen_ref_p.normal.expand.left45;
+        se->ego.left45_dist < prm->sen_ref_p.normal.ref.left45;
 
     if (!(check_front_left && check_front_right)) {
       if (range_check_passed_right && !exist_left45) {
@@ -797,10 +794,12 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
       if (check == 0) {
         const bool range_check_passed_right_near =
             (prm->sen_ref_p.normal2.ref.right90 < se->sen.r45.sensor_dist) &&
-            (se->sen.r45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_r);
+            (se->sen.r45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_r) &&
+            (se->sen.r45.sensor_dist + 5) < se->ego.right45_dist;
         const bool range_check_passed_left_near =
             (prm->sen_ref_p.normal2.ref.left90 < se->sen.l45.sensor_dist) &&
-            (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_l);
+            (se->sen.l45.sensor_dist < prm->sen_ref_p.normal2.ref.kireme_l) &&
+            (se->sen.l45.sensor_dist + 5) < se->ego.left45_dist;
         if (!range_check_passed_left_near && range_check_passed_right_near &&
             !exist_left45) {
           error += prm->sen_ref_p.normal2.ref.right45 - se->sen.r45.sensor_dist;
@@ -859,46 +858,66 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
 float IRAM_ATTR PlanningTask::check_sen_error_dia(SensingControlType &type) {
   float error = 0;
   int check = 0;
+  const auto se = get_sensing_entity();
 
   // 斜め移動が一定距離以上するとき、かつ、終わりまでの距離が一定距離未満
   if (tgt_val->tgt_in.tgt_dist > param_ro->sen_ctrl_front_th &&
       (tgt_val->tgt_in.tgt_dist - tgt_val->ego_in.dist) >
           param_ro->sen_ctrl_front_diff_th) {
     // 右前センサーが一定距離以内のとき
-    const bool valid_right = 1 < sensing_result->ego.right90_mid_dist &&
-                             sensing_result->ego.right90_mid_dist <
-                                 param_ro->sen_ref_p.dia.exist.right90;
+    const bool valid_right90 =
+        1 < se->ego.right90_mid_dist &&
+        se->ego.right90_mid_dist < param_ro->sen_ref_p.dia.exist.right90;
     // 左前センサーが一定距離以内のとき
-    const bool valid_left = 1 < sensing_result->ego.left90_mid_dist &&
-                            sensing_result->ego.left90_mid_dist <
-                                param_ro->sen_ref_p.dia.exist.left90;
+    const bool valid_left90 =
+        1 < se->ego.left90_mid_dist &&
+        se->ego.left90_mid_dist < param_ro->sen_ref_p.dia.exist.left90;
 
-    if (valid_right) {
-      error += param_ro->sen_ref_p.dia.ref.right90 -
-               sensing_result->ego.right90_mid_dist;
-      tgt_val->dia_state.right_old = param_ro->sen_ref_p.dia.ref.right90 -
-                                     sensing_result->ego.right90_mid_dist;
+    const bool valid_right45 =
+        1 < se->sen.r45.sensor_dist &&
+        se->sen.r45.sensor_dist < param_ro->sen_ref_p.dia.exist.right45 &&
+        se->sen.r45.sensor_dist < se->ego.right45_dist;
+    const bool valid_left45 =
+        1 < se->sen.l45.sensor_dist &&
+        se->sen.l45.sensor_dist < param_ro->sen_ref_p.dia.exist.left45 &&
+        se->sen.l45.sensor_dist < se->ego.left45_dist;
+
+    if (valid_right90) {
+      error += param_ro->sen_ref_p.dia.ref.right90 - se->ego.right90_mid_dist;
+      tgt_val->dia_state.right_old =
+          param_ro->sen_ref_p.dia.ref.right90 - se->ego.right90_mid_dist;
       tgt_val->dia_state.right_save = true;
       tgt_val->dia_state.left_save = false;
       check++;
     }
-    if (valid_left) {
-      error -= param_ro->sen_ref_p.dia.ref.left90 -
-               sensing_result->ego.left90_mid_dist;
-      tgt_val->dia_state.left_old = param_ro->sen_ref_p.dia.ref.left90 -
-                                    sensing_result->ego.left90_mid_dist;
+    if (valid_left90) {
+      error -= param_ro->sen_ref_p.dia.ref.left90 - se->ego.left90_mid_dist;
+      tgt_val->dia_state.left_old =
+          param_ro->sen_ref_p.dia.ref.left90 - se->ego.left90_mid_dist;
       tgt_val->dia_state.left_save = true;
       tgt_val->dia_state.right_save = false;
       check++;
     }
-    if (!valid_left && !valid_right && param_ro->sensor_gain.front4.a != 0) {
-      if (tgt_val->dia_state.right_save) {
-        error += tgt_val->dia_state.right_old;
+    if (!valid_left90 && !valid_right90 &&
+        param_ro->sensor_gain.front4.a != 0) {
+
+      if (valid_right45) {
+        error += param_ro->sen_ref_p.dia.ref.right45 - se->sen.r45.sensor_dist;
         check++;
       }
-      if (tgt_val->dia_state.left_save) {
-        error -= tgt_val->dia_state.left_old;
+      if (valid_left45) {
+        error -= param_ro->sen_ref_p.dia.ref.left45 - se->sen.l45.sensor_dist;
         check++;
+      }
+      if (!(valid_left45 && valid_right45)) {
+        if (tgt_val->dia_state.right_save) {
+          error += tgt_val->dia_state.right_old;
+          check++;
+        }
+        if (tgt_val->dia_state.left_save) {
+          error -= tgt_val->dia_state.left_old;
+          check++;
+        }
       }
     }
   }
@@ -1454,6 +1473,14 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
 
   tgt_val->global_pos.img_ang += mpc_next_ego.w * dt;
+
+  if (tgt_val->motion_type == MotionType::SLALOM) {
+    if (tgt_val->ego_in.pivot_state == 3) {
+      tgt_val->global_pos.img_ang = //
+          tgt_val->ego_in.img_ang = tgt_val->tgt_in.tgt_angle;
+    }
+  }
+
   tgt_val->global_pos.img_dist += mpc_next_ego.v * dt;
 
   tgt_val->ego_in.slip_point.slip_angle = mpc_next_ego.slip_point.slip_angle;
@@ -1551,6 +1578,7 @@ void IRAM_ATTR PlanningTask::cp_request() {
   tgt_val->tgt_in.alpha = receive_req->nmr.alpha;
 
   tgt_val->tgt_in.tgt_dist = receive_req->nmr.dist;
+  last_tgt_angle = tgt_val->tgt_in.tgt_angle;
   tgt_val->tgt_in.tgt_angle = receive_req->nmr.ang;
 
   tgt_val->motion_mode = (int)(receive_req->nmr.motion_mode);
@@ -1572,27 +1600,43 @@ void IRAM_ATTR PlanningTask::cp_request() {
   tgt_val->dia_state.right_save = false;
   tgt_val->dia_state.left_old = tgt_val->dia_state.right_old = 0;
 
-  if (!(tgt_val->motion_type == MotionType::NONE ||
-        tgt_val->motion_type == MotionType::STRAIGHT ||
-        tgt_val->motion_type == MotionType::PIVOT_PRE ||
-        tgt_val->motion_type == MotionType::PIVOT_AFTER ||
-        tgt_val->motion_type == MotionType::READY ||
-        tgt_val->motion_type == MotionType::SENSING_DUMP ||
-        tgt_val->motion_type == MotionType::WALL_OFF ||
-        tgt_val->motion_type == MotionType::WALL_OFF_DIA)) {
-    const auto tmp_ang = tgt_val->ego_in.img_ang;
-    tgt_val->ego_in.ang -= tmp_ang;
-    tgt_val->ego_in.img_ang = 0;
-    kf_ang.offset(-tmp_ang);
-  } else if (tgt_val->motion_type == MotionType::NONE) {
-    tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = 0;
+  // if (!(tgt_val->motion_type == MotionType::NONE ||
+  //       tgt_val->motion_type == MotionType::STRAIGHT ||
+  //       tgt_val->motion_type == MotionType::PIVOT_PRE ||
+  //       tgt_val->motion_type == MotionType::PIVOT_AFTER ||
+  //       tgt_val->motion_type == MotionType::READY ||
+  //       tgt_val->motion_type == MotionType::SENSING_DUMP ||
+  //       tgt_val->motion_type == MotionType::WALL_OFF ||
+  //       tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
+  //       tgt_val->motion_type == MotionType::BACK_STRAIGHT)) {
+  //   tgt_val->ego_in.ang -= last_tgt_angle;
+  //   tgt_val->ego_in.img_ang = 0;
+  //   kf_ang.offset(-last_tgt_angle);
+  // } else if (tgt_val->motion_type == MotionType::NONE) {
+  //   tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = last_tgt_angle = 0;
+  //   kf_ang.reset(0);
+  //   tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
+  //   kf_dist.reset(0);
+  // }
+
+  if (tgt_val->motion_type == MotionType::NONE ||
+      tgt_val->motion_type == MotionType::PIVOT ||
+      tgt_val->motion_type == MotionType::FRONT_CTRL ||
+      tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
+      tgt_val->motion_type == MotionType::PIVOT_AFTER) {
+    tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = last_tgt_angle = 0;
     kf_ang.reset(0);
     tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
     kf_dist.reset(0);
+  } else {
+    tgt_val->ego_in.ang -= last_tgt_angle;
+    tgt_val->ego_in.img_ang = 0;
+    kf_ang.offset(-last_tgt_angle);
   }
 
   if (tgt_val->motion_type == MotionType::NONE ||
       tgt_val->motion_type == MotionType::READY) {
+    last_tgt_angle = 0;
     tgt_val->global_pos.ang -= tgt_val->global_pos.img_ang;
     tgt_val->global_pos.img_ang = 0;
 
@@ -1605,8 +1649,8 @@ void IRAM_ATTR PlanningTask::cp_request() {
 
   if (tgt_val->tgt_in.tgt_angle != 0) {
     const auto tmp_ang = tgt_val->ego_in.ang;
-    tgt_val->ego_in.img_ang -= tmp_ang;
-    kf_ang.offset(-tmp_ang);
+    tgt_val->ego_in.img_ang -= last_tgt_angle;
+    kf_ang.offset(-last_tgt_angle);
     tgt_val->ego_in.ang = 0;
     // } else {
     //   kf_ang.reset(0);
@@ -2265,6 +2309,7 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang_vel() {
   if (param_ro->torque_mode == 2) {
     if (!(tgt->motion_type == MotionType::PIVOT ||
           tgt->motion_type == MotionType::FRONT_CTRL
+          // || tgt->motion_type == MotionType::SLALOM
           //
           )) {
       offset += duty_roll_ang;

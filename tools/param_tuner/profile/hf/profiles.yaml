@@ -332,7 +332,7 @@ profile_idx: [
       dia45_2: 30,
       dia135: 28,
       dia135_2: 28,
-      dia90: 26,
+      dia90: 28,
     },
     {
       # 22: 最短パラメータ 1500
@@ -345,20 +345,20 @@ profile_idx: [
       dia45_2: 30,
       dia135: 28,
       dia135_2: 28,
-      dia90: 26,
+      dia90: 28,
     },
     {
       # 23: 最短パラメータ 1500
       run_param: 23,
       suction: 2,
       normal: 0,
-      large: 32,
-      orval: 32,
+      large: 31,
+      orval: 31,
       dia45: 31,
       dia45_2: 31,
-      dia135: 28,
-      dia135_2: 28,
-      dia90: 26,
+      dia135: 29,
+      dia135_2: 29,
+      dia90: 28,
     },
     {
       # 24: 最短パラメータ 1500
@@ -369,22 +369,22 @@ profile_idx: [
       orval: 32,
       dia45: 31,
       dia45_2: 31,
-      dia135: 28,
-      dia135_2: 28,
-      dia90: 26,
+      dia135: 29,
+      dia135_2: 29,
+      dia90: 28,
     },
     {
       # 25: 最短パラメータ 1500
       run_param: 24,
       suction: 2,
       normal: 0,
-      large: 30,
-      orval: 28,
-      dia45: 24,
-      dia45_2: 24,
-      dia135: 23,
-      dia135_2: 23,
-      dia90: 23,
+      large: 32,
+      orval: 32,
+      dia45: 31,
+      dia45_2: 31,
+      dia135: 29,
+      dia135_2: 29,
+      dia90: 28,
     },
     {
       # 26: 最短パラメータ 1500

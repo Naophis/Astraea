@@ -44,16 +44,16 @@ class Plot:
                 end_pos = {"x": 90, "y": 90}
         elif type == "orval":
             if hf_cl == 0:
-                rad = 46.6
+                rad = 49.25
                 n = 4
-                tgt_ang = 180.5
+                tgt_ang = 180.0
                 # tgt_ang = 180
                 end_pos = {"x": 0, "y": 180}
                 start_ang = 0
 
         elif type == "dia45":
             end_pos = {"x": 90, "y": 45}
-            tgt_ang = 45.0
+            tgt_ang = 46.5
             start_ang = 0
             n = 6
             rad = 56.0

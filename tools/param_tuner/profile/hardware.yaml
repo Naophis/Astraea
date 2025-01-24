@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.635 #新品 13.6165
-tire2: 13.635 #新品 13.6165
+tire: 13.6265 #新品 13.6165
+tire2: 13.6265 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -131,7 +131,7 @@ gyro_pid_gain_limitter:
 
 sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000, 8000,12000]
 # sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125, 125, 125]
-sensor_deg_limitter_str: [75, 25, 50, 75, 75, 75, 75, 75, 75]
+sensor_deg_limitter_str: [8, 8, 50, 75, 75, 75, 75, 75, 75]
 # sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25, 25, 25]
 # sensor_deg_limitter_str: [3, 3, 3, 3, 3, 3, 3, 3, 3]
 # sensor_deg_limitter_dia: [3, 3, 6, 8, 8, 6, 4.5, 4.5, 4.5]
@@ -299,8 +299,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.0024515
-  gyro_w_gain_right: 0.0024515
+  gyro_w_gain_left: 0.00245167
+  gyro_w_gain_right: 0.0024511
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -383,8 +383,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 90 #[mm]
 normal_sla_r_wall_off_th_out: 90 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 140 #125~144
-normal_sla_r_wall_off_ref_cnt: 136 #125~144
+normal_sla_l_wall_off_ref_cnt: 143 #125~144
+normal_sla_r_wall_off_ref_cnt: 144 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6

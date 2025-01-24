@@ -257,7 +257,7 @@ MotionResult IRAM_ATTR MotionPlanning::pivot_turn(param_roll_t &p) {
     tgt_val->nmr.w_max = -p.w_max;
     tgt_val->nmr.w_end = -p.w_end;
     tgt_val->nmr.alpha = -p.alpha;
-    tgt_val->nmr.ang = p.ang;
+    tgt_val->nmr.ang = -p.ang;
     tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   }
   tgt_val->nmr.motion_mode = RUN_MODE2::PIVOT_TURN;
@@ -304,7 +304,7 @@ MotionResult IRAM_ATTR MotionPlanning::pivot_turn(param_roll_t &p) {
           tgt_val->nmr.w_max = -p.w_max;
           tgt_val->nmr.w_end = -p.w_end;
           tgt_val->nmr.alpha = -p.alpha;
-          tgt_val->nmr.ang = p.ang;
+          tgt_val->nmr.ang = -p.ang;
           tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
         }
         tgt_val->nmr.motion_mode = RUN_MODE2::PIVOT_TURN;
@@ -350,6 +350,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   bool find = false;
   bool find_r = false;
   bool find_l = false;
+  const auto se = get_sensing_entity();
 
   ps_front.search_str_wide_ctrl_l = ps_front.search_str_wide_ctrl_r =
       ps_back.search_str_wide_ctrl_l = ps_back.search_str_wide_ctrl_r = false;
@@ -541,32 +542,24 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     if (result) {
       if (sp.type == TurnType::Dia135_2) {
         if (td == TurnDirection::Right) {
-          dist = (param->dia_wall_off_ref_r -
-                  sensing_result->sen.r45.sensor_dist) /
-                 ROOT2;
+          dist = (param->dia_wall_off_ref_r - se->sen.r45.sensor_dist) / ROOT2;
         } else {
-          dist = (param->dia_wall_off_ref_l -
-                  sensing_result->sen.l45.sensor_dist) /
-                 ROOT2;
+          dist = (param->dia_wall_off_ref_l - se->sen.l45.sensor_dist) / ROOT2;
         }
         dist = std::clamp(dist, -param->dia_offset_max_dist,
                           param->dia_offset_max_dist);
       } else if (sp.type == TurnType::Dia90) {
         if (td == TurnDirection::Right) {
-          dist = (param->dia_wall_off_ref_r -
-                  sensing_result->sen.r45.sensor_dist) /
-                 ROOT2;
+          dist = (param->dia_wall_off_ref_r - se->sen.r45.sensor_dist) / ROOT2;
         } else {
-          dist = (param->dia_wall_off_ref_l -
-                  sensing_result->sen.l45.sensor_dist) /
-                 ROOT2;
+          dist = (param->dia_wall_off_ref_l - se->sen.l45.sensor_dist) / ROOT2;
         }
         dist = std::clamp(dist, -param->dia_offset_max_dist,
                           param->dia_offset_max_dist);
       }
     }
     // TODO: ここでdistを使ってps_front.distを調整する
-    // ps_front.dist = ps_front.dist - dist;
+    ps_front.dist = ps_front.dist - dist;
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
@@ -654,6 +647,8 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       (int)(tgt_val->nmr.sla_time * 2 / dt);
   tgt_val->nmr.timstamp++;
 
+  tgt_val->nmr.ang = (td == TurnDirection::Left) ? sp.ref_ang : -sp.ref_ang;
+
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
   vTaskDelay(1.0 / portTICK_RATE_MS);
   if (search_mode) {
@@ -713,6 +708,8 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       }
       if (tgt_val->ego_in.sla_param.counter >= (sp.time * 2 / dt)) {
         tgt_val->ego_in.w = 0;
+        tgt_val->ego_in.img_ang =
+            (td == TurnDirection::Left) ? sp.ref_ang : -sp.ref_ang;
         break;
       }
     }
@@ -811,6 +808,7 @@ void IRAM_ATTR MotionPlanning::reset_tgt_data() {
   tgt_val->global_pos.dist = 0;
   tgt_val->global_pos.img_dist = 0;
   tgt_val->nmr.tgt_reset_req = true;
+  pt->last_tgt_angle = 0;
   // TODO
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
   vTaskDelay(1.0 / portTICK_RATE_MS);

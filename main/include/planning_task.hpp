@@ -115,7 +115,7 @@ public:
   std::shared_ptr<motion_tgt_val_t> get_tgt_entity() { return tgt_val; }
 
   void reset_kf_state(bool reset_battery);
-
+  float last_tgt_angle = 0;
 private:
   sensor_ctrl_keep_dist_t right_keep;
   sensor_ctrl_keep_dist_t left_keep;
@@ -193,6 +193,7 @@ private:
   int pid_req_timestamp = 0;
   int motor_req_timestamp = 0;
   int suction_req_timestamp = 0;
+
   void pl_req_activate();
   void cp_tgt_val();
   mpc_tgt_calcModelClass mpc_tgt_calc;

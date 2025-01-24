@@ -48,39 +48,12 @@ void SensingTask::timer_200us_callback_main() {
   pt->kf_v_l.dt = enc_l_dt;
 
   if (std::isfinite(accl_l) && std::isfinite(accl_r)) {
+    auto tmp_r_v = ABS(calc_enc_v(enc_r, se->encoder.right_old, pt->kf_v_r.dt));
     auto tmp_l_v = ABS(calc_enc_v(enc_l, se->encoder.left_old, pt->kf_v_l.dt));
 
-    if ((enc_l == se->encoder.left_old) || (enc_l == 0) ||
-        (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50)) {
-      for (int i = 0; i < 3; i++) {
-        enc_l_timestamp_now = esp_timer_get_time();
-        enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
-        enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
-        if (enc_l != 0) {
-          break;
-        }
-      }
-      if (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50) {
-        // エンコーダ取得失敗時更新中止
-        enc_l_timestamp_now = enc_l_timestamp_old;
-      } else if (enc_l_dt > 0) {
-        se->encoder.left = enc_l;
-        se->ego.v_l =
-            calc_enc_v(se->encoder.left, se->encoder.left_old, pt->kf_v_l.dt);
-        pt->kf_v_l.dt = enc_l_dt;
-        pt->kf_v_l.predict(accl_l);
-        pt->kf_v_l.update(se->ego.v_l);
-      }
-    } else if (enc_l_dt > 0) {
-      se->encoder.left = enc_l;
-      se->ego.v_l =
-          calc_enc_v(se->encoder.left, se->encoder.left_old, pt->kf_v_l.dt);
-      pt->kf_v_l.dt = enc_l_dt;
-      pt->kf_v_l.predict(accl_l);
-      pt->kf_v_l.update(se->ego.v_l);
-    }
-    auto tmp_r_v = ABS(calc_enc_v(enc_r, se->encoder.right_old, pt->kf_v_r.dt));
-    if ((enc_r == se->encoder.right_old) || (enc_r == 0) ||
+    if (
+        // (enc_r == se->encoder.right_old) ||
+        (enc_r == 0) ||
         (enc_r == 0 && ABS(ABS(tmp_r_v) - ABS(se->ego.v_r)) > 50)) {
       for (int i = 0; i < 3; i++) {
         enc_r_timestamp_now = esp_timer_get_time();
@@ -108,6 +81,38 @@ void SensingTask::timer_200us_callback_main() {
       pt->kf_v_r.dt = enc_r_dt;
       pt->kf_v_r.predict(accl_r);
       pt->kf_v_r.update(se->ego.v_r);
+    }
+
+    if (
+        //(enc_l == se->encoder.left_old) ||
+        (enc_l == 0) ||
+        (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50)) {
+      for (int i = 0; i < 3; i++) {
+        enc_l_timestamp_now = esp_timer_get_time();
+        enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+        enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
+        if (enc_l != 0) {
+          break;
+        }
+      }
+      if (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50) {
+        // エンコーダ取得失敗時更新中止
+        enc_l_timestamp_now = enc_l_timestamp_old;
+      } else if (enc_l_dt > 0) {
+        se->encoder.left = enc_l;
+        se->ego.v_l =
+            calc_enc_v(se->encoder.left, se->encoder.left_old, pt->kf_v_l.dt);
+        pt->kf_v_l.dt = enc_l_dt;
+        pt->kf_v_l.predict(accl_l);
+        pt->kf_v_l.update(se->ego.v_l);
+      }
+    } else if (enc_l_dt > 0) {
+      se->encoder.left = enc_l;
+      se->ego.v_l =
+          calc_enc_v(se->encoder.left, se->encoder.left_old, pt->kf_v_l.dt);
+      pt->kf_v_l.dt = enc_l_dt;
+      pt->kf_v_l.predict(accl_l);
+      pt->kf_v_l.update(se->ego.v_l);
     }
   }
   if (param->enable_kalman_encoder > 0) {
@@ -278,8 +283,9 @@ void SensingTask::task() {
     if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
       if (tgt_val->ego_in.state == 0) {
         // 斜め壁制御加速中は横は発光させない
-        r45 = l45 = false;
+        // r45 = l45 = false;
       }
+      r45 = l45 = true;
     }
     if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
       r90 = l90 = true;
@@ -357,8 +363,9 @@ void SensingTask::task() {
       if (pt->tgt_val->nmr.sct == SensorCtrlType::Dia) {
         if (pt->tgt_val->ego_in.state == 0) {
           // 斜め壁制御加速中は横は発光させない
-          r45 = l45 = false;
+          // r45 = l45 = false;
         }
+        r45 = l45 = true;
       }
       if (pt->tgt_val->nmr.sct == SensorCtrlType::Straight) {
         r90 = l90 = true;

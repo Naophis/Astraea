@@ -178,11 +178,11 @@ typedef struct {
 } sen_log2_t;
 
 typedef struct {
-  // sen_log_t l90;
+  sen_log_t l90;
   sen_log_t l45;
   // sen_log_t front;
   sen_log_t r45;
-  // sen_log_t r90;
+  sen_log_t r90;
 } sen_logs_t;
 
 typedef struct {
@@ -849,6 +849,7 @@ typedef struct {
   float v = 0;
   float end_v = 0;
   float ang = 0;
+  float ref_ang = 0;
   float rad = 0;
   float rad2 = 0;
   slalom_offset_t front;

@@ -88,6 +88,9 @@ private:
   std::shared_ptr<UserInterface> ui;
 
   std::shared_ptr<sensing_result_entity_t> sensing_result;
+  std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
+    return sensing_result;
+  }
   std::shared_ptr<input_param_t> param;
   std::shared_ptr<PathCreator> pc;
   TrajectoryCreator tc;

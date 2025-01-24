@@ -1084,11 +1084,16 @@ void MainTask::load_sensor_param() {
   dia = getItem(root, "dia");
   dia_ref = getItem(dia, "ref");
   dia_exist = getItem(dia, "exist");
+  param->sen_ref_p.dia.ref.right45 = getItem(dia_ref, "right45")->valuedouble;
+  param->sen_ref_p.dia.ref.left45 = getItem(dia_ref, "left45")->valuedouble;
   param->sen_ref_p.dia.ref.right90 = getItem(dia_ref, "right90")->valuedouble;
   param->sen_ref_p.dia.ref.left90 = getItem(dia_ref, "left90")->valuedouble;
   param->sen_ref_p.dia.ref.kireme_r = getItem(dia_ref, "kireme_r")->valuedouble;
   param->sen_ref_p.dia.ref.kireme_l = getItem(dia_ref, "kireme_l")->valuedouble;
 
+  param->sen_ref_p.dia.exist.right45 =
+      getItem(dia_exist, "right45")->valuedouble;
+  param->sen_ref_p.dia.exist.left45 = getItem(dia_exist, "left45")->valuedouble;
   param->sen_ref_p.dia.exist.right90 =
       getItem(dia_exist, "right90")->valuedouble;
   param->sen_ref_p.dia.exist.left90 = getItem(dia_exist, "left90")->valuedouble;
@@ -1486,6 +1491,24 @@ void MainTask::load_slas(
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
     turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
+    if (p.first == TurnType::Normal) {
+      turn_map[p.first].ref_ang = m_PI * 90 / 180;
+    } else if (p.first == TurnType::Large) {
+      turn_map[p.first].ref_ang = m_PI * 90 / 180;
+    } else if (p.first == TurnType::Dia45) {
+      turn_map[p.first].ref_ang = m_PI * 45 / 180;
+    } else if (p.first == TurnType::Dia45_2) {
+      turn_map[p.first].ref_ang = m_PI * 45 / 180;
+    } else if (p.first == TurnType::Dia135) {
+      turn_map[p.first].ref_ang = m_PI * 135 / 180;
+    } else if (p.first == TurnType::Dia135_2) {
+      turn_map[p.first].ref_ang = m_PI * 135 / 180;
+    } else if (p.first == TurnType::Dia90) {
+      turn_map[p.first].ref_ang = m_PI * 90 / 180;
+    } else if (p.first == TurnType::Orval) {
+      turn_map[p.first].ref_ang = m_PI * 180 / 180;
+    }
+
     turn_map[p.first].rad =
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
     turn_map[p.first].time =
@@ -2333,6 +2356,7 @@ void MainTask::test_sla() {
   printf("slalom params[0]:\n");
   printf("  v: %f\n", sla_p.v);
   printf("  ang: %f\n", sla_p.ang * 180 / m_PI);
+  printf("  ref_ang: %f\n", sla_p.ref_ang * 180 / m_PI);
   printf("  rad: %f\n", sla_p.rad);
   printf("  time:  %f\n", sla_p.time);
   printf("  n: %d\n", sla_p.pow_n);
@@ -2458,7 +2482,7 @@ void MainTask::test_sla() {
     ps.accl = sys.test.dia_accl;
     ps.decel = sys.test.dia_decel;
   }
-  ps.motion_type = MotionType::BACK_STRAIGHT;
+  ps.motion_type = MotionType::STRAIGHT;
   mp->go_straight(ps);
 
   vTaskDelay(100.0 / portTICK_RATE_MS);

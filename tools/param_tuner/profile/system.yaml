@@ -83,7 +83,7 @@ test: # テスト走行時に使用するパラメータ群
   decel: -42500
   dia_accl: 35000
   dia_decel: -35000
-  dist: 720 #直進
+  dist: 180 #直進
   suction_active: 2
 
   # sla_accl: 28000
@@ -103,10 +103,10 @@ test: # テスト走行時に使用するパラメータ群
   search_mode: 0
   suction_duty: 4.75
   suction_duty_low: 4.5
-  # suction_duty_burst: 6.0
-  # suction_duty_burst_low: 5.75
-  suction_duty_burst: 8.1
-  suction_duty_burst_low: 7.75
+  suction_duty_burst: 7.75
+  suction_duty_burst_low: 7.5
+  # suction_duty_burst: 7.25
+  # suction_duty_burst_low: 7.0
   # suction_duty_burst: 4.75
   # suction_duty_burst_low: 4.5
 
@@ -116,7 +116,7 @@ test: # テスト走行時に使用するパラメータ群
   sla_dist: 90
   # sla_type: 3
   sla_type: 5
-  sla_type2: 9 #復路ターン種類
+  sla_type2: 8 # 復路ターン種類
   sla_return: 1 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval
@@ -128,7 +128,7 @@ test: # テスト走行時に使用するパラメータ群
   # sla_type: 8 #dia45_2
   # sla_type: 9 #dia135_2
   turn_times: 0
-  ignore_opp_sen: 0 #斜めターン後の直進テスト 0無効、1斜め制御なし、2斜め制御あり
+  ignore_opp_sen: 1 #斜めターン後の直進テスト 0無効、1斜め制御なし、2斜め制御あり
   sysid_test_mode: 0 #システム同定のテスト:0 直進、1回転
   sysid_duty: 1.5 #duty 
   sysid_time: 1250 #duty 

@@ -99,10 +99,12 @@ class Slalom:
         res["vx"] = np.array([])
         res["vy"] = np.array([])
         res["acc_y"] = np.array([])
+        res["ang"] = np.array([])
         tmp_w = 0
         tmp_theta = start_ang * math.pi / 180
         tmp_x = 0
         tmp_y = 0
+        # print(self.limit_time_count)
         for i in range(1, int(self.limit_time_count + 1)):
             tmp_alpha = self.base_alpha * \
                 self.calc_neipire(dt * i, self.base_time, self.pow_n)
@@ -125,7 +127,7 @@ class Slalom:
             res["vx"] = np.append(res["vx"], vx/1000)
             res["vy"] = np.append(res["vy"], vy/1000)
             res["acc_y"] = np.append(res["acc_y"], (self.v * tmp_w/1000))
-
+            res["ang"] = np.append(res["ang"], tmp_theta)
         # print(np.max(res["w"]) ** 2 * self.rad / 9.81 / 1000)
         self.res = res
         return res
@@ -142,6 +144,7 @@ class Slalom:
         res["beta"] = np.array([])
         res["acc_y"] = np.array([])
         res["w2"] = np.array([])
+        res["ang"] = np.array([])
         tmp_w = 0
         tmp_theta = start_ang * math.pi / 180
         tmp_x = 0
@@ -157,6 +160,7 @@ class Slalom:
         s = 0
         delta_beta = 0
         old_beta = 0
+
         for i in range(1, int(self.limit_time_count + 1)):
             tmp_alpha = self.base_alpha * \
                 self.calc_neipire(dt * i, self.base_time, self.pow_n)
@@ -208,7 +212,7 @@ class Slalom:
             beta = np.arctan2(vy, vx)
             beta = (old_beta / dt - tmp_w) / (1.0 / dt + self.K / tmp_v)
             res["beta"] = np.append(res["beta"], beta)
-
+            res["ang"] = np.append(res["ang"], tmp_theta)
             delta_beta = beta - old_beta
             # beta = tmp_v * tmp_w
 
