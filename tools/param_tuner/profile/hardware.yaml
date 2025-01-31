@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.6265 #新品 13.6165
-tire2: 13.6265 #新品 13.6165
+tire: 13.4965 #新品 13.6165
+tire2: 13.4965 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -83,8 +83,8 @@ axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]
 # axel_degenerate_y: [1, 1, 0.5, 0.2, 0.2, 0.1, 0.1]
 # axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
-axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
-# axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
+# axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
+axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
 decel_delay_cnt: 5
 dedel_delay_n: 4

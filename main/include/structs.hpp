@@ -320,6 +320,9 @@ typedef struct {
   float right_str_exist;
   float left_dia;
   float right_dia;
+  float left_dia_oppo;
+  float right_dia_oppo;
+
   float left_dia2;
   float right_dia2;
   float exist_dist_l;
@@ -333,11 +336,17 @@ typedef struct {
 
   float exist_dia_th_l;
   float exist_dia_th_r;
+  float exist_dia_th_l2;
+  float exist_dia_th_r2;
   float noexist_dia_th_l;
   float noexist_dia_th_r;
+  float noexist_dia_th_l2;
+  float noexist_dia_th_r2;
 
   float wall_off_exist_wall_th_l;
   float wall_off_exist_wall_th_r;
+  float wall_off_exist_dia_wall_th_l;
+  float wall_off_exist_dia_wall_th_r;
 
   bool search_wall_off_enable;
   float search_wall_off_l_dist_offset;
@@ -513,10 +522,16 @@ typedef struct {
   float dia_turn_exist_th_r = 0.0;
   float dia_turn_th_l = 0.0;
   float dia_turn_th_r = 0.0;
+  float dia_turn_ref_l = 0.0;
+  float dia_turn_ref_r = 0.0;
+  float dia_turn_max_dist_l = 0.0;
+  float dia_turn_max_dist_r = 0.0;
   float wall_off_pass_dist = 10;
 
   float dia_wall_off_ref_l = 0;
   float dia_wall_off_ref_r = 0;
+  float dia_wall_off_ref_l2 = 0;
+  float dia_wall_off_ref_r2 = 0;
   float dia_offset_max_dist = 0;
 
   float slip_param_K = 0;

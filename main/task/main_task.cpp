@@ -849,6 +849,10 @@ void MainTask::load_offset_param() {
 
   param->dia_turn_th_l = getItem(root, "dia_turn_th_l")->valuedouble;
   param->dia_turn_th_r = getItem(root, "dia_turn_th_r")->valuedouble;
+  param->dia_turn_ref_l = getItem(root, "dia_turn_ref_l")->valuedouble;
+  param->dia_turn_ref_r = getItem(root, "dia_turn_ref_r")->valuedouble;
+  param->dia_turn_max_dist_l = getItem(root, "dia_turn_max_dist_l")->valuedouble;
+  param->dia_turn_max_dist_r = getItem(root, "dia_turn_max_dist_r")->valuedouble;
   param->wall_off_pass_dist = getItem(root, "wall_off_pass_dist")->valuedouble;
 
   param->normal_sla_offset_front =
@@ -894,6 +898,11 @@ void MainTask::load_offset_param() {
   param->wall_off_dist.right_dia2 =
       getItem(root, "wall_off_hold_dist_dia_r2")->valuedouble;
 
+  param->wall_off_dist.left_dia_oppo =
+      getItem(root, "wall_off_hold_dist_dia_l_oppo")->valuedouble;
+  param->wall_off_dist.right_dia_oppo =
+      getItem(root, "wall_off_hold_dist_dia_r_oppo")->valuedouble;
+
   param->wall_off_dist.exist_dist_l =
       getItem(root, "wall_off_hold_exist_dist_l")->valuedouble;
   param->wall_off_dist.exist_dist_r =
@@ -936,13 +945,28 @@ void MainTask::load_offset_param() {
   param->wall_off_dist.exist_dia_th_r =
       getItem(root, "wall_off_hold_exist_dist_dia_r")->valuedouble;
 
+  param->wall_off_dist.exist_dia_th_l2 =
+      getItem(root, "wall_off_hold_exist_dist_dia_l2")->valuedouble;
+  param->wall_off_dist.exist_dia_th_r2 =
+      getItem(root, "wall_off_hold_exist_dist_dia_r2")->valuedouble;
+
   param->wall_off_dist.noexist_dia_th_l =
       getItem(root, "wall_off_hold_noexist_dia_th_l")->valuedouble;
   param->wall_off_dist.noexist_dia_th_r =
       getItem(root, "wall_off_hold_noexist_dia_th_r")->valuedouble;
 
+  param->wall_off_dist.noexist_dia_th_l2 =
+      getItem(root, "wall_off_hold_noexist_dia_th_l2")->valuedouble;
+  param->wall_off_dist.noexist_dia_th_r2 =
+      getItem(root, "wall_off_hold_noexist_dia_th_r2")->valuedouble;
+
   param->dia_wall_off_ref_l = getItem(root, "dia_wall_off_ref_l")->valuedouble;
   param->dia_wall_off_ref_r = getItem(root, "dia_wall_off_ref_r")->valuedouble;
+  param->dia_wall_off_ref_l2 =
+      getItem(root, "dia_wall_off_ref_l2")->valuedouble;
+  param->dia_wall_off_ref_r2 =
+      getItem(root, "dia_wall_off_ref_r2")->valuedouble;
+
   param->dia_offset_max_dist =
       getItem(root, "dia_offset_max_dist")->valuedouble;
 
@@ -1713,9 +1737,14 @@ void MainTask::task() {
     } else if (sys.user_mode == 11) {
       printf("suction\n");
       mp->reset_gyro_ref_with_check();
+      printf("suction_active = %d\n", sys.test.suction_active);
       if (sys.test.suction_active == 1) {
+        printf("duty = %f, duty_low = %f\n", sys.test.suction_duty,
+               sys.test.suction_duty_low);
         pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
       } else if (sys.test.suction_active == 2) {
+        printf("duty = %f, duty_low = %f\n", sys.test.suction_duty_burst,
+               sys.test.suction_duty_burst_low);
         pt->suction_enable(sys.test.suction_duty_burst,
                            sys.test.suction_duty_burst_low);
       }
@@ -2793,8 +2822,9 @@ void MainTask::test_dia_walloff() {
 
   ps.dist = param->cell / 2 * std::sqrt(2);
   ps.dia_mode = true;
-
-  mp->wall_off_dia(rorl2, ps);
+  bool exist = false;
+  bool use_oppo_wall = false;
+  mp->wall_off_dia(rorl2, ps, exist, use_oppo_wall);
 
   ps.dist = ps.dist - 5;
   ps.v_max = sys.test.v_max;

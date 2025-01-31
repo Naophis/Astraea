@@ -1285,6 +1285,7 @@ void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
     if (duty_suction_in > 100) {
       duty_suction_in = 100;
     }
+    // printf("duty_suction_in: %f\n", duty_suction_in);
     // mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
     mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction_in);
     // mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
@@ -2285,7 +2286,7 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
 
   set_ctrl_val(ee->ang_val,
                ee->ang.error_p,                         // p
-               0,                                       // i
+               ee->ang.error_i,                         // i
                0,                                       // i2
                ee->ang.error_d,                         // d
                param_ro->angle_pid.p * ee->ang.error_p, // kp*p
