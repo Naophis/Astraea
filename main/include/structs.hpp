@@ -316,6 +316,8 @@ typedef struct {
 typedef struct {
   float left_str;
   float right_str;
+  float left_diff_th;
+  float right_diff_th;
   float left_str_exist;
   float right_str_exist;
   float left_dia;

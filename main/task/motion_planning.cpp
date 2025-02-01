@@ -1227,14 +1227,15 @@ MotionResult IRAM_ATTR MotionPlanning::wall_off(param_straight_t &p, bool dia) {
 
 void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
                                         param_straight_t &ps_front) {
-
+  const auto se = get_sensing_entity();
   bool exist = false;
+  const auto r45_start_dist = se->ego.right45_dist;
+  const auto l45_start_dist = se->ego.left45_dist;
   if (td == TurnDirection::Right) {
-    exist = sensing_result->ego.right45_dist <
-            param->wall_off_dist.wall_off_exist_wall_th_r;
+    exist =
+        se->ego.right45_dist < param->wall_off_dist.wall_off_exist_wall_th_r;
   } else {
-    exist = sensing_result->ego.left45_dist <
-            param->wall_off_dist.wall_off_exist_wall_th_l;
+    exist = se->ego.left45_dist < param->wall_off_dist.wall_off_exist_wall_th_l;
   }
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
@@ -1260,22 +1261,19 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
   if (td == TurnDirection::Right) {
     while (true) {
       tmp_dist_after = tgt_val->global_pos.dist;
-      if (sensing_result->ego.right45_dist <
-          param->wall_off_dist.exist_dist_r) {
+      if (se->ego.right45_dist < param->wall_off_dist.exist_dist_r) {
         break;
       }
       if (!exist) {
-        if (sensing_result->ego.right45_dist <
-            param->wall_off_dist.exist_dist_r2) {
+        if (se->ego.right45_dist < param->wall_off_dist.exist_dist_r2) {
           break;
         }
       }
       //　見逃し対応：見切れた場合
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
           std::abs(param->wall_off_dist.diff_check_dist)) {
-        if ((sensing_result->ego.right45_dist_diff >
-             param->wall_off_dist.diff_dist_th_r) &&
-            (sensing_result->ego.right45_dist_diff > 0)) {
+        if ((se->ego.right45_dist_diff > param->wall_off_dist.diff_dist_th_r) &&
+            (se->ego.right45_dist_diff > 0)) {
           ps_front.dist -= param->wall_off_pass_through_offset_r;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
@@ -1284,23 +1282,31 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
       //　見逃し対応：通過して完全に壁がなくなった場合
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
           std::abs(param->wall_off_dist.diff_check_dist)) {
-        if (sensing_result->ego.right45_dist > 170) {
+        if (se->ego.right45_dist > 170) {
           ps_front.dist -= param->wall_off_pass_through_offset_r;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
         }
       }
+
+      // 見逃し対策、壁がないときに見切れた場合
+      if (!exist) {
+        if (se->ego.right45_dist_diff > param->wall_off_dist.right_diff_th &&
+            se->ego.right45_dist < 100) {
+          ps_front.dist -= param->wall_off_pass_through_offset_r;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+        }
+      }
+
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
           std::abs(param->wall_off_front_move_dist_th)) {
-        if (param->wall_off_front_ctrl_min <
-                sensing_result->ego.left90_far_dist &&
-            sensing_result->ego.left90_far_dist < param->front_dist_offset4 &&
-            param->wall_off_front_ctrl_min <
-                sensing_result->ego.right90_far_dist &&
-            sensing_result->ego.right90_far_dist < param->front_dist_offset4) {
-          if (sensing_result->ego.front_far_dist < param->front_dist_offset3) {
-            ps_front.dist -= (param->front_dist_offset2 -
-                              sensing_result->ego.front_far_dist);
+        if (param->wall_off_front_ctrl_min < se->ego.left90_far_dist &&
+            se->ego.left90_far_dist < param->front_dist_offset4 &&
+            param->wall_off_front_ctrl_min < se->ego.right90_far_dist &&
+            se->ego.right90_far_dist < param->front_dist_offset4) {
+          if (se->ego.front_far_dist < param->front_dist_offset3) {
+            ps_front.dist -=
+                (param->front_dist_offset2 - se->ego.front_far_dist);
             ps_front.dist = MAX(ps_front.dist, 0.1);
             return;
           }
@@ -1332,15 +1338,13 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
       //   return;
       // }
       if (exist) {
-        if (sensing_result->ego.right45_dist >
-            param->wall_off_dist.noexist_th_r) {
+        if (se->ego.right45_dist > param->wall_off_dist.noexist_th_r) {
           ps_front.dist += param->wall_off_dist.right_str_exist;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
         }
       } else {
-        if (sensing_result->ego.right45_dist >
-            param->wall_off_dist.noexist_th_r2) {
+        if (se->ego.right45_dist > param->wall_off_dist.noexist_th_r2) {
           ps_front.dist += param->wall_off_dist.right_str;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
@@ -1355,21 +1359,19 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
   } else {
     while (true) {
       tmp_dist_after = tgt_val->global_pos.dist;
-      if (sensing_result->ego.left45_dist < param->wall_off_dist.exist_dist_l) {
+      if (se->ego.left45_dist < param->wall_off_dist.exist_dist_l) {
         break;
       }
       if (!exist) {
-        if (sensing_result->ego.left45_dist <
-            param->wall_off_dist.exist_dist_l2) {
+        if (se->ego.left45_dist < param->wall_off_dist.exist_dist_l2) {
           break;
         }
       }
       //　見逃し対応：見切れた場合
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
           std::abs(param->wall_off_dist.diff_check_dist)) {
-        if ((sensing_result->ego.left45_dist_diff >
-             param->wall_off_dist.diff_dist_th_l) &&
-            (sensing_result->ego.left45_dist_diff > 0)) {
+        if ((se->ego.left45_dist_diff > param->wall_off_dist.diff_dist_th_l) &&
+            (se->ego.left45_dist_diff > 0)) {
           ps_front.dist -= param->wall_off_pass_through_offset_l;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
@@ -1378,21 +1380,30 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
       //　見逃し対応：通過して完全に壁がなくなった場合
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
           std::abs(param->wall_off_dist.diff_check_dist)) {
-        if (sensing_result->ego.left45_dist > 170) {
+        if (se->ego.left45_dist > 170) {
           ps_front.dist -= param->wall_off_pass_through_offset_l;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
         }
       }
+
+      // 見逃し対策、壁がないときに見切れた場合
+      if (!exist) {
+        if (se->ego.left45_dist_diff > param->wall_off_dist.left_diff_th &&
+            se->ego.left45_dist < 100) {
+          ps_front.dist -= param->wall_off_pass_through_offset_l;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+        }
+      }
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
           std::abs(param->wall_off_front_move_dist_th)) {
-        if (40 < sensing_result->ego.left90_far_dist &&
-            sensing_result->ego.left90_far_dist < param->front_dist_offset4 &&
-            40 < sensing_result->ego.right90_far_dist &&
-            sensing_result->ego.right90_far_dist < param->front_dist_offset4) {
-          if (sensing_result->ego.front_far_dist < param->front_dist_offset3) {
-            ps_front.dist -= (param->front_dist_offset2 -
-                              sensing_result->ego.front_far_dist);
+        if (40 < se->ego.left90_far_dist &&
+            se->ego.left90_far_dist < param->front_dist_offset4 &&
+            40 < se->ego.right90_far_dist &&
+            se->ego.right90_far_dist < param->front_dist_offset4) {
+          if (se->ego.front_far_dist < param->front_dist_offset3) {
+            ps_front.dist -=
+                (param->front_dist_offset2 - se->ego.front_far_dist);
             ps_front.dist = MAX(ps_front.dist, 0.1);
             return;
           }
@@ -1423,15 +1434,13 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
       //   return;
       // }
       if (exist) {
-        if (sensing_result->ego.left45_dist >
-            param->wall_off_dist.noexist_th_l) {
+        if (se->ego.left45_dist > param->wall_off_dist.noexist_th_l) {
           ps_front.dist += param->wall_off_dist.left_str_exist;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
         }
       } else {
-        if (sensing_result->ego.left45_dist >
-            param->wall_off_dist.noexist_th_l2) {
+        if (se->ego.left45_dist > param->wall_off_dist.noexist_th_l2) {
           ps_front.dist += param->wall_off_dist.left_str;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return;
@@ -1486,13 +1495,11 @@ bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
     while (true) {
       // 壁切れ開始
       if (exist) {
-        if (sensing_result->ego.right45_dist <
-            param->wall_off_dist.exist_dia_th_r) {
+        if (se->ego.right45_dist < param->wall_off_dist.exist_dia_th_r) {
           break;
         }
       } else {
-        if (sensing_result->ego.right45_dist <
-            param->wall_off_dist.exist_dia_th_r2) {
+        if (se->ego.right45_dist < param->wall_off_dist.exist_dia_th_r2) {
           break;
         }
       }
@@ -1602,6 +1609,7 @@ void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,
                                                   param_straight_t &back,
                                                   TurnDirection dir,
                                                   bool exec_wall_off) {
+  const auto se = get_sensing_entity();
   float offset_l = 0;
   float offset_r = 0;
   float offset = 0;
@@ -1609,48 +1617,41 @@ void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,
   bool valid_r = false;
   if (dir == TurnDirection::Left) {
     if (exec_wall_off) {
-      if (1 < sensing_result->sen.l45.sensor_dist &&
-          sensing_result->sen.l45.sensor_dist <
-              param->dia_turn_offset_calc_th) {
-        offset_l = sensing_result->sen.l45.sensor_dist -
-                   param->sen_ref_p.normal.ref.left45;
+      if (1 < se->sen.l45.sensor_dist &&
+          se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
+        offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     } else {
-      if (1 < sensing_result->ego.left45_dist &&
-          sensing_result->ego.left45_dist < param->dia_turn_offset_calc_th) {
-        offset_l = sensing_result->ego.left45_dist -
-                   param->sen_ref_p.normal.ref.left45;
+      if (1 < se->ego.left45_dist &&
+          se->ego.left45_dist < param->dia_turn_offset_calc_th) {
+        offset_l = se->ego.left45_dist - param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     }
-    if (1 < sensing_result->ego.right45_dist &&
-        sensing_result->ego.right45_dist < param->dia_turn_offset_calc_th) {
-      offset_r = param->sen_ref_p.normal.ref.right45 -
-                 sensing_result->ego.right45_dist;
+    if (1 < se->ego.right45_dist &&
+        se->ego.right45_dist < param->dia_turn_offset_calc_th) {
+      offset_r = param->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
       valid_r = true;
     }
   } else {
     if (exec_wall_off) {
-      if (1 < sensing_result->sen.r45.sensor_dist &&
-          sensing_result->sen.r45.sensor_dist <
-              param->dia_turn_offset_calc_th) {
-        offset_r = sensing_result->sen.r45.sensor_dist -
-                   param->sen_ref_p.normal.ref.right45;
+      if (1 < se->sen.r45.sensor_dist &&
+          se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
+        offset_r =
+            se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     } else {
-      if (1 < sensing_result->ego.right45_dist &&
-          sensing_result->ego.right45_dist < param->dia_turn_offset_calc_th) {
-        offset_r = sensing_result->ego.right45_dist -
-                   param->sen_ref_p.normal.ref.right45;
+      if (1 < se->ego.right45_dist &&
+          se->ego.right45_dist < param->dia_turn_offset_calc_th) {
+        offset_r = se->ego.right45_dist - param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     }
-    if (1 < sensing_result->ego.left45_dist &&
-        sensing_result->ego.left45_dist < param->dia_turn_offset_calc_th) {
-      offset_l =
-          param->sen_ref_p.normal.ref.left45 - sensing_result->ego.left45_dist;
+    if (1 < se->ego.left45_dist &&
+        se->ego.left45_dist < param->dia_turn_offset_calc_th) {
+      offset_l = param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
       valid_l = true;
     }
   }
@@ -1671,6 +1672,7 @@ void IRAM_ATTR MotionPlanning::calc_dia45_offset(param_straight_t &front,
                                                  param_straight_t &back,
                                                  TurnDirection dir,
                                                  bool exec_wall_off) {
+  const auto se = get_sensing_entity();
   float offset_l = 0;
   float offset_r = 0;
   float offset = 0;
@@ -1678,48 +1680,41 @@ void IRAM_ATTR MotionPlanning::calc_dia45_offset(param_straight_t &front,
   bool valid_r = false;
   if (dir == TurnDirection::Left) {
     if (exec_wall_off) {
-      if (1 < sensing_result->sen.l45.sensor_dist &&
-          sensing_result->sen.l45.sensor_dist <
-              param->dia_turn_offset_calc_th) {
-        offset_l = sensing_result->sen.l45.sensor_dist -
-                   param->sen_ref_p.normal.ref.left45;
+      if (1 < se->sen.l45.sensor_dist &&
+          se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
+        offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     } else {
-      if (1 < sensing_result->ego.left45_dist &&
-          sensing_result->ego.left45_dist < param->dia_turn_offset_calc_th) {
-        offset_l = sensing_result->ego.left45_dist -
-                   param->sen_ref_p.normal.ref.left45;
+      if (1 < se->ego.left45_dist &&
+          se->ego.left45_dist < param->dia_turn_offset_calc_th) {
+        offset_l = se->ego.left45_dist - param->sen_ref_p.normal.ref.left45;
         valid_l = true;
       }
     }
-    if (1 < sensing_result->ego.right45_dist &&
-        sensing_result->ego.right45_dist < param->dia_turn_offset_calc_th) {
-      offset_r = param->sen_ref_p.normal.ref.right45 -
-                 sensing_result->ego.right45_dist;
+    if (1 < se->ego.right45_dist &&
+        se->ego.right45_dist < param->dia_turn_offset_calc_th) {
+      offset_r = param->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
       valid_r = true;
     }
   } else {
     if (exec_wall_off) {
-      if (1 < sensing_result->sen.r45.sensor_dist &&
-          sensing_result->sen.r45.sensor_dist <
-              param->dia_turn_offset_calc_th) {
-        offset_r = sensing_result->sen.r45.sensor_dist -
-                   param->sen_ref_p.normal.ref.right45;
+      if (1 < se->sen.r45.sensor_dist &&
+          se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
+        offset_r =
+            se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     } else {
-      if (1 < sensing_result->ego.right45_dist &&
-          sensing_result->ego.right45_dist < param->dia_turn_offset_calc_th) {
-        offset_r = sensing_result->ego.right45_dist -
-                   param->sen_ref_p.normal.ref.right45;
+      if (1 < se->ego.right45_dist &&
+          se->ego.right45_dist < param->dia_turn_offset_calc_th) {
+        offset_r = se->ego.right45_dist - param->sen_ref_p.normal.ref.right45;
         valid_r = true;
       }
     }
-    if (1 < sensing_result->ego.left45_dist &&
-        sensing_result->ego.left45_dist < param->dia_turn_offset_calc_th) {
-      offset_l =
-          param->sen_ref_p.normal.ref.left45 - sensing_result->ego.left45_dist;
+    if (1 < se->ego.left45_dist &&
+        se->ego.left45_dist < param->dia_turn_offset_calc_th) {
+      offset_l = param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
       valid_l = true;
     }
   }

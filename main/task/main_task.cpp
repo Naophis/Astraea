@@ -851,8 +851,10 @@ void MainTask::load_offset_param() {
   param->dia_turn_th_r = getItem(root, "dia_turn_th_r")->valuedouble;
   param->dia_turn_ref_l = getItem(root, "dia_turn_ref_l")->valuedouble;
   param->dia_turn_ref_r = getItem(root, "dia_turn_ref_r")->valuedouble;
-  param->dia_turn_max_dist_l = getItem(root, "dia_turn_max_dist_l")->valuedouble;
-  param->dia_turn_max_dist_r = getItem(root, "dia_turn_max_dist_r")->valuedouble;
+  param->dia_turn_max_dist_l =
+      getItem(root, "dia_turn_max_dist_l")->valuedouble;
+  param->dia_turn_max_dist_r =
+      getItem(root, "dia_turn_max_dist_r")->valuedouble;
   param->wall_off_pass_dist = getItem(root, "wall_off_pass_dist")->valuedouble;
 
   param->normal_sla_offset_front =
@@ -872,6 +874,11 @@ void MainTask::load_offset_param() {
       getItem(root, "wall_off_hold_dist_str_l")->valuedouble;
   param->wall_off_dist.right_str =
       getItem(root, "wall_off_hold_dist_str_r")->valuedouble;
+  param->wall_off_dist.left_diff_th =
+      getItem(root, "wall_off_noexist_diff_l")->valuedouble;
+  param->wall_off_dist.right_diff_th =
+      getItem(root, "wall_off_noexist_diff_r")->valuedouble;
+
   param->wall_off_dist.left_str_exist =
       getItem(root, "wall_off_hold_dist_str_l_exist")->valuedouble;
   param->wall_off_dist.right_str_exist =
