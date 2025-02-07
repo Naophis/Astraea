@@ -46,7 +46,11 @@ if 'x' in data.columns and 'y' in data.columns:
         pos_x = group['x']+45-9
         pos_y = group['y']
         color = cmap(i / num_states)  # カラーマップから色を取得
-        plt.plot(pos_x, pos_y, ".", markersize=4,
+        numpy_x = pos_x.to_numpy()
+        numpy_y = pos_y.to_numpy()
+        # plt.plot(pos_x, pos_y, ".", markersize=4,
+        #          color=color, label=f'State {state}')
+        plt.plot(numpy_x, numpy_y, ".", markersize=4,
                  color=color, label=f'State {state}')
 
     # タイトルとラベル

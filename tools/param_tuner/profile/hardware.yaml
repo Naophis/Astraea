@@ -30,7 +30,7 @@ motor_debug_mode_duty_r: 10
 motor_debug_mode_duty_l: -10
 
 MotorHz: 37500
-SuctionHz: 82500
+SuctionHz: 62500
 MotorResolution: 40
 SuctionResolution: 40
 
