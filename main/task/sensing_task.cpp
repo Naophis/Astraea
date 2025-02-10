@@ -115,9 +115,12 @@ void SensingTask::timer_200us_callback_main() {
       pt->kf_v_l.update(se->ego.v_l);
     }
   }
-  if (param->enable_kalman_encoder > 0) {
+  if (param->enable_kalman_encoder == 1) {
     se->ego.v_l = pt->kf_v_l.get_state();
     se->ego.v_r = pt->kf_v_r.get_state();
+  }else{
+    se->ego.v_l = se->ego.v_l;
+    se->ego.v_r = se->ego.v_r;
   }
   const auto alpha = (tgt_val->ego_in.w - w_old) / dt;
   if (std::isfinite(alpha) && std::isfinite(se->ego.w_lp)) {
@@ -137,8 +140,10 @@ void SensingTask::timer_200us_callback_main() {
       // pt->kf_w.update2(se->ego.w_raw, w_enc);
     }
   }
-  if (param->enable_kalman_gyro > 0) {
+  if (param->enable_kalman_gyro == 1) {
     se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
+  } else if (param->enable_kalman_gyro == 2) {
+    se->ego.w_kf = se->ego.w_raw;
   } else {
     se->ego.w_kf = pt->kf_w.get_state();
   }
@@ -147,12 +152,12 @@ void SensingTask::timer_200us_callback_main() {
 void SensingTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192 * 1, this, 2,
                           &handle, xCoreID);
-  // const esp_timer_create_args_t timer_200us_args = {
-  //     .callback = &SensingTask::timer_200us_callback,
-  //     .arg = this,
-  //     .dispatch_method = ESP_TIMER_TASK,
-  //     .name = "timer_200us"};
-  // esp_timer_create(&timer_200us_args, &timer_200us);
+  const esp_timer_create_args_t timer_200us_args = {
+      .callback = &SensingTask::timer_200us_callback,
+      .arg = this,
+      .dispatch_method = ESP_TIMER_TASK,
+      .name = "timer_200us"};
+  esp_timer_create(&timer_200us_args, &timer_200us);
 }
 void SensingTask::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param) {

@@ -130,7 +130,7 @@ wall_off_hold_dist_dia_l: 3.0
 wall_off_hold_dist_dia_r: 3.0
 #斜め壁切れ時のmax接近距離
 dia_wall_off_ref_l: 29.850
-dia_wall_off_ref_r: 32.650
+dia_wall_off_ref_r: 32.1250
 
 ### 最初から壁がない場合
 # 壁切れ In(斜め)
@@ -164,7 +164,7 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 4
+dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 
