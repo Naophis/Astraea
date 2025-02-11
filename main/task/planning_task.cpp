@@ -139,6 +139,7 @@ void IRAM_ATTR PlanningTask::motor_enable() {
   kf_ang.reset(0);
   kf_v.reset(0);
   kf_w.reset(0);
+  kf_w2.reset(0);
   kf_v_l.reset(0);
   kf_v_r.reset(0);
   motor_enable_send_msg.enable = true;
@@ -319,9 +320,10 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
   // float process_noise = 0.05;       // プロセスノイズの共分散
   // float measurement_noise = 0.35;   // 観測ノイズの共分散
 
-  kf_w.dt = 0.001 / 5;
-  kf_v_r.dt = 0.001 / 5;
-  kf_v_l.dt = 0.001 / 5;
+  kf_w.dt = 0.001 / 1;
+  kf_w2.dt = 0.001 / 1;
+  kf_v_r.dt = 0.001 / 1;
+  kf_v_l.dt = 0.001 / 1;
 
   if (reset_battery) {
     kf_batt.init(sensing_result->ego.battery_raw, //

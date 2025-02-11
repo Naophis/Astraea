@@ -304,6 +304,12 @@ gyro_param:
   gyro_w_gain_left: 0.0024515
   gyro_w_gain_right: 0.0024515
   lp_delay: 1
+gyro2_param:
+  # gyro_w_gain_left: 0.00246095
+  # gyro_w_gain_right: 0.00246095
+  gyro_w_gain_left: 0.0024515
+  gyro_w_gain_right: 0.0024515
+  lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
   # gain: 155.75 # 8g

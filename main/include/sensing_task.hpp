@@ -130,6 +130,8 @@ private:
   float vl_old = 0;
   int64_t gyro_timestamp_old = 0;
   int64_t gyro_timestamp_now = 0;
+  int64_t gyro2_timestamp_old = 0;
+  int64_t gyro2_timestamp_now = 0;
   int64_t enc_r_timestamp_old = 0;
   int64_t enc_r_timestamp_now = 0;
   int64_t enc_l_timestamp_old = 0;

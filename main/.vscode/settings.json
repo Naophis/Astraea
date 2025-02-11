@@ -71,7 +71,8 @@
         "numbers": "cpp",
         "semaphore": "cpp",
         "shared_mutex": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "*.ipp": "cpp"
     },
     "idf.adapterTargetName": "esp32s3",
     "clang-format.executable": "/usr/bin/clang-format",

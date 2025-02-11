@@ -31,6 +31,10 @@ public:
   int16_t read_2byte_itr();
   signed short read_2byte_itr2(std::vector<int> &list);
   void setup();
+
+  uint8_t write1byte_gy(const uint8_t address, const uint8_t data);
+  uint8_t read1byte_gy(const uint8_t address);
+  int16_t read_2byte_gy(const uint8_t address);
   int read_gyro_z();
   int read_accel_x();
   int read_accel_y();
@@ -39,6 +43,7 @@ public:
 private:
   spi_device_handle_t spi_l;
   spi_device_handle_t spi_r;
+  spi_device_handle_t spi_gyro;
   spi_transaction_t itr_t;
   spi_transaction_t *r_trans;
   bool _spiCalcEvenParity(uint16_t value);

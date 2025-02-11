@@ -55,7 +55,7 @@ debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
 # mode: 0 # メイン
-mode: 1 # 最短スローム
+# mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -64,7 +64,7 @@ mode: 1 # 最短スローム
 # mode: 11 # vacume/suction test
 # mode: 12 # silent_keep
 # mode: 13 # keep_pos
-# mode: 14 # sensing
+mode: 14 # sensing
 # mode: 15 # sensor calib
 # mode: 16 # system identification (para)
 # mode: 17 # system identification (roll)

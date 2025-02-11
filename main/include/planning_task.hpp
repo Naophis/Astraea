@@ -96,6 +96,7 @@ public:
   std::vector<float> sensor_deg_limitter_piller;
 
   KalmanFilter kf_w;
+  KalmanFilter kf_w2;
   KalmanFilter kf_v;
   KalmanFilter kf_v_r;
   KalmanFilter kf_v_l;

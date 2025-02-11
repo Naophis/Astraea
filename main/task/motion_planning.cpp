@@ -866,16 +866,19 @@ void IRAM_ATTR MotionPlanning::reset_ego_data() {
 void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   float gyro_raw_data_sum = 0;
+  float gyro2_raw_data_sum = 0;
   float accel_x_raw_data_sum = 0;
   float accel_y_raw_data_sum = 0;
 
   for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
     gyro_raw_data_sum += sensing_result->gyro.raw;
+    gyro2_raw_data_sum += sensing_result->gyro2.raw;
     accel_x_raw_data_sum += sensing_result->accel_x.raw;
     accel_y_raw_data_sum += sensing_result->accel_y.raw;
     vTaskDelay(xDelay); //他モジュールの起動待ち
   }
   tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
+  tgt_val->gyro2_zero_p_offset = gyro2_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_y_zero_p_offset = accel_y_raw_data_sum / RESET_GYRO_LOOP_CNT;
 

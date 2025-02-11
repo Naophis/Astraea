@@ -194,6 +194,7 @@ typedef struct {
   led_sensor_t led_sen_after;
   led_sensor_t led_sen_before;
   sensing_data_t gyro;
+  sensing_data_t gyro2;
   sensing_data_t accel_x;
   sensing_data_t accel_y;
   int gyro_list[5];
@@ -454,6 +455,7 @@ typedef struct {
   // pid_param_t sensor_pid;
   pid_param_t sensor_pid_dia;
   gyro_param_t gyro_param;
+  gyro_param_t gyro2_param;
   accel_param_t accel_x_param;
   comp_param_t comp_param;
   sen_param_t battery_param;
@@ -745,6 +747,7 @@ typedef struct {
   planning_req_t pl_req;
   fail_safe_state_t fss;
   volatile float gyro_zero_p_offset = 0;
+  volatile float gyro2_zero_p_offset = 0;
   volatile float accel_x_zero_p_offset = 0;
   volatile float accel_y_zero_p_offset = 0;
   buzzer_t buzzer;

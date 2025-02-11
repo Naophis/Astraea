@@ -28,6 +28,8 @@ void AS5147P::init() {
   ret = spi_bus_add_device(SPI3_HOST, &devcfg, &spi_l);
   devcfg.spics_io_num = ENC_R_CS;
   ret = spi_bus_add_device(SPI3_HOST, &devcfg, &spi_r);
+  // devcfg.spics_io_num = GYRO2_CS;
+  // ret = spi_bus_add_device(SPI3_HOST, &devcfg, &spi_gyro);
 
   // high keep
   GPIO.out_w1ts = BIT(6);
@@ -89,8 +91,76 @@ int16_t AS5147P::read2byte_2(const uint8_t address1, const uint8_t address2) {
   return 0;
 }
 
+#define LSM6DSRX_CTRL1_XL 0x10U
+#define LSM6DSRX_CTRL2_G 0x11U
+#define LSM6DSRX_CTRL3_C 0x12U
+#define LSM6DSRX_CTRL4_C 0x13U
+#define LSM6DSRX_CTRL8_XL 0x17U
+#define LSM6DSRX_CTRL9_XL 0x18U
+#define LSM6DSRX_FIFO_CTRL4 0x0AU
+#define LSM6DSRX_CTRL10_C 0x19U
+#define LSM6DSRX_EMB_FUNC_SRC 0x64U
+#define LSM6DSRX_FIFO_STATUS1 0x3AU
+#define LSM6DSRX_FIFO_DATA_OUT_TAG 0x78U
+#define LSM6DSRX_FIFO_DATA_OUT_Z_L 0x7DU
+#define LSM6DSRX_FIFO_DATA_OUT_Z_H 0x7EU
 void AS5147P::setup() {
-  // uint8_t whoami = read1byte(0x0F); //
+  uint8_t whoami = read1byte_gy(0x0F);
+  // begin();
+  printf("setup gyro2\n");
+  write1byte_gy(LSM6DSRX_CTRL3_C, 0x81); // LSM6DSRXをリセット
+  vTaskDelay(200.0 / portTICK_PERIOD_MS);
+  while ((read1byte(LSM6DSRX_CTRL3_C) & 0x01) == 0x01)
+    ;
+  if (true) {
+    // lsm6sr
+    write1byte_gy(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte_gy(LSM6DSRX_CTRL4_C, 0x06); // I2CモードをDisableに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+
+    // 加速度計の設定
+    write1byte_gy(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
+    // write1byte_gy(LSM6DSRX_CTRL1_XL, 0xAE); //8g
+    // write1byte_gy(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
+    // 加速度計のスケールを±8gに設定
+    // 加速度計の出力データレートを416Hzに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte_gy(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+
+    // ジャイロの設定
+    write1byte_gy(LSM6DSRX_CTRL2_G, 0xA1);
+    auto ctrl1 = read1byte_gy(LSM6DSRX_CTRL1_XL);
+    auto ctrl2 = read1byte_gy(LSM6DSRX_CTRL2_G);
+    auto ctrl3 = read1byte_gy(LSM6DSRX_CTRL3_C);
+    auto ctrl4 = read1byte_gy(LSM6DSRX_CTRL4_C);
+    auto ctrl9 = read1byte_gy(LSM6DSRX_CTRL9_XL);
+    printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
+  } else { // lsm6sdv16
+    // write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
+    write1byte_gy(0x03, 0x01); // I2C/I3CモードをDisableに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte_gy(0x15, 0x0c); // 4000deg/s,  LPF 279hz
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+
+    write1byte_gy(0x11, 0x0c); // 7.68kHz
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl1 = read1byte_gy(LSM6DSRX_CTRL1_XL);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl2 = read1byte_gy(LSM6DSRX_CTRL2_G);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl3 = read1byte_gy(LSM6DSRX_CTRL3_C);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl4 = read1byte_gy(LSM6DSRX_CTRL4_C);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl9 = read1byte_gy(LSM6DSRX_CTRL9_XL);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
+    // ジャイロのスケールを±4000deg/sに設定
+    // ジャイロの出力データレートを6.66Hzに設定
+  }
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
 }
 int AS5147P::read_gyro_z() { return read2byte(0x47); }
 int AS5147P::read_accel_x() { return read2byte(0x3B); }
@@ -123,4 +193,64 @@ signed short AS5147P::read_2byte_itr2(std::vector<int> &list) {
   list[3] = r_trans->rx_data[3];
   return (signed short)((((unsigned short)(r_trans->rx_data[1] & 0xff)) << 8) |
                         ((unsigned short)(r_trans->rx_data[2] & 0xff)));
+}
+
+uint8_t AS5147P::read1byte_gy(const uint8_t address) {
+  esp_err_t ret;
+  spi_transaction_t t;
+  memset(&t, 0, sizeof(t)); // Zero out the transaction
+  t.flags = SPI_TRANS_USE_RXDATA;
+  t.length = 16; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+  uint16_t tx_data = (address | READ_FLAG) << 8;
+  tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
+  t.tx_buffer = &tx_data;
+  ret = spi_device_polling_transmit(spi_gyro, &t); // Transmit!
+  assert(ret == ESP_OK);                           // Should have had no issues.
+  printf("%d, %d\n", t.rx_data[0], t.rx_data[1]);
+  uint8_t data =
+      SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 16) & 0x00FF; // FF + Data
+  return data;
+}
+
+uint8_t AS5147P::write1byte_gy(const uint8_t address, const uint8_t data) {
+  esp_err_t ret;
+  spi_transaction_t t;
+  memset(&t, 0, sizeof(t)); // Zero out the transaction
+
+  // printf("%2x, %2x\n", address, data);
+  // printf("%2x, %2x\n", address, 0x0f & data);
+  t.length = 16; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+  t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
+  t.tx_data[0] = address;
+  t.tx_data[1] = (uint8_t)(0xff & data);
+  // t.tx_data[2] = 0;
+
+  // uint16_t tx_data = (address) << 8 | (0xff & data);
+  // tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
+  // t.tx_buffer = &(t.tx_data);
+  ret = spi_device_polling_transmit(spi_gyro, &t); // Transmit!
+  assert(ret == ESP_OK);                           // Should have had no issues.
+  return 0;
+}
+
+int16_t IRAM_ATTR AS5147P::read_2byte_gy(const uint8_t address) {
+  esp_err_t ret;
+  DRAM_ATTR static spi_transaction_t t;
+  static bool is_initialized = false;
+
+  if (!is_initialized) {
+    memset(&t, 0, sizeof(t)); // Zero out the transaction once
+    t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
+    t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
+    is_initialized = true;
+  }
+
+  t.tx_data[0] = (address | READ_FLAG);
+  t.tx_data[1] = 0;
+  t.tx_data[2] = 0;
+
+  ret = spi_device_polling_transmit(spi_gyro, &t); // Transmit!
+
+  return (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
+                        ((unsigned short)(t.rx_data[1] & 0xff)));
 }

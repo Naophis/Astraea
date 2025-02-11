@@ -34,16 +34,23 @@ void SensingTask::timer_200us_callback_main() {
   }
   gyro_timestamp_now = esp_timer_get_time();
   auto gyro = gyro_if.read_2byte(0x26);
+
+  // gyro2_timestamp_now = esp_timer_get_time();
+  // auto gyro2 = enc_if.read_2byte_gy(0x26);
+
   enc_r_timestamp_now = esp_timer_get_time();
   auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
   enc_l_timestamp_now = esp_timer_get_time();
   auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
+  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) / 1000000;
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
   pt->kf_w.dt = gyro_dt;
+  // pt->kf_w2.dt = gyro2_dt;
+
   pt->kf_v_r.dt = enc_r_dt;
   pt->kf_v_l.dt = enc_l_dt;
 
@@ -118,7 +125,7 @@ void SensingTask::timer_200us_callback_main() {
   if (param->enable_kalman_encoder == 1) {
     se->ego.v_l = pt->kf_v_l.get_state();
     se->ego.v_r = pt->kf_v_r.get_state();
-  }else{
+  } else {
     se->ego.v_l = se->ego.v_l;
     se->ego.v_r = se->ego.v_r;
   }
@@ -139,7 +146,24 @@ void SensingTask::timer_200us_callback_main() {
       pt->kf_w.update(se->ego.w_raw);
       // pt->kf_w.update2(se->ego.w_raw, w_enc);
     }
+    //
+    // se->gyro2.raw = se->gyro2.data = gyro2;
+    // if (gyro2_dt > 0) {
+    //   if (tgt_val->motion_dir == MotionDirection::LEFT) {
+    //     se->ego.w_raw = param->gyro2_param.gyro_w_gain_left *
+    //                     (gyro2 - tgt_val->gyro_zero_p_offset);
+    //   } else {
+    //     se->ego.w_raw = param->gyro2_param.gyro_w_gain_right *
+    //                     (gyro2 - tgt_val->gyro_zero_p_offset);
+    //   }
+    //   pt->kf_w2.predict(alpha);
+    //   const float tread = param->tire_tread;
+    //   const float w_enc = -(se->ego.v_r - se->ego.v_l) / tread;
+    //   pt->kf_w2.update(se->ego.w_raw);
+    //   // pt->kf_w.update2(se->ego.w_raw, w_enc);
+    // }
   }
+
   if (param->enable_kalman_gyro == 1) {
     se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
   } else if (param->enable_kalman_gyro == 2) {
@@ -196,6 +220,7 @@ void SensingTask::task() {
     gyro_if.init();
     gyro_if.setup();
     enc_if.init();
+    // enc_if.setup();
   }
   // esp_timer_start_periodic(timer_200us, 200);
 

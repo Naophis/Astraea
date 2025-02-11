@@ -107,6 +107,8 @@ void IRAM_ATTR MainTask::dump1() {
 
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
+    // printf("gyro2: %d\t(%0.3f)\n", sensing_result->gyro2.raw,
+    //        tgt_val->gyro2_zero_p_offset);
     printf("accel_x: %f\t(%f)\n", sensing_result->ego.accel_x_raw,
            sensing_result->ego.accel_x_raw / 9806.65 *
                param->accel_x_param.gain);
@@ -353,16 +355,17 @@ void MainTask::load_hw_param() {
 
   cJSON *root = cJSON_CreateObject(), *front_ctrl_roll_pid, *motor_pid,
         *motor_pid2, *motor_pid3, *gyro_pid, *str_ang_pid, *str_ang_dia_pid,
-        *gyro_param, *battery_kalman_config, *encoder_kalman_config,
-        *w_kalman_config, *v_kalman_config, *ang_kalman_config,
-        *dist_kalman_config, *pos_kalman_config, *battery_param, *led_param,
-        *angle_pid, *front_ctrl_dist_pid, *front_ctrl_keep_angle_pid,
-        *front_ctrl_angle_pid, *sen_pid, *sen_pid_dia, *accel_x, *comp_v_param,
-        *axel_degenerate_x, *axel_degenerate_y, *led_blight,
-        *gyro_pid_gain_limitter, *motor_pid_gain_limitter,
-        *motor2_pid_gain_limitter, *motor3_pid_gain_limitter,
-        *sensor_deg_limitter_v, *sensor_deg_limitter_str,
-        *sensor_deg_limitter_dia, *sensor_deg_limitter_piller;
+        *gyro_param, *gyro2_param, *battery_kalman_config,
+        *encoder_kalman_config, *w_kalman_config, *v_kalman_config,
+        *ang_kalman_config, *dist_kalman_config, *pos_kalman_config,
+        *battery_param, *led_param, *angle_pid, *front_ctrl_dist_pid,
+        *front_ctrl_keep_angle_pid, *front_ctrl_angle_pid, *sen_pid,
+        *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
+        *axel_degenerate_y, *led_blight, *gyro_pid_gain_limitter,
+        *motor_pid_gain_limitter, *motor2_pid_gain_limitter,
+        *motor3_pid_gain_limitter, *sensor_deg_limitter_v,
+        *sensor_deg_limitter_str, *sensor_deg_limitter_dia,
+        *sensor_deg_limitter_piller;
 
   root = cJSON_Parse(str.c_str());
 
@@ -679,6 +682,13 @@ void MainTask::load_hw_param() {
   param->gyro_param.gyro_w_gain_left =
       getItem(gyro_param, "gyro_w_gain_left")->valuedouble;
   param->gyro_param.lp_delay = getItem(gyro_param, "lp_delay")->valuedouble;
+
+  gyro2_param = getItem(root, "gyro2_param");
+  param->gyro2_param.gyro_w_gain_right =
+      getItem(gyro2_param, "gyro_w_gain_right")->valuedouble;
+  param->gyro2_param.gyro_w_gain_left =
+      getItem(gyro2_param, "gyro_w_gain_left")->valuedouble;
+  param->gyro2_param.lp_delay = getItem(gyro2_param, "lp_delay")->valuedouble;
 
   accel_x = getItem(root, "accel_x_param");
   param->accel_x_param.gain = getItem(accel_x, "gain")->valuedouble;

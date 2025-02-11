@@ -226,54 +226,54 @@ void LSM6DSR::setup() {
   vTaskDelay(200.0 / portTICK_PERIOD_MS);
   while ((read1byte(LSM6DSRX_CTRL3_C) & 0x01) == 0x01)
     ;
+  if (true) {
+    // lsm6sr
+    write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte(LSM6DSRX_CTRL4_C, 0x06); // I2CモードをDisableに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
-  // write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
-  write1byte(0x03, 0x01); // I2C/I3CモードをDisableに設定
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  // write1byte(LSM6DSRX_CTRL4_C, 0x06); // I2CモードをDisableに設定
-  // vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    // 加速度計の設定
+    write1byte(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
+    // write1byte(LSM6DSRX_CTRL1_XL, 0xAE); //8g
+    // write1byte(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
+    // 加速度計のスケールを±8gに設定
+    // 加速度計の出力データレートを416Hzに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
-  // 加速度計の設定
-  // write1byte(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
-  // write1byte(LSM6DSRX_CTRL1_XL, 0xAE); //8g
-  // write1byte(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
-  // 加速度計のスケールを±8gに設定
-  // 加速度計の出力データレートを416Hzに設定
-  // vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  // write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
-  // vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    // ジャイロの設定
+    write1byte(LSM6DSRX_CTRL2_G, 0xA1);
+    auto ctrl1 = read1byte(LSM6DSRX_CTRL1_XL);
+    auto ctrl2 = read1byte(LSM6DSRX_CTRL2_G);
+    auto ctrl3 = read1byte(LSM6DSRX_CTRL3_C);
+    auto ctrl4 = read1byte(LSM6DSRX_CTRL4_C);
+    auto ctrl9 = read1byte(LSM6DSRX_CTRL9_XL);
+    printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
+  } else { // lsm6sdv16
+    // write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
+    write1byte(0x03, 0x01); // I2C/I3CモードをDisableに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte(0x15, 0x0c); // 4000deg/s,  LPF 279hz
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
-  // write1byte(LSM6DSRX_FIFO_CTRL4, 6);      // FIFOの設定
-  // write1byte(LSM6DSRX_CTRL10_C, 0x20);     // timestamp有効
-  // write1byte(LSM6DSRX_EMB_FUNC_SRC, 0x80); // reset
-  // vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  // ジャイロの設定
-  // write1byte(LSM6DSRX_CTRL2_G, 0xA1);
-
-  write1byte(0x15, 0x0c);  //4000deg/s,  LPF 279hz
-  // write1byte(0x15, 0x1c);  //4000deg/s,  LPF 212hz
-  // write1byte(0x15, 0x2c);  //4000deg/s,  LPF 156hz
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-
-  write1byte(0x11, 0x0c); // 7.68kHz
-  // write1byte(0x11, 0x0b); // 3.84kHz
-  // write1byte(0x11, 0x0a); // 1.92kHz
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-
-  auto ctrl1 = read1byte(LSM6DSRX_CTRL1_XL);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  auto ctrl2 = read1byte(LSM6DSRX_CTRL2_G);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  auto ctrl3 = read1byte(LSM6DSRX_CTRL3_C);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  auto ctrl4 = read1byte(LSM6DSRX_CTRL4_C);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  auto ctrl9 = read1byte(LSM6DSRX_CTRL9_XL);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
-  // ジャイロのスケールを±4000deg/sに設定
-  // ジャイロの出力データレートを6.66Hzに設定
-
+    write1byte(0x11, 0x0c); // 7.68kHz
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl1 = read1byte(LSM6DSRX_CTRL1_XL);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl2 = read1byte(LSM6DSRX_CTRL2_G);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl3 = read1byte(LSM6DSRX_CTRL3_C);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl4 = read1byte(LSM6DSRX_CTRL4_C);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    auto ctrl9 = read1byte(LSM6DSRX_CTRL9_XL);
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
+    // ジャイロのスケールを±4000deg/sに設定
+    // ジャイロの出力データレートを6.66Hzに設定
+  }
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 }
 int LSM6DSR::read_gyro_z() { return read2byte(0x26); }
