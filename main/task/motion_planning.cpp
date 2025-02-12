@@ -811,7 +811,7 @@ void IRAM_ATTR MotionPlanning::reset_tgt_data() {
 
   tgt_val->motion_mode = 0;
 
-  tgt_val->tgt_in.accl_param.limit = 5000;
+  tgt_val->tgt_in.accl_param.limit = 3500;
   tgt_val->tgt_in.accl_param.n = 4;
   tgt_val->global_pos.ang = 0;
   tgt_val->global_pos.img_ang = 0;
