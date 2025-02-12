@@ -1477,12 +1477,13 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
 
   tgt_val->global_pos.img_ang += mpc_next_ego.w * dt;
 
-  if (tgt_val->motion_type == MotionType::SLALOM) {
-    if (tgt_val->ego_in.pivot_state == 3) {
-      tgt_val->global_pos.img_ang = //
-          tgt_val->ego_in.img_ang = tgt_val->tgt_in.tgt_angle;
-    }
-  }
+  // TODO: 角度が正確に計算できないことがあるので注意
+  // if (tgt_val->motion_type == MotionType::SLALOM) {
+  //   if (tgt_val->ego_in.pivot_state == 3) {
+  //     tgt_val->global_pos.img_ang = //
+  //         tgt_val->ego_in.img_ang = tgt_val->tgt_in.tgt_angle;
+  //   }
+  // }
 
   tgt_val->global_pos.img_dist += mpc_next_ego.v * dt;
 
@@ -1622,19 +1623,39 @@ void IRAM_ATTR PlanningTask::cp_request() {
   //   kf_dist.reset(0);
   // }
 
-  if (tgt_val->motion_type == MotionType::NONE ||
-      tgt_val->motion_type == MotionType::PIVOT ||
-      tgt_val->motion_type == MotionType::FRONT_CTRL ||
-      tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
-      tgt_val->motion_type == MotionType::PIVOT_AFTER) {
-    tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = last_tgt_angle = 0;
+  // TODO revert
+  //  if (tgt_val->motion_type == MotionType::NONE ||
+  //      tgt_val->motion_type == MotionType::PIVOT ||
+  //      tgt_val->motion_type == MotionType::FRONT_CTRL ||
+  //      tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
+  //      tgt_val->motion_type == MotionType::PIVOT_AFTER) {
+  //    tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = last_tgt_angle = 0;
+  //    kf_ang.reset(0);
+  //    tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
+  //    kf_dist.reset(0);
+  //  } else {
+  //    tgt_val->ego_in.ang -= last_tgt_angle;
+  //    tgt_val->ego_in.img_ang = 0;
+  //    kf_ang.offset(-last_tgt_angle);
+  //  }
+
+  if (!(tgt_val->motion_type == MotionType::NONE ||
+        tgt_val->motion_type == MotionType::STRAIGHT ||
+        tgt_val->motion_type == MotionType::PIVOT_PRE ||
+        tgt_val->motion_type == MotionType::PIVOT_AFTER ||
+        tgt_val->motion_type == MotionType::READY ||
+        tgt_val->motion_type == MotionType::SENSING_DUMP ||
+        tgt_val->motion_type == MotionType::WALL_OFF ||
+        tgt_val->motion_type == MotionType::WALL_OFF_DIA)) {
+    const auto tmp_ang = tgt_val->ego_in.img_ang;
+    tgt_val->ego_in.ang -= tmp_ang;
+    tgt_val->ego_in.img_ang = 0;
+    kf_ang.offset(-tmp_ang);
+  } else if (tgt_val->motion_type == MotionType::NONE) {
+    tgt_val->ego_in.ang = tgt_val->ego_in.img_ang = 0;
     kf_ang.reset(0);
     tgt_val->ego_in.img_dist = tgt_val->ego_in.dist = 0;
     kf_dist.reset(0);
-  } else {
-    tgt_val->ego_in.ang -= last_tgt_angle;
-    tgt_val->ego_in.img_ang = 0;
-    kf_ang.offset(-last_tgt_angle);
   }
 
   if (tgt_val->motion_type == MotionType::NONE ||
@@ -1652,8 +1673,11 @@ void IRAM_ATTR PlanningTask::cp_request() {
 
   if (tgt_val->tgt_in.tgt_angle != 0) {
     const auto tmp_ang = tgt_val->ego_in.ang;
-    tgt_val->ego_in.img_ang -= last_tgt_angle;
-    kf_ang.offset(-last_tgt_angle);
+    // TODO revert
+    //  tgt_val->ego_in.img_ang -= last_tgt_angle;
+    //  kf_ang.offset(-last_tgt_angle);
+    tgt_val->ego_in.img_ang -= tmp_ang;
+    kf_ang.offset(-tmp_ang);
     tgt_val->ego_in.ang = 0;
     // } else {
     //   kf_ang.reset(0);
