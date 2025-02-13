@@ -44,8 +44,7 @@ void SensingTask::timer_200us_callback_main() {
   auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
-  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) /
-  // 1000000;
+  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) / 1000000;
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
@@ -314,9 +313,9 @@ void SensingTask::task() {
     if (tgt_val->nmr.sct == SensorCtrlType::Dia) {
       if (tgt_val->ego_in.state == 0) {
         // 斜め壁制御加速中は横は発光させない
-        r45 = l45 = false;
+        // r45 = l45 = false;
       }
-      // r45 = l45 = true;
+      r45 = l45 = true;
     }
     if (tgt_val->nmr.sct == SensorCtrlType::Straight) {
       r90 = l90 = true;
@@ -394,9 +393,9 @@ void SensingTask::task() {
       if (pt->tgt_val->nmr.sct == SensorCtrlType::Dia) {
         if (pt->tgt_val->ego_in.state == 0) {
           // 斜め壁制御加速中は横は発光させない
-          r45 = l45 = false;
+          // r45 = l45 = false;
         }
-        // r45 = l45 = true;
+        r45 = l45 = true;
       }
       if (pt->tgt_val->nmr.sct == SensorCtrlType::Straight) {
         r90 = l90 = true;
