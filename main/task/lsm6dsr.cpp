@@ -201,6 +201,7 @@ void LSM6DSR::enable_g() {}
 #define LSM6DSRX_CTRL4_C 0x13U
 #define LSM6DSRX_CTRL8_XL 0x17U
 #define LSM6DSRX_CTRL9_XL 0x18U
+#define LSM6DSRX_CTRL1_OIS 0x70U
 #define LSM6DSRX_FIFO_CTRL4 0x0AU
 #define LSM6DSRX_CTRL10_C 0x19U
 #define LSM6DSRX_EMB_FUNC_SRC 0x64U
@@ -229,18 +230,24 @@ void LSM6DSR::setup() {
   if (true) {
     // lsm6sr
     write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
+    write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
     vTaskDelay(10.0 / portTICK_PERIOD_MS);
+    write1byte(LSM6DSRX_CTRL4_C, 0x06); // I2CモードをDisableに設定
     write1byte(LSM6DSRX_CTRL4_C, 0x06); // I2CモードをDisableに設定
     vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
     // 加速度計の設定
-    write1byte(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
+    // write1byte(LSM6DSRX_CTRL1_XL, 0xAA); // 4g
     // write1byte(LSM6DSRX_CTRL1_XL, 0xAE); //8g
     // write1byte(LSM6DSRX_CTRL1_XL, 0xA6); // 16g
     // 加速度計のスケールを±8gに設定
     // 加速度計の出力データレートを416Hzに設定
     vTaskDelay(10.0 / portTICK_PERIOD_MS);
     write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
+    vTaskDelay(10.0 / portTICK_PERIOD_MS);
+
+
+    write1byte(LSM6DSRX_CTRL1_OIS, 0xA9); // OIS無効化
     vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
     // ジャイロの設定

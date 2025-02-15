@@ -64,8 +64,8 @@ wall_off_hold_dist: 88
 ctrl_exist_wall_th_l: 50
 ctrl_exist_wall_th_r: 50
 go_straight_wide_ctrl_th: 75
-search_wall_off_l_dist_offset: 44.0
-search_wall_off_r_dist_offset: 43.75
+search_wall_off_l_dist_offset: 52.0
+search_wall_off_r_dist_offset: 51.25
 search_wall_off_enable: 1
 
 # 壁切れ壁あり判定
@@ -78,18 +78,18 @@ wall_off_hold_exist_dist_r: 54
 wall_off_hold_noexist_th_l: 57
 wall_off_hold_noexist_th_r: 56
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: -4.50
-wall_off_hold_dist_str_r_exist: -4.0
+wall_off_hold_dist_str_l_exist: -4.0
+wall_off_hold_dist_str_r_exist: -3.5
 
 # 壁切れ In2(最初からないとき)
-wall_off_hold_exist_dist_l2: 63
-wall_off_hold_exist_dist_r2: 63
+wall_off_hold_exist_dist_l2: 65
+wall_off_hold_exist_dist_r2: 65
 # 壁切れ Out2(最初からないとき)
-wall_off_hold_noexist_th_l2: 65
-wall_off_hold_noexist_th_r2: 65
+wall_off_hold_noexist_th_l2: 67
+wall_off_hold_noexist_th_r2: 67
 # 壁切れ オフセット距離(最初からないとき)
-wall_off_hold_dist_str_l: -5.25
-wall_off_hold_dist_str_r: -5.5
+wall_off_hold_dist_str_l: -5.75
+wall_off_hold_dist_str_r: -6.5
 
 wall_off_noexist_diff_l: 0.25
 wall_off_noexist_diff_r: 0.25
@@ -129,8 +129,8 @@ wall_off_hold_noexist_dia_th_r: 50
 wall_off_hold_dist_dia_l: 3.0
 wall_off_hold_dist_dia_r: 3.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 29.850
-dia_wall_off_ref_r: 32.1250
+dia_wall_off_ref_l: 30.850
+dia_wall_off_ref_r: 33.750
 
 ### 最初から壁がない場合
 # 壁切れ In(斜め)
@@ -164,7 +164,7 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
+dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 

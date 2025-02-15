@@ -44,7 +44,8 @@ void SensingTask::timer_200us_callback_main() {
   auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
-  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) / 1000000;
+  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) /
+  // 1000000;
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
@@ -60,8 +61,8 @@ void SensingTask::timer_200us_callback_main() {
 
     if (
         // (enc_r == se->encoder.right_old) ||
-        (enc_r == 0) ||
-        (enc_r == 0 && ABS(ABS(tmp_r_v) - ABS(se->ego.v_r)) > 50)) {
+        false && ((enc_r == 0) ||
+                  (enc_r == 0 && ABS(ABS(tmp_r_v) - ABS(se->ego.v_r)) > 50))) {
       for (int i = 0; i < 3; i++) {
         enc_r_timestamp_now = esp_timer_get_time();
         enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
@@ -92,8 +93,8 @@ void SensingTask::timer_200us_callback_main() {
 
     if (
         //(enc_l == se->encoder.left_old) ||
-        (enc_l == 0) ||
-        (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50)) {
+        false && ((enc_l == 0) ||
+                  (enc_l == 0 && ABS(ABS(tmp_l_v) - ABS(se->ego.v_l)) > 50))) {
       for (int i = 0; i < 3; i++) {
         enc_l_timestamp_now = esp_timer_get_time();
         enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
@@ -176,12 +177,12 @@ void SensingTask::timer_200us_callback_main() {
 void SensingTask::create_task(const BaseType_t xCoreID) {
   xTaskCreatePinnedToCore(task_entry_point, "sensing_task", 8192 * 1, this, 2,
                           &handle, xCoreID);
-  const esp_timer_create_args_t timer_200us_args = {
-      .callback = &SensingTask::timer_200us_callback,
-      .arg = this,
-      .dispatch_method = ESP_TIMER_TASK,
-      .name = "timer_200us"};
-  esp_timer_create(&timer_200us_args, &timer_200us);
+  // const esp_timer_create_args_t timer_200us_args = {
+  //     .callback = &SensingTask::timer_200us_callback,
+  //     .arg = this,
+  //     .dispatch_method = ESP_TIMER_TASK,
+  //     .name = "timer_200us"};
+  // esp_timer_create(&timer_200us_args, &timer_200us);
 }
 void SensingTask::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param) {
@@ -335,7 +336,16 @@ void SensingTask::task() {
       r90 = l90 = true;
       r45 = l45 = true;
     }
-
+    if (pt->tgt_val->motion_type == MotionType::SLALOM) {
+      r90 = l90 = r45 = l45 = false;
+      if (pt->tgt_val->tt == TurnType::Normal) {
+        if (pt->tgt_val->td == TurnDirection::Right) {
+          l45 = true;
+        } else {
+          r45 = true;
+        }
+      }
+    }
     // LED_OFF ADC
     if (skip_sensing) {
       if (r90) {
