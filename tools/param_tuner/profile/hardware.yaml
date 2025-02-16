@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.605 #新品 13.6165
-tire2: 13.605 #新品 13.6165
+tire: 13.60 #新品 13.6165
+tire2: 13.60 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -30,7 +30,7 @@ motor_debug_mode_duty_r: 10
 motor_debug_mode_duty_l: -10
 
 MotorHz: 37500
-SuctionHz: 62500
+SuctionHz: 42500
 MotorResolution: 40
 SuctionResolution: 40
 
@@ -98,7 +98,7 @@ ff_roll_gain_after: 0.145
 ff_front_gain_decel: 0.5
 
 enable_kalman_gyro: 0
-enable_kalman_encoder: 1
+enable_kalman_encoder: 0
 
 motor_pid_gain_limitter: 
   mode: 0
@@ -157,8 +157,18 @@ front_ctrl_roll_pid:
 motor_pid2:
   #AS5147P 
   mode: 7
+  # p: 0.0000075
+  # i: 0.000003625
+  # b: 0.00
+  # d: 0.0000085
+
+  # p: 0.0000085
+  # i: 0.000009125
+  # b: 0.00
+  # d: 0.0000195
+
   p: 0.0000075
-  i: 0.000003625
+  i: 0.000004225
   b: 0.00
   d: 0.0000085
 
@@ -302,8 +312,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.00246235
-  gyro_w_gain_right: 0.00246175
+  gyro_w_gain_left: 0.0024515
+  gyro_w_gain_right: 0.00245125
   lp_delay: 1
 gyro2_param:
   # gyro_w_gain_left: 0.00246095
@@ -390,13 +400,13 @@ right_keep_dist_th: 8
 normal_sla_l_wall_off_th_in: 70 #[mm]
 normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 90 #[mm]
-normal_sla_r_wall_off_th_out: 90 #[mm]
+normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 143 #125~144
-normal_sla_r_wall_off_ref_cnt: 135 #125~144
+normal_sla_l_wall_off_ref_cnt: 133 #125~144
+normal_sla_r_wall_off_ref_cnt: 132 #125~144
 
-normal_sla_l_wall_off_dist: 6
-normal_sla_r_wall_off_dist: 6
+normal_sla_l_wall_off_dist: 0
+normal_sla_r_wall_off_dist: 0
 # normal_sla_l_wall_off_dist: 0
 # normal_sla_r_wall_off_dist: 0
 normal_sla_l_wall_off_margin: 4

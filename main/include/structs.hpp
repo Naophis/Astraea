@@ -323,6 +323,8 @@ typedef struct {
   float right_str_exist;
   float left_dia;
   float right_dia;
+  float left_dia_noexit;
+  float right_dia_noexit;
   float left_dia_oppo;
   float right_dia_oppo;
 
@@ -336,6 +338,8 @@ typedef struct {
   float noexist_th_r;
   float noexist_th_l2;
   float noexist_th_r2;
+  float div_th_l;
+  float div_th_r;
 
   float exist_dia_th_l;
   float exist_dia_th_r;

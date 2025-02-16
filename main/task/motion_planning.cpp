@@ -811,7 +811,7 @@ void IRAM_ATTR MotionPlanning::reset_tgt_data() {
 
   tgt_val->motion_mode = 0;
 
-  tgt_val->tgt_in.accl_param.limit = 3500;
+  tgt_val->tgt_in.accl_param.limit = 5500;
   tgt_val->tgt_in.accl_param.n = 4;
   tgt_val->global_pos.ang = 0;
   tgt_val->global_pos.img_ang = 0;
@@ -1347,6 +1347,13 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
           return;
         }
       } else {
+        // 壁が見切れかけ始めたら
+        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_r &&
+            se->ego.right45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.right_str;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return;
+        }
         if (se->ego.right45_dist > param->wall_off_dist.noexist_th_r2) {
           ps_front.dist += param->wall_off_dist.right_str;
           ps_front.dist = MAX(ps_front.dist, 0.1);
@@ -1443,6 +1450,13 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
           return;
         }
       } else {
+        // 壁が見切れかけ始めたら
+        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_l &&
+            se->ego.left45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.left_str;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return;
+        }
         if (se->ego.left45_dist > param->wall_off_dist.noexist_th_l2) {
           ps_front.dist += param->wall_off_dist.left_str;
           ps_front.dist = MAX(ps_front.dist, 0.1);
@@ -1543,7 +1557,7 @@ bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
         }
       } else {
         if (se->ego.right45_dist > param->wall_off_dist.noexist_dia_th_r2) {
-          ps_front.dist += param->wall_off_dist.right_dia;
+          ps_front.dist += param->wall_off_dist.right_dia2;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return true;
         }
@@ -1598,7 +1612,7 @@ bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
         }
       } else {
         if (se->ego.left45_dist > param->wall_off_dist.noexist_dia_th_l2) {
-          ps_front.dist += param->wall_off_dist.left_dia;
+          ps_front.dist += param->wall_off_dist.left_dia2;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return true;
         }

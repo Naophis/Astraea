@@ -27,12 +27,12 @@ data = read_yaml("../param_tuner/profile/hardware.yaml")
 p = Plot()
 po = PlotOrval()
 
-v =  2100
+v =  1800
 dia45_mode = 0
 
 hf_cl = 0
-show = True
-# show = False
+# show = True
+show = False
 if len(sys.argv) > 1:
     v = int(sys.argv[1])
     dia45_mode = int(sys.argv[2])
@@ -53,8 +53,8 @@ offset = {
 # p.exe("large", v, show, 0, K, list_K_y, offset, hf_cl)
 # p.exe("dia45",v, show, dia45_mode, K, list_K_y, offset, hf_cl)
 # p.exe("dia45_2", v, show, 0, K, list_K_y, offset, hf_cl)
-p.exe("dia135",v, show, 0,  K, list_K_y, offset, hf_cl)
-# p.exe("dia135_2", v, show, 0,  K, list_K_y, offset, hf_cl)
+# p.exe("dia135",v, show, 0,  K, list_K_y, offset, hf_cl)
+p.exe("dia135_2", v, show, 0,  K, list_K_y, offset, hf_cl)
 # p.exe("dia90", v, show, 0, K, list_K_y, offset, hf_cl)
 
 # p.exe("orval", v, show, 0, K, list_K_y, offset, hf_cl)

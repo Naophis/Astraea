@@ -889,6 +889,11 @@ void MainTask::load_offset_param() {
   param->wall_off_dist.right_diff_th =
       getItem(root, "wall_off_noexist_diff_r")->valuedouble;
 
+  param->wall_off_dist.div_th_l =
+      getItem(root, "wall_off_hold_div_th_l")->valuedouble;
+  param->wall_off_dist.div_th_r =
+      getItem(root, "wall_off_hold_div_th_r")->valuedouble;
+
   param->wall_off_dist.left_str_exist =
       getItem(root, "wall_off_hold_dist_str_l_exist")->valuedouble;
   param->wall_off_dist.right_str_exist =
@@ -976,6 +981,11 @@ void MainTask::load_offset_param() {
       getItem(root, "wall_off_hold_noexist_dia_th_l2")->valuedouble;
   param->wall_off_dist.noexist_dia_th_r2 =
       getItem(root, "wall_off_hold_noexist_dia_th_r2")->valuedouble;
+
+  param->wall_off_dist.wall_off_exist_dia_wall_th_l =
+      getItem(root, "wall_off_exist_dia_wall_th_l")->valuedouble;
+  param->wall_off_dist.wall_off_exist_dia_wall_th_r =
+      getItem(root, "wall_off_exist_dia_wall_th_r")->valuedouble;
 
   param->dia_wall_off_ref_l = getItem(root, "dia_wall_off_ref_l")->valuedouble;
   param->dia_wall_off_ref_r = getItem(root, "dia_wall_off_ref_r")->valuedouble;

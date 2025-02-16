@@ -227,7 +227,7 @@ void LSM6DSR::setup() {
   vTaskDelay(200.0 / portTICK_PERIOD_MS);
   while ((read1byte(LSM6DSRX_CTRL3_C) & 0x01) == 0x01)
     ;
-  if (true) {
+  if (false) {
     // lsm6sr
     write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定
     write1byte(LSM6DSRX_CTRL9_XL, 0xE2); // I3CモードをDisableに設定

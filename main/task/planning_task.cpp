@@ -1676,7 +1676,7 @@ void IRAM_ATTR PlanningTask::cp_request() {
   tgt_val->motion_dir = receive_req->nmr.motion_dir;
   tgt_val->dia_mode = receive_req->nmr.dia_mode;
 
-  tgt_val->tgt_in.accl_param.limit = 3500;
+  tgt_val->tgt_in.accl_param.limit = 5500;
   tgt_val->tgt_in.accl_param.n = 4;
 
   tgt_val->tgt_in.slip_gain_K1 = param_ro->slip_param_K;
