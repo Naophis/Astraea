@@ -7,18 +7,16 @@ straight:
     w_end: 0.1
     alpha: 10
   fast_run:
-    v_max: 2000
-    # accl: 28000
-    # decel: -30000
-    accl: 25000
-    decel: -17500
+    v_max: 6000
+    accl: 28000
+    decel: -30000
     w_max: 5
     w_end: 0.1
     alpha: 10
   fast_run_dia:
-    v_max: 2000
-    accl: 25000
-    decel: -17500
+    v_max: 5000
+    accl: 28000
+    decel: -30000
     w_max: 5
     w_end: 0.1
     alpha: 10

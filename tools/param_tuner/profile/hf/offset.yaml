@@ -94,6 +94,9 @@ wall_off_hold_dist_str_r: -7.5
 wall_off_hold_div_th_l: 0.65
 wall_off_hold_div_th_r: 0.30
 
+wall_off_hold_div_th_l2: 1.0
+wall_off_hold_div_th_r2: 1.0
+
 wall_off_noexist_diff_l: 0.25
 wall_off_noexist_diff_r: 0.25
 
@@ -119,7 +122,7 @@ wall_off_wait_dist: 65
 
 # 壁切れ壁あり判定
 wall_off_exist_dia_wall_th_l: 40
-wall_off_exist_dia_wall_th_r: 55
+wall_off_exist_dia_wall_th_r: 58
 
 ### 最初から壁がある場合
 # 壁切れ In(斜め)
@@ -132,8 +135,11 @@ wall_off_hold_noexist_dia_th_r: 40
 wall_off_hold_dist_dia_l: 3.0
 wall_off_hold_dist_dia_r: 3.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 32.750
-dia_wall_off_ref_r: 26.250
+dia_wall_off_ref_l: 30.750
+dia_wall_off_ref_r: 28.950
+
+wall_off_hold_div_th_dia_l: 30.65
+wall_off_hold_div_th_dia_r: 1.50
 
 ### 最初から壁がない場合
 # 壁切れ In(斜め)
@@ -154,7 +160,7 @@ dia_turn_th_l: 54
 dia_turn_th_r: 54
 
 dia_turn_ref_l: 58.0
-dia_turn_ref_r: 58.0
+dia_turn_ref_r: 55.0
 
 dia_turn_max_dist_l: 5.0
 dia_turn_max_dist_r: 5.0

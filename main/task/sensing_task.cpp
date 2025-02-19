@@ -556,8 +556,16 @@ void SensingTask::calc_vel(float gyro_dt, float enc_r_dt, float enc_l_dt) {
   tgt_val->ego_in.dist += se->ego.v_c * dt;
   tgt_val->global_pos.dist += se->ego.v_c * dt;
 
-  tgt_val->ego_in.ang += se->ego.w_kf * gyro_dt;
-  tgt_val->global_pos.ang += se->ego.w_kf * gyro_dt;
+  if (param->enable_kalman_gyro == 1) {
+    tgt_val->ego_in.ang += se->ego.w_kf * gyro_dt;
+    tgt_val->global_pos.ang += se->ego.w_kf * gyro_dt;
+  } else if (param->enable_kalman_gyro == 2) {
+    tgt_val->ego_in.ang += se->ego.w_raw * gyro_dt;
+    tgt_val->global_pos.ang += se->ego.w_raw * gyro_dt;
+  } else {
+    tgt_val->ego_in.ang += se->ego.w_raw * gyro_dt;
+    tgt_val->global_pos.ang += se->ego.w_raw * gyro_dt;
+  }
 
   w_old = tgt_val->ego_in.w;
   vl_old = se->ego.v_l;

@@ -889,10 +889,19 @@ void MainTask::load_offset_param() {
   param->wall_off_dist.right_diff_th =
       getItem(root, "wall_off_noexist_diff_r")->valuedouble;
 
+  param->wall_off_dist.div_th_dia_l =
+      getItem(root, "wall_off_hold_div_th_dia_l")->valuedouble;
+  param->wall_off_dist.div_th_dia_r =
+      getItem(root, "wall_off_hold_div_th_dia_r")->valuedouble;
+
   param->wall_off_dist.div_th_l =
       getItem(root, "wall_off_hold_div_th_l")->valuedouble;
   param->wall_off_dist.div_th_r =
       getItem(root, "wall_off_hold_div_th_r")->valuedouble;
+  param->wall_off_dist.div_th_l2 =
+      getItem(root, "wall_off_hold_div_th_l2")->valuedouble;
+  param->wall_off_dist.div_th_r2 =
+      getItem(root, "wall_off_hold_div_th_r2")->valuedouble;
 
   param->wall_off_dist.left_str_exist =
       getItem(root, "wall_off_hold_dist_str_l_exist")->valuedouble;
@@ -2502,7 +2511,8 @@ void MainTask::test_sla() {
     const auto type2 = static_cast<TurnType>(sys.test.sla_type2);
     bool dia = type2 == TurnType::Dia45_2 || type2 == TurnType::Dia135_2 ||
                type2 == TurnType::Dia90;
-
+    param->sen_ref_p.normal.exist.right45 = 1;
+    param->sen_ref_p.normal.exist.left45 = 1;
     mp->slalom(sla_p2, rorl2, nm, dia);
   }
 

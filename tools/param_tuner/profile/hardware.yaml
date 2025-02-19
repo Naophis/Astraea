@@ -5,13 +5,13 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.60 #新品 13.6165
-tire2: 13.60 #新品 13.6165
+tire: 13.585 #新品 13.6165
+tire2: 13.585 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
-offset_start_dist: 4.0
+offset_start_dist: 2.0
 gear_a: 39
 gear_b: 9
 # max_duty: 99.9
@@ -82,9 +82,9 @@ led_light_delay_cnt2: 950
 axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]
 # axel_degenerate_y: [1, 1, 0.5, 0.2, 0.2, 0.1, 0.1]
-# axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
+axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
-axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
+# axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
 decel_delay_cnt: 5
 dedel_delay_n: 4
@@ -98,7 +98,7 @@ ff_roll_gain_after: 0.145
 ff_front_gain_decel: 0.5
 
 enable_kalman_gyro: 0
-enable_kalman_encoder: 0
+enable_kalman_encoder: 1
 
 motor_pid_gain_limitter: 
   mode: 0
@@ -129,16 +129,16 @@ gyro_pid_gain_limitter:
   b: 15
   c: 15
 
-sensor_deg_limitter_v: [0, 500, 2000, 4000, 5000, 6000, 7000, 8000,12000]
+sensor_deg_limitter_v: [0, 500, 1000, 2000, 4000, 5000, 6000, 7000, 8000, 12000]
 # sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125, 125, 125]
-sensor_deg_limitter_str: [8, 8, 75, 125, 125, 125, 125, 125, 125]
+sensor_deg_limitter_str: [8, 8, 75, 125, 125, 125, 125, 125, 125, 125]
 # sensor_deg_limitter_str: [8, 8, 50, 75, 75, 75, 75, 75, 75]
 # sensor_deg_limitter_str: [8, 8, 5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5]
 # sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25, 25, 25]
 # sensor_deg_limitter_str: [3, 3, 3, 3, 3, 3, 3, 3, 3]
-# sensor_deg_limitter_dia: [3, 3, 6, 8, 8, 6, 4.5, 4.5, 4.5]
-sensor_deg_limitter_dia: [3, 3, 4.5, 4.5, 4.5, 4.6, 4.5, 4.5, 4.5]
-sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3]
+sensor_deg_limitter_dia: [3, 3, 6, 6, 8, 8, 6, 4.5, 4.5, 4.5]
+# sensor_deg_limitter_dia: [3, 3, 4.5, 4.5, 4.5, 4.6, 4.5, 4.5, 4.5]
+sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 # sensor_deg_limitter_piller: [0, 0, 0, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
@@ -216,11 +216,12 @@ angle_pid: # pid for angle
   b: 0
   c: 0
 
-  p: 7.50
-  # i: 0.25
-  # i: 0.125
-  # i: 0.225
-  i: 0.0
+  # p: 7.50
+  # i: 0.0
+  # d: 4.5
+
+  p: 9.50
+  i: 0.475
   d: 4.5
 
 
@@ -312,8 +313,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.0024515
-  gyro_w_gain_right: 0.00245125
+  gyro_w_gain_left: 0.00245125
+  gyro_w_gain_right: 0.00245075
   lp_delay: 1
 gyro2_param:
   # gyro_w_gain_left: 0.00246095
@@ -402,11 +403,11 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 90 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 133 #125~144
-normal_sla_r_wall_off_ref_cnt: 132 #125~144
+normal_sla_l_wall_off_ref_cnt: 141 #125~144
+normal_sla_r_wall_off_ref_cnt: 139 #125~144
 
-normal_sla_l_wall_off_dist: 0
-normal_sla_r_wall_off_dist: 0
+normal_sla_l_wall_off_dist: 6
+normal_sla_r_wall_off_dist: 6
 # normal_sla_l_wall_off_dist: 0
 # normal_sla_r_wall_off_dist: 0
 normal_sla_l_wall_off_margin: 4

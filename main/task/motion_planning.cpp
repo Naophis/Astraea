@@ -1271,6 +1271,19 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
         if (se->ego.right45_dist < param->wall_off_dist.exist_dist_r2) {
           break;
         }
+        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_r2 &&
+            se->ego.right45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.right_str;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return;
+        }
+      } else {
+        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_r2 &&
+            se->ego.right45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.right_str;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return;
+        }
       }
       //　見逃し対応：見切れた場合
       if (std::abs(tmp_dist_after - tmp_dist_before) >=
@@ -1375,6 +1388,19 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
       if (!exist) {
         if (se->ego.left45_dist < param->wall_off_dist.exist_dist_l2) {
           break;
+        }
+        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_l2 &&
+            se->ego.left45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.left_str;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return;
+        }
+      } else {
+        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_l2 &&
+            se->ego.left45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.left_str;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return;
         }
       }
       //　見逃し対応：見切れた場合
@@ -1555,6 +1581,12 @@ bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return true;
         }
+        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_dia_r &&
+            se->ego.right45_dist < 100) {
+          ps_front.dist += param->wall_off_dist.right_dia;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return true;
+        }
       } else {
         if (se->ego.right45_dist > param->wall_off_dist.noexist_dia_th_r2) {
           ps_front.dist += param->wall_off_dist.right_dia2;
@@ -1606,6 +1638,12 @@ bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
       // 壁切れ終了
       if (exist) {
         if (se->ego.left45_dist > param->wall_off_dist.noexist_dia_th_l) {
+          ps_front.dist += param->wall_off_dist.left_dia;
+          ps_front.dist = MAX(ps_front.dist, 0.1);
+          return true;
+        }
+        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_dia_l &&
+            se->ego.left45_dist < 100) {
           ps_front.dist += param->wall_off_dist.left_dia;
           ps_front.dist = MAX(ps_front.dist, 0.1);
           return true;

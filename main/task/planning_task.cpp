@@ -1041,7 +1041,15 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   if (std::isfinite(tgt_val->ego_in.w)) {
     kf_ang.predict(tgt_val->ego_in.w);
     kf_ang.update(tgt_val->ego_in.ang);
-    se->ego.ang_kf = kf_ang.get_state();
+
+    if (param_ro->enable_kalman_gyro == 1) {
+      se->ego.ang_kf = kf_ang.get_state();
+    } else if (param_ro->enable_kalman_gyro == 2) {
+      se->ego.ang_kf = tgt_val->ego_in.ang;
+    } else {
+      se->ego.ang_kf = tgt_val->ego_in.ang;
+    }
+
     // const auto angle = kf_ang.get_state();
     // se->ego.ang_kf = fmod(angle + M_PI, 2 * M_PI) - M_PI;
   }
@@ -1668,7 +1676,15 @@ void IRAM_ATTR PlanningTask::cp_request() {
   }
 
   sensing_result->ego.dist_kf = kf_dist.get_state();
-  sensing_result->ego.ang_kf = kf_ang.get_state();
+  // sensing_result->ego.ang_kf = kf_ang.get_state();
+
+  if (param_ro->enable_kalman_gyro == 1) {
+    se->ego.ang_kf = kf_ang.get_state();
+  } else if (param_ro->enable_kalman_gyro == 2) {
+    se->ego.ang_kf = tgt_val->ego_in.ang;
+  } else {
+    se->ego.ang_kf = tgt_val->ego_in.ang;
+  }
 
   tgt_val->ego_in.sla_param.counter = 1;
   tgt_val->ego_in.sla_param.state = 0;

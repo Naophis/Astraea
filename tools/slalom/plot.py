@@ -68,7 +68,7 @@ class Plot:
             n = 4.0
 
             if hf_cl == 0:
-                rad = 42.0
+                rad = 46.5
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":
@@ -82,7 +82,7 @@ class Plot:
         elif type == "dia135_2":
             start_ang = 45
             if hf_cl == 0:
-                rad = 42.0
+                rad = 44.5
                 n = 4
                 tgt_ang = 135.0
                 end_pos = {"x": -45, "y": 90}
