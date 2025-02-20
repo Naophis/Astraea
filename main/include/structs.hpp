@@ -434,6 +434,7 @@ typedef struct {
   int FF_keV = 0;
   float offset_start_dist = 0;
   float offset_start_dist_search = 0;
+  float long_run_offset_dist = 5;
   float pivot_back_offset = 0;
   float cell = 90;
   float cell2 = 90;

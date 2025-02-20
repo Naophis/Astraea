@@ -446,6 +446,8 @@ void MainTask::load_hw_param() {
   param->offset_start_dist = getItem(root, "offset_start_dist")->valuedouble;
   param->offset_start_dist_search =
       getItem(root, "offset_start_dist_search")->valuedouble;
+  param->long_run_offset_dist =
+      getItem(root, "long_run_offset_dist")->valuedouble;
   param->sakiyomi_time = getItem(root, "sakiyomi_time")->valuedouble;
 
   axel_degenerate_x = getItem(root, "axel_degenerate_x");
@@ -1938,8 +1940,11 @@ void MainTask::task() {
         sim_run_time_all();
       } else if (mode_num == 17) {
         save_maze_data(false);
+        ui->coin(25);
         save_maze_kata_data(false);
+        ui->coin(25);
         save_maze_return_data(false);
+        ui->coin(25);
         lgc->init(sys.maze_size, sys.maze_size * sys.maze_size - 1);
         lgc->set_goal_pos(sys.goals);
       }
@@ -2923,6 +2928,15 @@ void MainTask::test_sla_walloff() {
     }
   }
   mp->reset_gyro_ref_with_check();
+
+  if (sys.test.suction_active == 1) {
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
+    vTaskDelay(xDelay500);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
+  }
 
   reset_tgt_data();
   reset_ego_data();

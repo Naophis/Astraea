@@ -1117,6 +1117,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       // }
 
       // printf("%f %f %f %f\n", ps.dist, ps.v_max, ps.v_end, ps.accl);
+      ps.dist -= param->long_run_offset_dist;
       auto res = go_straight(ps);
       carry_over_dist = 0;
       if (res == MotionResult::ERROR) {

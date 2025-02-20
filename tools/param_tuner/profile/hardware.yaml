@@ -12,6 +12,10 @@ tire2: 13.585 #新品 13.6165
 # offset_start_dist: 21.0
 offset_start_dist_search: 15.0
 offset_start_dist: 2.0
+long_run_offset_dist: 5
+long_run_offset_dist_x: [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 15.0] 
+long_run_offset_dist_y: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
+
 gear_a: 39
 gear_b: 9
 # max_duty: 99.9
@@ -275,7 +279,7 @@ str_ang_pid:
   p: 0.035
   i: 0.0325
 
-  b: 0.035
+  b: 0.0435
   d: 0.0325
   c: 0
 

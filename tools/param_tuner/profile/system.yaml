@@ -48,19 +48,21 @@ goals: [[1, 0]]
 
 # goals: [[14, 14], [14, 15], [15, 14], [15, 15]] #東日本2023
 
+# goals: [[19, 8],[19, 9],[19, 10],[20, 8],[20, 9],[20, 10],[21, 8],[21, 9],[21, 10]]  #全日本2024 Final
+
 #  27 *55
 maze_size: 32
 give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-mode: 0 # メイン
+# mode: 0 # メイン
 # mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
-# mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
+mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
 # mode: 11 # vacume/suction test
 # mode: 12 # silent_keep
 # mode: 13 # keep_pos
@@ -73,21 +75,21 @@ mode: 0 # メイン
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  # v_max: 400
-  # accl: 2000
-  # decel: -2000 
-  # dia_accl: 2500
-  # dia_decel: -2500
-  # dist: 720 #直進
-  # suction_active: 0
+  v_max: 400
+  accl: 2000
+  decel: -2000 
+  dia_accl: 2500
+  dia_decel: -2500
+  dist: 720 #直進
+  suction_active: 0
 
-  v_max: 1500
-  accl: 35000
-  decel: -37500
-  dia_accl: 35000
-  dia_decel: -35000
-  dist: 180 #直進
-  suction_active: 2
+  # v_max: 1800
+  # accl: 35000
+  # decel: -37500
+  # dia_accl: 35000
+  # dia_decel: -35000
+  # dist: 180 #直進
+  # suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -112,8 +114,8 @@ test: # テスト走行時に使用するパラメータ群
   # suction_duty_burst: 5.75
   # suction_duty_burst_low: 5.50
   # 0816
-  suction_duty_burst: 3.35
-  suction_duty_burst_low: 3.1
+  suction_duty_burst: 3.45
+  suction_duty_burst_low: 3.2
   # CL 4
   # suction_duty_burst: 8.25
   # suction_duty_burst_low: 8.0
@@ -121,10 +123,10 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 32
+  file_idx: 1
   sla_dist: 90
   # sla_type: 3
-  sla_type: 3
+  sla_type: 4
   sla_type2: 6 # 復路ターン種類
   sla_return: 0 #往復フラグ
   # sla_type: 1 normal
