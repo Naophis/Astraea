@@ -342,6 +342,8 @@ typedef struct {
   float div_th_r;
   float div_th_l2;
   float div_th_r2;
+  float div_th_l3;
+  float div_th_r3;
   float div_th_dia_l;
   float div_th_dia_r;
 

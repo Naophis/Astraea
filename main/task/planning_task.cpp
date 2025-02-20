@@ -773,9 +773,9 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
         (se->sen.l45.sensor_dist + 5) < se->ego.left45_dist;
 
     const bool exist_right45 =
-        se->ego.right45_dist < prm->sen_ref_p.normal.ref.right45;
+        se->ego.right45_dist < prm->sen_ref_p.search_exist.right45;
     const bool exist_left45 =
-        se->ego.left45_dist < prm->sen_ref_p.normal.ref.left45;
+        se->ego.left45_dist < prm->sen_ref_p.search_exist.left45;
 
     if (!(check_front_left && check_front_right)) {
       if (range_check_passed_right && !exist_left45) {

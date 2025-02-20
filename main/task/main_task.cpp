@@ -904,6 +904,10 @@ void MainTask::load_offset_param() {
       getItem(root, "wall_off_hold_div_th_l2")->valuedouble;
   param->wall_off_dist.div_th_r2 =
       getItem(root, "wall_off_hold_div_th_r2")->valuedouble;
+  param->wall_off_dist.div_th_l3 =
+      getItem(root, "wall_off_hold_div_th_l3")->valuedouble;
+  param->wall_off_dist.div_th_r3 =
+      getItem(root, "wall_off_hold_div_th_r3")->valuedouble;
 
   param->wall_off_dist.left_str_exist =
       getItem(root, "wall_off_hold_dist_str_l_exist")->valuedouble;
