@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.585 #新品 13.6165
-tire2: 13.585 #新品 13.6165
+tire: 13.535 #新品 13.6165
+tire2: 13.535 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -135,7 +135,7 @@ gyro_pid_gain_limitter:
 
 sensor_deg_limitter_v: [0, 500, 1000, 2000, 4000, 5000, 6000, 7000, 8000, 12000]
 # sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125, 125, 125]
-sensor_deg_limitter_str: [8, 8, 75, 125, 125, 125, 125, 125, 125, 125]
+sensor_deg_limitter_str: [5, 5, 75, 125, 125, 125, 125, 125, 125, 125]
 # sensor_deg_limitter_str: [8, 8, 50, 75, 75, 75, 75, 75, 75]
 # sensor_deg_limitter_str: [8, 8, 5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5]
 # sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25, 25, 25]
@@ -279,7 +279,7 @@ str_ang_pid:
   p: 0.035
   i: 0.0325
 
-  b: 0.0435
+  b: 0.035
   d: 0.0325
   c: 0
 
@@ -297,7 +297,8 @@ str_ang_pid:
 str_ang_dia_pid: #not use
   # p: 0.095
   # d: 1.25
-  p: 0.0125
+  p: 0.0
+  # p: 0.0125
   # d: 0.000275
   # p: 0
   d: 0

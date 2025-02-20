@@ -54,15 +54,15 @@ clear_dist_ragne_from: 22.5
 clear_dist_ragne_to: 50.0
 
 clear_dist_ragne_dist_list: [0, 20, 25, 55, 60, 90]
-clear_dist_ragne_th_list: [60, 60, 46.0, 46.5, 60, 60]
+clear_dist_ragne_th_list: [60, 60, 44.5, 44.5, 60, 60]
 # clear_dist_ragne_th_list: [46, 46, 46.0, 46.0, 46, 46]
 clear_dist_ragne_to2: 35 # 探索時制御範囲拡張移動距離
 
 wall_off_hold_dist: 88
 
 # 探索壁あり判定
-ctrl_exist_wall_th_l: 50
-ctrl_exist_wall_th_r: 50
+ctrl_exist_wall_th_l: 47 #探索壁切れ
+ctrl_exist_wall_th_r: 47 #探索壁切れ
 go_straight_wide_ctrl_th: 75
 search_wall_off_l_dist_offset: 50.50
 search_wall_off_r_dist_offset: 53.250
@@ -78,25 +78,28 @@ wall_off_hold_exist_dist_r: 51
 wall_off_hold_noexist_th_l: 50
 wall_off_hold_noexist_th_r: 53
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: -5.0
+wall_off_hold_dist_str_l_exist: -3.0
 wall_off_hold_dist_str_r_exist: -3.5
 
 # 壁切れ In2(最初からないとき)
-wall_off_hold_exist_dist_l2: 62
-wall_off_hold_exist_dist_r2: 63
+wall_off_hold_exist_dist_l2: 64
+wall_off_hold_exist_dist_r2: 66
 # 壁切れ Out2(最初からないとき)
-wall_off_hold_noexist_th_l2: 64
-wall_off_hold_noexist_th_r2: 64
+wall_off_hold_noexist_th_l2: 66
+wall_off_hold_noexist_th_r2: 67
 # 壁切れ オフセット距離(最初からないとき)
 wall_off_hold_dist_str_l: -7.5
 wall_off_hold_dist_str_r: -7.5
 
-# 壁切れ 偏差(壁が見える前)
+# 壁切れ 偏差(最初見えず、柱で反応)
 wall_off_hold_div_th_l: 2.5
 wall_off_hold_div_th_r: 2.5
-# 壁切れ 偏差(壁が見える前に過ぎた場合)
-wall_off_hold_div_th_l2: 4.5
-wall_off_hold_div_th_r2: 8.5
+# 壁切れ 偏差(壁が見える前に過ぎてた場合)
+wall_off_hold_div_th_l2: 2.5
+wall_off_hold_div_th_r2: 2.5
+# 壁切れ 偏差()
+wall_off_hold_div_th_l3: 0.5
+wall_off_hold_div_th_r3: 0.5
 
 wall_off_noexist_diff_l: 0.25
 wall_off_noexist_diff_r: 0.25
@@ -112,11 +115,11 @@ wall_off_diff_check_dist: 35 # 壁切れ偏差チェック　移動距離条件
 diff_check_dist_dia_2: 15 # 壁切れ偏差チェック　距離条件
 
 # 壁切れ：前壁補正　リファレンス値(大：前に近づく)
-front_dist_offset2: 139 #ref
+front_dist_offset2: 137 #ref
 # 壁切れ：前壁補正  しきい値(far: center)
 front_dist_offset3: 137.0 #th
 # 壁切れ：前壁補正　しきい値(far: both)
-front_dist_offset4: 120.0 # both front sensors condition th
+front_dist_offset4: 136.0 # both front sensors condition th
 
 # 壁切れ街制限距離
 wall_off_wait_dist: 65
@@ -136,10 +139,11 @@ wall_off_hold_noexist_dia_th_r: 40
 wall_off_hold_dist_dia_l: 3.0
 wall_off_hold_dist_dia_r: 3.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 32.750
-dia_wall_off_ref_r: 30.150
+dia_wall_off_ref_l: 28.850
+dia_wall_off_ref_r: 31.81250
 
-wall_off_hold_div_th_dia_l: 30.65
+# 斜め壁切れ偏差
+wall_off_hold_div_th_dia_l: 1.50
 wall_off_hold_div_th_dia_r: 1.50
 
 ### 最初から壁がない場合
@@ -153,28 +157,28 @@ wall_off_hold_noexist_dia_th_r2: 50
 wall_off_hold_dist_dia_l2: 1.0
 wall_off_hold_dist_dia_r2: 1.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l2: 43.15
-dia_wall_off_ref_r2: 36.950
+dia_wall_off_ref_l2: 43.15 #not use
+dia_wall_off_ref_r2: 36.950 #not use
 
 #斜めターン壁有り補正
-dia_turn_th_l: 54
-dia_turn_th_r: 54
+dia_turn_th_l: 55.5
+dia_turn_th_r: 57.0
 
-dia_turn_ref_l: 58.0
-dia_turn_ref_r: 55.0
+dia_turn_ref_l: 58.5
+dia_turn_ref_r: 60.0
 
 dia_turn_max_dist_l: 5.0
 dia_turn_max_dist_r: 5.0
 
 # 壁切れ オフセット距離(反対側の壁有り)
-wall_off_hold_dist_dia_l_oppo: 2.5
-wall_off_hold_dist_dia_r_oppo: 2.5
+wall_off_hold_dist_dia_l_oppo: -2.5
+wall_off_hold_dist_dia_r_oppo: -2.5
 # 壁あり補正有効条件距離
 wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値
+dia_offset_max_dist: 2 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 

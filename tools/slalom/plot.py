@@ -90,7 +90,7 @@ class Plot:
             start_ang = 0
             n = 4
             tgt_ang = 90
-            rad = 43.5
+            rad = 45.0
             end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
 
         res = {}

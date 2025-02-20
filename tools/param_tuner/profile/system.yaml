@@ -56,13 +56,13 @@ give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-# mode: 0 # メイン
+mode: 0 # メイン
 # mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
-mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
+# mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
 # mode: 11 # vacume/suction test
 # mode: 12 # silent_keep
 # mode: 13 # keep_pos
@@ -114,8 +114,8 @@ test: # テスト走行時に使用するパラメータ群
   # suction_duty_burst: 5.75
   # suction_duty_burst_low: 5.50
   # 0816
-  suction_duty_burst: 3.45
-  suction_duty_burst_low: 3.2
+  suction_duty_burst: 3.5
+  suction_duty_burst_low: 3.25
   # CL 4
   # suction_duty_burst: 8.25
   # suction_duty_burst_low: 8.0
@@ -123,10 +123,10 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 1
+  file_idx: 28
   sla_dist: 90
   # sla_type: 3
-  sla_type: 4
+  sla_type: 3
   sla_type2: 6 # 復路ターン種類
   sla_return: 0 #往復フラグ
   # sla_type: 1 normal
