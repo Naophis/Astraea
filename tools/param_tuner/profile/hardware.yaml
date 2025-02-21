@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.535 #新品 13.6165
-tire2: 13.535 #新品 13.6165
+tire: 13.6025 #新品 13.6165
+tire2: 13.6025 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -225,7 +225,7 @@ angle_pid: # pid for angle
   # d: 4.5
 
   p: 9.50
-  i: 0.475
+  i: 0.0
   d: 4.5
 
 
@@ -319,7 +319,7 @@ gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
   gyro_w_gain_left: 0.00245125
-  gyro_w_gain_right: 0.00245075
+  gyro_w_gain_right: 0.00245025
   lp_delay: 1
 gyro2_param:
   # gyro_w_gain_left: 0.00246095
@@ -408,8 +408,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 90 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 141 #125~144
-normal_sla_r_wall_off_ref_cnt: 139 #125~144
+normal_sla_l_wall_off_ref_cnt: 144 #125~144
+normal_sla_r_wall_off_ref_cnt: 140 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6

@@ -9,7 +9,7 @@ pivot_angle_180: 180.0
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 # front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
-front_dist_offset: 93.50 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 94.50 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
 normal_sla_offset_front: 9
@@ -115,11 +115,11 @@ wall_off_diff_check_dist: 35 # 壁切れ偏差チェック　移動距離条件
 diff_check_dist_dia_2: 15 # 壁切れ偏差チェック　距離条件
 
 # 壁切れ：前壁補正　リファレンス値(大：前に近づく)
-front_dist_offset2: 137 #ref
+front_dist_offset2: 138 #ref
 # 壁切れ：前壁補正  しきい値(far: center)
-front_dist_offset3: 137.0 #th
+front_dist_offset3: 135.0 #th
 # 壁切れ：前壁補正　しきい値(far: both)
-front_dist_offset4: 136.0 # both front sensors condition th
+front_dist_offset4: 135.0 # both front sensors condition th
 
 # 壁切れ街制限距離
 wall_off_wait_dist: 65
@@ -139,8 +139,12 @@ wall_off_hold_noexist_dia_th_r: 40
 wall_off_hold_dist_dia_l: 3.0
 wall_off_hold_dist_dia_r: 3.0
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l: 28.850
-dia_wall_off_ref_r: 31.81250
+# dia_wall_off_ref_l: 35.0
+# dia_wall_off_ref_r: 32.0
+dia_wall_off_ref_l: 24.0 #dia135
+dia_wall_off_ref_r: 24.0 #dia135
+dia_wall_off_ref_l3: 35.0 #dia45
+dia_wall_off_ref_r3: 30.0 #dia45
 
 # 斜め壁切れ偏差
 wall_off_hold_div_th_dia_l: 1.50
@@ -178,7 +182,7 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 2 # 斜め壁切れ距離補正最大値
+dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 
