@@ -1913,23 +1913,23 @@ void MainTask::task() {
       } else if (mode_num == 4) {
         path_run(12, 12, 12);
       } else if (mode_num == 5) {
-        path_run(14, 14, 13);
+        path_run(14, 14, 14);
       } else if (mode_num == 6) {
-        path_run(18, 16, 13);
+        path_run(18, 16, 14);
       } else if (mode_num == 7) {
-        path_run(19, 17, 13);
+        path_run(19, 17, 14);
       } else if (mode_num == 8) {
-        path_run(20, 18, 13);
+        path_run(20, 18, 14);
       } else if (mode_num == 9) {
-        path_run(21, 19, 13);
+        path_run(21, 19, 14);
       } else if (mode_num == 10) {
-        path_run(22, 20, 13);
+        path_run(22, 20, 14);
       } else if (mode_num == 11) {
-        path_run(22, 21, 13);
+        path_run(22, 21, 14);
       } else if (mode_num == 12) {
-        path_run(23, 22, 13);
+        path_run(23, 22, 14);
       } else if (mode_num == 13) {
-        path_run(24, 23, 13);
+        path_run(24, 23, 14);
       } else if (mode_num == 14) {
         printf("keep_pivot\n");
         keep_pivot();
@@ -3297,16 +3297,16 @@ void MainTask::sim_run_time_all() {
   const auto rorl = ui->select_direction2();
   silent_load = true;
   sim_run_time(5, 12, 12, 12, false);
-  sim_run_time(6, 14, 14, 13, false);
-  sim_run_time(7, 18, 16, 13, false);
-  sim_run_time(8, 19, 17, 13, false);
-  sim_run_time(9, 20, 18, 13, false);
-  sim_run_time(10, 21, 19, 13, false);
-  sim_run_time(11, 22, 21, 13, false);
-  sim_run_time(12, 23, 22, 13, false);
+  sim_run_time(6, 14, 14, 14, false);
+  sim_run_time(7, 18, 16, 14, false);
+  sim_run_time(8, 19, 17, 14, false);
+  sim_run_time(9, 20, 18, 14, false);
+  sim_run_time(10, 21, 19, 14, false);
+  sim_run_time(11, 22, 21, 14, false);
+  sim_run_time(12, 23, 22, 14, false);
   silent_load = false;
-  sim_run_time(13, 24, 23, 13, true);
-  // sim_run_time(14, 24, 23, 13, true);
+  sim_run_time(13, 24, 23, 14, true);
+  // sim_run_time(14, 24, 23, 14, true);
 }
 
 void MainTask::path_run(int idx, int idx2, int idx3) {
