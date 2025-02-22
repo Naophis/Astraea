@@ -124,7 +124,7 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 24
+  file_idx: 30
   sla_dist: 90
   # sla_type: 3
   sla_type: 3

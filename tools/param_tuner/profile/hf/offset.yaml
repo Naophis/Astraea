@@ -53,8 +53,11 @@ seach_timer: 450 # 探索時間 450sec -> 7.5min
 clear_dist_ragne_from: 22.5
 clear_dist_ragne_to: 50.0
 
-clear_dist_ragne_dist_list: [0, 20, 25, 55, 60, 90]
-clear_dist_ragne_th_list: [60, 60, 44.5, 44.5, 60, 60]
+clear_dist_ragne_dist_list: [0, 20, 25, 50, 60, 90]
+clear_dist_ragne_th_list: [50, 50, 44.5, 44.5, 50, 50]
+
+clear_dist_ragne_dist_list_fast: [0, 10, 25, 50, 60, 90] #not use
+clear_dist_ragne_th_list_fast: [44.5, 44.5, 50, 50, 44.5, 44.5] #not use
 # clear_dist_ragne_th_list: [46, 46, 46.0, 46.0, 46, 46]
 clear_dist_ragne_to2: 35 # 探索時制御範囲拡張移動距離
 

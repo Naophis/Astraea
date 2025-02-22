@@ -506,6 +506,8 @@ typedef struct {
 
   std::vector<float> clear_dist_ragne_dist_list;
   std::vector<float> clear_dist_ragne_th_list;
+  std::vector<float> clear_dist_ragne_dist_list_fast;
+  std::vector<float> clear_dist_ragne_th_list_fast;
 
   float wall_off_hold_dist;
   wall_off_hold_dist_t wall_off_dist;

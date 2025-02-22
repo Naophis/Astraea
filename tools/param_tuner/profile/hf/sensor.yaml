@@ -104,7 +104,7 @@ search:
     kireme_l: 1.0 #切れ目しきい値 L
 
     offset_r: 10 #前壁制御　左右値差　しきい値
-    offset_l: 7.75 #前壁制御　duty max値
+    offset_l: 7.65 #前壁制御　duty max値
 
     # 前壁補正
     front_ctrl_th: 56 #ref

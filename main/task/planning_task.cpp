@@ -663,7 +663,8 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   bool expand_left_2 = false;
 
   auto wall_th = interp1d(param_ro->clear_dist_ragne_dist_list,
-                          param_ro->clear_dist_ragne_th_list, dist_mod, false);
+                          param_ro->clear_dist_ragne_th_list, tmp_dist, false);
+  // printf("wall_th %f %f\n", wall_th, tmp_dist);
 
   const auto se = get_sensing_entity();
   const auto prm = get_param();
@@ -674,16 +675,25 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   // auto exist_left45_expand = prm->sen_ref_p.normal.expand.left45;
   auto exist_right45_expand = wall_th;
   auto exist_left45_expand = wall_th;
-  if (exist_right45_expand == 0 && exist_right45_expand == 0) {
-    exist_right45_expand = 0;
-    exist_left45_expand = 0;
-  }
 
-  if (tgt_val->motion_type == MotionType::STRAIGHT) {
+  if (search_mode && tgt_val->tgt_in.tgt_dist > 80 &&
+      tgt_val->tgt_in.tgt_dist < 100 &&
+      tgt_val->motion_type == MotionType::STRAIGHT) {
     expand_right = (10 < se->ego.right45_dist) &&
                    (se->ego.right45_dist < prm->sen_ref_p.search_exist.right45);
     expand_left = (10 < se->ego.left45_dist) &&
                   (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
+    // } else if (!search_mode && tgt_val->tgt_in.tgt_dist >= 90 &&
+    //            tgt_val->motion_type == MotionType::STRAIGHT) {
+    //   expand_right = (10 < se->ego.right45_dist) &&
+    //                  (se->ego.right45_dist <
+    //                  prm->sen_ref_p.search_exist.right45);
+    //   expand_left = (10 < se->ego.left45_dist) &&
+    //                 (se->ego.left45_dist <
+    //                 prm->sen_ref_p.search_exist.left45);
+  } else {
+    exist_right45_expand = 0;
+    exist_left45_expand = 0;
   }
   // auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
   // auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
@@ -725,6 +735,9 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     if (range_check_right) {
       if (dist_check_right && check_diff_right) {
         error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+      } else if (expand_right && range_check_right_expand && dist_check_right &&
+                 check_diff_right) {
+        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
       }
       check++;
     } else if (expand_right && range_check_right_expand) {
@@ -738,6 +751,9 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     if (range_check_left) {
       if (dist_check_left && check_diff_left) {
         error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+      } else if (expand_left && range_check_left_expand && dist_check_left &&
+                 check_diff_left) {
+        error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
       }
       check++;
     } else if (expand_left && range_check_left_expand) {
