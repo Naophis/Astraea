@@ -83,13 +83,13 @@ void ICM20689::setup() {
   uint8_t whoami = read1byte(0x0F);
   printf("%d\n", whoami);
   write1byte(0x6B, 0x80); //スリープ解除?
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(0x68, 0x04); //ジャイロリセット
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(0x6A, 0x10); // uercontrol i2c=disable
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(0x1B, 0x18); // 2000
-  vTaskDelay(10.0/ portTICK_PERIOD_MS);
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   // write1byte(0x1C, 0x08); // 4g
   // write1byte(0x1C, 0x10); // 8g
   // write1byte(0x1C, 0x18); // 16g
@@ -97,15 +97,9 @@ void ICM20689::setup() {
   // write1byte(0x1D, 0x00); // 4kHz
   // vTaskDelay(10.0/ portTICK_PERIOD_MS);
 }
-int ICM20689::read_gyro_z() {
-  return read2byte(0x47);
-}
-int ICM20689::read_accel_x() {
-  return read2byte(0x3B);
-}
-int ICM20689::read_accel_y() {
-  return read2byte(0x3D);
-}
+int ICM20689::read_gyro_z() { return read2byte(0x47); }
+int ICM20689::read_accel_x() { return read2byte(0x3B); }
+int ICM20689::read_accel_y() { return read2byte(0x3D); }
 void ICM20689::req_read1byte_itr(const uint8_t address) {
   memset(&itr_t, 0, sizeof(itr_t)); // Zero out the transaction
   itr_t.flags = SPI_TRANS_USE_RXDATA;

@@ -43,28 +43,34 @@ constexpr float cell_size = 90;
 //  constexpr gpio_num_t SDA_PIN = GPIO_NUM_16;
 //  constexpr gpio_num_t SCL_PIN = GPIO_NUM_14;
 // Exia
-constexpr gpio_num_t SDA_PIN = GPIO_NUM_15;
-constexpr gpio_num_t SCL_PIN = GPIO_NUM_14;
+constexpr gpio_num_t SDA_PIN = GPIO_NUM_33;
+constexpr gpio_num_t SCL_PIN = GPIO_NUM_34;
 
-constexpr gpio_num_t LED_EN = GPIO_NUM_10;
-constexpr gpio_num_t LED_A0 = GPIO_NUM_11;
-constexpr gpio_num_t LED_A1 = GPIO_NUM_12;
+constexpr gpio_num_t LED_A0_R = GPIO_NUM_10;
+constexpr gpio_num_t LED_A1_R = GPIO_NUM_11;
+constexpr gpio_num_t LED_EN_R1 = GPIO_NUM_12;
+constexpr gpio_num_t LED_EN_R2 = GPIO_NUM_13;
+
+constexpr gpio_num_t LED_A0_L = GPIO_NUM_48;
+constexpr gpio_num_t LED_A1_L = GPIO_NUM_47;
+constexpr gpio_num_t LED_EN_L1 = GPIO_NUM_20;
+constexpr gpio_num_t LED_EN_L2 = GPIO_NUM_21;
 
 constexpr gpio_num_t TXD = GPIO_NUM_43;
 constexpr gpio_num_t RXD = GPIO_NUM_44;
 constexpr gpio_num_t RTS = GPIO_NUM_15;
 constexpr gpio_num_t CTS = GPIO_NUM_16;
 
-constexpr gpio_num_t L_CW_CCW1 = GPIO_NUM_38;
-constexpr gpio_num_t L_CW_CCW2 = GPIO_NUM_38;
-constexpr gpio_num_t R_CW_CCW1 = GPIO_NUM_46;
-constexpr gpio_num_t R_CW_CCW2 = GPIO_NUM_46;
+constexpr gpio_num_t L_CW_CCW1 = GPIO_NUM_37;
+constexpr gpio_num_t L_CW_CCW2 = GPIO_NUM_37;
+constexpr gpio_num_t R_CW_CCW1 = GPIO_NUM_37;
+constexpr gpio_num_t R_CW_CCW2 = GPIO_NUM_37;
 
-constexpr uint32_t L_CW_CCW1_BIT = BIT(GPIO_NUM_38 - 32);
-constexpr uint32_t L_CW_CCW2_BIT = BIT(GPIO_NUM_38 - 32);
+constexpr uint32_t L_CW_CCW1_BIT = BIT(GPIO_NUM_37 - 32);
+constexpr uint32_t L_CW_CCW2_BIT = BIT(GPIO_NUM_37 - 32);
 
-constexpr uint32_t R_CW_CCW1_BIT = BIT(GPIO_NUM_38 - 32);
-constexpr uint32_t R_CW_CCW2_BIT = BIT(GPIO_NUM_38 - 32);
+constexpr uint32_t R_CW_CCW1_BIT = BIT(GPIO_NUM_37 - 32);
+constexpr uint32_t R_CW_CCW2_BIT = BIT(GPIO_NUM_37 - 32);
 
 constexpr gpio_num_t Motor_L_PWM = GPIO_NUM_39;
 constexpr gpio_num_t Motor_L_PWM2 = GPIO_NUM_40;
@@ -74,7 +80,7 @@ constexpr gpio_num_t Motor_R_PWM2 = GPIO_NUM_42;
 
 constexpr gpio_num_t BUZZER = GPIO_NUM_5;
 
-constexpr gpio_num_t SW1 = GPIO_NUM_34;
+constexpr gpio_num_t SW1 = GPIO_NUM_36;
 
 constexpr gpio_num_t EN_MISO = GPIO_NUM_1;
 constexpr gpio_num_t EN_MOSI = GPIO_NUM_2;
@@ -83,48 +89,29 @@ constexpr gpio_num_t EN_GN_SSL = GPIO_NUM_4;
 
 constexpr gpio_num_t ENC_R_CS = GPIO_NUM_6;
 constexpr gpio_num_t GYRO2_CS = GPIO_NUM_46;
-constexpr gpio_num_t ENC_L_CS = GPIO_NUM_37;
+
+constexpr gpio_num_t ENC_L_CS = GPIO_NUM_35;
 constexpr gpio_num_t ENC_CLK = GPIO_NUM_7;
 constexpr gpio_num_t ENC_MISO = GPIO_NUM_8; // B
 constexpr gpio_num_t ENC_MOSI = GPIO_NUM_9; // A
 
-constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_46;
+constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_37;
 
-// Banshee
-//  #define SEN_R90 ADC2_CHANNEL_2
-//  #define SEN_L90 ADC2_CHANNEL_4
-//  #define SEN_R45 ADC2_CHANNEL_6
-//  #define SEN_L45 ADC2_CHANNEL_7
-//  #define BATTERY ADC2_CHANNEL_9
-// Exia
-#define SEN_R90 ADC2_CHANNEL_2
-#define SEN_L90 ADC2_CHANNEL_5
-#define SEN_R45 ADC2_CHANNEL_7
-#define SEN_L45 ADC2_CHANNEL_6
-#define BATTERY ADC2_CHANNEL_9
+// Astraea
+#define SEN_R90 ADC2_CHANNEL_3
+#define SEN_R45 ADC2_CHANNEL_4
+#define SEN_L45 ADC2_CHANNEL_5
+#define SEN_L90 ADC2_CHANNEL_6
+#define BATTERY ADC2_CHANNEL_7
 
-// Banshee
-//  #define SEN_R90_GPIO GPIO_NUM_13
-//  #define SEN_L90_GPIO GPIO_NUM_15
-//  #define SEN_R45_GPIO GPIO_NUM_17
-//  #define SEN_L45_GPIO GPIO_NUM_18
-//  #define BATTERY_GPIO GPIO_NUM_20
-// Exia
-#define SEN_R90_GPIO GPIO_NUM_13
-#define SEN_L90_GPIO GPIO_NUM_16
-#define SEN_R45_GPIO GPIO_NUM_18
-#define SEN_L45_GPIO GPIO_NUM_17
-#define BATTERY_GPIO GPIO_NUM_20
+#define SEN_R90_GPIO GPIO_NUM_14
+#define SEN_R45_GPIO GPIO_NUM_15
+#define SEN_L45_GPIO GPIO_NUM_16
+#define SEN_L90_GPIO GPIO_NUM_17
+#define BATTERY_GPIO GPIO_NUM_18
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
-
-// constexpr adc2_channel_t SEN_R90 = ADC2_CHANNEL_0;
-// constexpr adc2_channel_t SEN_R45 = ADC2_CHANNEL_1;
-// constexpr adc2_channel_t SEN_F = ADC2_CHANNEL_4;
-// constexpr adc2_channel_t SEN_L45 = ADC2_CHANNEL_6;
-// constexpr adc2_channel_t SEN_L90 = ADC2_CHANNEL_8;
-// constexpr adc2_channel_t BATTERY = ADC2_CHANNEL_9;
 
 constexpr int16_t ENCODER_H_LIM_VAL = 32767;
 constexpr int16_t ENCODER_L_LIM_VAL = -32767;

@@ -440,7 +440,7 @@ void SensingTask::task() {
         // }
       }
       if (r90) { // R90
-        led_driver(LED_A0, false, LED_A1, false, LED_EN, true);
+        led_driver(LED_A0_R, false, LED_A1_R, false, LED_EN_R1, true, LED_EN_R2, false);
         lec_cnt = 0;
         for (int i = 0; i < param->led_light_delay_cnt; i++) {
           lec_cnt++;
@@ -450,7 +450,7 @@ void SensingTask::task() {
         se->led_sen_after.right90.raw = 0;
       }
       if (l90) { // L90
-        led_driver(LED_A0, true, LED_A1, false, LED_EN, true);
+        led_driver(LED_A0_L, false, LED_A1_L, false, LED_EN_L1, false, LED_EN_L2, true);
         lec_cnt = 0;
         for (int i = 0; i < param->led_light_delay_cnt2; i++) {
           lec_cnt++;
@@ -460,7 +460,7 @@ void SensingTask::task() {
         se->led_sen_after.left90.raw = 0;
       }
       if (r45) { // R45
-        led_driver(LED_A0, false, LED_A1, true, LED_EN, true);
+        led_driver(LED_A0_R, false, LED_A1_R, false, LED_EN_R1, true, LED_EN_R2, false);
         lec_cnt = 0;
         for (int i = 0; i < param->led_light_delay_cnt2; i++) {
           lec_cnt++;

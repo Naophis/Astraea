@@ -48,9 +48,11 @@ typedef struct {
   sensing_data_t right90;
   sensing_data_t right45;
   sensing_data_t right45_2;
+  sensing_data_t right45_3;
   sensing_data_t front;
   sensing_data_t left45;
   sensing_data_t left45_2;
+  sensing_data_t left45_3;
   sensing_data_t left90;
 } led_sensor_t;
 

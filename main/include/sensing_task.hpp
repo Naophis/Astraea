@@ -164,29 +164,74 @@ private:
     }
   }
   void IRAM_ATTR led_driver(gpio_num_t io1, int state1, gpio_num_t io2,
-                            int state2, gpio_num_t io3, int state3) {
+                            int state2, gpio_num_t io3, int state3,
+                            gpio_num_t io4, int state4) {
     const int num1 = (int)io1;
     const int num2 = (int)io2;
     const int num3 = (int)io3;
+    const int num4 = (int)io4;
     uint32_t out_wlts = 0;
     uint32_t out_wltc = 0;
+    uint32_t out1_wlts = 0;
+    uint32_t out1_wltc = 0;
+
     if (state1) {
-      out_wlts |= BIT(num1);
+      if (num1 < 32) {
+        out_wlts |= BIT(num1);
+      }else{
+        out1_w1ts |= BIT(num1);
+      }
     } else {
-      out_wltc |= BIT(num1);
+      if (num1 < 32) {
+        out_wltc |= BIT(num1);
+      }else{
+        out1_wltc |= BIT(num1);
+      }
     }
     if (state2) {
-      out_wlts |= BIT(num2);
+      if (num2 < 32) {
+        out_wlts |= BIT(num2);
+      }else{
+        out1_w1ts |= BIT(num2);
+      }
     } else {
-      out_wltc |= BIT(num2);
+      if (num2 < 32) {
+        out_wltc |= BIT(num2);
+      }else{
+        out1_wltc |= BIT(num2);
+      }
     }
     if (state3) {
-      out_wlts |= BIT(num3);
+      if (num3 < 32) {
+        out_wlts |= BIT(num3);
+      }else{
+        out1_w1ts |= BIT(num3);
+      }
     } else {
-      out_wltc |= BIT(num3);
+      if (num3 < 32) {
+        out_wltc |= BIT(num3);
+      }else{
+        out1_wltc |= BIT(num3);
+      }
     }
+    if (state4) {
+      if (num4 < 32) {
+        out_wlts |= BIT(num4);
+      }else{
+        out1_w1ts |= BIT(num4);
+      }
+    } else {
+      if (num4 < 32) {
+        out_wltc |= BIT(num4);
+      }else{
+        out1_wltc |= BIT(num4);
+      }
+    }
+
     GPIO.out_w1ts = out_wlts;
     GPIO.out_w1tc = out_wltc;
+    GPIO.out1_w1ts.val = out1_wlts;
+    GPIO.out1_w1tc.val = out1_wltc;
   }
 
   float calc_sensor(float data, float a, float b);
