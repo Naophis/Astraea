@@ -179,7 +179,7 @@ private:
       if (num1 < 32) {
         out_wlts |= BIT(num1);
       }else{
-        out1_w1ts |= BIT(num1);
+        out1_wlts |= BIT(num1);
       }
     } else {
       if (num1 < 32) {
@@ -192,7 +192,7 @@ private:
       if (num2 < 32) {
         out_wlts |= BIT(num2);
       }else{
-        out1_w1ts |= BIT(num2);
+        out1_wlts |= BIT(num2);
       }
     } else {
       if (num2 < 32) {
@@ -205,7 +205,7 @@ private:
       if (num3 < 32) {
         out_wlts |= BIT(num3);
       }else{
-        out1_w1ts |= BIT(num3);
+        out1_wlts |= BIT(num3);
       }
     } else {
       if (num3 < 32) {
@@ -218,7 +218,7 @@ private:
       if (num4 < 32) {
         out_wlts |= BIT(num4);
       }else{
-        out1_w1ts |= BIT(num4);
+        out1_wlts |= BIT(num4);
       }
     } else {
       if (num4 < 32) {

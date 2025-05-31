@@ -470,7 +470,7 @@ void SensingTask::task() {
         se->led_sen_after.right45.raw = 0;
       }
       if (l45) { // L45
-        led_driver(LED_A0, true, LED_A1, true, LED_EN, true);
+        led_driver(LED_A0_R, false, LED_A1_R, false, LED_EN_R1, true, LED_EN_R2, false);
         lec_cnt = 0;
         for (int i = 0; i < param->led_light_delay_cnt2; i++) {
           lec_cnt++;
@@ -482,7 +482,10 @@ void SensingTask::task() {
     }
 
     // end2 = esp_timer_get_time();
-    set_gpio_state(LED_EN, false);
+    set_gpio_state(LED_EN_L1 , false);
+    set_gpio_state(LED_EN_L2 , false);
+    set_gpio_state(LED_EN_R1 , false);
+    set_gpio_state(LED_EN_R2 , false);
 
     se->battery.data = BATTERY_GAIN * 4 * sensing_result->battery.raw / 4096;
     if (led_on) {

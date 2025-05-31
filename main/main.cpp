@@ -78,9 +78,14 @@ void init_gpio() {
   // io_conf.pin_bit_mask |= 1ULL << LED_R45;
   // io_conf.pin_bit_mask |= 1ULL << LED_L45;
   // io_conf.pin_bit_mask |= 1ULL << LED_L90;
-  io_conf.pin_bit_mask |= 1ULL << LED_A0;
-  io_conf.pin_bit_mask |= 1ULL << LED_A1;
-  io_conf.pin_bit_mask |= 1ULL << LED_EN;
+  io_conf.pin_bit_mask |= 1ULL << LED_A0_R;
+  io_conf.pin_bit_mask |= 1ULL << LED_A1_R;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_R1;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_R2;
+  io_conf.pin_bit_mask |= 1ULL << LED_A0_L;
+  io_conf.pin_bit_mask |= 1ULL << LED_A1_L;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_L1;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_L2;
 
   io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
   io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
