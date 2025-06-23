@@ -2,6 +2,8 @@
 #define SENSING_TASK_HPP
 
 #include "as5147p.hpp"
+#include "asm330lhh.hpp"
+#include "mt6835.hpp"
 #include "defines.hpp"
 #include "driver/pcnt.h"
 #include "driver/rtc_io.h"
@@ -25,72 +27,6 @@
 
 // リングバッファのサイズを定義
 constexpr size_t BUFFER_SIZE = 5;
-
-class RingBuffer {
-public:
-  // 配列と重みの初期化
-  std::array<double, BUFFER_SIZE> buffer{};
-  std::array<double, BUFFER_SIZE> weights{1, 2, 3, 4, 5}; // 重みを設定
-  int head = 0; // 次にデータを追加する位置
-  int tail = 0; // 現在の先頭要素の位置
-  int size = 0; // 現在の要素数
-  bool is_full = false;
-
-  // 新しいデータをリングバッファに追加
-  void add(double value) {
-    buffer[head] = value;
-    head = (head + 1) % BUFFER_SIZE;
-    if (is_full) {
-      tail = (tail + 1) % BUFFER_SIZE;
-      size = BUFFER_SIZE;
-    } else {
-      size++; // バッファが満杯でない場合のみサイズを増加
-    }
-    is_full = head == tail;
-  }
-  double pop() {
-    if (!is_full && head == tail) {
-      return 0;
-    }
-    double value = buffer[tail];
-    tail = (tail + 1) % BUFFER_SIZE;
-    is_full = false; // データを削除したので full フラグをリセット
-    size--;
-    return value;
-  }
-  bool isEmpty() const {
-    return (!is_full && head == tail); // バッファが空かどうか
-  }
-  int getSize() const { return size; }
-  double getLatest() const {
-    if (!is_full && head == tail) {
-      return 0;
-    }
-    size_t latestIndex = (head == 0) ? BUFFER_SIZE - 1 : head - 1;
-    return buffer[latestIndex];
-  }
-  // 重み付き平均を計算（minとmaxを除外）
-  double calculateWeightedAverageWithoutMinMax() {
-    // minとmaxの要素を見つける
-    auto minIt = std::min_element(buffer.begin(), buffer.end());
-    auto maxIt = std::max_element(buffer.begin(), buffer.end());
-    size_t minIndex = std::distance(buffer.begin(), minIt);
-    size_t maxIndex = std::distance(buffer.begin(), maxIt);
-
-    // minとmaxの一つを除外して加重平均を計算
-    double weightedSum = 0;
-    double weightSum = 0;
-    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
-      if (i != minIndex && i != maxIndex) { // 最初のmin, maxのみスキップ
-        weightedSum += buffer[i] * weights[i];
-        weightSum += weights[i];
-      }
-    }
-
-    return weightedSum / weightSum;
-  }
-};
-
 class SensingTask {
 public:
   SensingTask();
@@ -123,8 +59,10 @@ public:
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 
 private:
-  LSM6DSR gyro_if;
+  // LSM6DSR gyro_if;
+  ASM330LHH gyro_if;
   AS5147P enc_if;
+  // MT6835 enc_if;
   float w_old = 0;
   float vr_old = 0;
   float vl_old = 0;

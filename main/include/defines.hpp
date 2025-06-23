@@ -51,8 +51,8 @@ constexpr gpio_num_t LED_A1_R = GPIO_NUM_11;
 constexpr gpio_num_t LED_EN_R1 = GPIO_NUM_12;
 constexpr gpio_num_t LED_EN_R2 = GPIO_NUM_13;
 
-constexpr gpio_num_t LED_A0_L = GPIO_NUM_48;
-constexpr gpio_num_t LED_A1_L = GPIO_NUM_47;
+constexpr gpio_num_t LED_A0_L = GPIO_NUM_47;
+constexpr gpio_num_t LED_A1_L = GPIO_NUM_48;
 constexpr gpio_num_t LED_EN_L1 = GPIO_NUM_20;
 constexpr gpio_num_t LED_EN_L2 = GPIO_NUM_21;
 
@@ -92,8 +92,8 @@ constexpr gpio_num_t GYRO2_CS = GPIO_NUM_46;
 
 constexpr gpio_num_t ENC_L_CS = GPIO_NUM_35;
 constexpr gpio_num_t ENC_CLK = GPIO_NUM_7;
-constexpr gpio_num_t ENC_MISO = GPIO_NUM_8; // B
-constexpr gpio_num_t ENC_MOSI = GPIO_NUM_9; // A
+constexpr gpio_num_t ENC_MISO = GPIO_NUM_9; // B
+constexpr gpio_num_t ENC_MOSI = GPIO_NUM_8; // A
 
 constexpr gpio_num_t SUCTION_PWM = GPIO_NUM_37;
 

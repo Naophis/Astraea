@@ -1,5 +1,5 @@
-#ifndef LSM6DSR_HPP
-#define LSM6DSR_HPP
+#ifndef ASM330LHH_HPP
+#define ASM330LHH_HPP
 
 #include "defines.hpp"
 #include "driver/spi_common.h"
@@ -11,24 +11,35 @@
 #include <cstring>
 #include <string.h>
 
-class LSM6DSR {
+#define ASM330LHH_CTRL1_XL 0x10U
+#define ASM330LHH_CTRL2_G 0x11U
+#define ASM330LHH_CTRL3_C 0x12U
+#define ASM330LHH_CTRL4_C 0x13U
+#define ASM330LHH_CTRL6_C 0x15U
+#define ASM330LHH_CTRL8_XL 0x17U
+#define ASM330LHH_CTRL9_XL 0x18U
+#define ASM330LHH_CTRL1_OIS 0x70U
+#define ASM330LHH_FIFO_CTRL4 0x0AU
+#define ASM330LHH_CTRL10_C 0x19U
+#define ASM330LHH_EMB_FUNC_SRC 0x64U
+#define ASM330LHH_FIFO_STATUS1 0x3AU
+#define ASM330LHH_FIFO_DATA_OUT_TAG 0x78U
+#define ASM330LHH_FIFO_DATA_OUT_Z_L 0x7DU
+#define ASM330LHH_FIFO_DATA_OUT_Z_H 0x7EU
+
+class ASM330LHH {
 public:
-  LSM6DSR();
-  virtual ~LSM6DSR();
+  ASM330LHH();
+  virtual ~ASM330LHH();
 
   void init();
   uint8_t write1byte(const uint8_t address, const uint8_t data);
   uint8_t read1byte(const uint8_t address);
   int16_t read_2byte(const uint8_t address);
-
-  int16_t read_2byte_retry(const uint8_t address);
-
   void setup();
   int16_t read_gyro_z();
   int16_t read_accel_x();
   int16_t read_accel_y();
-  void begin();
-  void enable_g();
   int get_unread_fifo_data_length();
   int get_fifo_data();
   int get_fifo_tag();

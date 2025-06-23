@@ -51,7 +51,7 @@ void LSM6DSR::init() {
 //   return 0;
 // }
 
-uint8_t LSM6DSR::write1byte(const uint8_t address, const uint8_t data) {
+uint8_t IRAM_ATTR LSM6DSR::write1byte(const uint8_t address, const uint8_t data) {
   esp_err_t ret;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t)); // Zero out the transaction
@@ -72,7 +72,7 @@ uint8_t LSM6DSR::write1byte(const uint8_t address, const uint8_t data) {
   return 0;
 }
 
-uint8_t LSM6DSR::read1byte(const uint8_t address) {
+uint8_t IRAM_ATTR LSM6DSR::read1byte(const uint8_t address) {
   esp_err_t ret;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t)); // Zero out the transaction
@@ -87,64 +87,6 @@ uint8_t LSM6DSR::read1byte(const uint8_t address) {
   uint8_t data =
       SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 16) & 0x00FF; // FF + Data
   return data;
-}
-
-int16_t LSM6DSR::read2byte_2(const uint8_t address) {
-  esp_err_t ret;
-  spi_transaction_t t;
-  const int size = 13;
-  const int len = 8 * size;
-
-  memset(&t, 0, sizeof(t)); // Zero out the transaction
-  t.flags = 0;
-  // t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
-  t.length = len; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-  uint16_t tx_buff[size];
-  uint16_t rx_buff[size];
-  t.tx_buffer = &rx_buff;
-  t.rx_buffer = &rx_buff;
-  for (int i = 0; i < size; i++) {
-    rx_buff[i] = 0;
-    tx_buff[i] = 0;
-  }
-  tx_buff[0] = (address | READ_FLAG);
-  ret = spi_device_polling_transmit(spi, &t); // Transmit!
-  assert(ret == ESP_OK);                      // Should have had no issues.
-  // printf("%d, %d\n", t.rx_data[0], t.rx_data[1]);
-  for (int i = 0; i < size; i++) {
-    printf("%d, ", rx_buff[i]);
-  }
-  printf("\n");
-
-  return 0;
-}
-
-int16_t IRAM_ATTR LSM6DSR::read2byte(const uint8_t address) {
-
-  esp_err_t ret;
-  DRAM_ATTR static spi_transaction_t t;
-  static bool is_initialized = false;
-
-  if (!is_initialized) {
-    memset(&t, 0, sizeof(t)); // Zero out the transaction once
-    t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
-    t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-    is_initialized = true;
-  }
-
-  t.tx_data[0] = (address | READ_FLAG);
-  t.tx_data[1] = 0;
-  t.tx_data[2] = 0;
-
-  ret = spi_device_polling_transmit(spi, &t); // Transmit!
-  // auto data = (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
-  //                            ((unsigned short)(t.rx_data[1] & 0xff)));
-  // printf("Time: %lld, %lld, %d\n", end_time - start_time, end_time2 -
-  // end_time,
-  //        data);
-
-  return (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
-                        ((unsigned short)(t.rx_data[1] & 0xff)));
 }
 
 int16_t IRAM_ATTR LSM6DSR::read_2byte(const uint8_t address) {
@@ -178,17 +120,6 @@ int16_t IRAM_ATTR LSM6DSR::read_2byte(const uint8_t address) {
   // end_time,
   //        data);
 
-  return (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
-                        ((unsigned short)(t.rx_data[1] & 0xff)));
-}
-
-int16_t IRAM_ATTR LSM6DSR::read_2byte_retry(const uint8_t address) {
-  esp_err_t ret;
-  DRAM_ATTR static spi_transaction_t t;
-  t.tx_data[0] = (address | READ_FLAG);
-  t.tx_data[1] = 0;
-  t.tx_data[2] = 0;
-  ret = spi_device_polling_end(spi, portMAX_DELAY); // Transmit!
   return (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
                         ((unsigned short)(t.rx_data[1] & 0xff)));
 }
@@ -246,7 +177,6 @@ void LSM6DSR::setup() {
     write1byte(LSM6DSRX_CTRL8_XL, 0xB0); // 加速度計のLPFを100Hzに設定
     vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
-
     write1byte(LSM6DSRX_CTRL1_OIS, 0xA9); // OIS無効化
     vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
@@ -283,43 +213,6 @@ void LSM6DSR::setup() {
   }
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 }
-int LSM6DSR::read_gyro_z() { return read2byte(0x26); }
-int LSM6DSR::read_accel_x() { return read2byte(0x3B); }
-int LSM6DSR::read_accel_y() { return read2byte(0x3D); }
-void LSM6DSR::req_read1byte_itr(const uint8_t address) {
-  memset(&itr_t, 0, sizeof(itr_t)); // Zero out the transaction
-  itr_t.flags = SPI_TRANS_USE_RXDATA;
-  itr_t.length = 16; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-  uint16_t tx_data = (address | READ_FLAG) << 8;
-  tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
-  itr_t.tx_buffer = &tx_data;
-  spi_device_queue_trans(spi, &itr_t, 1.0 / portTICK_RATE_MS); // Transmit!
-}
-uint8_t LSM6DSR::read_1byte_itr() {
-  spi_device_get_trans_result(spi, &r_trans, 1.0 / portTICK_RATE_MS);
-  return (uint8_t)(((unsigned short)(r_trans->rx_data[1] & 0xff)));
-}
-
-void LSM6DSR::req_read2byte_itr(const uint8_t address) {
-  memset(&itr_t, 0, sizeof(itr_t)); // Zero out the transaction
-  itr_t.flags = SPI_TRANS_USE_TXDATA | SPI_TRANS_USE_RXDATA;
-  itr_t.length = 24; // SPI_ADDRESS(8bit) + SPI_DATA(8bit)
-  itr_t.tx_data[0] = (address | READ_FLAG);
-  itr_t.tx_data[1] = 0;
-  itr_t.tx_data[2] = 0;
-  spi_device_queue_trans(spi, &itr_t, 1.0 / portTICK_RATE_MS); // Transmit!
-}
-int16_t LSM6DSR::read_2byte_itr() {
-  spi_device_get_trans_result(spi, &r_trans, 1.0 / portTICK_RATE_MS);
-  return (signed short)((((unsigned short)(r_trans->rx_data[2] & 0xff)) << 8) |
-                        ((unsigned short)(r_trans->rx_data[1] & 0xff)));
-}
-signed short LSM6DSR::read_2byte_itr2(std::vector<int> &list) {
-  spi_device_get_trans_result(spi, &r_trans, 1 / portTICK_RATE_MS);
-  list[0] = r_trans->rx_data[0];
-  list[1] = r_trans->rx_data[1];
-  list[2] = r_trans->rx_data[2];
-  list[3] = r_trans->rx_data[3];
-  return (signed short)((((unsigned short)(r_trans->rx_data[1] & 0xff)) << 8) |
-                        ((unsigned short)(r_trans->rx_data[2] & 0xff)));
-}
+int16_t LSM6DSR::read_gyro_z() { return read_2byte(0x26); }
+int16_t LSM6DSR::read_accel_x() { return read_2byte(0x3B); }
+int16_t LSM6DSR::read_accel_y() { return read_2byte(0x3D); }

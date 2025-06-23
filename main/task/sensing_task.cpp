@@ -33,15 +33,26 @@ void SensingTask::timer_200us_callback_main() {
     return;
   }
   gyro_timestamp_now = esp_timer_get_time();
-  auto gyro = gyro_if.read_2byte(0x26);
+  auto gyro = gyro_if.read_gyro_z();
 
   // gyro2_timestamp_now = esp_timer_get_time();
   // auto gyro2 = enc_if.read_2byte_gy(0x26);
 
+  // AS5147Pエンコーダーの読み取り
   enc_r_timestamp_now = esp_timer_get_time();
   auto enc_r = enc_if.read2byte(0x3F, 0xFF, true) & 0x3FFF;
   enc_l_timestamp_now = esp_timer_get_time();
   auto enc_l = enc_if.read2byte(0x3F, 0xFF, false) & 0x3FFF;
+
+  // // MT6835エンコーダーの読み取り
+  // enc_r_timestamp_now = esp_timer_get_time();
+  // auto enc_r = enc_if.read2byte(0xA0, 0x03, true) & 0x3FFF;
+  // enc_l_timestamp_now = esp_timer_get_time();
+  // auto enc_l = enc_if.read2byte(0xA0, 0x03, false) & 0x3FFF;
+  // enc_r_timestamp_now = esp_timer_get_time();
+  // auto enc_r = enc_if.read2byte(0x30, 0x03, true) & 0x3FFF;
+  // enc_l_timestamp_now = esp_timer_get_time();
+  // auto enc_l = enc_if.read2byte(0x30, 0x03, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
   // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) /
@@ -221,7 +232,6 @@ void SensingTask::task() {
     gyro_if.init();
     gyro_if.setup();
     enc_if.init();
-    // enc_if.setup();
   }
   // esp_timer_start_periodic(timer_200us, 200);
 
@@ -359,14 +369,19 @@ void SensingTask::task() {
         sensing_result->led_sen_before.left90.raw = 0;
       }
     } else {
-
       if (r45) {
         exec_adc(SEN_R45, width, &sensing_result->led_sen_before.right45.raw);
+        sensing_result->led_sen_before.right45_2.raw =
+            sensing_result->led_sen_before.right45_3.raw =
+                sensing_result->led_sen_before.right45.raw;
       } else {
         sensing_result->led_sen_before.right45.raw = 0;
       }
       if (l45) {
         exec_adc(SEN_L45, width, &sensing_result->led_sen_before.left45.raw);
+        sensing_result->led_sen_before.left45_2.raw =
+            sensing_result->led_sen_before.left45_3.raw =
+                sensing_result->led_sen_before.left45.raw;
       } else {
         sensing_result->led_sen_before.left45.raw = 0;
       }
@@ -440,52 +455,92 @@ void SensingTask::task() {
         // }
       }
       if (r90) { // R90
-        led_driver(LED_A0_R, false, LED_A1_R, false, LED_EN_R1, true, LED_EN_R2, false);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt; i++) {
-          lec_cnt++;
-        }
-        exec_adc(SEN_R90, width, &se->led_sen_after.right90.raw);
+        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 1, LED_EN_R2, 0);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_R90, width, &se->led_sen_after.right90.raw);
+        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 0, LED_EN_R2, 0);
       } else {
         se->led_sen_after.right90.raw = 0;
       }
       if (l90) { // L90
-        led_driver(LED_A0_L, false, LED_A1_L, false, LED_EN_L1, false, LED_EN_L2, true);
+        led_driver(LED_A0_L, 0, LED_A1_L, 0, LED_EN_L1, 1, LED_EN_L2, 1);
         lec_cnt = 0;
         for (int i = 0; i < param->led_light_delay_cnt2; i++) {
           lec_cnt++;
         }
         exec_adc(SEN_L90, width, &se->led_sen_after.left90.raw);
+        led_driver(LED_A0_L, 0, LED_A1_L, 0, LED_EN_L1, 0, LED_EN_L2, 0);
       } else {
         se->led_sen_after.left90.raw = 0;
       }
       if (r45) { // R45
-        led_driver(LED_A0_R, false, LED_A1_R, false, LED_EN_R1, true, LED_EN_R2, false);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-          lec_cnt++;
-        }
-        exec_adc(SEN_R45, width, &se->led_sen_after.right45.raw);
+
+        // // R45
+        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 0, LED_EN_R2, 1);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_R90, width, &se->led_sen_after.right45.raw);
+
+        // // R45_2
+        // led_driver(LED_A0_R, 1, LED_A1_R, 0, LED_EN_R1, 1, LED_EN_R2, 1);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_R90, width, &se->led_sen_after.right45_3.raw);
+
+        // // R45_3
+        // led_driver(LED_A0_R, 1, LED_A1_R, 0, LED_EN_R1, 1, LED_EN_R2, 0);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_R90, width, &se->led_sen_after.right45_3.raw);
+
+        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 0, LED_EN_R2, 0);
+
       } else {
-        se->led_sen_after.right45.raw = 0;
+        se->led_sen_after.right45.raw = se->led_sen_after.right45_2.raw =
+            se->led_sen_after.right45_3.raw = 0;
       }
       if (l45) { // L45
-        led_driver(LED_A0_R, false, LED_A1_R, false, LED_EN_R1, true, LED_EN_R2, false);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-          lec_cnt++;
-        }
-        exec_adc(SEN_L45, width, &se->led_sen_after.left45.raw);
+        // // L45
+        // led_driver(LED_A0_L, 0, LED_A1_L, 1, LED_EN_L1, 1, LED_EN_L2, 0);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_L45, width, &se->led_sen_after.left45.raw);
+
+        // // L45_2
+        // led_driver(LED_A0_L, 0, LED_A1_L, 1, LED_EN_L1, 1, LED_EN_L2, 1);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_L45, width, &se->led_sen_after.left45_2.raw);
+
+        // // L45_3
+        // led_driver(LED_A0_L, 0, LED_A1_L, 1, LED_EN_L1, 1, LED_EN_L2, 0);
+        // lec_cnt = 0;
+        // for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+        //   lec_cnt++;
+        // }
+        // exec_adc(SEN_L45, width, &se->led_sen_after.left45_3.raw);
+        // led_driver(LED_A0_L, 0, LED_A1_L, 0, LED_EN_L1, 0, LED_EN_L2, 0);
       } else {
-        se->led_sen_after.left45.raw = 0;
+        se->led_sen_after.left45.raw = se->led_sen_after.left45_2.raw =
+            se->led_sen_after.left45_3.raw = 0;
       }
     }
 
     // end2 = esp_timer_get_time();
-    set_gpio_state(LED_EN_L1 , false);
-    set_gpio_state(LED_EN_L2 , false);
-    set_gpio_state(LED_EN_R1 , false);
-    set_gpio_state(LED_EN_R2 , false);
+    led_driver(LED_EN_L1, 0, LED_EN_L2, 0, LED_EN_R1, 0, LED_EN_R2, 0);
 
     se->battery.data = BATTERY_GAIN * 4 * sensing_result->battery.raw / 4096;
     if (led_on) {

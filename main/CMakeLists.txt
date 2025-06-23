@@ -24,6 +24,8 @@ set(COMPONENT_SRCS
     "task/lsm6dsr.cpp"
     "task/sensing_task.cpp"
     "task/as5147p.cpp"
+    "task/mt6835.cpp"
+    "task/asm330lhh.cpp"
     "task/kalman_filter.cpp"
     "task/kalman_filter_matrix.cpp"
     "search/adachi.cpp"
