@@ -1,4 +1,4 @@
-# Astraea/AstraeaNova
+# Astraea/AstraeaNova/AstraeaAlter
  
 2023年全日本大会で突貫で3セル化したBanshee.SSSをベースに、正式な3セル機として作成したシリーズ。  
 Banshee.SSSでは足りなかったトルクをφ8.5mmのモーターに変更しつつ、制御システムを刷新。
@@ -6,13 +6,13 @@ Banshee.SSSでは足りなかったトルクをφ8.5mmのモーターに変更�
 
 このリポジトリでは、Astraea/AstraeaNovaで利用しているすべてのソースコードと基板のファイルを公開しています。
 
-<img src="img/AstraeaNova.jpg">
+<img src="img/AstraeaAlter.jpg">
 
 ## 利用部品解説
 
 ### 1. CPU
 ESP32-S3の以下の型番を利用
-* ESP32-S3-PICO-1 (Astraea/AstraeaNova)
+* ESP32-S3-PICO-1 (Astraea/AstraeaNova/AstraeaAlter)
 
 上記の2モデルは昨年発売されておらず、今シーズンから採用。  
 昨年使用していたESP32-S3-FN8との違いはPSRAMが搭載で、2MBまでログを取得できるようになったことで細かい解析ができるようになった。
@@ -38,7 +38,7 @@ ESP32の他シリーズではデータシートに記載しているものもあ
 > 他にもある可能性があり。
 
 ### 2. MotorDriver
-* MP6551  (AstraeaNova/AstraeaNova)
+* MP6551  (AstraeaNova/AstraeaNova/AstraeaAlter)
 
 #### 2.1 MP6551
 2023年全日本クラシックチャンピオンが採用していた。採用理由は以下の通り。
@@ -54,7 +54,7 @@ ESP32の他シリーズではデータシートに記載しているものもあ
 
 秋月にて購入できるため採用。
 
-#### 3.2 MIC5319-3.3YM5
+#### 3.2 MIC5219-3.3YM5
 3.3V出力に利用。LEDの出力を大きくしたため、500mA出力できるこのICを採用。
 データシート通りバイパス用のピンに470pFのコンデンサをつけることでノイズの低減効果がある。
 
@@ -63,15 +63,14 @@ ESP32の他シリーズではデータシートに記載しているものもあ
 
 ### 4. LED + PhotoTransistor
 * LED:
-  * VSLY5940 (Astraea)
-  * OSI5FU3A11C (AstraeaNova)
+  * OSI5FU3A11C (AstraeaNova/AstraeaAlter)
 * PhotoTransistor: 
   * LTR-4206E
 
 BCR421UFD（定電流回路）を使用。抵抗値はそれぞれ5Ω。
 
 #### 5. IMU
-LSM6DSV16BXを採用。4000deg/sec対応している最新のIMU。センサーフュージョン搭載しているが現状活用できてない
+ASM330LHHを採用。4000deg/sec対応している最新のIMU。（車載対応品）
 
 #### 6. encoder
 AS5147Pを採用。14bit対応+28000RPMまで対応しているため継続採用。
@@ -121,3 +120,4 @@ AD変換については、常にすべてのAD変換を行うのではなく、�
 ## change log
 1. Astraea
 2. AstraeaNova
+3. AstraeaAlter
