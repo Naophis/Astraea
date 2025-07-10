@@ -192,8 +192,12 @@ typedef struct {
 typedef struct {
   sen_log_t l90;
   sen_log_t l45;
+  sen_log_t l45_2;
+  sen_log_t l45_3;
   // sen_log_t front;
   sen_log_t r45;
+  sen_log_t r45_2;
+  sen_log_t r45_3;
   sen_log_t r90;
 } sen_logs_t;
 
@@ -1285,7 +1289,7 @@ typedef struct {
   float sen_dist_l45_2 = 93;
   float sen_dist_r45_2 = 94;
   float sen_dist_l45_3 = 95;
-  float sen_dist_r45_4 = 96;
+  float sen_dist_r45_3 = 96;
 
 } LogStruct8 __attribute__((packed));
 

@@ -1490,6 +1490,10 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
     }
     se->sen.r45.sensor_dist = 0;
     se->sen.l45.sensor_dist = 0;
+    se->sen.r45_2.sensor_dist = 0;
+    se->sen.l45_2.sensor_dist = 0;
+    se->sen.r45_3.sensor_dist = 0;
+    se->sen.l45_3.sensor_dist = 0;
   }
   tgt_val->ego_in.w = mpc_next_ego.w;
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
@@ -1841,7 +1845,7 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
 
 void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   const auto se = get_sensing_entity();
-
+  // l45
   if (se->sen.l45.sensor_dist > se->ego.left45_dist ||
       se->sen.l45.sensor_dist == 0) {
     se->sen.l45.sensor_dist = se->ego.left45_dist;
@@ -1854,6 +1858,7 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     }
   }
 
+  // r45
   if (se->sen.r45.sensor_dist > se->ego.right45_dist ||
       se->sen.r45.sensor_dist == 0) {
     se->sen.r45.sensor_dist = se->ego.right45_dist;
@@ -1863,6 +1868,58 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
          param_ro->wall_off_hold_dist) &&
         se->ego.right45_dist < param_ro->sen_ref_p.normal2.exist.right90) {
       se->sen.r45.sensor_dist = se->ego.right45_dist;
+    }
+  }
+
+  // l45_2
+  if (se->sen.l45_2.sensor_dist > se->ego.left45_2_dist ||
+      se->sen.l45_2.sensor_dist == 0) {
+    se->sen.l45_2.sensor_dist = se->ego.left45_2_dist;
+    se->sen.l45_2.global_run_dist = tgt_val->global_pos.dist;
+  } else {
+    if (((tgt_val->global_pos.dist - se->sen.l45_2.global_run_dist) >
+         param_ro->wall_off_hold_dist) &&
+        se->ego.left45_dist < param_ro->sen_ref_p.normal2.exist.left90) {
+      se->sen.l45_2.sensor_dist = se->ego.left45_2_dist;
+    }
+  }
+
+  // r45_2
+  if (se->sen.r45_2.sensor_dist > se->ego.right45_2_dist ||
+      se->sen.r45_2.sensor_dist == 0) {
+    se->sen.r45_2.sensor_dist = se->ego.right45_2_dist;
+    se->sen.r45_2.global_run_dist = tgt_val->global_pos.dist;
+  } else {
+    if (((tgt_val->global_pos.dist - se->sen.r45_2.global_run_dist) >
+         param_ro->wall_off_hold_dist) &&
+        se->ego.right45_dist < param_ro->sen_ref_p.normal2.exist.right90) {
+      se->sen.r45_2.sensor_dist = se->ego.right45_2_dist;
+    }
+  }
+
+  // l45_3
+  if (se->sen.l45_3.sensor_dist > se->ego.left45_3_dist ||
+      se->sen.l45_3.sensor_dist == 0) {
+    se->sen.l45_3.sensor_dist = se->ego.left45_3_dist;
+    se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
+  } else {
+    if (((tgt_val->global_pos.dist - se->sen.l45_3.global_run_dist) >
+         param_ro->wall_off_hold_dist) &&
+        se->ego.left45_dist < param_ro->sen_ref_p.normal2.exist.left90) {
+      se->sen.l45_3.sensor_dist = se->ego.left45_3_dist;
+    }
+  }
+
+  // r45_3
+  if (se->sen.r45_3.sensor_dist > se->ego.right45_3_dist ||
+      se->sen.r45_3.sensor_dist == 0) {
+    se->sen.r45_3.sensor_dist = se->ego.right45_3_dist;
+    se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
+  } else {
+    if (((tgt_val->global_pos.dist - se->sen.r45_3.global_run_dist) >
+         param_ro->wall_off_hold_dist) &&
+        se->ego.right45_dist < param_ro->sen_ref_p.normal2.exist.right90) {
+      se->sen.r45_3.sensor_dist = se->ego.right45_3_dist;
     }
   }
 }
