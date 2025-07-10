@@ -16,8 +16,8 @@ long_run_offset_dist: 0
 long_run_offset_dist_x: [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 15.0] 
 long_run_offset_dist_y: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
 
-gear_a: 39
-gear_b: 9
+gear_a: 63
+gear_b: 13
 # max_duty: 99.9
 max_duty: 99.950
 min_duty: 0.01
