@@ -138,8 +138,12 @@ typedef struct {
 
   volatile float front_dist = 0;
   volatile float left45_dist = 0;
+  volatile float left45_2_dist = 0;
+  volatile float left45_3_dist = 0;
   volatile float left90_dist = 0;
   volatile float right45_dist = 0;
+  volatile float right45_2_dist = 0;
+  volatile float right45_3_dist = 0;
   volatile float right90_dist = 0;
   volatile float front_far_dist = 0;
   volatile float left90_far_dist = 0;

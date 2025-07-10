@@ -455,84 +455,84 @@ void SensingTask::task() {
         // }
       }
       if (r90) { // R90
-        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 1, LED_EN_R2, 0);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_R90, width, &se->led_sen_after.right90.raw);
-        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 0, LED_EN_R2, 0);
+        led_driver(LED_EN_R90, 1, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_R90, width, &se->led_sen_after.right90.raw);
+        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
       } else {
         se->led_sen_after.right90.raw = 0;
       }
       if (l90) { // L90
-        led_driver(LED_A0_L, 0, LED_A1_L, 0, LED_EN_L1, 1, LED_EN_L2, 1);
+        led_driver(LED_EN_L90, 1, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
         lec_cnt = 0;
         for (int i = 0; i < param->led_light_delay_cnt2; i++) {
           lec_cnt++;
         }
         exec_adc(SEN_L90, width, &se->led_sen_after.left90.raw);
-        led_driver(LED_A0_L, 0, LED_A1_L, 0, LED_EN_L1, 0, LED_EN_L2, 0);
+        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
       } else {
         se->led_sen_after.left90.raw = 0;
       }
       if (r45) { // R45
 
         // // R45
-        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 0, LED_EN_R2, 1);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_R90, width, &se->led_sen_after.right45.raw);
+        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 1);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_R45, width, &se->led_sen_after.right45.raw);
 
-        // // R45_2
-        // led_driver(LED_A0_R, 1, LED_A1_R, 0, LED_EN_R1, 1, LED_EN_R2, 1);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_R90, width, &se->led_sen_after.right45_3.raw);
+        // R45_2
+        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 1);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_R45, width, &se->led_sen_after.right45_2.raw);
 
-        // // R45_3
-        // led_driver(LED_A0_R, 1, LED_A1_R, 0, LED_EN_R1, 1, LED_EN_R2, 0);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_R90, width, &se->led_sen_after.right45_3.raw);
+        // R45_3
+        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 0);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_R45, width, &se->led_sen_after.right45_3.raw);
 
-        // led_driver(LED_A0_R, 0, LED_A1_R, 0, LED_EN_R1, 0, LED_EN_R2, 0);
+        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
 
       } else {
         se->led_sen_after.right45.raw = se->led_sen_after.right45_2.raw =
             se->led_sen_after.right45_3.raw = 0;
       }
       if (l45) { // L45
-        // // L45
-        // led_driver(LED_A0_L, 0, LED_A1_L, 1, LED_EN_L1, 1, LED_EN_L2, 0);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_L45, width, &se->led_sen_after.left45.raw);
+        // L45
+        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 1);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_L45, width, &se->led_sen_after.left45.raw);
 
-        // // L45_2
-        // led_driver(LED_A0_L, 0, LED_A1_L, 1, LED_EN_L1, 1, LED_EN_L2, 1);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_L45, width, &se->led_sen_after.left45_2.raw);
+        // L45_2
+        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 1);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_L45, width, &se->led_sen_after.left45_2.raw);
 
-        // // L45_3
-        // led_driver(LED_A0_L, 0, LED_A1_L, 1, LED_EN_L1, 1, LED_EN_L2, 0);
-        // lec_cnt = 0;
-        // for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-        //   lec_cnt++;
-        // }
-        // exec_adc(SEN_L45, width, &se->led_sen_after.left45_3.raw);
-        // led_driver(LED_A0_L, 0, LED_A1_L, 0, LED_EN_L1, 0, LED_EN_L2, 0);
+        // L45_3
+        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 0);
+        lec_cnt = 0;
+        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+          lec_cnt++;
+        }
+        exec_adc(SEN_L45, width, &se->led_sen_after.left45_3.raw);
+        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
       } else {
         se->led_sen_after.left45.raw = se->led_sen_after.left45_2.raw =
             se->led_sen_after.left45_3.raw = 0;
@@ -540,7 +540,8 @@ void SensingTask::task() {
     }
 
     // end2 = esp_timer_get_time();
-    led_driver(LED_EN_L1, 0, LED_EN_L2, 0, LED_EN_R1, 0, LED_EN_R2, 0);
+    led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
+    led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
 
     se->battery.data = BATTERY_GAIN * 4 * sensing_result->battery.raw / 4096;
     if (led_on) {
@@ -548,18 +549,29 @@ void SensingTask::task() {
           se->led_sen_after.right90.raw - se->led_sen_before.right90.raw, 0);
       se->led_sen.right45.raw = std::max(
           se->led_sen_after.right45.raw - se->led_sen_before.right45.raw, 0);
+      se->led_sen.right45_2.raw = std::max(se->led_sen_after.right45_2.raw -
+                                               se->led_sen_before.right45_2.raw,
+                                           0);
+      se->led_sen.right45_3.raw = std::max(se->led_sen_after.right45_3.raw -
+                                               se->led_sen_before.right45_3.raw,
+                                           0);
       se->led_sen.left45.raw = std::max(
           se->led_sen_after.left45.raw - se->led_sen_before.left45.raw, 0);
+      se->led_sen.left45_2.raw = std::max(
+          se->led_sen_after.left45_2.raw - se->led_sen_before.left45_2.raw, 0);
+      se->led_sen.left45_3.raw = std::max(
+          se->led_sen_after.left45_3.raw - se->led_sen_before.left45_3.raw, 0);
+
       se->led_sen.left90.raw = std::max(
           se->led_sen_after.left90.raw - se->led_sen_before.left90.raw, 0);
       se->led_sen.front.raw =
           (se->led_sen.left90.raw + se->led_sen.right90.raw) / 2;
     } else {
-      se->led_sen.right90.raw = 0;
-      se->led_sen.right45.raw = 0;
-      se->led_sen.left45.raw = 0;
-      se->led_sen.left90.raw = 0;
-      se->led_sen.front.raw = 0;
+      se->led_sen.right90.raw = se->led_sen.right45.raw =
+          se->led_sen.right45_2.raw = se->led_sen.right45_3.raw =
+              se->led_sen.left45.raw = se->led_sen.left45_2.raw =
+                  se->led_sen.left45_3.raw = se->led_sen.left90.raw =
+                      se->led_sen.front.raw = 0;
     }
 
     now_gyro_time = esp_timer_get_time();

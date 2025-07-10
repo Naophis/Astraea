@@ -32,8 +32,6 @@ void AS5147P::init() {
   // ret = spi_bus_add_device(SPI3_HOST, &devcfg, &spi_gyro);
 
   // high keep
-  GPIO.out_w1ts = BIT(6);
-  GPIO.out1_w1ts.val = BIT(33 - 32);
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
   initialized = true;
 }

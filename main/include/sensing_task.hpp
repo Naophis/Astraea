@@ -3,7 +3,6 @@
 
 #include "as5147p.hpp"
 #include "asm330lhh.hpp"
-#include "mt6835.hpp"
 #include "defines.hpp"
 #include "driver/pcnt.h"
 #include "driver/rtc_io.h"
@@ -15,6 +14,7 @@
 #include "icm20689.hpp"
 #include "lsm6dsr.hpp"
 #include "main_task.hpp"
+#include "mt6835.hpp"
 #include <algorithm> // std::min_element, std::max_element
 #include <deque>
 #include <driver/adc.h>
@@ -102,12 +102,10 @@ private:
     }
   }
   void IRAM_ATTR led_driver(gpio_num_t io1, int state1, gpio_num_t io2,
-                            int state2, gpio_num_t io3, int state3,
-                            gpio_num_t io4, int state4) {
+                            int state2, gpio_num_t io3, int state3) {
     const int num1 = (int)io1;
     const int num2 = (int)io2;
     const int num3 = (int)io3;
-    const int num4 = (int)io4;
     uint32_t out_wlts = 0;
     uint32_t out_wltc = 0;
     uint32_t out1_wlts = 0;
@@ -116,53 +114,40 @@ private:
     if (state1) {
       if (num1 < 32) {
         out_wlts |= BIT(num1);
-      }else{
-        out1_wlts |= BIT(num1);
+      } else {
+        out1_wlts |= BIT(num1 - 32);
       }
     } else {
       if (num1 < 32) {
         out_wltc |= BIT(num1);
-      }else{
-        out1_wltc |= BIT(num1);
+      } else {
+        out1_wltc |= BIT(num1 - 32);
       }
     }
     if (state2) {
       if (num2 < 32) {
         out_wlts |= BIT(num2);
-      }else{
-        out1_wlts |= BIT(num2);
+      } else {
+        out1_wlts |= BIT(num2 - 32);
       }
     } else {
       if (num2 < 32) {
         out_wltc |= BIT(num2);
-      }else{
-        out1_wltc |= BIT(num2);
+      } else {
+        out1_wltc |= BIT(num2 - 32);
       }
     }
     if (state3) {
       if (num3 < 32) {
         out_wlts |= BIT(num3);
-      }else{
-        out1_wlts |= BIT(num3);
+      } else {
+        out1_wlts |= BIT(num3 - 32);
       }
     } else {
       if (num3 < 32) {
         out_wltc |= BIT(num3);
-      }else{
-        out1_wltc |= BIT(num3);
-      }
-    }
-    if (state4) {
-      if (num4 < 32) {
-        out_wlts |= BIT(num4);
-      }else{
-        out1_wlts |= BIT(num4);
-      }
-    } else {
-      if (num4 < 32) {
-        out_wltc |= BIT(num4);
-      }else{
-        out1_wltc |= BIT(num4);
+      } else {
+        out1_wltc |= BIT(num3 - 32);
       }
     }
 

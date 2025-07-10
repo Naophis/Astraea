@@ -78,14 +78,12 @@ void init_gpio() {
   // io_conf.pin_bit_mask |= 1ULL << LED_R45;
   // io_conf.pin_bit_mask |= 1ULL << LED_L45;
   // io_conf.pin_bit_mask |= 1ULL << LED_L90;
-  io_conf.pin_bit_mask |= 1ULL << LED_A0_R;
-  io_conf.pin_bit_mask |= 1ULL << LED_A1_R;
-  io_conf.pin_bit_mask |= 1ULL << LED_EN_R1;
-  io_conf.pin_bit_mask |= 1ULL << LED_EN_R2;
-  io_conf.pin_bit_mask |= 1ULL << LED_A0_L;
-  io_conf.pin_bit_mask |= 1ULL << LED_A1_L;
-  io_conf.pin_bit_mask |= 1ULL << LED_EN_L1;
-  io_conf.pin_bit_mask |= 1ULL << LED_EN_L2;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_L45_1;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_L45_2;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_L90;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_R45_1;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_R45_2;
+  io_conf.pin_bit_mask |= 1ULL << LED_EN_R90;
 
   io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
   io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
@@ -178,38 +176,10 @@ extern "C" void app_main() {
   // LSM6DSR lsm6dsr;
   // lsm6dsr.init();
   // lsm6dsr.setup();
-  // while (1) {
-  //   auto first = lsm6dsr.read_2byte(0x26);
-  //   auto second = lsm6dsr.read_2byte_retry(0x26);
-  //   auto third = lsm6dsr.read_2byte_retry(0x26);
-  //   auto fourth = lsm6dsr.read_2byte_retry(0x26);
-  //   printf("first: %d, second: %d, third: %d, fourth: %d\n", first, second,
-  //          third, fourth);
-  // }
-
+  printf("ESP32-S3\n"
+         "Build time: %s %s\n",
+         __DATE__, __TIME__);
   // print_log();
-
-  // printf("test: %d\n", sizeof(LogStruct1));
-  // vTaskDelay(500.0 / portTICK_RATE_MS);
-  // lt->print_header();
-  // int cnt = 0;
-  // while (1) {
-  //   ls1.index = cnt++;
-  //   uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
-  //   vTaskDelay(1.0 / portTICK_RATE_MS);
-  //   uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
-  //   vTaskDelay(1.0 / portTICK_RATE_MS);
-  //   uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
-  //   vTaskDelay(1.0 / portTICK_RATE_MS);
-  //   uart_write_bytes(UART_NUM_0, &ls4, sizeof(LogStruct4));
-  //   vTaskDelay(1.0 / portTICK_RATE_MS);
-  //   uart_write_bytes(UART_NUM_0, &ls5, sizeof(LogStruct5));
-  //   vTaskDelay(1.0 / portTICK_RATE_MS);
-  //   uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
-  //   vTaskDelay(1.0 / portTICK_RATE_MS);
-  //   uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
-  //   vTaskDelay(100.0 / portTICK_RATE_MS);
-  // }
 
   QueueHandle_t xQueue;
   xQueue = xQueueCreate(4, sizeof(motion_tgt_val_t *));
@@ -228,16 +198,9 @@ extern "C" void app_main() {
   param->gyro_pid.d = 0.0;
   tgt_val->ego_in.v = 0;
   tgt_val->ego_in.w = 0;
+  tgt_val->motion_type = MotionType::NONE;
   param->gyro_param.gyro_w_gain_left = 0.0002645;
 
-  // st.set_sensing_entity(sensing_entity);
-  // st.set_tgt_val(tgt_val);
-  // st.set_main_task(mt);
-  // st.set_input_param_entity(param);
-  // st.set_planning_task(pt);
-  // st.set_queue_handler(xQueue);
-  // st.set_task_handler(xTaskHandler);
-  // st.create_task(0);
   st->set_sensing_entity(sensing_entity);
   st->set_tgt_val(tgt_val);
   st->set_main_task(mt);
@@ -255,8 +218,6 @@ extern "C" void app_main() {
   pt->set_error_entity(error_entity);
   pt->set_queue_handler(xQueue);
   pt->set_task_handler(xTaskHandler);
-  // pt->set_task_handler((TaskHandle_t) NULL);
-  // pt->set_sensing(sn);
   pt->create_task(0);
 
   lt->set_sensing_entity(sensing_entity);
