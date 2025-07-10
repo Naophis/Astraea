@@ -1283,6 +1283,26 @@ void MainTask::load_sensor_param() {
   param->sensor_gain.r90_mid.b =
       cJSON_GetArrayItem(getItem(gain, "R90_mid"), 1)->valuedouble;
 
+  param->sensor_gain.r45_2.a =
+      cJSON_GetArrayItem(getItem(gain, "R45_2"), 0)->valuedouble;
+  param->sensor_gain.r45_2.b =
+      cJSON_GetArrayItem(getItem(gain, "R45_2"), 1)->valuedouble;
+
+  param->sensor_gain.l45_2.a =  
+      cJSON_GetArrayItem(getItem(gain, "L45_2"), 0)->valuedouble;
+  param->sensor_gain.l45_2.b =
+      cJSON_GetArrayItem(getItem(gain, "L45_2"), 1)->valuedouble;
+
+  param->sensor_gain.r45_3.a = 
+      cJSON_GetArrayItem(getItem(gain, "R45_3"), 0)->valuedouble; 
+  param->sensor_gain.r45_3.b =
+      cJSON_GetArrayItem(getItem(gain, "R45_3"), 1)->valuedouble;
+
+  param->sensor_gain.l45_3.a = 
+      cJSON_GetArrayItem(getItem(gain, "L45_3"), 0)->valuedouble; 
+  param->sensor_gain.l45_3.b =
+      cJSON_GetArrayItem(getItem(gain, "L45_3"), 1)->valuedouble;
+
   // cJSON_free(normal);
   // cJSON_free(normal_ref);
   // cJSON_free(normal_exist);

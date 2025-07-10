@@ -58,6 +58,7 @@ private:
   LogStruct5 ls5;
   LogStruct6 ls6;
   LogStruct7 ls7;
+  LogStruct8 ls8;
 
   bool logging_active = false;
   bool log_mode = true;

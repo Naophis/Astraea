@@ -139,6 +139,8 @@ const switchLineMode = (obj) => {
   });
 }
 
+let LOG_STRUCT_SIZE = 12; // 12 bytes per record
+
 const switchToBinaryMode = (obj) => {
   const dataSize = 48;//obj.byte_size
   const dataSize2 = obj.data_struct.reduce((prev, cur) => {
@@ -146,6 +148,9 @@ const switchToBinaryMode = (obj) => {
   }, 0);
   console.log('size1: ', dataSize, 'bytes');
   console.log('size2: ', dataSize2, 'bytes');
+
+  LOG_STRUCT_SIZE = dataSize2 / (4 * 12); // 4 * 12 bytes per struct
+
   binaryMode = true;
 
   // パイプラインをクリア
@@ -193,7 +198,6 @@ const switchToBinaryMode = (obj) => {
   }, 1000);
 
 
-
   parser.on('data', (binaryData) => {
     let offset = 0;
     cnt++;
@@ -220,7 +224,7 @@ const switchToBinaryMode = (obj) => {
           throw new Error(`Unsupported data type: ${data.type}`);
       }
     }
-    if (cnt == 7) {
+    if (cnt === LOG_STRUCT_SIZE) {
       cnt = 0;
       if (index > 10 && record[0] <= 0 && !finish) {
         clearInterval(interval);

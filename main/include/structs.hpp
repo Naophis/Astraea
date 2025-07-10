@@ -127,6 +127,10 @@ typedef struct {
   float right45_2_lp = 0;
   float left45_2_raw = 0;
   float left45_2_lp = 0;
+  float right45_3_raw = 0;
+  float right45_3_lp = 0;
+  float left45_3_raw = 0;
+  float left45_3_lp = 0;
 
   float front_lp_old = 0;
   float left45_lp_old = 0;
@@ -135,6 +139,8 @@ typedef struct {
   float right90_lp_old = 0;
   float left45_2_lp_old = 0;
   float right45_2_lp_old = 0;
+  float left45_3_lp_old = 0;
+  float right45_3_lp_old = 0;
 
   volatile float front_dist = 0;
   volatile float left45_dist = 0;
@@ -309,6 +315,10 @@ typedef struct {
   sensor_gain_param_t front4;
   sensor_gain_param_t front_ctrl_th;
   sensor_gain_param_t r45;
+  sensor_gain_param_t l45_2;
+  sensor_gain_param_t r45_2;
+  sensor_gain_param_t l45_3;
+  sensor_gain_param_t r45_3;
   sensor_gain_param_t r90;
   sensor_gain_param_t l90_far;
   sensor_gain_param_t r90_far;
@@ -1033,8 +1043,10 @@ typedef struct {
   real16_T right90_lp;
   real16_T battery_lp;
 
-  // real16_T left45_2_lp;
-  // real16_T right45_2_lp;
+  real16_T left45_2_lp;
+  real16_T right45_2_lp;
+  real16_T left45_3_lp;
+  real16_T right45_3_lp;
 
   char motion_type;
   int16_t motion_timestamp;
@@ -1044,6 +1056,10 @@ typedef struct {
   real16_T duty_sensor_ctrl;
   real16_T sen_log_l45;
   real16_T sen_log_r45;
+  real16_T sen_log_l45_2;
+  real16_T sen_log_r45_2;
+  real16_T sen_log_l45_3;
+  real16_T sen_log_r45_3;
   int16_t sen_calc_time;
   int16_t sen_calc_time2;
   int16_t pln_calc_time;
@@ -1254,5 +1270,23 @@ typedef struct {
   float x = 83;
   float y = 84;
 } LogStruct7 __attribute__((packed));
+
+typedef struct {
+  float right45_2 = 85;
+  float right45_3 = 86;
+  float left45_2 = 87;
+  float left45_3 = 88;
+
+  float right45_2_d = 89;
+  float right45_3_d = 90;
+  float left45_2_d = 91;
+  float left45_3_d = 92;
+
+  float sen_dist_l45_2 = 93;
+  float sen_dist_r45_2 = 94;
+  float sen_dist_l45_3 = 95;
+  float sen_dist_r45_4 = 96;
+
+} LogStruct8 __attribute__((packed));
 
 #endif
