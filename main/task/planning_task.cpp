@@ -1112,16 +1112,34 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
                        se->ego.right90_raw * param_ro->led_param.lp_delay;
 
   se->ego.right45_raw = se->led_sen.right45.raw;
+  se->ego.right45_2_raw = se->led_sen.right45_2.raw;
+  se->ego.right45_3_raw = se->led_sen.right45_3.raw;
+
   se->ego.right45_lp = se->ego.right45_lp * (1 - param_ro->led_param.lp_delay) +
                        se->ego.right45_raw * param_ro->led_param.lp_delay;
+  se->ego.right45_2_lp =
+      se->ego.right45_2_lp * (1 - param_ro->led_param.lp_delay) +
+      se->ego.right45_2_raw * param_ro->led_param.lp_delay;
+  se->ego.right45_3_lp =
+      se->ego.right45_3_lp * (1 - param_ro->led_param.lp_delay) +
+      se->ego.right45_3_raw * param_ro->led_param.lp_delay;
 
   se->ego.front_raw = se->led_sen.front.raw;
   se->ego.front_lp = se->ego.front_lp * (1 - param_ro->led_param.lp_delay) +
                      se->ego.front_raw * param_ro->led_param.lp_delay;
 
   se->ego.left45_raw = se->led_sen.left45.raw;
+  se->ego.left45_2_raw = se->led_sen.left45_2.raw;
+  se->ego.left45_3_raw = se->led_sen.left45_3.raw;
+
   se->ego.left45_lp = se->ego.left45_lp * (1 - param_ro->led_param.lp_delay) +
                       se->ego.left45_raw * param_ro->led_param.lp_delay;
+  se->ego.left45_2_lp =
+      se->ego.left45_2_lp * (1 - param_ro->led_param.lp_delay) +
+      se->ego.left45_2_raw * param_ro->led_param.lp_delay;
+  se->ego.left45_3_lp =
+      se->ego.left45_3_lp * (1 - param_ro->led_param.lp_delay) +
+      se->ego.left45_3_raw * param_ro->led_param.lp_delay;
 
   se->ego.left90_raw = se->led_sen.left90.raw;
   se->ego.left90_lp = se->ego.left90_lp * (1 - param_ro->led_param.lp_delay) +
