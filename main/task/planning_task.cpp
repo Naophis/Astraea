@@ -1765,9 +1765,21 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
     se->ego.left45_dist =
         calc_sensor(se->ego.left45_lp, param_ro->sensor_gain.l45.a,
                     param_ro->sensor_gain.l45.b);
+    se->ego.left45_2_dist =
+        calc_sensor(se->ego.left45_2_lp, param_ro->sensor_gain.l45_2.a,
+                    param_ro->sensor_gain.l45_2.b);
+    se->ego.left45_3_dist =
+        calc_sensor(se->ego.left45_3_lp, param_ro->sensor_gain.l45_3.a,
+                    param_ro->sensor_gain.l45_3.b);
     se->ego.right45_dist =
         calc_sensor(se->ego.right45_lp, param_ro->sensor_gain.r45.a,
                     param_ro->sensor_gain.r45.b);
+    se->ego.right45_2_dist =
+        calc_sensor(se->ego.right45_2_lp, param_ro->sensor_gain.r45_2.a,
+                    param_ro->sensor_gain.r45_2.b);
+    se->ego.right45_3_dist =
+        calc_sensor(se->ego.right45_3_lp, param_ro->sensor_gain.r45_3.a,
+                    param_ro->sensor_gain.r45_3.b);
     se->ego.right90_dist =
         calc_sensor(se->ego.right90_lp, param_ro->sensor_gain.r90.a,
                     param_ro->sensor_gain.r90.b);
