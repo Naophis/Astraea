@@ -101,7 +101,7 @@ void ASM330LHH::setup() {
     ;
   write1byte(ASM330LHH_CTRL4_C, 0x04); // I2C/I3CモードをDisableに設定
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  write1byte(ASM330LHH_CTRL2_G, 0x9c); // ODR: 6667Hz, scale: 4000deg/s
+  write1byte(ASM330LHH_CTRL2_G, 0x91); // ODR: 6667Hz, scale: 4000deg/s
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
