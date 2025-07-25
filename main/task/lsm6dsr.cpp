@@ -51,7 +51,8 @@ void LSM6DSR::init() {
 //   return 0;
 // }
 
-uint8_t IRAM_ATTR LSM6DSR::write1byte(const uint8_t address, const uint8_t data) {
+uint8_t IRAM_ATTR LSM6DSR::write1byte(const uint8_t address,
+                                      const uint8_t data) {
   esp_err_t ret;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t)); // Zero out the transaction
