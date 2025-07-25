@@ -1,5 +1,6 @@
 # goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
 # goals: [[1, 0], [2, 0]]
+goals: [[1, 0], [2, 0], [1, 1], [2, 1]]
 # goals: [[1, 0]]
 # goals: [[3, 0]]
 # goals: [[7, 0], [8, 0]]
@@ -49,7 +50,7 @@
 
 # goals: [[14, 14], [14, 15], [15, 14], [15, 15]] #東日本2023
 
-goals: [[19, 8],[19, 9],[19, 10],[20, 8],[20, 9],[20, 10],[21, 8],[21, 9],[21, 10]]  #全日本2024 Final
+# goals: [[19, 8],[19, 9],[19, 10],[20, 8],[20, 9],[20, 10],[21, 8],[21, 9],[21, 10]]  #全日本2024 Final
 
 #  27 *55
 maze_size: 32
@@ -63,11 +64,11 @@ hf_cl: 0 # half(0) or classic(1)
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
-# mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
+mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
 # mode: 11 # vacume/suction test
 # mode: 12 # silent_keep
 # mode: 13 # keep_pos
-mode: 14 # sensing
+# mode: 14 # sensing
 # mode: 15 # sensor calib
 # mode: 16 # system identification (para)
 # mode: 17 # system identification (roll)
@@ -76,21 +77,21 @@ mode: 14 # sensing
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  # v_max: 400
-  # accl: 2000
-  # decel: -2000 
-  # dia_accl: 2500
-  # dia_decel: -2500
-  # dist: 720 #直進
-  # suction_active: 0
+  v_max: 400
+  accl: 2500
+  decel: -2500 
+  dia_accl: 2500
+  dia_decel: -2500
+  dist: 260 #直進
+  suction_active: 0
 
-  v_max: 1800
-  accl: 28000
-  decel: -30000
-  dia_accl: 28000
-  dia_decel: -30000
-  dist: 180 #直進
-  suction_active: 2
+  # v_max: 72000
+  # accl: 42000
+  # decel: -52500
+  # dia_accl: 28000
+  # dia_decel: -30000
+  # dist: 810 #直進
+  # suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -107,24 +108,20 @@ test: # テスト走行時に使用するパラメータ群
   alpha: 180
   ang: 3600
   search_mode: 0
-  # suction_duty: 5.75
-  # suction_duty_low: 5.5
-  suction_duty: 2.75
-  suction_duty_low: 2.5
-  # HR
-  # suction_duty_burst: 5.75
-  # suction_duty_burst_low: 5.50
-  # 0816
-  suction_duty_burst: 3.75
-  suction_duty_burst_low: 3.5
-  # CL 4
-  # suction_duty_burst: 8.25
-  # suction_duty_burst_low: 8.0
+  
+  suction_duty: 3.75
+  suction_duty_low: 3.5
+  # Alter
+  suction_duty_burst: 4.125
+  suction_duty_burst_low: 4.125
+  # Nova
+  # suction_duty_burst: 3.75
+  # suction_duty_burst_low: 3.5
   
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 30
+  file_idx: 35
   sla_dist: 90
   # sla_type: 3
   sla_type: 3

@@ -284,8 +284,17 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "v_c")
             if (record[i] > 10000 || record[i] < -10000)
               res = false;
-          if (data.name === "righ45_2_d")
-            if (record[i] > 100000 || record[i] < -100000)
+          if (data.name === "right45_2_d")
+            if (record[i] > 200 || record[i] < -200)
+              res = false;
+          if (data.name === "right45_3_d")
+            if (record[i] > 200 || record[i] < -200)
+              res = false;
+          if (data.name === "left45_2_d")
+            if (record[i] > 200 || record[i] < -200)
+              res = false;
+          if (data.name === "left45_3_d")
+            if (record[i] > 200 || record[i] < -200)
               res = false;
           return res;
         });
