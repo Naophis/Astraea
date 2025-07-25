@@ -9,7 +9,7 @@ pivot_angle_180: 180.0
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 # front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
-front_dist_offset: 94.50 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 92.50 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
 normal_sla_offset_front: 9
@@ -21,7 +21,7 @@ pivot_back_offset: 6.0 # pivot時の前壁補正後のバック距離のオフ�
 pivot_back_dist0: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 45.0 #大→短くなる
+sla_wall_ref_l: 44.50 #大→短くなる
 sla_wall_ref_r: 45.0 #大→短くなる
 sla_max_offset_dist: 6
 
@@ -67,39 +67,39 @@ wall_off_hold_dist: 88
 ctrl_exist_wall_th_l: 47 #探索壁切れ
 ctrl_exist_wall_th_r: 47 #探索壁切れ
 go_straight_wide_ctrl_th: 75
-search_wall_off_l_dist_offset: 50.50
+search_wall_off_l_dist_offset: 54.250
 search_wall_off_r_dist_offset: 53.250
 search_wall_off_enable: 1
 
 # 壁切れ壁あり判定
-wall_off_exist_wall_th_l: 55
-wall_off_exist_wall_th_r: 55
+wall_off_exist_wall_th_l: 52
+wall_off_exist_wall_th_r: 52
 # 壁切れ In(最初からあるとき)
 wall_off_hold_exist_dist_l: 49
-wall_off_hold_exist_dist_r: 51
+wall_off_hold_exist_dist_r: 49
 # 壁切れ Out(最初からあるとき)
 wall_off_hold_noexist_th_l: 50
-wall_off_hold_noexist_th_r: 53
+wall_off_hold_noexist_th_r: 50
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: -3.0
-wall_off_hold_dist_str_r_exist: -3.5
+wall_off_hold_dist_str_l_exist: -1.0
+wall_off_hold_dist_str_r_exist: -1.0
 
 # 壁切れ In2(最初からないとき)
 wall_off_hold_exist_dist_l2: 64
-wall_off_hold_exist_dist_r2: 66
+wall_off_hold_exist_dist_r2: 64
 # 壁切れ Out2(最初からないとき)
 wall_off_hold_noexist_th_l2: 66
-wall_off_hold_noexist_th_r2: 67
+wall_off_hold_noexist_th_r2: 66
 # 壁切れ オフセット距離(最初からないとき)
-wall_off_hold_dist_str_l: -7.5
-wall_off_hold_dist_str_r: -7.5
+wall_off_hold_dist_str_l: -2.0
+wall_off_hold_dist_str_r: -2.0
 
 # 壁切れ 偏差(最初見えず、柱で反応)
-wall_off_hold_div_th_l: 2.5
-wall_off_hold_div_th_r: 2.5
+wall_off_hold_div_th_l: 0.5
+wall_off_hold_div_th_r: 0.5
 # 壁切れ 偏差(壁が見える前に過ぎてた場合)
-wall_off_hold_div_th_l2: 2.5
-wall_off_hold_div_th_r2: 2.5
+wall_off_hold_div_th_l2: 0.5
+wall_off_hold_div_th_r2: 0.5
 # 壁切れ 偏差()
 wall_off_hold_div_th_l3: 0.5
 wall_off_hold_div_th_r3: 0.5
