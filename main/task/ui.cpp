@@ -213,7 +213,7 @@ TurnDirection IRAM_ATTR UserInterface::select_direction() {
         return td;
       }
     } else {
-      LED_bit((int)b, 0, 0, 0, 0, (int)b);
+      LED_bit((int)b, (int)!b, (int)b, (int)b, (int)!b, (int)b);
       b = b ? false : true;
     }
     vTaskDelay(25.0 / portTICK_PERIOD_MS);
