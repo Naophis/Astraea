@@ -25,6 +25,8 @@ void ASM330LHH::init() {
   ESP_ERROR_CHECK(ret);
   // Attach the LCD to the SPI bus
   ret = spi_bus_add_device(SPI2_HOST, &devcfg, &spi);
+  // devcfg.spics_io_num = EN_GN_SSL2;
+  // ret = spi_bus_add_device(SPI2_HOST, &devcfg, &spi_2);
   ESP_ERROR_CHECK(ret);
 }
 
@@ -38,7 +40,11 @@ uint8_t IRAM_ATTR ASM330LHH::write1byte(const uint8_t address,
   t.tx_data[0] = address;
   t.tx_data[1] = (uint8_t)(0xff & data);
   ret = spi_device_polling_transmit(spi, &t); // Transmit!
-  assert(ret == ESP_OK);                      // Should have had no issues.
+  // if (!use_2) {
+  // } else {
+  //   ret = spi_device_polling_transmit(spi_2, &t); // Transmit!
+  // }
+  assert(ret == ESP_OK); // Should have had no issues.
   return 0;
 }
 
@@ -52,7 +58,11 @@ uint8_t IRAM_ATTR ASM330LHH::read1byte(const uint8_t address) {
   tx_data = SPI_SWAP_DATA_TX(tx_data, 16);
   t.tx_buffer = &tx_data;
   ret = spi_device_polling_transmit(spi, &t); // Transmit!
-  assert(ret == ESP_OK);                      // Should have had no issues.
+  // if (!use_2) {
+  // } else {
+  //   ret = spi_device_polling_transmit(spi_2, &t); // Transmit!
+  // }
+  assert(ret == ESP_OK); // Should have had no issues.
   printf("%d, %d\n", t.rx_data[0], t.rx_data[1]);
   uint8_t data =
       SPI_SWAP_DATA_RX(*(uint16_t *)t.rx_data, 16) & 0x00FF; // FF + Data
@@ -76,6 +86,10 @@ int16_t IRAM_ATTR ASM330LHH::read_2byte(const uint8_t address) {
   t.tx_data[2] = 0;
 
   ret = spi_device_polling_transmit(spi, &t); // Transmit!
+  // if (!use_2) {
+  // } else {
+  //   ret = spi_device_polling_transmit(spi_2, &t); // Transmit!
+  // }
 
   return (signed short)((((unsigned short)(t.rx_data[2] & 0xff)) << 8) |
                         ((unsigned short)(t.rx_data[1] & 0xff)));

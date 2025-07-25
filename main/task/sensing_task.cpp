@@ -33,10 +33,13 @@ void SensingTask::timer_200us_callback_main() {
     return;
   }
   gyro_timestamp_now = esp_timer_get_time();
+  // gyro_if.use_2 = false; // Use 1st SPI bus for gyro
   auto gyro = gyro_if.read_gyro_z();
 
+  // printf("Gyro Z: %d\n", gyro);
   // gyro2_timestamp_now = esp_timer_get_time();
-  // auto gyro2 = enc_if.read_2byte_gy(0x26);
+  // gyro_if.use_2 = true; // Use 2ndSPI bus for gyro
+  // auto gyro2 = gyro_if.read_gyro_z();
 
   // AS5147Pエンコーダーの読み取り
   enc_r_timestamp_now = esp_timer_get_time();
@@ -55,8 +58,7 @@ void SensingTask::timer_200us_callback_main() {
   // auto enc_l = enc_if.read2byte(0x30, 0x03, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
-  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) /
-  // 1000000;
+  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) / 1000000;
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
@@ -158,30 +160,32 @@ void SensingTask::timer_200us_callback_main() {
       pt->kf_w.update(se->ego.w_raw);
       // pt->kf_w.update2(se->ego.w_raw, w_enc);
     }
-    //
     // se->gyro2.raw = se->gyro2.data = gyro2;
     // if (gyro2_dt > 0) {
     //   if (tgt_val->motion_dir == MotionDirection::LEFT) {
-    //     se->ego.w_raw = param->gyro2_param.gyro_w_gain_left *
-    //                     (gyro2 - tgt_val->gyro_zero_p_offset);
+    //     se->ego.w_raw2 = param->gyro2_param.gyro_w_gain_left *
+    //                      (gyro2 - tgt_val->gyro_zero_p_offset);
     //   } else {
-    //     se->ego.w_raw = param->gyro2_param.gyro_w_gain_right *
-    //                     (gyro2 - tgt_val->gyro_zero_p_offset);
+    //     se->ego.w_raw2 = param->gyro2_param.gyro_w_gain_right *
+    //                      (gyro2 - tgt_val->gyro_zero_p_offset);
     //   }
     //   pt->kf_w2.predict(alpha);
     //   const float tread = param->tire_tread;
     //   const float w_enc = -(se->ego.v_r - se->ego.v_l) / tread;
-    //   pt->kf_w2.update(se->ego.w_raw);
+    //   pt->kf_w2.update(se->ego.w_raw2);
     //   // pt->kf_w.update2(se->ego.w_raw, w_enc);
     // }
   }
 
   if (param->enable_kalman_gyro == 1) {
     se->ego.w_raw = se->ego.w_kf = pt->kf_w.get_state();
+    // se->ego.w_raw2 = se->ego.w_kf2 = pt->kf_w2.get_state();
   } else if (param->enable_kalman_gyro == 2) {
     se->ego.w_kf = se->ego.w_raw;
+    // se->ego.w_kf2 = se->ego.w_raw;
   } else {
     se->ego.w_kf = pt->kf_w.get_state();
+    // se->ego.w_kf2 = pt->kf_w2.get_state();
   }
 }
 
@@ -230,7 +234,11 @@ void SensingTask::task() {
   // timer_init_grp0_timer0();
   if (!GY_MODE) {
     gyro_if.init();
+    // gyro_if.use_2 = false; // Use 1st SPI bus for gyro
     gyro_if.setup();
+    // gyro_if.use_2 = true; // Use 2nd SPI bus for gyro
+    // gyro_if.setup();
+    // gyro_if.use_2 = false; // Use 1st SPI bus for gyro
     enc_if.init();
   }
   // esp_timer_start_periodic(timer_200us, 200);
