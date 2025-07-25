@@ -107,8 +107,8 @@ void IRAM_ATTR MainTask::dump1() {
 
     printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
            tgt_val->gyro_zero_p_offset);
-    // printf("gyro2: %d\t(%0.3f)\n", sensing_result->gyro2.raw,
-    //        tgt_val->gyro2_zero_p_offset);
+    printf("gyro2: %d\t(%0.3f)\n", sensing_result->gyro2.raw,
+           tgt_val->gyro2_zero_p_offset);
     printf("accel_x: %f\t(%f)\n", sensing_result->ego.accel_x_raw,
            sensing_result->ego.accel_x_raw / 9806.65 *
                param->accel_x_param.gain);
@@ -242,10 +242,15 @@ void MainTask::dump2() {
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
 
   while (1) {
-    printf("%d, %d, %d, %d, %d\n", sensing_result->led_sen.left90.raw,
+    printf("%d, %d, %d, %d, %d, %d, %d, %d, %d\n",
+           sensing_result->led_sen.left90.raw,
+           sensing_result->led_sen.left45_3.raw,
+           sensing_result->led_sen.left45_2.raw,
            sensing_result->led_sen.left45.raw,
            sensing_result->led_sen.front.raw,
            sensing_result->led_sen.right45.raw,
+           sensing_result->led_sen.right45_2.raw,
+           sensing_result->led_sen.right45_3.raw,
            sensing_result->led_sen.right90.raw);
 
     if (ui->button_state()) {
@@ -1288,18 +1293,18 @@ void MainTask::load_sensor_param() {
   param->sensor_gain.r45_2.b =
       cJSON_GetArrayItem(getItem(gain, "R45_2"), 1)->valuedouble;
 
-  param->sensor_gain.l45_2.a =  
+  param->sensor_gain.l45_2.a =
       cJSON_GetArrayItem(getItem(gain, "L45_2"), 0)->valuedouble;
   param->sensor_gain.l45_2.b =
       cJSON_GetArrayItem(getItem(gain, "L45_2"), 1)->valuedouble;
 
-  param->sensor_gain.r45_3.a = 
-      cJSON_GetArrayItem(getItem(gain, "R45_3"), 0)->valuedouble; 
+  param->sensor_gain.r45_3.a =
+      cJSON_GetArrayItem(getItem(gain, "R45_3"), 0)->valuedouble;
   param->sensor_gain.r45_3.b =
       cJSON_GetArrayItem(getItem(gain, "R45_3"), 1)->valuedouble;
 
-  param->sensor_gain.l45_3.a = 
-      cJSON_GetArrayItem(getItem(gain, "L45_3"), 0)->valuedouble; 
+  param->sensor_gain.l45_3.a =
+      cJSON_GetArrayItem(getItem(gain, "L45_3"), 0)->valuedouble;
   param->sensor_gain.l45_3.b =
       cJSON_GetArrayItem(getItem(gain, "L45_3"), 1)->valuedouble;
 
