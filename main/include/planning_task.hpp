@@ -102,6 +102,7 @@ public:
   KalmanFilter kf_v_l;
   KalmanFilter kf_dist;
   KalmanFilter kf_ang;
+  KalmanFilter kf_ang2;
   KalmanFilter kf_batt;
   KalmanFilterMatrix pos;
 

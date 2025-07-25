@@ -90,6 +90,7 @@ constexpr gpio_num_t EN_MISO = GPIO_NUM_1;
 constexpr gpio_num_t EN_MOSI = GPIO_NUM_2;
 constexpr gpio_num_t EN_CLK = GPIO_NUM_3;
 constexpr gpio_num_t EN_GN_SSL = GPIO_NUM_4;
+constexpr gpio_num_t EN_GN_SSL2 = GPIO_NUM_15;
 
 constexpr gpio_num_t ENC_R_CS = GPIO_NUM_6;
 constexpr gpio_num_t GYRO2_CS = GPIO_NUM_46;

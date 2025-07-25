@@ -91,11 +91,15 @@ typedef struct {
   float main_v = 0;
 
   float w_raw = 0;
+  float w_raw2 = 0;
   float w_lp = 0;
+  float w_lp2 = 0;
   float w_kf = 0;
+  float w_kf2 = 0;
   float v_kf = 0;
   float dist_kf = 0;
   float ang_kf = 0;
+  float ang_kf2 = 0;
   float batt_kf = 0;
   float accel_x_raw = 0;
 
@@ -159,12 +163,20 @@ typedef struct {
   volatile float front_mid_dist = 0;
 
   volatile float left45_dist_diff = 0;
+  volatile float left45_2_dist_diff = 0;
+  volatile float left45_3_dist_diff = 0;
   volatile float right45_dist_diff = 0;
+  volatile float right45_2_dist_diff = 0;
+  volatile float right45_3_dist_diff = 0;
 
   float front_dist_old = 0;
   float left45_dist_old = 0;
+  float left45_2_dist_old = 0;
+  float left45_3_dist_old = 0;
   float left90_dist_old = 0;
   float right45_dist_old = 0;
+  float right45_2_dist_old = 0;
+  float right45_3_dist_old = 0;
   float right90_dist_old = 0;
   bool exist_r_wall = false;
   bool exist_l_wall = false;
@@ -1112,6 +1124,11 @@ typedef struct {
   real16_T pos_x;
   real16_T pos_y;
 
+  // real16_T w_lp2;
+  // real16_T w_kf2;
+  // real16_T ang2;
+  // real16_T ang_kf2;
+
   // real16_T kalman_w;
   // real16_T kalman_v_r;
   // real16_T kalman_v_l;
@@ -1292,5 +1309,22 @@ typedef struct {
   float sen_dist_r45_3 = 96;
 
 } LogStruct8 __attribute__((packed));
+typedef struct {
+  float w_lp2 = 97;
+  float w_kf2 = 98;
+  float ang_kf2 = 99;
+  float reserve1 = 100;
+
+  float reserve2 = 101;
+  float reserve3 = 102;
+  float reserve4 = 103;
+  float reserve5 = 104;
+
+  float reserve6 = 105;
+  float reserve7 = 106;
+  float reserve8 = 107;
+  float reserve9 = 108;
+
+} LogStruct9 __attribute__((packed));
 
 #endif

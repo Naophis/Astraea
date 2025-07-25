@@ -44,8 +44,11 @@ public:
   int get_fifo_data();
   int get_fifo_tag();
 
+  bool use_2 = false; // Use 2nd SPI bus for gyro
+
 private:
   spi_device_handle_t spi;
+  // spi_device_handle_t spi_2;
   spi_transaction_t itr_t;
   spi_transaction_t *r_trans;
 };
