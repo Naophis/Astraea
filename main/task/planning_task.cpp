@@ -344,6 +344,10 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
             param_ro->w_init_cov, //
             param_ro->w_p_noise,  //
             param_ro->w_m_noise);
+  kf_w2.init(initial_state,        //
+             param_ro->w_init_cov, //
+             param_ro->w_p_noise,  //
+             param_ro->w_m_noise);
   kf_v.init(initial_state,        //
             param_ro->v_init_cov, //
             param_ro->v_p_noise,  //
@@ -364,6 +368,10 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
               param_ro->ang_init_cov, //
               param_ro->ang_p_noise,  //
               param_ro->ang_m_noise);
+  kf_ang2.init(initial_state,          //
+               param_ro->ang_init_cov, //
+               param_ro->ang_p_noise,  //
+               param_ro->ang_m_noise);
 }
 
 void PlanningTask::task() {
@@ -1019,6 +1027,8 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
 
   se->ego.w_lp = se->ego.w_lp * (1 - param_ro->gyro_param.lp_delay) +
                  se->ego.w_raw * param_ro->gyro_param.lp_delay;
+  se->ego.w_lp2 = se->ego.w_lp2 * (1 - param_ro->gyro_param.lp_delay) +
+                  se->ego.w_raw2 * param_ro->gyro_param.lp_delay;
 
   // kf_w.predict(sensing_result->ego.w_raw);
   // kf_w.update(sensing_result->ego.w_raw);
@@ -1057,13 +1067,18 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   if (std::isfinite(tgt_val->ego_in.w)) {
     kf_ang.predict(tgt_val->ego_in.w);
     kf_ang.update(tgt_val->ego_in.ang);
+    kf_ang2.predict(tgt_val->ego_in.w);
+    kf_ang2.update(tgt_val->ego_in.ang);
 
     if (param_ro->enable_kalman_gyro == 1) {
       se->ego.ang_kf = kf_ang.get_state();
+      se->ego.ang_kf2 = kf_ang2.get_state();
     } else if (param_ro->enable_kalman_gyro == 2) {
       se->ego.ang_kf = tgt_val->ego_in.ang;
+      se->ego.ang_kf2 = tgt_val->ego_in.ang;
     } else {
       se->ego.ang_kf = tgt_val->ego_in.ang;
+      se->ego.ang_kf2 = tgt_val->ego_in.ang;
     }
 
     // const auto angle = kf_ang.get_state();
@@ -1856,18 +1871,35 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
       se->ego.front_mid_dist = param_ro->sensor_range_max;
     }
   } else {
-    se->ego.left90_dist        //
-        = se->ego.left45_dist  //
-        = se->ego.front_dist   //
-        = se->ego.right45_dist //
+    se->ego.left90_dist          //
+        = se->ego.left45_dist    //
+        = se->ego.left45_2_dist  //
+        = se->ego.left45_3_dist  //
+        = se->ego.front_dist     //
+        = se->ego.right45_dist   //
+        = se->ego.right45_2_dist //
+        = se->ego.right45_3_dist //
         = se->ego.right90_dist = param_ro->sensor_range_max;
-    se->ego.left45_dist_diff = 0;
-    se->ego.right45_dist_diff = 0;
+
+    se->ego.left45_dist_diff          //
+        = se->ego.right45_dist_diff   //
+        = se->ego.right45_2_dist_diff //
+        = se->ego.right45_3_dist_diff //
+        = se->ego.left45_2_dist_diff  //
+        = se->ego.left45_3_dist_diff = 0;
   }
 
   se->ego.left45_dist_diff = se->ego.left45_dist - se->ego.left45_dist_old;
+  se->ego.left45_2_dist_diff =
+      se->ego.left45_2_dist - se->ego.left45_2_dist_old;
+  se->ego.left45_3_dist_diff =
+      se->ego.left45_3_dist - se->ego.left45_3_dist_old;
 
   se->ego.right45_dist_diff = se->ego.right45_dist - se->ego.right45_dist_old;
+  se->ego.right45_2_dist_diff =
+      se->ego.right45_2_dist - se->ego.right45_2_dist_old;
+  se->ego.right45_3_dist_diff =
+      se->ego.right45_3_dist - se->ego.right45_3_dist_old;
 
   // 壁からの距離に変換。あとで斜め用に変更
   calc_sensor_dist_diff();
