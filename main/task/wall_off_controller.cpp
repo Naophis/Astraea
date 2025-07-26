@@ -30,14 +30,6 @@ void IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
   const auto p_wall_off = get_wall_off_param();
 
   bool exist = false;
-  const auto r45_start_dist = se->ego.right45_dist;
-  const auto l45_start_dist = se->ego.left45_dist;
-
-  if (td == TurnDirection::Right) {
-    exist = se->ego.right45_dist < p_wall_off.wall_off_exist_wall_th_r;
-  } else {
-    exist = se->ego.left45_dist < p_wall_off.wall_off_exist_wall_th_l;
-  }
 
   // モーション設定
   tgt_val->nmr.v_max = ps_front.v_max;
@@ -57,27 +49,25 @@ void IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
   tgt_val->nmr.sct = SensorCtrlType::Straight;
   tgt_val->nmr.timstamp++;
 
-  auto tmp_dist_before = tgt_val->global_pos.dist;
-  auto tmp_dist_after = tmp_dist_before;
-
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
   vTaskDelay(1.0 / portTICK_RATE_MS);
 
   if (td == TurnDirection::Right) {
-    process_right_wall_off(ps_front, exist, r45_start_dist, tmp_dist_before,
-                           tmp_dist_after);
+    process_right_wall_off(ps_front);
   } else {
-    process_left_wall_off(ps_front, exist, l45_start_dist, tmp_dist_before,
-                          tmp_dist_after);
+    process_left_wall_off(ps_front);
   }
 }
 
-void IRAM_ATTR WallOffController::process_right_wall_off(
-    param_straight_t &ps_front, bool exist, float r45_start_dist,
-    float &tmp_dist_before, float &tmp_dist_after) {
+void IRAM_ATTR
+WallOffController::process_right_wall_off(param_straight_t &ps_front) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
   const auto strategy = get_right_strategy();
+
+  bool exist = se->ego.right45_dist < p_wall_off.wall_off_exist_wall_th_r;
+  auto tmp_dist_before = tgt_val->global_pos.dist;
+  auto tmp_dist_after = tmp_dist_before;
 
   // 第一段階：壁を見つけるまで待機
   while (true) {
@@ -178,12 +168,15 @@ void IRAM_ATTR WallOffController::process_right_wall_off(
   }
 }
 
-void IRAM_ATTR WallOffController::process_left_wall_off(
-    param_straight_t &ps_front, bool exist, float l45_start_dist,
-    float &tmp_dist_before, float &tmp_dist_after) {
+void IRAM_ATTR
+WallOffController::process_left_wall_off(param_straight_t &ps_front) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
   const auto strategy = get_left_strategy();
+
+  bool exist = se->ego.left45_dist < p_wall_off.wall_off_exist_wall_th_l;
+  auto tmp_dist_before = tgt_val->global_pos.dist;
+  auto tmp_dist_after = tmp_dist_before;
 
   // 第一段階：壁を見つけるまで待機
   while (true) {
@@ -306,8 +299,7 @@ bool IRAM_ATTR WallOffController::apply_front_sensor_correction(
 }
 
 bool IRAM_ATTR WallOffController::execute_wall_off_dia(
-    TurnDirection td, param_straight_t &ps_front, bool &exist,
-    bool &use_oppo_wall) {
+    TurnDirection td, param_straight_t &ps_front, bool &use_oppo_wall) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
@@ -329,37 +321,20 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   tgt_val->nmr.sct = SensorCtrlType::Dia;
   tgt_val->nmr.timstamp++;
 
-  float tmp_dist_before = tgt_val->global_pos.dist;
-  float tmp_dist_after = tmp_dist_before;
-  float init_r45_dist = sensing_result->ego.right45_dist;
-  float init_l45_dist = sensing_result->ego.left45_dist;
-
-  // 壁の存在判定
-  if (td == TurnDirection::Right) {
-    exist = se->ego.right45_dist < p_wall_off.wall_off_exist_dia_wall_th_r;
-  } else {
-    exist = se->ego.left45_dist < p_wall_off.wall_off_exist_dia_wall_th_l;
-  }
-
-  use_oppo_wall = false;
+  use_oppo_wall = false; // reset
 
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
   vTaskDelay(1.0 / portTICK_RATE_MS);
 
   if (td == TurnDirection::Right) {
-    return process_right_wall_off_dia(ps_front, exist, tmp_dist_before,
-                                      tmp_dist_after, init_r45_dist,
-                                      use_oppo_wall);
+    return process_right_wall_off_dia(ps_front, use_oppo_wall);
   } else {
-    return process_left_wall_off_dia(ps_front, exist, tmp_dist_before,
-                                     tmp_dist_after, init_l45_dist,
-                                     use_oppo_wall);
+    return process_left_wall_off_dia(ps_front, use_oppo_wall);
   }
 }
 
 MotionResult IRAM_ATTR WallOffController::execute_search_wall_off(
     param_straight_t &p, bool search_mode) {
-
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
   static int wall_off_state = 0;
@@ -416,69 +391,75 @@ bool WallOffController::is_wall_exist(TurnDirection td, float threshold_l,
 }
 
 bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
-    param_straight_t &ps_front, bool exist, float tmp_dist_before,
-    float tmp_dist_after, float init_r45_dist, bool &use_oppo_wall) {
+    param_straight_t &ps_front, bool &use_oppo_wall) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
+  const auto strategy = get_right_dia_strategy();
+  const auto init_r45_dist = se->ego.right45_dist;
 
+  // 初期距離の保存
+  float tmp_dist_before = tgt_val->global_pos.dist;
+  float tmp_dist_after = tmp_dist_before;
+
+  const auto exist =
+      se->ego.right45_dist < p_wall_off.wall_off_exist_dia_wall_th_r;
   // 第一段階：壁切れ開始を待つ
   while (true) {
-    // 壁切れ開始
+    // 壁切れ開始の判定
     if (exist) {
-      if (se->ego.right45_dist < p_wall_off.exist_dia_th_r) {
+      if (strategy.exist_dia_wall_start()) {
         break;
       }
       break;
     } else {
-      if (se->ego.right45_dist < p_wall_off.exist_dia_th_r2) {
+      if (strategy.exist_dia_wall_start_alt()) {
         break;
       }
     }
-    // 反対側の壁あり
+
+    // 距離更新
     tmp_dist_after = tgt_val->global_pos.dist;
-    // 見切れた場合
-    if (std::abs(tmp_dist_after - tmp_dist_before) >=
-        std::abs(p_wall_off.diff_check_dist_dia_2)) {
-      if ((se->ego.right45_dist - init_r45_dist) > param->wall_off_pass_dist) {
-        ps_front.dist += p_wall_off.right_dia_oppo;
-        ps_front.dist = MAX(ps_front.dist, 0.1);
-        return false;
-      }
+
+    // 見切れた場合の検出
+    if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after,
+                                           init_r45_dist)) {
+      ps_front.dist += p_wall_off.right_dia_oppo;
+      ps_front.dist = MAX(ps_front.dist, 0.1);
+      return false;
     }
-    // 反対側の壁あり
-    if (std::abs(tmp_dist_after - tmp_dist_before) >=
-        std::abs(p_wall_off.diff_check_dist_dia)) {
-      if (se->ego.left45_dist < param->dia_turn_th_l) {
-        // ps_front.dist += p_wall_off.right_dia_oppo;
-        float diff = (se->ego.left45_dist - param->dia_turn_ref_l);
-        diff = std::clamp(diff, -param->dia_turn_max_dist_l,
-                          param->dia_turn_max_dist_l);
-        ps_front.dist = ps_front.dist + diff;
-        use_oppo_wall = true;
-        return false;
-      }
+
+    // 反対側の壁ありの場合の検出
+    if (strategy.detect_pass_through_case2(tmp_dist_before, tmp_dist_after,
+                                           init_r45_dist)) {
+      float diff = (se->ego.left45_dist - param->dia_turn_ref_l);
+      diff = std::clamp(diff, -param->dia_turn_max_dist_l,
+                        param->dia_turn_max_dist_l);
+      ps_front.dist = ps_front.dist + diff;
+      use_oppo_wall = true;
+      return false;
     }
+
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
+
   // 第二段階：壁切れ終了を待つ
   while (true) {
-    // 壁切れ終了
     if (exist) {
-      if (se->ego.right45_dist > p_wall_off.noexist_dia_th_r &&
-          se->ego.right45_dist_diff > 0) {
+      // 壁切れ終了の検出
+      if (strategy.detect_wall_off_exist()) {
         ps_front.dist += p_wall_off.right_dia;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
-      if (se->ego.right45_dist_diff > p_wall_off.div_th_dia_r &&
-          se->ego.right45_2_dist_diff > 0 && se->ego.right45_3_dist_diff > 0 &&
-          se->ego.right45_dist < 100) {
+      // 微分による壁切れ終了検出
+      if (strategy.detect_wall_off_by_deviation()) {
         ps_front.dist += p_wall_off.right_dia;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
     } else {
-      if (se->ego.right45_dist > p_wall_off.noexist_dia_th_r2) {
+      // 壁切れ終了（exist=falseの場合）
+      if (strategy.detect_wall_off_alt()) {
         ps_front.dist += p_wall_off.right_dia2;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
@@ -490,71 +471,76 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
 }
 
 bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
-    param_straight_t &ps_front, bool exist, float tmp_dist_before,
-    float tmp_dist_after, float init_l45_dist, bool &use_oppo_wall) {
+    param_straight_t &ps_front, bool &use_oppo_wall) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
+  const auto strategy = get_left_dia_strategy();
+
+  // 初期距離の保存
+  const auto init_l45_dist = se->ego.left45_dist;
+  float tmp_dist_before = tgt_val->global_pos.dist;
+  float tmp_dist_after = tmp_dist_before;
+
+  const auto exist =
+      se->ego.left45_dist < p_wall_off.wall_off_exist_dia_wall_th_l;
 
   // 第一段階：壁切れ開始を待つ
   while (true) {
-    // 壁切れ開始
+    // 壁切れ開始の判定
     if (exist) {
-      if (se->ego.left45_dist < p_wall_off.exist_dia_th_l) {
+      if (strategy.exist_dia_wall_start()) {
         break;
       }
       break;
     } else {
-      if (se->ego.left45_dist < p_wall_off.exist_dia_th_l2) {
+      if (strategy.exist_dia_wall_start_alt()) {
         break;
       }
     }
-    // 反対側の壁あり
+
+    // 距離更新
     tmp_dist_after = tgt_val->global_pos.dist;
-    //  見切れた場合
-    if (std::abs(tmp_dist_after - tmp_dist_before) >=
-        std::abs(p_wall_off.diff_check_dist_dia_2)) {
-      if ((se->ego.left45_dist - init_l45_dist) > param->wall_off_pass_dist) {
-        ps_front.dist += p_wall_off.left_dia_oppo;
-        ps_front.dist = MAX(ps_front.dist, 0.1);
-        return false;
-      }
+
+    // 見切れた場合の検出
+    if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after,
+                                           init_l45_dist)) {
+      ps_front.dist += p_wall_off.left_dia_oppo;
+      ps_front.dist = MAX(ps_front.dist, 0.1);
+      return false;
     }
-    // 反対側の壁あり
-    if (std::abs(tmp_dist_after - tmp_dist_before) >=
-        std::abs(p_wall_off.diff_check_dist_dia)) {
-      if (se->ego.right45_dist < param->dia_turn_th_r) {
-        // ps_front.dist += p_wall_off.left_dia_oppo;
-        float diff = (se->ego.right45_dist - param->dia_turn_ref_r);
-        diff = std::clamp(diff, -param->dia_turn_max_dist_r,
-                          param->dia_turn_max_dist_r);
-        ps_front.dist = ps_front.dist + diff;
-        use_oppo_wall = true;
-        return false;
-      }
+
+    // 反対側の壁ありの場合の検出
+    if (strategy.detect_pass_through_case2(tmp_dist_before, tmp_dist_after,
+                                           init_l45_dist)) {
+      float diff = (se->ego.right45_dist - param->dia_turn_ref_r);
+      diff = std::clamp(diff, -param->dia_turn_max_dist_r,
+                        param->dia_turn_max_dist_r);
+      ps_front.dist = ps_front.dist + diff;
+      use_oppo_wall = true;
+      return false;
     }
+
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
 
   // 第二段階：壁切れ終了を待つ
   while (true) {
-    // 壁切れ終了
     if (exist) {
-      if (se->ego.left45_dist > p_wall_off.noexist_dia_th_l &&
-          se->ego.left45_dist_diff > 0) {
+      // 壁切れ終了の検出
+      if (strategy.detect_wall_off_exist()) {
         ps_front.dist += p_wall_off.left_dia;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
-      if (se->ego.left45_dist_diff > p_wall_off.div_th_dia_l && //
-          se->ego.left45_2_dist_diff > 0 &&                     //
-          se->ego.left45_3_dist_diff > 0 &&                     //
-          se->ego.left45_dist < 100) {
+      // 微分による壁切れ終了検出
+      if (strategy.detect_wall_off_by_deviation()) {
         ps_front.dist += p_wall_off.left_dia;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
     } else {
-      if (se->ego.left45_dist > p_wall_off.noexist_dia_th_l2) {
+      // 壁切れ終了（exist=falseの場合）
+      if (strategy.detect_wall_off_alt()) {
         ps_front.dist += p_wall_off.left_dia2;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
@@ -598,7 +584,6 @@ wall_off_hold_dist_t &WallOffController::get_wall_off_param() {
 }
 
 WallSensorStrategy &WallOffController::get_right_strategy() {
-
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
   if (right_strategy.has_value()) {
@@ -712,4 +697,90 @@ WallSensorStrategy &WallOffController::get_left_strategy() {
       [=]() { return se->ego.left45_dist > p_wall_off.noexist_th_l2; },
   };
   return *left_strategy;
+}
+
+DiagonalWallOffStrategy &WallOffController::get_left_dia_strategy() {
+  const auto se = get_sensing_entity();
+  const auto p_wall_off = get_wall_off_param();
+
+  if (left_dia_strategy.has_value()) {
+    return *left_dia_strategy;
+  }
+
+  left_dia_strategy = DiagonalWallOffStrategy{
+      // exist_dia_wall_start - 斜め壁切れ開始の判定（exist=trueの場合）
+      [=]() { return se->ego.left45_dist < p_wall_off.exist_dia_th_l; },
+      // exist_dia_wall_start_alt - 斜め壁切れ開始の判定（exist=falseの場合）
+      [=]() { return se->ego.left45_dist < p_wall_off.exist_dia_th_l2; },
+      // detect_pass_through_case1 - 見切れた場合の検出
+      [=](float before, float after, float init) {
+        return std::abs(after - before) >=
+                   std::abs(p_wall_off.diff_check_dist_dia_2) &&
+               (se->ego.left45_dist - init) > param->wall_off_pass_dist;
+      },
+      // detect_pass_through_case2 - 反対側の壁ありの場合の検出
+      [=](float before, float after, float init) {
+        return std::abs(after - before) >=
+                   std::abs(p_wall_off.diff_check_dist_dia) &&
+               se->ego.right45_dist < param->dia_turn_th_r;
+      },
+      // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
+      [=]() {
+        return se->ego.left45_dist > p_wall_off.noexist_dia_th_l &&
+               se->ego.left45_dist_diff > 0;
+      },
+      // detect_wall_off_by_deviation - 微分による壁切れ終了検出
+      [=]() {
+        return se->ego.left45_dist_diff > p_wall_off.div_th_dia_l &&
+               se->ego.left45_2_dist_diff > 0 &&
+               //  se->ego.left45_3_dist_diff > 0 && //
+               se->ego.left45_dist < 100;
+      },
+      // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
+      [=]() { return se->ego.left45_dist > p_wall_off.noexist_dia_th_l2; },
+  };
+  return *left_dia_strategy;
+}
+
+DiagonalWallOffStrategy &WallOffController::get_right_dia_strategy() {
+  const auto se = get_sensing_entity();
+  const auto p_wall_off = get_wall_off_param();
+
+  if (right_dia_strategy.has_value()) {
+    return *right_dia_strategy;
+  }
+
+  right_dia_strategy = DiagonalWallOffStrategy{
+      // exist_dia_wall_start - 斜め壁切れ開始の判定（exist=trueの場合）
+      [=]() { return se->ego.right45_dist < p_wall_off.exist_dia_th_r; },
+      // exist_dia_wall_start_alt - 斜め壁切れ開始の判定（exist=falseの場合）
+      [=]() { return se->ego.right45_dist < p_wall_off.exist_dia_th_r2; },
+      // detect_pass_through_case1 - 見切れた場合の検出
+      [=](float before, float after, float init) {
+        return std::abs(after - before) >=
+                   std::abs(p_wall_off.diff_check_dist_dia_2) &&
+               (se->ego.right45_dist - init) > param->wall_off_pass_dist;
+      },
+      // detect_pass_through_case2 - 反対側の壁ありの場合の検出
+      [=](float before, float after, float init) {
+        return std::abs(after - before) >=
+                   std::abs(p_wall_off.diff_check_dist_dia) &&
+               se->ego.left45_dist < param->dia_turn_th_l;
+      },
+      // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
+      [=]() {
+        return se->ego.right45_dist > p_wall_off.noexist_dia_th_r &&
+               se->ego.right45_dist_diff > 0;
+      },
+      // detect_wall_off_by_deviation - 微分による壁切れ終了検出
+      [=]() {
+        return se->ego.right45_dist_diff > p_wall_off.div_th_dia_r &&
+               se->ego.right45_2_dist_diff > 0 &&
+               //  se->ego.right45_3_dist_diff > 0 &&
+               se->ego.right45_dist < 100;
+      },
+      // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
+      [=]() { return se->ego.right45_dist > p_wall_off.noexist_dia_th_r2; },
+  };
+  return *right_dia_strategy;
 }

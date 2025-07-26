@@ -1746,6 +1746,8 @@ void MainTask::load_param() {
     load_offset_param();
     mp->wall_off_controller->get_right_strategy();
     mp->wall_off_controller->get_left_strategy();
+    mp->wall_off_controller->get_right_dia_strategy();
+    mp->wall_off_controller->get_left_dia_strategy();
     // load_slalom_param();
   }
 }
@@ -2925,9 +2927,8 @@ void MainTask::test_dia_walloff() {
 
   ps.dist = param->cell / 2 * std::sqrt(2);
   ps.dia_mode = true;
-  bool exist = false;
   bool use_oppo_wall = false;
-  mp->wall_off_dia(rorl2, ps, exist, use_oppo_wall);
+  mp->wall_off_dia(rorl2, ps, use_oppo_wall);
 
   ps.dist = ps.dist - 5;
   ps.v_max = sys.test.v_max;

@@ -510,9 +510,8 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
                                                  : param->offset_after_turn_l;
   } else if (sp.type == TurnType::Dia45_2 || sp.type == TurnType::Dia135_2 ||
              sp.type == TurnType::Dia90) {
-    bool exist = false;
     bool use_oppo_wall = false;
-    bool result = wall_off_dia(td, ps_front, exist, use_oppo_wall);
+    bool result = wall_off_dia(td, ps_front, use_oppo_wall);
     float dist = 0;
     if (result && !use_oppo_wall) {
       dist = wall_off_controller->calculate_dia_wall_off_distance(td, sp.type);
@@ -1184,9 +1183,8 @@ void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
 
 bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
                                             param_straight_t &ps_front,
-                                            bool &exist, bool &use_oppo_wall) {
-  return wall_off_controller->execute_wall_off_dia(td, ps_front, exist,
-                                                   use_oppo_wall);
+                                            bool &use_oppo_wall) {
+  return wall_off_controller->execute_wall_off_dia(td, ps_front, use_oppo_wall);
 }
 
 void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,

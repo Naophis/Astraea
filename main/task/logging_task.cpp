@@ -735,7 +735,7 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->pos_x = floatToHalf(sensing_result->ego.pos_x);
   ld->pos_y = floatToHalf(sensing_result->ego.pos_y);
 
-  if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 10000) {
+  if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 7500) {
     log_vec.emplace_back(std::move(ld));
     idx_slalom_log++;
   }

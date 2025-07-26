@@ -63,7 +63,7 @@ public:
   MotionResult front_ctrl(bool limit);
 
   void wall_off(TurnDirection td, param_straight_t &ps_front);
-  bool wall_off_dia(TurnDirection td, param_straight_t &ps_front, bool &exist,
+  bool wall_off_dia(TurnDirection td, param_straight_t &ps_front,
                     bool &use_oppo_wall);
   void req_error_reset();
 
