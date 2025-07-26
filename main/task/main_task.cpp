@@ -1744,6 +1744,8 @@ void MainTask::load_param() {
     load_sensor_param();
     load_turn_param_profiles(false, 0);
     load_offset_param();
+    mp->wall_off_controller->get_right_strategy();
+    mp->wall_off_controller->get_left_strategy();
     // load_slalom_param();
   }
 }

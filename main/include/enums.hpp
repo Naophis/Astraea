@@ -56,6 +56,7 @@ enum class FailSafe : int {
 enum class MotionResult : int {
   NONE = 0,
   ERROR = 1,
+  WALL_OFF_DETECTED = 2,
 };
 enum class SearchResult : int {
   SUCCESS = 0,

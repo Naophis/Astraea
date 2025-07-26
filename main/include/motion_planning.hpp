@@ -10,13 +10,14 @@
 #include "include/planning_task.hpp"
 #include "include/trajectory_creator.hpp"
 #include "include/ui.hpp"
+#include "include/wall_off_controller.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 class MotionPlanning {
 public:
-  MotionPlanning() {}
+  MotionPlanning();
   virtual ~MotionPlanning() {}
 
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
@@ -74,11 +75,12 @@ public:
   QueueHandle_t *qh;
   void set_queue_handler(QueueHandle_t &_qh) { qh = &_qh; }
   TaskHandle_t *th;
-  void set_task_handler(TaskHandle_t &_th) { th = &_th; }
+  void set_task_handler(TaskHandle_t &_th);
 
   void notify() {
     xTaskNotifyGive(notify_handle); //
   }
+  std::shared_ptr<WallOffController> wall_off_controller;
 
 private:
   TaskHandle_t notify_handle = xTaskGetCurrentTaskHandle();
@@ -97,6 +99,7 @@ private:
   TrajectoryCreator tc;
   std::shared_ptr<PlanningTask> pt;
   std::shared_ptr<LoggingTask> lt;
+
   // const float th_offset_dist = 5.0;
   param_straight_t ps_front;
   param_straight_t ps_back;

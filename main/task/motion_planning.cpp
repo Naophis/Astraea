@@ -1,17 +1,29 @@
 #include "include/motion_planning.hpp"
 
+MotionPlanning::MotionPlanning() {
+  wall_off_controller = std::make_shared<WallOffController>();
+}
+
 void MotionPlanning::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
   tgt_val = _tgt_val;
+  wall_off_controller->set_tgt_val(_tgt_val);
 }
 
 void MotionPlanning::set_input_param_entity(
     std::shared_ptr<input_param_t> &_param) {
   param = _param;
+  wall_off_controller->set_input_param_entity(_param);
 }
 
 void MotionPlanning::set_sensing_entity(
     std::shared_ptr<sensing_result_entity_t> &_entity) {
   sensing_result = _entity;
+  wall_off_controller->set_sensing_entity(_entity);
+}
+
+void MotionPlanning::set_task_handler(TaskHandle_t &_th) {
+  th = &_th;
+  wall_off_controller->set_task_handler(_th);
 }
 
 void MotionPlanning::set_userinterface(std::shared_ptr<UserInterface> &_ui) {
@@ -135,53 +147,14 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
         return MotionResult::NONE;
       }
     }
-    if (search_mode && param->wall_off_dist.search_wall_off_enable) {
-      // watch wall off
-      if (wall_off_state == 0) {
-        if (sensing_result->ego.right45_dist <
-                param->wall_off_dist.exist_dist_r &&
-            exist_right) {
-          wall_off_state |= 1;
-        }
-        if (sensing_result->ego.left45_dist <
-                param->wall_off_dist.exist_dist_l &&
-            exist_left) {
-          wall_off_state |= 2;
-        }
-      } else if (wall_off_state == 3 && exist_right && exist_left) {
-        if (sensing_result->ego.right45_dist >
-            param->wall_off_dist.noexist_th_r) {
-          wall_off_state = 4;
-          p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
-          param->sen_ref_p.normal.exist.left45 = left;
-          param->sen_ref_p.normal.exist.right45 = right;
-          return go_straight(p, fake_adachi, false);
-        } else if (sensing_result->ego.left45_dist >
-                   param->wall_off_dist.noexist_th_l) {
-          wall_off_state = 4;
-          p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
-          param->sen_ref_p.normal.exist.left45 = left;
-          param->sen_ref_p.normal.exist.right45 = right;
-          return go_straight(p, fake_adachi, false);
-        }
-      } else if (wall_off_state == 1 && exist_right) {
-        if (sensing_result->ego.right45_dist >
-            param->wall_off_dist.noexist_th_r) {
-          wall_off_state = 4;
-          p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
-          param->sen_ref_p.normal.exist.left45 = left;
-          param->sen_ref_p.normal.exist.right45 = right;
-          return go_straight(p, fake_adachi, false);
-        }
-      } else if (wall_off_state == 2 && exist_left) {
-        if (sensing_result->ego.left45_dist >
-            param->wall_off_dist.noexist_th_l) {
-          wall_off_state = 4;
-          p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
-          param->sen_ref_p.normal.exist.left45 = left;
-          param->sen_ref_p.normal.exist.right45 = right;
-          return go_straight(p, fake_adachi, false);
-        }
+    // 壁切れ処理をWallOffControllerに委任
+    if (wall_off_controller) {
+      auto wall_off_result =
+          wall_off_controller->execute_search_wall_off(p, search_mode);
+      if (wall_off_result == MotionResult::WALL_OFF_DETECTED) {
+        param->sen_ref_p.normal.exist.left45 = left;
+        param->sen_ref_p.normal.exist.right45 = right;
+        return go_straight(p, fake_adachi, false);
       }
     }
 
@@ -542,33 +515,8 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     bool result = wall_off_dia(td, ps_front, exist, use_oppo_wall);
     float dist = 0;
     if (result && !use_oppo_wall) {
-      if (sp.type == TurnType::Dia135_2) {
-        if (td == TurnDirection::Right) {
-          const auto ref = param->dia_wall_off_ref_r;
-          // exist ? param->dia_wall_off_ref_r : param->dia_wall_off_ref_r2;
-          dist = (ref - se->sen.r45.sensor_dist) / ROOT2;
-        } else {
-          const auto ref = param->dia_wall_off_ref_l;
-          // exist ? param->dia_wall_off_ref_l : param->dia_wall_off_ref_l2;
-          dist = (ref - se->sen.l45.sensor_dist) / ROOT2;
-        }
-        dist = std::clamp(dist, -param->dia_offset_max_dist,
-                          param->dia_offset_max_dist);
-      } else if (sp.type == TurnType::Dia90) {
-        if (td == TurnDirection::Right) {
-          const auto ref = param->dia_wall_off_ref_r;
-          // exist ? param->dia_wall_off_ref_r : param->dia_wall_off_ref_r2;
-          dist = (ref - se->sen.r45.sensor_dist) / ROOT2;
-        } else {
-          const auto ref = param->dia_wall_off_ref_l;
-          // exist ? param->dia_wall_off_ref_l : param->dia_wall_off_ref_l2;
-          dist = (ref - se->sen.l45.sensor_dist) / ROOT2;
-        }
-        dist = std::clamp(dist, -param->dia_offset_max_dist,
-                          param->dia_offset_max_dist);
-      }
+      dist = wall_off_controller->calculate_dia_wall_off_distance(td, sp.type);
     }
-    // TODO: ここでdistを使ってps_front.distを調整する
     ps_front.dist = ps_front.dist - dist;
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
@@ -1231,510 +1179,14 @@ MotionResult IRAM_ATTR MotionPlanning::wall_off(param_straight_t &p, bool dia) {
 
 void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
                                         param_straight_t &ps_front) {
-  const auto se = get_sensing_entity();
-  bool exist = false;
-  const auto r45_start_dist = se->ego.right45_dist;
-  const auto l45_start_dist = se->ego.left45_dist;
-  if (td == TurnDirection::Right) {
-    exist =
-        se->ego.right45_dist < param->wall_off_dist.wall_off_exist_wall_th_r;
-  } else {
-    exist = se->ego.left45_dist < param->wall_off_dist.wall_off_exist_wall_th_l;
-  }
-  tgt_val->nmr.v_max = ps_front.v_max;
-  tgt_val->nmr.v_end = ps_front.v_end;
-  tgt_val->nmr.accl = ps_front.accl;
-  tgt_val->nmr.decel = ps_front.decel;
-  tgt_val->nmr.dist = param->wall_off_wait_dist;
-  tgt_val->nmr.w_max = 0;
-  tgt_val->nmr.w_end = 0;
-  tgt_val->nmr.alpha = 0;
-  tgt_val->nmr.ang = 0;
-  tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  tgt_val->motion_type = MotionType::WALL_OFF;
-  tgt_val->nmr.motion_type = MotionType::WALL_OFF;
-  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
-  tgt_val->nmr.dia_mode = ps_front.dia_mode;
-  tgt_val->nmr.sct = SensorCtrlType::Straight;
-  tgt_val->nmr.timstamp++;
-  float tmp_dist_before = tgt_val->global_pos.dist;
-  float tmp_dist_after = tmp_dist_before;
-
-  xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
-  vTaskDelay(1.0 / portTICK_RATE_MS);
-  if (td == TurnDirection::Right) {
-    while (true) {
-      tmp_dist_after = tgt_val->global_pos.dist;
-      if (se->ego.right45_dist < param->wall_off_dist.exist_dist_r) {
-        break;
-      }
-      if (!exist) {
-        if (se->ego.right45_dist < param->wall_off_dist.exist_dist_r2) {
-          break;
-        }
-        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_r2 &&
-            se->ego.right45_2_dist_diff > 0 && //
-            // se->ego.right45_3_dist_diff > 0 && //
-            se->ego.right45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.right_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      } else {
-        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_r2 &&
-            se->ego.right45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.right_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-        break;
-      }
-      //　見逃し対応：見切れた場合
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist)) {
-        if ((se->ego.right45_dist_diff > param->wall_off_dist.diff_dist_th_r) &&
-            (se->ego.right45_2_dist_diff > 0) &&
-            // (se->ego.right45_3_dist_diff > 0)
-            (se->ego.right45_dist_diff < 100)) {
-          ps_front.dist -= param->wall_off_pass_through_offset_r;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-      //　見逃し対応：通過して完全に壁がなくなった場合
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist)) {
-        if (se->ego.right45_dist > 170) {
-          ps_front.dist -= param->wall_off_pass_through_offset_r;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-
-      // 見逃し対策、壁がないときに見切れた場合
-      if (!exist) {
-        if (se->ego.right45_dist_diff > param->wall_off_dist.right_diff_th &&
-            se->ego.right45_dist < 100) {
-          ps_front.dist -= param->wall_off_pass_through_offset_r;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-        }
-      }
-
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_front_move_dist_th)) {
-        // if (param->wall_off_front_ctrl_min < se->ego.left90_far_dist &&
-        //     se->ego.left90_far_dist < param->front_dist_offset4 &&
-        //     param->wall_off_front_ctrl_min < se->ego.right90_far_dist &&
-        //     se->ego.right90_far_dist < param->front_dist_offset4) {
-        //   if (se->ego.front_far_dist < param->front_dist_offset3) {
-        //     ps_front.dist -=
-        //         (param->front_dist_offset2 - se->ego.front_far_dist);
-        //     ps_front.dist = MAX(ps_front.dist, 0.1);
-        //     return;
-        //   }
-        // }
-        // use near front sensor
-        if (param->wall_off_front_ctrl_min < se->ego.left90_dist &&
-            se->ego.left90_dist < param->front_dist_offset4 &&
-            param->wall_off_front_ctrl_min < se->ego.right90_dist &&
-            se->ego.right90_dist < param->front_dist_offset4) {
-          if (se->ego.front_far_dist < param->front_dist_offset3) {
-            ps_front.dist -= (param->front_dist_offset2 - se->ego.front_dist);
-            ps_front.dist = MAX(ps_front.dist, 0.1);
-            return;
-          }
-        }
-      }
-
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_front_move_dist_th)) {
-        if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
-          ps_front.dist -= param->wall_off_pass_through_offset_r;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-      if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-        return;
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-    while (true) {
-      tmp_dist_after = tgt_val->global_pos.dist;
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_front_move_dist_th)) {
-        // if (param->wall_off_front_ctrl_min < se->ego.left90_far_dist &&
-        //     se->ego.left90_far_dist < param->front_dist_offset4 &&
-        //     param->wall_off_front_ctrl_min < se->ego.right90_far_dist &&
-        //     se->ego.right90_far_dist < param->front_dist_offset4) {
-        //   if (se->ego.front_far_dist < param->front_dist_offset3) {
-        //     ps_front.dist -=
-        //         (param->front_dist_offset2 - se->ego.front_far_dist);
-        //     ps_front.dist = MAX(ps_front.dist, 0.1);
-        //     return;
-        //   }
-        // }
-        if (param->wall_off_front_ctrl_min < se->ego.left90_dist &&
-            se->ego.left90_dist < param->front_dist_offset4 &&
-            param->wall_off_front_ctrl_min < se->ego.right90_dist &&
-            se->ego.right90_dist < param->front_dist_offset4) {
-          if (se->ego.front_far_dist < param->front_dist_offset3) {
-            ps_front.dist -= (param->front_dist_offset2 - se->ego.front_dist);
-            ps_front.dist = MAX(ps_front.dist, 0.1);
-            return;
-          }
-        }
-      }
-      if (exist) {
-        if (se->ego.right45_dist > param->wall_off_dist.noexist_th_r &&
-            se->ego.right45_dist_diff > 0) {
-          ps_front.dist += param->wall_off_dist.right_str_exist;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      } else {
-        // 壁が見切れかけ始めたら
-        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_r &&
-            se->ego.right45_2_dist_diff > 0 && //
-            // se->ego.right45_3_dist_diff > 0 && //
-            se->ego.right45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.right_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-        if (se->ego.right45_dist > param->wall_off_dist.noexist_th_r2) {
-          ps_front.dist += param->wall_off_dist.right_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-
-      if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-        return;
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-  } else {
-    while (true) {
-      tmp_dist_after = tgt_val->global_pos.dist;
-      if (se->ego.left45_dist < param->wall_off_dist.exist_dist_l) {
-        break;
-      }
-      if (!exist) {
-        if (se->ego.left45_dist < param->wall_off_dist.exist_dist_l2) {
-          break;
-        }
-        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_l3 &&
-            se->ego.left45_2_dist_diff > 0 && //
-            // se->ego.left45_3_dist_diff > 0 && //
-            se->ego.left45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.left_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      } else {
-        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_l2 &&
-            se->ego.left45_2_dist_diff > 0 && //
-            // se->ego.left45_2_dist_diff > 0 && //
-            se->ego.left45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.left_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-        break;
-      }
-      //　見逃し対応：見切れた場合
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist)) {
-        if ((se->ego.left45_dist_diff > param->wall_off_dist.diff_dist_th_l) &&
-            (se->ego.left45_2_dist_diff > 0) && //
-            // (se->ego.left45_3_dist_diff > 0) && //
-            se->ego.left45_dist_diff < 100) {
-          ps_front.dist -= param->wall_off_pass_through_offset_l;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-      //　見逃し対応：通過して完全に壁がなくなった場合
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist)) {
-        if (se->ego.left45_dist > 170) {
-          ps_front.dist -= param->wall_off_pass_through_offset_l;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-
-      // 見逃し対策、壁がないときに見切れた場合
-      if (!exist) {
-        if (se->ego.left45_dist_diff > param->wall_off_dist.left_diff_th &&
-            se->ego.left45_dist < 100) {
-          ps_front.dist -= param->wall_off_pass_through_offset_l;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-        }
-      }
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_front_move_dist_th)) {
-        // if (param->wall_off_front_ctrl_min < se->ego.left90_far_dist &&
-        //     se->ego.left90_far_dist < param->front_dist_offset4 &&
-        //     param->wall_off_front_ctrl_min < se->ego.right90_far_dist &&
-        //     se->ego.right90_far_dist < param->front_dist_offset4) {
-        //   if (se->ego.front_far_dist < param->front_dist_offset3) {
-        //     ps_front.dist -=
-        //         (param->front_dist_offset2 - se->ego.front_far_dist);
-        //     ps_front.dist = MAX(ps_front.dist, 0.1);
-        //     return;
-        //   }
-        // }
-        if (param->wall_off_front_ctrl_min < se->ego.left90_dist &&
-            se->ego.left90_dist < param->front_dist_offset4 &&
-            param->wall_off_front_ctrl_min < se->ego.right90_dist &&
-            se->ego.right90_dist < param->front_dist_offset4) {
-          if (se->ego.front_far_dist < param->front_dist_offset3) {
-            ps_front.dist -= (param->front_dist_offset2 - se->ego.front_dist);
-            ps_front.dist = MAX(ps_front.dist, 0.1);
-            return;
-          }
-        }
-      }
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_front_move_dist_th)) {
-        if (std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist)) {
-          ps_front.dist -= param->wall_off_pass_through_offset_r;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-      if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-        return;
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-    while (true) {
-      tmp_dist_after = tgt_val->global_pos.dist;
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_front_move_dist_th)) {
-        // if (40 < se->ego.left90_far_dist &&
-        //     se->ego.left90_far_dist < param->front_dist_offset4 &&
-        //     40 < se->ego.right90_far_dist &&
-        //     se->ego.right90_far_dist < param->front_dist_offset4) {
-        //   if (se->ego.front_far_dist < param->front_dist_offset3) {
-        //     ps_front.dist -=
-        //         (param->front_dist_offset2 - se->ego.front_far_dist);
-        //     ps_front.dist = MAX(ps_front.dist, 0.1);
-        //     return;
-        //   }
-        // }
-        if (param->wall_off_front_ctrl_min < se->ego.left90_dist &&
-            se->ego.left90_dist < param->front_dist_offset4 &&
-            param->wall_off_front_ctrl_min < se->ego.right90_dist &&
-            se->ego.right90_dist < param->front_dist_offset4) {
-          if (se->ego.front_far_dist < param->front_dist_offset3) {
-            ps_front.dist -= (param->front_dist_offset2 - se->ego.front_dist);
-            ps_front.dist = MAX(ps_front.dist, 0.1);
-            return;
-          }
-        }
-      }
-      if (exist) {
-        if (se->ego.left45_dist > param->wall_off_dist.noexist_th_l &&
-            se->ego.left45_dist_diff > 0) {
-          ps_front.dist += param->wall_off_dist.left_str_exist;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      } else {
-        // 壁が見切れかけ始めたら
-        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_l &&
-            se->ego.left45_2_dist_diff > 0 && //
-            // se->ego.left45_3_dist_diff > 0 && //
-            se->ego.left45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.left_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-        if (se->ego.left45_dist > param->wall_off_dist.noexist_th_l2) {
-          ps_front.dist += param->wall_off_dist.left_str;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return;
-        }
-      }
-      if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-        return;
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-  }
+  wall_off_controller->execute_wall_off(td, ps_front);
 }
 
 bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,
                                             param_straight_t &ps_front,
                                             bool &exist, bool &use_oppo_wall) {
-  const auto se = get_sensing_entity();
-  tgt_val->nmr.v_max = ps_front.v_max;
-  tgt_val->nmr.v_end = ps_front.v_end;
-  tgt_val->nmr.accl = ps_front.accl;
-  tgt_val->nmr.decel = ps_front.decel;
-  tgt_val->nmr.dist = param->wall_off_wait_dist_dia;
-  tgt_val->nmr.w_max = 0;
-  tgt_val->nmr.w_end = 0;
-  tgt_val->nmr.alpha = 0;
-  tgt_val->nmr.ang = 0;
-  tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  tgt_val->motion_type = MotionType::WALL_OFF_DIA;
-  tgt_val->nmr.motion_type = MotionType::WALL_OFF_DIA;
-  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
-  tgt_val->nmr.dia_mode = ps_front.dia_mode;
-  tgt_val->nmr.sct = SensorCtrlType::Dia;
-  tgt_val->nmr.timstamp++;
-
-  float tmp_dist_before = tgt_val->global_pos.dist;
-  float tmp_dist_after = tmp_dist_before;
-
-  float init_r45_dist = sensing_result->ego.right45_dist;
-  float init_l45_dist = sensing_result->ego.left45_dist;
-
-  exist = false;
-  if (td == TurnDirection::Right) {
-    exist = se->ego.right45_dist <
-            param->wall_off_dist.wall_off_exist_dia_wall_th_r;
-  } else {
-    exist =
-        se->ego.left45_dist < param->wall_off_dist.wall_off_exist_dia_wall_th_l;
-  }
-  use_oppo_wall = false;
-
-  if (td == TurnDirection::Right) {
-    while (true) {
-      // 壁切れ開始
-      if (exist) {
-        if (se->ego.right45_dist < param->wall_off_dist.exist_dia_th_r) {
-          break;
-        }
-        break;
-      } else {
-        if (se->ego.right45_dist < param->wall_off_dist.exist_dia_th_r2) {
-          break;
-        }
-      }
-      // 反対側の壁あり
-      tmp_dist_after = tgt_val->global_pos.dist;
-      // 見切れた場合
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist_dia_2)) {
-        if ((se->ego.right45_dist - init_r45_dist) >
-            param->wall_off_pass_dist) {
-          ps_front.dist += param->wall_off_dist.right_dia_oppo;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return false;
-        }
-      }
-      // 反対側の壁あり
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist_dia)) {
-        if (se->ego.left45_dist < param->dia_turn_th_l) {
-          // ps_front.dist += param->wall_off_dist.right_dia_oppo;
-          float diff = (se->ego.left45_dist - param->dia_turn_ref_l);
-          diff = std::clamp(diff, -param->dia_turn_max_dist_l,
-                            param->dia_turn_max_dist_l);
-          ps_front.dist = ps_front.dist + diff;
-          use_oppo_wall = true;
-          return false;
-        }
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-    while (true) {
-      // 壁切れ終了
-      if (exist) {
-        if (se->ego.right45_dist > param->wall_off_dist.noexist_dia_th_r &&
-            se->ego.right45_dist_diff > 0) {
-          ps_front.dist += param->wall_off_dist.right_dia;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return true;
-        }
-        if (se->ego.right45_dist_diff > param->wall_off_dist.div_th_dia_r &&
-            se->ego.right45_2_dist_diff > 0 &&
-            se->ego.right45_3_dist_diff > 0 && se->ego.right45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.right_dia;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return true;
-        }
-      } else {
-        if (se->ego.right45_dist > param->wall_off_dist.noexist_dia_th_r2) {
-          ps_front.dist += param->wall_off_dist.right_dia2;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return true;
-        }
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-  } else {
-    while (true) {
-      // 壁切れ開始
-      if (exist) {
-        if (se->ego.left45_dist < param->wall_off_dist.exist_dia_th_l) {
-          break;
-        }
-        break;
-      } else {
-        if (se->ego.left45_dist < param->wall_off_dist.exist_dia_th_l2) {
-          break;
-        }
-      }
-      // 反対側の壁あり
-      tmp_dist_after = tgt_val->global_pos.dist;
-      //  見切れた場合
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist_dia_2)) {
-        if ((se->ego.left45_dist - init_l45_dist) > param->wall_off_pass_dist) {
-          ps_front.dist += param->wall_off_dist.left_dia_oppo;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return false;
-        }
-      }
-      // 反対側の壁あり
-      if (std::abs(tmp_dist_after - tmp_dist_before) >=
-          std::abs(param->wall_off_dist.diff_check_dist_dia)) {
-        if (se->ego.right45_dist < param->dia_turn_th_r) {
-          // ps_front.dist += param->wall_off_dist.left_dia_oppo;
-          float diff = (se->ego.right45_dist - param->dia_turn_ref_r);
-          diff = std::clamp(diff, -param->dia_turn_max_dist_r,
-                            param->dia_turn_max_dist_r);
-          ps_front.dist = ps_front.dist + diff;
-          use_oppo_wall = true;
-          return false;
-        }
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-    while (true) {
-      // 壁切れ終了
-      if (exist) {
-        if (se->ego.left45_dist > param->wall_off_dist.noexist_dia_th_l &&
-            se->ego.left45_dist_diff > 0) {
-          ps_front.dist += param->wall_off_dist.left_dia;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return true;
-        }
-        if (se->ego.left45_dist_diff > param->wall_off_dist.div_th_dia_l && //
-            se->ego.left45_2_dist_diff > 0 &&                               //
-            se->ego.left45_3_dist_diff > 0 &&                               //
-            se->ego.left45_dist < 100) {
-          ps_front.dist += param->wall_off_dist.left_dia;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return true;
-        }
-      } else {
-        if (se->ego.left45_dist > param->wall_off_dist.noexist_dia_th_l2) {
-          ps_front.dist += param->wall_off_dist.left_dia2;
-          ps_front.dist = MAX(ps_front.dist, 0.1);
-          return true;
-        }
-      }
-      vTaskDelay(1.0 / portTICK_RATE_MS);
-    }
-  }
+  return wall_off_controller->execute_wall_off_dia(td, ps_front, exist,
+                                                   use_oppo_wall);
 }
 
 void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,

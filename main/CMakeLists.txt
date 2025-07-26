@@ -28,6 +28,7 @@ set(COMPONENT_SRCS
     "task/asm330lhh.cpp"
     "task/kalman_filter.cpp"
     "task/kalman_filter_matrix.cpp"
+    "task/wall_off_controller.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
     "search/search_controller.cpp"

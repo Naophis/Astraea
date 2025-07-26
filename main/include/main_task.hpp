@@ -24,6 +24,7 @@
 #include "include/motion_planning.hpp"
 #include "include/path_creator.hpp"
 #include "include/search_controller.hpp"
+#include "include/wall_off_controller.hpp"
 #include "include/ui.hpp"
 
 // #include "libs/nlohmnn-json/json.hpp"
