@@ -64,7 +64,7 @@ public:
 
   void wall_off(TurnDirection td, param_straight_t &ps_front);
   bool wall_off_dia(TurnDirection td, param_straight_t &ps_front,
-                    bool &use_oppo_wall);
+                    bool &use_oppo_wall, bool &exist_wall);
   void req_error_reset();
 
   void system_identification(MotionType mt, float duty_l, float duty_r,

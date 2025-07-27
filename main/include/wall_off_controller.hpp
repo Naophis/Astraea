@@ -13,8 +13,8 @@ struct WallSensorStrategy {
   std::function<bool()> wall_missing;
   std::function<bool()> exist_wall;
   std::function<bool()> find_vertical_wall;
-  std::function<bool(float, float)> detect_wall_missing;
-  std::function<bool(float, float)> detect_missing_and_passed;
+  std::function<bool(float, float)> detect_pass_through_case1;
+  std::function<bool(float, float)> detect_pass_through_case2;
   std::function<bool(float, float)> detect_distance;
   std::function<bool()> detect_missing_by_deviation;
   std::function<bool()> detect_wall_off;
@@ -47,7 +47,7 @@ public:
 
   // 斜め走行時の壁切れ処理
   bool execute_wall_off_dia(TurnDirection td, param_straight_t &ps_front,
-                            bool &use_oppo_wall);
+                            bool &use_oppo_wall, bool &exist_wall);
 
   // 検索時の壁切れ処理（go_straight内で使用）
   MotionResult execute_search_wall_off(param_straight_t &p, bool search_mode);
@@ -58,7 +58,8 @@ public:
   void set_sensing_entity(std::shared_ptr<sensing_result_entity_t> &_entity);
   void set_task_handler(TaskHandle_t &_th);
   // 斜め走行用の壁切れ距離計算
-  float calculate_dia_wall_off_distance(TurnDirection td, TurnType turn_type);
+  float calculate_dia_wall_off_distance(TurnDirection td, TurnType turn_type,
+                                        bool &exist_wall);
 
 private:
   std::shared_ptr<input_param_t> param;
@@ -86,11 +87,11 @@ private:
 
   // 右壁の斜め壁切れ処理
   bool process_right_wall_off_dia(param_straight_t &ps_front,
-                                  bool &use_oppo_wall);
+                                  bool &use_oppo_wall, bool &exist_wall);
 
   // 左壁の斜め壁切れ処理
   bool process_left_wall_off_dia(param_straight_t &ps_front,
-                                 bool &use_oppo_wall);
+                                 bool &use_oppo_wall, bool &exist_wall);
 
   std::optional<WallSensorStrategy> right_strategy;
   std::optional<WallSensorStrategy> left_strategy;

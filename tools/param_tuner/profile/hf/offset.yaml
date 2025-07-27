@@ -81,8 +81,8 @@ wall_off_hold_exist_dist_r: 49
 wall_off_hold_noexist_th_l: 50
 wall_off_hold_noexist_th_r: 50
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: -1.0
-wall_off_hold_dist_str_r_exist: -1.0
+wall_off_hold_dist_str_l_exist: 0.5
+wall_off_hold_dist_str_r_exist: -0.5
 
 # 壁切れ In2(最初からないとき)
 wall_off_hold_exist_dist_l2: 64
@@ -91,8 +91,8 @@ wall_off_hold_exist_dist_r2: 64
 wall_off_hold_noexist_th_l2: 66
 wall_off_hold_noexist_th_r2: 66
 # 壁切れ オフセット距離(最初からないとき)
-wall_off_hold_dist_str_l: -2.0
-wall_off_hold_dist_str_r: -2.0
+wall_off_hold_dist_str_l: -0.0
+wall_off_hold_dist_str_r: -1.0
 
 # 壁切れ 偏差(最初見えず、柱で反応)
 wall_off_hold_div_th_l: 0.5
@@ -133,8 +133,8 @@ wall_off_exist_dia_wall_th_r: 58
 
 ### 最初から壁がある場合
 # 壁切れ In(斜め)
-wall_off_hold_exist_dist_dia_l: 38
-wall_off_hold_exist_dist_dia_r: 38
+wall_off_hold_exist_dist_dia_l: 39
+wall_off_hold_exist_dist_dia_r: 39
 # 壁切れ Out(斜め)
 wall_off_hold_noexist_dia_th_l: 40
 wall_off_hold_noexist_dia_th_r: 40
@@ -146,12 +146,15 @@ wall_off_hold_dist_dia_r: 3.0
 # dia_wall_off_ref_r: 32.0
 dia_wall_off_ref_l: 24.0 #dia135
 dia_wall_off_ref_r: 24.0 #dia135
-dia_wall_off_ref_l3: 35.0 #dia45
-dia_wall_off_ref_r3: 30.0 #dia45
+#斜め壁切れ時のmax接近距離
+dia_wall_off_ref_l_wall: 32.125 #exist_wall
+dia_wall_off_ref_r_wall: 32.125 #exist_wall
+dia_wall_off_ref_l_piller: 38.8125 #noexist_wall
+dia_wall_off_ref_r_piller: 38.8125 #noexist_wall
 
 # 斜め壁切れ偏差
-wall_off_hold_div_th_dia_l: 1.50
-wall_off_hold_div_th_dia_r: 1.50
+wall_off_hold_div_th_dia_l: 0.250
+wall_off_hold_div_th_dia_r: 0.250
 
 ### 最初から壁がない場合
 # 壁切れ In(斜め)
@@ -163,13 +166,10 @@ wall_off_hold_noexist_dia_th_r2: 50
 # 壁切れ オフセット距離
 wall_off_hold_dist_dia_l2: 1.0
 wall_off_hold_dist_dia_r2: 1.0
-#斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l2: 43.15 #not use
-dia_wall_off_ref_r2: 36.950 #not use
 
 #斜めターン壁有り補正
-dia_turn_th_l: 55.5
-dia_turn_th_r: 57.0
+dia_turn_th_l: 61.0
+dia_turn_th_r: 61.0
 
 dia_turn_ref_l: 58.5
 dia_turn_ref_r: 60.0

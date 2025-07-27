@@ -1023,10 +1023,14 @@ void MainTask::load_offset_param() {
 
   param->dia_wall_off_ref_l = getItem(root, "dia_wall_off_ref_l")->valuedouble;
   param->dia_wall_off_ref_r = getItem(root, "dia_wall_off_ref_r")->valuedouble;
-  param->dia_wall_off_ref_l2 =
-      getItem(root, "dia_wall_off_ref_l2")->valuedouble;
-  param->dia_wall_off_ref_r2 =
-      getItem(root, "dia_wall_off_ref_r2")->valuedouble;
+  param->dia_wall_off_ref_l_wall =
+      getItem(root, "dia_wall_off_ref_l_wall")->valuedouble;
+  param->dia_wall_off_ref_r_wall =
+      getItem(root, "dia_wall_off_ref_r_wall")->valuedouble;
+  param->dia_wall_off_ref_l_piller =
+      getItem(root, "dia_wall_off_ref_l_piller")->valuedouble;
+  param->dia_wall_off_ref_r_piller =
+      getItem(root, "dia_wall_off_ref_r_piller")->valuedouble;
 
   param->dia_offset_max_dist =
       getItem(root, "dia_offset_max_dist")->valuedouble;
@@ -2928,7 +2932,8 @@ void MainTask::test_dia_walloff() {
   ps.dist = param->cell / 2 * std::sqrt(2);
   ps.dia_mode = true;
   bool use_oppo_wall = false;
-  mp->wall_off_dia(rorl2, ps, use_oppo_wall);
+  bool exist_wall = false;
+  mp->wall_off_dia(rorl2, ps, use_oppo_wall, exist_wall);
 
   ps.dist = ps.dist - 5;
   ps.v_max = sys.test.v_max;
