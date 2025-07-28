@@ -52,11 +52,8 @@ void IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
   vTaskDelay(1.0 / portTICK_RATE_MS);
 
-  if (td == TurnDirection::Right) {
-    process_right_wall_off(ps_front);
-  } else {
-    process_left_wall_off(ps_front);
-  }
+  return (td == TurnDirection::Right) ? process_right_wall_off(ps_front)
+                                      : process_left_wall_off(ps_front);
 }
 
 void IRAM_ATTR
@@ -323,15 +320,14 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   tgt_val->nmr.timstamp++;
 
   use_oppo_wall = false; // reset
+  exist_wall = false;    // reset
 
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
   vTaskDelay(1.0 / portTICK_RATE_MS);
 
-  if (td == TurnDirection::Right) {
-    return process_right_wall_off_dia(ps_front, use_oppo_wall, exist_wall);
-  } else {
-    return process_left_wall_off_dia(ps_front, use_oppo_wall, exist_wall);
-  }
+  return (td == TurnDirection::Right)
+             ? process_right_wall_off_dia(ps_front, use_oppo_wall, exist_wall)
+             : process_left_wall_off_dia(ps_front, use_oppo_wall, exist_wall);
 }
 
 MotionResult IRAM_ATTR WallOffController::execute_search_wall_off(
@@ -612,6 +608,7 @@ WallSensorStrategy &WallOffController::get_right_strategy() {
                 std::abs(p_wall_off.diff_check_dist)) &&
                se->ego.right45_dist_diff > p_wall_off.diff_dist_th_r &&
                se->ego.right45_2_dist_diff > 0 &&
+               se->ego.right45_3_dist_diff > 0 &&
                se->ego.right45_dist_diff < 100;
       },
       // detect_pass_through_case2
@@ -643,8 +640,9 @@ WallSensorStrategy &WallOffController::get_right_strategy() {
       // detect_wall_missing_by_deviation
       [=]() {
         return se->ego.right45_dist_diff > p_wall_off.div_th_r && //
-               se->ego.right45_2_dist_diff > 0                    //
-               && se->ego.right45_dist < 100;
+               se->ego.right45_2_dist_diff > 0 &&                 //
+               se->ego.right45_3_dist_diff > 0 &&                 //
+               se->ego.right45_dist < 100;
       },
       // detect_wall_off_vertical
       [=]() { return se->ego.right45_dist > p_wall_off.noexist_th_r2; },
@@ -674,8 +672,10 @@ WallSensorStrategy &WallOffController::get_left_strategy() {
       [=](float before, float after) {
         return (std::abs(after - before) >=
                 std::abs(p_wall_off.diff_check_dist)) &&
-               se->ego.left45_dist_diff > p_wall_off.diff_dist_th_l &&
-               se->ego.left45_2_dist_diff > 0 && se->ego.left45_dist < 100;
+               se->ego.left45_dist_diff > p_wall_off.diff_dist_th_l && //
+               se->ego.left45_2_dist_diff > 0 &&                       //
+               se->ego.left45_3_dist_diff > 0 &&                       //
+               se->ego.left45_dist < 100;
       },
       // detect_pass_through_case2
       [=](float before, float after) {
@@ -700,14 +700,14 @@ WallSensorStrategy &WallOffController::get_left_strategy() {
                 se->ego.left45_dist_diff > 0) ||                   //
                (se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
                 se->ego.left45_2_dist_diff > 0 &&                  //
-                // se->ego.left45_3_dist_diff > 0 &&               //
+                se->ego.left45_3_dist_diff > 0 &&                  //
                 se->ego.left45_dist < 100);
       },
       // detect_wall_missing_by_deviation
       [=]() {
         return se->ego.left45_dist_diff > p_wall_off.div_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                 //
-               //    se->ego.left45_3_dist_diff > 0 &&           //
+               se->ego.left45_3_dist_diff > 0 &&                 //
                se->ego.left45_dist < 100;
       },
       // detect_wall_off_vertical
@@ -747,14 +747,14 @@ DiagonalWallOffStrategy &WallOffController::get_left_dia_strategy() {
                 se->ego.left45_dist_diff > 0) ||                      //
                (se->ego.left45_dist_diff > p_wall_off.div_th_dia_l && //
                 se->ego.left45_2_dist_diff > 0 &&                     //
-                // se->ego.left45_3_dist_diff > 0 &&                  //
+                se->ego.left45_3_dist_diff > 0 &&                     //
                 se->ego.left45_dist < 100);
       },
       // detect_wall_off_by_deviation - 微分による壁切れ終了検出
       [=]() {
         return se->ego.left45_dist_diff > p_wall_off.div_th_dia_l &&
                se->ego.left45_2_dist_diff > 0 &&
-               //  se->ego.left45_3_dist_diff > 0 && //
+               se->ego.left45_3_dist_diff > 0 && //
                se->ego.left45_dist < 100;
       },
       // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
@@ -794,14 +794,14 @@ DiagonalWallOffStrategy &WallOffController::get_right_dia_strategy() {
                 se->ego.right45_dist_diff > 0) ||                      //
                (se->ego.right45_dist_diff > p_wall_off.div_th_dia_r && //
                 se->ego.right45_2_dist_diff > 0 &&                     //
-                // se->ego.right45_3_dist_diff > 0 &&                     //
+                se->ego.right45_3_dist_diff > 0 &&                     //
                 se->ego.right45_dist < 100);
       },
       // detect_wall_off_by_deviation - 微分による壁切れ終了検出
       [=]() {
-        return se->ego.right45_dist_diff > p_wall_off.div_th_dia_r &&
-               se->ego.right45_2_dist_diff > 0 &&
-               //  se->ego.right45_3_dist_diff > 0 &&
+        return se->ego.right45_dist_diff > p_wall_off.div_th_dia_r && //
+               se->ego.right45_2_dist_diff > 0 &&                     //
+               se->ego.right45_3_dist_diff > 0 &&                     //
                se->ego.right45_dist < 100;
       },
       // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
