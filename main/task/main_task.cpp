@@ -350,6 +350,7 @@ void MainTask::save_json_data(std::string &str) {
     return;
   // 書き込み&ファイルclose
   fprintf(f, res[1].c_str());
+  fflush(f);
   fclose(f);
   // printf("%s\n", str.c_str());
   ui->coin(25);
@@ -3123,6 +3124,7 @@ void MainTask::save_maze_data(bool write) {
     printf("delete maze data\n");
     fprintf(f, "null");
   }
+  fflush(f);
   fclose(f);
 
   printf("wall: [");
@@ -3160,6 +3162,7 @@ void MainTask::save_maze_kata_data(bool write) {
     printf("delete maze data\n");
     fprintf(f, "null");
   }
+  fflush(f);
   fclose(f);
   umount();
 }
@@ -3176,6 +3179,7 @@ void MainTask::save_maze_return_data(bool write) {
     printf("delete maze data\n");
     fprintf(f, "null");
   }
+  fflush(f);
   fclose(f);
   umount();
 }
