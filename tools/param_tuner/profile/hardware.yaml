@@ -136,6 +136,7 @@ gyro_pid_gain_limitter:
 sensor_deg_limitter_v: [0, 500, 1000, 2000, 4000, 5000, 6000, 7000, 8000, 12000]
 # sensor_deg_limitter_str: [125, 125, 125, 125, 125, 125, 125, 125, 125]
 sensor_deg_limitter_str: [5, 5, 75, 125, 125, 125, 125, 125, 125, 125]
+# sensor_deg_limitter_str: [0, 0, 75, 125, 125, 125, 125, 125, 125, 125]
 # sensor_deg_limitter_str: [8, 8, 50, 75, 75, 75, 75, 75, 75]
 # sensor_deg_limitter_str: [8, 8, 5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5]
 # sensor_deg_limitter_str: [25, 25, 25, 25, 25, 25, 25, 25, 25]
@@ -144,7 +145,7 @@ sensor_deg_limitter_str: [5, 5, 75, 125, 125, 125, 125, 125, 125, 125]
 sensor_deg_limitter_dia: [3, 3, 6, 12, 12, 8, 6, 4.5, 4.5, 4.5]
 # sensor_deg_limitter_dia: [3, 3, 4.5, 4.5, 4.5, 4.6, 4.5, 4.5, 4.5]
 sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
-# sensor_deg_limitter_piller: [0, 0, 0, 3, 3, 3, 3, 3, 3]
+# sensor_deg_limitter_piller: [0, 0, 0, 0, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
   mode: 3
@@ -172,10 +173,10 @@ motor_pid2:
   # b: 0.00
   # d: 0.0000195
 
-  p: 0.0000075
-  i: 0.000004125
+  p: 0.000025
+  i: 0.00000425
   b: 0.00
-  d: 0.0000085
+  d: 0.0000125
 
 
   # p: 0.00000825
@@ -200,11 +201,11 @@ motor_pid3:
   c: 0
 gyro_pid:
   mode: 3
-  p: 0.000325
+  p: 0.000575
   # i: 0.003275
-  i: 0.01365
+  i: 0.01465
   b: 0.0000275
-  d: 0.000295
+  d: 0.000775
   # d: 0.000045
   # c: 0.0
   
