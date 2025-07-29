@@ -1971,29 +1971,29 @@ void MainTask::task() {
         }
         search_ctrl->print_maze();
       } else if (mode_num == 2) {
-        path_run(0, 0, 0);
+        path_run(1, 1, 1);
       } else if (mode_num == 3) {
-        path_run(1, 1, 0);
+        path_run(2, 2, 2);
       } else if (mode_num == 4) {
-        path_run(12, 12, 12);
+        path_run(3, 3, 3);
       } else if (mode_num == 5) {
-        path_run(14, 14, 14);
+        path_run(6, 4, 3);
       } else if (mode_num == 6) {
-        path_run(18, 16, 14);
+        path_run(7, 5, 3);
       } else if (mode_num == 7) {
-        path_run(19, 17, 14);
+        path_run(8, 6, 3);
       } else if (mode_num == 8) {
-        path_run(20, 18, 14);
+        path_run(9, 7, 3);
       } else if (mode_num == 9) {
-        path_run(21, 19, 14);
+        path_run(10, 8, 3);
       } else if (mode_num == 10) {
-        path_run(22, 20, 14);
+        path_run(10, 9, 3);
       } else if (mode_num == 11) {
-        path_run(22, 21, 14);
+        path_run(11, 10, 3);
       } else if (mode_num == 12) {
-        path_run(23, 22, 14);
+        path_run(12, 11, 3);
       } else if (mode_num == 13) {
-        path_run(24, 23, 14);
+        path_run(13, 12, 3);
       } else if (mode_num == 14) {
         printf("keep_pivot\n");
         keep_pivot();
@@ -3363,16 +3363,15 @@ void MainTask::sim_run_time_all() {
   param_set.start_offset = param->offset_start_dist;
   const auto rorl = ui->select_direction2();
   silent_load = true;
-  sim_run_time(5, 12, 12, 12, false);
-  sim_run_time(6, 14, 14, 14, false);
-  sim_run_time(7, 18, 16, 14, false);
-  sim_run_time(8, 19, 17, 14, false);
-  sim_run_time(9, 20, 18, 14, false);
-  sim_run_time(10, 21, 19, 14, false);
-  sim_run_time(11, 22, 21, 14, false);
-  sim_run_time(12, 23, 22, 14, false);
+  sim_run_time(2, 2, 2, 2, false);
+  sim_run_time(3, 3, 3, 3, false);
+  sim_run_time(4, 6, 4, 3, false);
+  sim_run_time(6, 10, 6, 3, false);
+  sim_run_time(8, 10, 8, 3, false);
+  sim_run_time(10, 11, 10, 3, false);
+  sim_run_time(12, 12, 12, 3, false);
   silent_load = false;
-  sim_run_time(13, 24, 23, 14, true);
+  sim_run_time(13, 13, 12, 3, true);
   // sim_run_time(14, 24, 23, 14, true);
 }
 
