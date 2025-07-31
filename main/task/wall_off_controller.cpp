@@ -435,7 +435,9 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
       use_oppo_wall = true;
       return false;
     }
-
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return false;
+    }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
 
@@ -461,6 +463,9 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
+    }
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
@@ -516,7 +521,9 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
       use_oppo_wall = true;
       return false;
     }
-
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return false;
+    }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
 
@@ -542,6 +549,9 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
+    }
+    if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
