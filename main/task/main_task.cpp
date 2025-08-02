@@ -398,6 +398,9 @@ void MainTask::load_hw_param() {
   param->min_duty = getItem(root, "min_duty")->valuedouble;
   param->Ke = getItem(root, "Ke")->valuedouble;
   param->Km = getItem(root, "Km")->valuedouble;
+  param->coulomb_friction = getItem(root, "coulomb_friction")->valuedouble;
+  param->viscous_friction = getItem(root, "viscous_friction")->valuedouble;
+
   param->Resist = getItem(root, "Resist")->valuedouble;
   param->Mass = getItem(root, "Mass")->valuedouble;
   param->Lm = getItem(root, "Lm")->valuedouble;
@@ -1038,8 +1041,6 @@ void MainTask::load_offset_param() {
 
   param->sla_wall_ref_l = getItem(root, "sla_wall_ref_l")->valuedouble;
   param->sla_wall_ref_r = getItem(root, "sla_wall_ref_r")->valuedouble;
-  param->sla_max_offset_dist =
-      getItem(root, "sla_max_offset_dist")->valuedouble;
 
   param->sla_wall_ref_l_orval =
       getItem(root, "sla_wall_ref_l_orval")->valuedouble;

@@ -254,6 +254,9 @@ private:
   float duty_sen = 0;
   float sen_ang = 0;
 
+  bool enable_expand_right = false;
+  bool enable_expand_left = false;
+
   float last_accl;
   sen_log2_t sen_log;
   slip_t slip_param;

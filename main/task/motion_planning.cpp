@@ -54,6 +54,7 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
   tgt_val->nmr.motion_type = MotionType::STRAIGHT;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = p.dia_mode;
+  tgt_val->nmr.dia90_offset = p.dia90_offset;
 
   const auto ego_v = tgt_val->ego_in.v;
   const auto req_dist =
@@ -332,6 +333,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   ps_front.v_end = sp.v;
   ps_front.accl = next_motion.accl;
   ps_front.decel = next_motion.decel;
+  ps_front.dia90_offset = 0;
 
   ps_front.dist = (td == TurnDirection::Right) ? sp.front.right : sp.front.left;
   if (adachi != nullptr) {
@@ -519,6 +521,15 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
                                                                   exist_wall);
     }
     ps_front.dist = ps_front.dist - dist;
+
+    if (sp.type == TurnType::Dia90) {
+      ps_front.dia90_offset = (td == TurnDirection::Right)
+                                  ? param->dia90_offset
+                                  : -param->dia90_offset;
+    } else {
+      ps_front.dia90_offset = 0;
+    }
+
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {

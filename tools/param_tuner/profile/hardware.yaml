@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 14.115 #新品 13.6165
-tire2: 14.115 #新品 13.6165
+tire: 14.0950 #新品 13.6165
+tire2: 14.0950 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -44,8 +44,15 @@ SuctionResolution: 40
 Ke: 0.000975  # 大：逆起電力大
 # Km: 0.00260946 # トルク定数：　大-> 縦系の出力小
 # Km: 0.00130473 # トルク定数：　大-> 縦系の出力小
-Km: 0.00145 # トルク定数：　大-> 縦系の出力小
+# Km: 0.00145 # トルク定数：　大-> 縦系の出力小
+Km: 0.00180 # トルク定数：　大-> 縦系の出力小
 Lm: 0.00000035 # 大：横系の出力大
+
+coulomb_friction: 0.000015 # クーロン摩擦
+viscous_friction: 0.000001725 # 粘性摩擦
+
+# coulomb_friction: 0.0 # クーロン摩擦
+# viscous_friction: 0.0 # 粘性摩擦
 
 Resist: 4.4
 Mass: 0.030
@@ -173,8 +180,8 @@ motor_pid2:
   # b: 0.00
   # d: 0.0000195
 
-  p: 0.000025
-  i: 0.00000425
+  p: 0.0000175
+  i: 0.0000045
   b: 0.00
   d: 0.0000125
 
@@ -201,23 +208,21 @@ motor_pid3:
   c: 0
 gyro_pid:
   mode: 3
-  p: 0.000575
-  # i: 0.003275
-  i: 0.01465
-  b: 0.0000275
-  d: 0.000775
-  # d: 0.000045
-  # c: 0.0
-  
-  # p: 0.000475
-  # i: 0.0475 # angle
-  # b: 0.0000275 # sigma w
-  # d: 0.000295 # d_w
+  # p: 0.000325
+  # i: 0.01465
+  # b: 0.0000275
+  # d: 0.000775
 
-  # p: 0.0
-  # i: 0.0
-  # b: 0.0
-  # d: 0.0
+  # p: 0.000325
+  # i: 0.01365 # dif angle
+  # b: 0.0000375 #summation
+  # d: 0.000775
+
+  p: 0.000325
+  i: 0.01365 #dif angle
+  b: 0.0000275 #summation
+  d: 0.000295
+
   c: 0
 angle_pid: # pid for angle
   # p: 44.50
@@ -327,14 +332,14 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.002428
-  gyro_w_gain_right: 0.0024275
+  gyro_w_gain_left: 0.002429
+  gyro_w_gain_right: 0.002429
   lp_delay: 1
 gyro2_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.0024425
-  gyro_w_gain_right: 0.0024515
+  gyro_w_gain_left: 0.0024475
+  gyro_w_gain_right: 0.0024475
   lp_delay: 1
 accel_x_param:
   # gain: 315.56 # 16g
@@ -417,8 +422,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 133 #125~144
-normal_sla_r_wall_off_ref_cnt: 138 #125~144
+normal_sla_l_wall_off_ref_cnt: 129 #125~144
+normal_sla_r_wall_off_ref_cnt: 133 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6

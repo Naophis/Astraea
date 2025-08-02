@@ -9,11 +9,11 @@ pivot_angle_180: 180.0
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 # front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
-front_dist_offset: 92.50 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 94.00 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
-normal_sla_offset_front: 9
-normal_sla_offset_back: 6
+normal_sla_offset_front: 9 # 探索スラローム前補正
+normal_sla_offset_back: 6 # 探索スラローム後補正
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
 pivot_back_enable_front_th: 120 # バック判断のための壁有無しきい値
@@ -23,7 +23,8 @@ pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフ�
 # スラロームオフセット距離壁補正リファレンス値
 sla_wall_ref_l: 44.50 #大→短くなる
 sla_wall_ref_r: 45.0 #大→短くなる
-sla_max_offset_dist: 6
+
+sla_max_offset_dist: 0 #not use
 
 # Orvalスラロームオフセット距離壁補正リファレンス値
 sla_wall_ref_l_orval: 45.0
@@ -81,8 +82,8 @@ wall_off_hold_exist_dist_r: 49
 wall_off_hold_noexist_th_l: 50
 wall_off_hold_noexist_th_r: 50
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: 1.0
-wall_off_hold_dist_str_r_exist: 0.0
+wall_off_hold_dist_str_l_exist: 1.5
+wall_off_hold_dist_str_r_exist: 1.0
 
 # 壁切れ In2(最初からないとき)
 wall_off_hold_exist_dist_l2: 64
@@ -92,20 +93,20 @@ wall_off_hold_noexist_th_l2: 66
 wall_off_hold_noexist_th_r2: 66
 # 壁切れ オフセット距離(最初からないとき)
 wall_off_hold_dist_str_l: 0.5
-wall_off_hold_dist_str_r: -0.5
+wall_off_hold_dist_str_r: -1.5
 
 # 壁切れ 偏差(最初見えず、柱で反応)
-wall_off_hold_div_th_l: 0.25
-wall_off_hold_div_th_r: 0.25
+wall_off_hold_div_th_l: 0.5
+wall_off_hold_div_th_r: 0.5
 # 壁切れ 偏差(壁が見える前に過ぎてた場合)
-wall_off_hold_div_th_l2: 0.25
-wall_off_hold_div_th_r2: 0.25
+wall_off_hold_div_th_l2: 0.5
+wall_off_hold_div_th_r2: 0.5
 # 壁切れ 偏差(斜め用)
-wall_off_hold_div_th_l3: 0.25 
-wall_off_hold_div_th_r3: 0.25
+wall_off_hold_div_th_l3: 1.5 
+wall_off_hold_div_th_r3: 1.5
 
-wall_off_noexist_diff_l: 0.25
-wall_off_noexist_diff_r: 0.25
+wall_off_noexist_diff_l: 0.5
+wall_off_noexist_diff_r: 0.5
 
 wall_off_front_move_dist_th: 2
 wall_off_front_move_dia_dist_th: 2

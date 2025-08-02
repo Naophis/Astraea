@@ -9,7 +9,7 @@ straight:
     w_end: 0.1
     alpha: 180
   fast_run:
-    v_max: 525
+    v_max: 550
     # v_max: 300
     accl: 1500
     decel: -2500
@@ -42,8 +42,8 @@ normal:
   pow_n: 2
   rad: 22
   time: 0.09545312500000586
-  front: { left: 9.7560502248606609, right: 9.7560502248606609 }
-  back: { left: 12.327402340243637, right: 13.827402340243637 }
+  front: { left: 13.7560502248606609, right: 14.7560502248606609 }
+  back: { left: 8.827402340243637, right: 7.327402340243637 }
 
 
 # normal:

@@ -44,7 +44,7 @@ class Plot:
                 end_pos = {"x": 90, "y": 90}
         elif type == "orval":
             if hf_cl == 0:
-                rad = 48.5
+                rad = 51.0
                 n = 4
                 tgt_ang = 180.0
                 # tgt_ang = 180
@@ -55,8 +55,8 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             tgt_ang = 45.0
             start_ang = 0
-            n = 6
-            rad = 54.0
+            n = 2
+            rad = 57.5
 
             if hf_cl == 0:
                 # rad = 80.0
@@ -68,13 +68,13 @@ class Plot:
             n = 4.0
 
             if hf_cl == 0:
-                rad = 42.0
+                rad = 52.0
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":
             start_ang = 45
             n = 4
-            rad = 68
+            rad = 52
             tgt_ang = 45
             if hf_cl == 0:
                 end_pos = {"x": 90, "y": 45}
@@ -82,7 +82,7 @@ class Plot:
         elif type == "dia135_2":
             start_ang = 45
             if hf_cl == 0:
-                rad = 44.5
+                rad = 52
                 n = 4
                 tgt_ang = 135.0
                 end_pos = {"x": -45, "y": 90}
@@ -90,7 +90,7 @@ class Plot:
             start_ang = 0
             n = 4
             tgt_ang = 90
-            rad = 45.0
+            rad = 38.0
             end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
 
         res = {}

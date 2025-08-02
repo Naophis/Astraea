@@ -27,7 +27,7 @@ data = read_yaml("../param_tuner/profile/hardware.yaml")
 p = Plot()
 po = PlotOrval()
 
-v =  2000
+v =  400
 dia45_mode = 0
 
 hf_cl = 0

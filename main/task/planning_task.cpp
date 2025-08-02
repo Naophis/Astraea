@@ -684,25 +684,6 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   auto exist_right45_expand = wall_th;
   auto exist_left45_expand = wall_th;
 
-  if (search_mode && tgt_val->tgt_in.tgt_dist > 80 &&
-      tgt_val->tgt_in.tgt_dist < 100 &&
-      tgt_val->motion_type == MotionType::STRAIGHT) {
-    expand_right = (10 < se->ego.right45_dist) &&
-                   (se->ego.right45_dist < prm->sen_ref_p.search_exist.right45);
-    expand_left = (10 < se->ego.left45_dist) &&
-                  (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
-    // } else if (!search_mode && tgt_val->tgt_in.tgt_dist >= 90 &&
-    //            tgt_val->motion_type == MotionType::STRAIGHT) {
-    //   expand_right = (10 < se->ego.right45_dist) &&
-    //                  (se->ego.right45_dist <
-    //                  prm->sen_ref_p.search_exist.right45);
-    //   expand_left = (10 < se->ego.left45_dist) &&
-    //                 (se->ego.left45_dist <
-    //                 prm->sen_ref_p.search_exist.left45);
-  } else {
-    exist_right45_expand = 0;
-    exist_left45_expand = 0;
-  }
   // auto exist_right45_expand_2 = prm->sen_ref_p.normal.expand.right45_2;
   // auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
   float val_left = 1000;
@@ -713,10 +694,7 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
       (1 < se->ego.right45_dist) && (se->ego.right45_dist < exist_right45);
   bool range_check_left =
       (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45);
-  bool range_check_right_expand = (1 < se->ego.right45_dist) &&
-                                  (se->ego.right45_dist < exist_right45_expand);
-  bool range_check_left_expand =
-      (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45_expand);
+
   bool dist_check_right = ABS(tgt_val->global_pos.dist - right_keep.star_dist) >
                           prm->right_keep_dist_th;
   bool dist_check_left = ABS(tgt_val->global_pos.dist - left_keep.star_dist) >
@@ -739,34 +717,76 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
       (10 < se->ego.right90_mid_dist) &&
       (se->ego.right90_mid_dist < prm->sen_ref_p.normal.exist.front);
 
-  if (!(check_front_left && check_front_right)) {
+  if (!check_diff_right) {
+    enable_expand_right = false;
+  }
+  if (!check_diff_left) {
+    enable_expand_left = false;
+  }
+
+  if (search_mode && tgt_val->tgt_in.tgt_dist > 80 &&
+      tgt_val->tgt_in.tgt_dist < 100 &&
+      tgt_val->motion_type == MotionType::STRAIGHT) {
+    expand_right = (10 < se->ego.right45_dist) &&
+                   (se->ego.right45_dist < prm->sen_ref_p.search_exist.right45);
+    expand_left = (10 < se->ego.left45_dist) &&
+                  (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
+  } else {
+    if (enable_expand_right) {
+      exist_right45_expand = wall_th + 2;
+      expand_right = (10 < se->ego.right45_dist) &&
+                     (se->ego.right45_dist < exist_right45_expand);
+    } else {
+      exist_right45_expand = 0;
+    }
+    if (enable_expand_left) {
+      exist_left45_expand = wall_th + 2;
+      expand_left = (10 < se->ego.left45_dist) &&
+                    (se->ego.left45_dist < exist_left45_expand);
+    } else {
+      exist_left45_expand = 0;
+    }
+  }
+  bool range_check_right_expand = (1 < se->ego.right45_dist) &&
+                                  (se->ego.right45_dist < exist_right45_expand);
+  bool range_check_left_expand =
+      (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45_expand);
+      
+  if (!(check_front_left && check_front_right)) { //前壁チェック
     if (range_check_right) {
       if (dist_check_right && check_diff_right) {
         error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+        enable_expand_right = true;
       } else if (expand_right && range_check_right_expand && dist_check_right &&
                  check_diff_right) {
         error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+        enable_expand_right = true;
       }
       check++;
     } else if (expand_right && range_check_right_expand) {
       if (dist_check_right && check_diff_right) {
         error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+        enable_expand_right = true;
       }
       check++;
     } else {
       right_keep.star_dist = tgt_val->global_pos.dist;
+      enable_expand_right = false;
     }
     if (range_check_left) {
       if (dist_check_left && check_diff_left) {
         error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+        enable_expand_left = true;
       } else if (expand_left && range_check_left_expand && dist_check_left &&
                  check_diff_left) {
         error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+        enable_expand_left = true;
       }
       check++;
     } else if (expand_left && range_check_left_expand) {
       if (dist_check_left && check_diff_left) {
         error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+        enable_expand_left = true;
       }
       check++;
     } else {
@@ -2240,8 +2260,7 @@ void IRAM_ATTR PlanningTask::summation_duty() {
   if (param_ro->FF_keV == 0) {
     ff_duty_l = ff_duty_r = 0;
   }
-  if (param_ro->torque_mode == 0 ||
-      tgt_val->motion_type == MotionType::FRONT_CTRL) {
+  if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     tgt_duty.duty_r =
         (duty_c + duty_front_ctrl_trans + duty_roll + duty_front_ctrl_roll +
          duty_front_ctrl_roll_keep + ff_duty_r) /
@@ -2253,32 +2272,30 @@ void IRAM_ATTR PlanningTask::summation_duty() {
         sensing_result->ego.battery_lp * 100;
 
   } else if (param_ro->torque_mode == 1) {
-    auto ff_front = mpc_next_ego.ff_front_torque;
-    auto ff_roll = mpc_next_ego.ff_roll_torque;
-    auto ff_duty_r = mpc_next_ego.ff_duty_rpm_r;
-    auto ff_duty_l = mpc_next_ego.ff_duty_rpm_l;
-    if (param_ro->FF_keV == 0) {
-      ff_front = ff_roll = ff_duty_r = ff_duty_l = 0;
-    }
-    float torque_r = (ff_front + ff_roll + duty_c + duty_roll + duty_sen);
-    float torque_l = (ff_front - ff_roll + duty_c - duty_roll - duty_sen);
-
-    const float km_gear = param_ro->Km * (param_ro->gear_a / param_ro->gear_b);
-    float req_v_r = torque_r * param_ro->Resist / km_gear + ff_duty_r;
-    float req_v_l = torque_l * param_ro->Resist / km_gear + ff_duty_l;
-
-    tgt_duty.duty_r = req_v_r / sensing_result->ego.battery_lp * 100;
-    tgt_duty.duty_l = req_v_l / sensing_result->ego.battery_lp * 100;
   } else if (param_ro->torque_mode == 2) {
     auto ff_front = mpc_next_ego.ff_front_torque;
     auto ff_roll = mpc_next_ego.ff_roll_torque;
     auto ff_duty_r = mpc_next_ego.ff_duty_rpm_r;
     auto ff_duty_l = mpc_next_ego.ff_duty_rpm_l;
+
+    auto v = mpc_next_ego.v;
+    auto w = mpc_next_ego.w;
+    auto tread = param_ro->tire_tread;
+    auto v_l = v - w * tread / 2;
+    auto v_r = v + w * tread / 2;
+
+    auto cf = param_ro->coulomb_friction;
+    auto vf = param_ro->viscous_friction;
+
+    auto ff_friction_l = (v_l > 0) ? (vf * v_l + cf) : (vf * v_l - cf);
+    auto ff_friction_r = (v_r > 0) ? (vf * v_r + cf) : (vf * v_r - cf);
+
     if (param_ro->FF_keV == 0) {
-      ff_front = ff_roll = ff_duty_r = ff_duty_l = 0;
+      ff_front = ff_roll = ff_duty_r = ff_duty_l = ff_friction_r =
+          ff_friction_l = 0;
     }
-    float torque_r = (ff_front + ff_roll + duty_c + duty_roll);
-    float torque_l = (ff_front - ff_roll + duty_c - duty_roll);
+    float torque_r = (ff_front + ff_roll + duty_c + duty_roll + ff_friction_r);
+    float torque_l = (ff_front - ff_roll + duty_c - duty_roll + ff_friction_l);
 
     const float km_gear = param_ro->Km * (param_ro->gear_a / param_ro->gear_b);
     float req_v_r = torque_r * param_ro->Resist / km_gear + ff_duty_r;

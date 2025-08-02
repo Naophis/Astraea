@@ -316,7 +316,8 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   tgt_val->nmr.motion_type = MotionType::WALL_OFF_DIA;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = ps_front.dia_mode;
-  tgt_val->nmr.sct = SensorCtrlType::Dia;
+  // tgt_val->nmr.sct = SensorCtrlType::Dia;
+  tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.timstamp++;
 
   use_oppo_wall = false; // reset
@@ -606,7 +607,8 @@ WallSensorStrategy &WallOffController::get_right_strategy() {
       // wall_missing
       [=]() {
         return se->ego.right45_dist_diff > p_wall_off.div_th_r2 &&
-               se->ego.right45_2_dist_diff > 0 && se->ego.right45_dist < 100;
+               se->ego.right45_2_dist_diff > 0 && //
+               se->ego.right45_dist < 70;
       },
       // exist_wall
       [=]() { return se->ego.right45_dist < p_wall_off.exist_dist_r; },
@@ -671,8 +673,9 @@ WallSensorStrategy &WallOffController::get_left_strategy() {
   left_strategy = WallSensorStrategy{
       // wall_missing
       [=]() {
-        return se->ego.left45_dist_diff > p_wall_off.div_th_l3 &&
-               se->ego.left45_2_dist_diff > 0 && se->ego.left45_dist < 100;
+        return se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
+               se->ego.left45_2_dist_diff > 0 &&                  //
+               se->ego.left45_dist < 70;
       },
       // exist_wall
       [=]() { return se->ego.left45_dist < p_wall_off.exist_dist_l; },
@@ -749,6 +752,7 @@ DiagonalWallOffStrategy &WallOffController::get_left_dia_strategy() {
       [=](float before, float after, float init) {
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist_dia) &&
+              //  se->ego.left45_dist > 100 &&
                se->ego.right45_dist < param->dia_turn_th_r;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
@@ -795,7 +799,8 @@ DiagonalWallOffStrategy &WallOffController::get_right_dia_strategy() {
       // detect_pass_through_case2 - 反対側の壁ありの場合の検出
       [=](float before, float after, float init) {
         return std::abs(after - before) >=
-                   std::abs(p_wall_off.diff_check_dist_dia) &&
+                   std::abs(p_wall_off.diff_check_dist_dia) && //
+              //  se->ego.right45_dist > 100 &&
                se->ego.left45_dist < param->dia_turn_th_l;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）

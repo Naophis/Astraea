@@ -75,6 +75,8 @@ typedef struct{
   float ke;
   float tire;
   float gear_ratio;
+  float coulomb_friction;
+  float viscous_friction;
 } t_dynamics;
 
 typedef struct {

@@ -438,6 +438,8 @@ typedef struct {
   float Resist = 0;
   float Mass = 0;
   float Lm = 0;
+  float coulomb_friction = 0;
+  float viscous_friction = 0;
 
   float battery_init_cov = 0.95;
   float battery_p_noise = 0.05;
@@ -642,6 +644,7 @@ typedef struct {
   char torque_mode = 0;
   char enable_kalman_gyro = 0;
   char enable_kalman_encoder = 0;
+  float dia90_offset = 0;
 } input_param_t;
 
 typedef struct {
@@ -748,6 +751,7 @@ typedef struct {
   volatile float sla_time;
   volatile float sla_pow_n;
   volatile float sla_rad;
+  volatile float dia90_offset;
   volatile TurnDirection td;
   volatile TurnType tt;
   volatile RUN_MODE2 motion_mode;
@@ -779,6 +783,7 @@ typedef struct {
   float left_old;
   bool right_save = false;
   bool left_save = false;
+  float dia90_offset = 0;
 } dia_state_t;
 typedef struct {
   t_tgt tgt_in;
@@ -823,6 +828,7 @@ typedef struct {
   volatile bool skil_wall_off = false;
   volatile bool search_str_wide_ctrl_r = false;
   volatile bool search_str_wide_ctrl_l = false;
+  volatile float dia90_offset = 0;
 } param_straight_t;
 
 typedef struct {
