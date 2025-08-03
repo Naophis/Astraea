@@ -378,7 +378,7 @@ MotionResult IRAM_ATTR WallOffController::execute_search_wall_off(
   return MotionResult::NONE;
 }
 
-bool WallOffController::is_wall_exist(TurnDirection td, float threshold_l,
+bool IRAM_ATTR WallOffController::is_wall_exist(TurnDirection td, float threshold_l,
                                       float threshold_r) {
   const auto se = get_sensing_entity();
   if (td == TurnDirection::Right) {
@@ -559,7 +559,7 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
   return false;
 }
 
-float WallOffController::calculate_dia_wall_off_distance(TurnDirection td,
+float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(TurnDirection td,
                                                          TurnType turn_type,
                                                          bool &exist_wall) {
   const auto se = get_sensing_entity();
@@ -592,11 +592,11 @@ float WallOffController::calculate_dia_wall_off_distance(TurnDirection td,
   return dist;
 }
 
-wall_off_hold_dist_t &WallOffController::get_wall_off_param() {
+wall_off_hold_dist_t IRAM_ATTR &WallOffController::get_wall_off_param() {
   return param->wall_off_dist;
 }
 
-WallSensorStrategy &WallOffController::get_right_strategy() {
+WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
   if (right_strategy.has_value()) {
@@ -662,7 +662,7 @@ WallSensorStrategy &WallOffController::get_right_strategy() {
   return *right_strategy;
 }
 
-WallSensorStrategy &WallOffController::get_left_strategy() {
+WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
@@ -729,7 +729,7 @@ WallSensorStrategy &WallOffController::get_left_strategy() {
   return *left_strategy;
 }
 
-DiagonalWallOffStrategy &WallOffController::get_left_dia_strategy() {
+DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
@@ -777,7 +777,7 @@ DiagonalWallOffStrategy &WallOffController::get_left_dia_strategy() {
   return *left_dia_strategy;
 }
 
-DiagonalWallOffStrategy &WallOffController::get_right_dia_strategy() {
+DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
