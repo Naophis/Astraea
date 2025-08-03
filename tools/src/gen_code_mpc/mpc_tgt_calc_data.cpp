@@ -88,6 +88,8 @@ mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P{
 
   0,
 
+  0,
+
   2,
 
   0,
@@ -95,8 +97,6 @@ mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P{
   1,
 
   1,
-
-  0,
 
   0,
 
@@ -261,6 +261,12 @@ mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P{
   9.54929638F,
 
   0.5F,
+
+  0.5F,
+
+  0.001F,
+
+  0.001F,
 
   0.5F,
 

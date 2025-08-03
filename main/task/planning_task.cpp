@@ -641,10 +641,13 @@ float IRAM_ATTR PlanningTask::calc_sensor_pid_dia() {
   if (type == SensingControlType::DiaPiller && ee->sen_dia.error_p != 0) {
     duty = param_ro->sensor_pid_dia.p * ee->sen_dia.error_p -
            param_ro->sensor_pid_dia.d * sensing_result->ego.w_kf;
-    set_ctrl_val(ee->s_val, ee->sen_dia.error_p, 0, 0, ee->sen_dia.error_d,
-                 param_ro->sensor_pid_dia.p * ee->sen_dia.error_p,
-                 param_ro->sensor_pid_dia.i * ee->sen_dia.error_i, 0,
-                 param_ro->sensor_pid_dia.d * ee->sen_dia.error_d, 0, 0);
+
+    const float gain = 0.1;
+    set_ctrl_val(ee->s_val, ee->sen_dia.error_p * gain, 0, 0,
+                 ee->sen_dia.error_d * gain,
+                 param_ro->sensor_pid_dia.p * ee->sen_dia.error_p * gain,
+                 param_ro->sensor_pid_dia.i * ee->sen_dia.error_i * gain, 0,
+                 param_ro->sensor_pid_dia.d * ee->sen_dia.error_d * gain, 0, 0);
   } else {
     duty = 0;
     set_ctrl_val(ee->s_val, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -704,10 +707,21 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   bool check_diff_left =
       ABS(se->ego.left45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_l;
   if (!search_mode) {
-    check_diff_right = ABS(se->ego.right45_dist_diff) <
-                       prm->sen_ref_p.normal.ref.kireme_r_fast;
-    check_diff_left =
-        ABS(se->ego.left45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_l_fast;
+
+    if (tgt_val->motion_type == MotionType::WALL_OFF ||
+        tgt_val->motion_type == MotionType::SLA_FRONT_STR
+
+    ) {
+      check_diff_right = ABS(se->ego.right45_dist_diff) <
+                         prm->sen_ref_p.normal.ref.kireme_r_wall_off;
+      check_diff_left = ABS(se->ego.left45_dist_diff) <
+                        prm->sen_ref_p.normal.ref.kireme_l_wall_off;
+    } else {
+      check_diff_right = ABS(se->ego.right45_dist_diff) <
+                         prm->sen_ref_p.normal.ref.kireme_r_fast;
+      check_diff_left = ABS(se->ego.left45_dist_diff) <
+                        prm->sen_ref_p.normal.ref.kireme_l_fast;
+    }
   }
 
   bool check_front_left =
@@ -733,14 +747,14 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
                   (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
   } else {
     if (enable_expand_right) {
-      exist_right45_expand = wall_th + 2;
+      exist_right45_expand = wall_th + 0.75;
       expand_right = (10 < se->ego.right45_dist) &&
                      (se->ego.right45_dist < exist_right45_expand);
     } else {
       exist_right45_expand = 0;
     }
     if (enable_expand_left) {
-      exist_left45_expand = wall_th + 2;
+      exist_left45_expand = wall_th + 0.75;
       expand_left = (10 < se->ego.left45_dist) &&
                     (se->ego.left45_dist < exist_left45_expand);
     } else {
@@ -751,7 +765,7 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
                                   (se->ego.right45_dist < exist_right45_expand);
   bool range_check_left_expand =
       (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45_expand);
-      
+
   if (!(check_front_left && check_front_right)) { //前壁チェック
     if (range_check_right) {
       if (dist_check_right && check_diff_right) {
@@ -795,6 +809,17 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     if (check != 0) {
       type = SensingControlType::Wall;
     }
+  }
+
+  // 片壁制御から両壁に移る際に、壁の切れ目でなければ拡張許可を出す
+  if (enable_expand_left && !enable_expand_right && check_diff_right &&
+      ((1 < se->ego.right45_dist) && //
+       (se->ego.right45_dist < wall_th + 0.75))) {
+    enable_expand_right = true;
+  } else if (!enable_expand_left && enable_expand_right && check_diff_left &&
+             ((1 < se->ego.left45_dist) &&
+              (se->ego.left45_dist < wall_th + 0.75))) {
+    enable_expand_left = true;
   }
 
   if (check == 0) {
@@ -1613,7 +1638,7 @@ void IRAM_ATTR PlanningTask::check_fail_safe() {
   if (ABS(ee->w.error_i) > param_ro->fail_check.w) {
     tgt_val->fss.error = 1;
   }
-  if (fail_check_ang > param_ro->fail_check.ang) {
+  if (ABS(ee->ang.error_i)  > param_ro->fail_check.ang) {
     tgt_val->fss.error = 1;
   }
   if (keep_wall_off_cnt > param_ro->fail_check.wall_off) {
@@ -2277,18 +2302,20 @@ void IRAM_ATTR PlanningTask::summation_duty() {
     auto ff_roll = mpc_next_ego.ff_roll_torque;
     auto ff_duty_r = mpc_next_ego.ff_duty_rpm_r;
     auto ff_duty_l = mpc_next_ego.ff_duty_rpm_l;
+    auto ff_friction_r = mpc_next_ego.ff_friction_torque_r;
+    auto ff_friction_l = mpc_next_ego.ff_friction_torque_l;
 
-    auto v = mpc_next_ego.v;
-    auto w = mpc_next_ego.w;
-    auto tread = param_ro->tire_tread;
-    auto v_l = v - w * tread / 2;
-    auto v_r = v + w * tread / 2;
+    // auto v = mpc_next_ego.v;
+    // auto w = mpc_next_ego.w;
+    // auto tread = param_ro->tire_tread;
+    // auto v_l = v - w * tread / 2;
+    // auto v_r = v + w * tread / 2;
 
-    auto cf = param_ro->coulomb_friction;
-    auto vf = param_ro->viscous_friction;
+    // auto cf = param_ro->coulomb_friction;
+    // auto vf = param_ro->viscous_friction;
 
-    auto ff_friction_l = (v_l > 0) ? (vf * v_l + cf) : (vf * v_l - cf);
-    auto ff_friction_r = (v_r > 0) ? (vf * v_r + cf) : (vf * v_r - cf);
+    // auto ff_friction_l = (v_l > 0) ? (vf * v_l + cf) : (vf * v_l - cf);
+    // auto ff_friction_r = (v_r > 0) ? (vf * v_r + cf) : (vf * v_r - cf);
 
     if (param_ro->FF_keV == 0) {
       ff_front = ff_roll = ff_duty_r = ff_duty_l = ff_friction_r =

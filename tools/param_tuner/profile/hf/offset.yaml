@@ -121,7 +121,7 @@ diff_check_dist_dia_2: 15 # 壁切れ偏差チェック　距離条件
 # 壁切れ：前壁補正　リファレンス値(大：前に近づく)
 front_dist_offset2: 138 #ref
 # 壁切れ：前壁補正  しきい値(far: center)
-front_dist_offset3: 135.0 #th
+front_dist_offset3: 125.0 #th
 # 壁切れ：前壁補正　しきい値(far: both)
 front_dist_offset4: 135.0 # both front sensors condition th
 

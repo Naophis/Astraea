@@ -49,7 +49,7 @@ Km: 0.00180 # トルク定数：　大-> 縦系の出力小
 Lm: 0.00000035 # 大：横系の出力大
 
 coulomb_friction: 0.000015 # クーロン摩擦
-viscous_friction: 0.000001725 # 粘性摩擦
+viscous_friction: 0.001475 # 粘性摩擦
 
 # coulomb_friction: 0.0 # クーロン摩擦
 # viscous_friction: 0.0 # 粘性摩擦
@@ -77,10 +77,11 @@ ff_front_dury: 0.95
 
 # fail_safe
 fail_duty_cnt: 150
-fail_v_cnt: 35000
-fail_w_cnt: 2500
-fail_ang_cnt: 500
+fail_v_cnt: 7500
+fail_w_cnt: 1500
+fail_ang_cnt: 15
 fail_wall_off_cnt: 500
+fail_check_ang_th: 20 #deg
 
 cell: 90
 cell2: 90
@@ -213,15 +214,20 @@ gyro_pid:
   # b: 0.0000275
   # d: 0.000775
 
-  # p: 0.000325
-  # i: 0.01365 # dif angle
-  # b: 0.0000375 #summation
-  # d: 0.000775
-
   p: 0.000325
-  i: 0.01365 #dif angle
-  b: 0.0000275 #summation
-  d: 0.000295
+  i: 0.01365 # dif angle
+  b: 0.0000375 #summation
+  d: 0.000775
+
+  # p: 0.000325
+  # i: 0.01365 #dif angle
+  # b: 0.0000275 #summation
+  # d: 0.000295
+
+  # p: 0.00
+  # i: 0.0
+  # b: 0.00
+  # d: 0.00
 
   c: 0
 angle_pid: # pid for angle

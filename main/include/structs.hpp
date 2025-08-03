@@ -278,6 +278,8 @@ typedef struct {
   float kireme_l;
   float kireme_r_fast;
   float kireme_l_fast;
+  float kireme_r_wall_off;
+  float kireme_l_wall_off;
 } sen_ref_param3_t;
 
 typedef struct {

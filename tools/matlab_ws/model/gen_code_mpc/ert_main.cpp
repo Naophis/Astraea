@@ -48,6 +48,8 @@ static t_ego arg_ego{
   0.0F,
   0.0F,
   0.0F,
+  0.0F,
+  0.0F,
 
   {
     0.0F,
@@ -113,6 +115,8 @@ static t_ego arg_ego{
   0.0F,
   0.0F,
   0.0F,
+  0.0F,
+  0.0F,
   0
 };
 
@@ -121,6 +125,8 @@ static int32_T arg_mode{ 0 };
 static int32_T arg_time_step{ 0 };
 
 static t_dynamics arg_ego1{
+  0.0F,
+  0.0F,
   0.0F,
   0.0F,
   0.0F,

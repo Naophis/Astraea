@@ -529,6 +529,9 @@ void MainTask::load_hw_param() {
   param->front_ctrl_error_th =
       getItem(root, "front_ctrl_error_th")->valuedouble;
 
+  param->fail_check_ang_th =
+      getItem(root, "fail_check_ang_th")->valuedouble * M_PI / 180;
+
   param->logging_time =
       getItem(root, "logging_time")->valuedouble / portTICK_PERIOD_MS;
   param->set_param = true;
@@ -791,6 +794,8 @@ void MainTask::load_hw_param() {
   pt->dynamics.ke = param->Ke;
   pt->dynamics.tire = param->tire;
   pt->dynamics.gear_ratio = param->gear_a / param->gear_b;
+  pt->dynamics.coulomb_friction = param->coulomb_friction;
+  pt->dynamics.viscous_friction = param->viscous_friction;
 
   // cJSON_free(motor_pid);
   // cJSON_free(gyro_pid);
@@ -1149,6 +1154,10 @@ void MainTask::load_sensor_param() {
       getItem(normal_ref, "kireme_r_fast")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_l_fast =
       getItem(normal_ref, "kireme_l_fast")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_r_wall_off =
+      getItem(normal_ref, "kireme_r_wall_off")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_l_wall_off =
+      getItem(normal_ref, "kireme_l_wall_off")->valuedouble;
 
   param->sen_ref_p.normal.exist.right45 =
       getItem(normal_exist, "right45")->valuedouble;
