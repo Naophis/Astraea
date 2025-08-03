@@ -2560,24 +2560,22 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
 }
 
 void IRAM_ATTR PlanningTask::generate_trajectory() {
-  mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
-                    mpc_step, &mpc_next_ego, &dynamics);
-  // for (int i = 0; i < trajectory_length; i++) {
-
-  //   if (i == 0) {
-  //     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
-  //                       tgt_val->motion_mode, mpc_step, &mpc_next_ego,
-  //                       &dynamics);
-  //     trajectory_points[i] = mpc_next_ego;
-  //     mpc_next_ego_prev = mpc_next_ego;
-  //   } else {
-  //     mpc_tgt_calc.step(&tgt_val->tgt_in, &mpc_next_ego_prev,
-  //                       tgt_val->motion_mode, mpc_step, &mpc_next_ego2,
-  //                       &dynamics);
-  //     trajectory_points[i] = mpc_next_ego2;
-  //     mpc_next_ego_prev = mpc_next_ego2;
-  //   }
-
-  // }
-
+  // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
+  //                   mpc_step, &mpc_next_ego, &dynamics);
+  for (int i = 0; i < trajectory_length; i++) {
+    int32_T index = i + 1;
+    if (i == 0) {
+      mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
+                        tgt_val->motion_mode, mpc_step, &mpc_next_ego,
+                        &dynamics, &index);
+      trajectory_points[i] = mpc_next_ego;
+      mpc_next_ego_prev = mpc_next_ego;
+    } else {
+      mpc_tgt_calc.step(&tgt_val->tgt_in, &mpc_next_ego_prev,
+                        tgt_val->motion_mode, mpc_step, &mpc_next_ego2,
+                        &dynamics, &index);
+      trajectory_points[i] = mpc_next_ego2;
+      mpc_next_ego_prev = mpc_next_ego2;
+    }
+  }
 }

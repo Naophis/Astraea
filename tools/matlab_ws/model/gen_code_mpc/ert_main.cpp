@@ -137,6 +137,8 @@ static t_dynamics arg_ego1{
   0.0F
 };
 
+static int32_T arg_In1{ 0 };
+
 static t_ego arg_next_ego;
 void rt_OneStep(void);
 void rt_OneStep(void)
@@ -150,7 +152,7 @@ void rt_OneStep(void)
 
   OverrunFlag = true;
   mpc_tgt_calc_Obj.step(&arg_tgt, &arg_ego, arg_mode, arg_time_step,
-                        &arg_next_ego, &arg_ego1);
+                        &arg_next_ego, &arg_ego1, &arg_In1);
   OverrunFlag = false;
 }
 
