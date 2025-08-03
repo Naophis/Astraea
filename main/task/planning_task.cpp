@@ -395,6 +395,10 @@ void PlanningTask::task() {
   }
   memset(&buzzer_ch, 0, sizeof(buzzer_ch));
   memset(&buzzer_timer, 0, sizeof(buzzer_timer));
+
+  trajectory_points.clear();
+  trajectory_points.reserve(trajectory_length);
+
   buzzer_ch.channel = (ledc_channel_t)LEDC_CHANNEL_0;
   buzzer_ch.duty = 0;
   buzzer_ch.gpio_num = BUZZER;
@@ -511,9 +515,8 @@ void PlanningTask::task() {
         tgt_val->tgt_in.enable_slip_decel = 0;
       }
       // auto time = esp_timer_get_time();
-      mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
-                        tgt_val->motion_mode, mpc_step, &mpc_next_ego,
-                        &dynamics);
+      // Generate trajectory points
+      generate_trajectory();
       // auto time2 = esp_timer_get_time();
 
       // printf("mpc calc time: %lld usec\n", time2 - time);
@@ -2554,4 +2557,27 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
       ee->ang.error_p = ee->ang.error_i = ee->ang.error_d = 0;
     }
   }
+}
+
+void IRAM_ATTR PlanningTask::generate_trajectory() {
+  mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
+                    mpc_step, &mpc_next_ego, &dynamics);
+  // for (int i = 0; i < trajectory_length; i++) {
+
+  //   if (i == 0) {
+  //     mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
+  //                       tgt_val->motion_mode, mpc_step, &mpc_next_ego,
+  //                       &dynamics);
+  //     trajectory_points[i] = mpc_next_ego;
+  //     mpc_next_ego_prev = mpc_next_ego;
+  //   } else {
+  //     mpc_tgt_calc.step(&tgt_val->tgt_in, &mpc_next_ego_prev,
+  //                       tgt_val->motion_mode, mpc_step, &mpc_next_ego2,
+  //                       &dynamics);
+  //     trajectory_points[i] = mpc_next_ego2;
+  //     mpc_next_ego_prev = mpc_next_ego2;
+  //   }
+
+  // }
+
 }

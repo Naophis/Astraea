@@ -23,6 +23,7 @@
 #include "include/kalman_filter.hpp"
 #include "include/kalman_filter_matrix.hpp"
 #include <algorithm>
+#include <array>
 // #include "hal/mcpwm_ll.h"
 
 class PlanningTask {
@@ -87,6 +88,7 @@ public:
   std::vector<float> log_table;
 
   t_ego mpc_next_ego;
+  t_ego mpc_next_ego_prev;
 
   std::vector<float> axel_degenerate_x;
   std::vector<float> axel_degenerate_y;
@@ -117,8 +119,13 @@ public:
   std::shared_ptr<motion_tgt_val_t> get_tgt_entity() { return tgt_val; }
 
   void reset_kf_state(bool reset_battery);
+  void generate_trajectory();
   float last_tgt_angle = 0;
+
 private:
+  std::vector<t_ego> trajectory_points;
+  const int trajectory_length = 50; // Number of trajectory points to generate
+
   sensor_ctrl_keep_dist_t right_keep;
   sensor_ctrl_keep_dist_t left_keep;
 
