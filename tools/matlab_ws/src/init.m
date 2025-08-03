@@ -12,6 +12,8 @@ Simulink.importExternalCTypes('../include/bus.h');
 dt = 0.001;
 
 delay_n = 25;
+
+plan_length = int32(50);
  
 test_mode = 0; % straight
 

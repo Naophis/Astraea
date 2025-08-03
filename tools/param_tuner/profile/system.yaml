@@ -58,8 +58,8 @@ give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-mode: 0 # メイン
-# mode: 1 # 最短スローム
+# mode: 0 # メイン
+mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -77,21 +77,21 @@ mode: 0 # メイン
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  # v_max: 400
-  # accl: 2500
-  # decel: -2500 
-  # dia_accl: 2500
-  # dia_decel: -2500
-  # dist: 720 #直進
-  # suction_active: 0
+  v_max: 400
+  accl: 2500
+  decel: -2500 
+  dia_accl: 2500
+  dia_decel: -2500
+  dist: 720 #直進
+  suction_active: 0
 
-  v_max: 2500
-  accl: 36000
-  decel: -47500
-  dia_accl: 36000
-  dia_decel: -42500
-  dist: 180 #直進
-  suction_active: 2
+  # v_max: 2500
+  # accl: 36000
+  # decel: -47500
+  # dia_accl: 36000
+  # dia_decel: -42500
+  # dist: 180 #直進
+  # suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -121,12 +121,12 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 5
+  file_idx: 1
   sla_dist: 90
   # sla_type: 3
-  sla_type: 4
+  sla_type: 3
   sla_type2: 6 # 復路ターン種類
-  sla_return: 1 # 往復フラグ
+  sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval
   # sla_type: 3 #large

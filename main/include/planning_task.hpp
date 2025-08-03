@@ -88,6 +88,7 @@ public:
   std::vector<float> log_table;
 
   t_ego mpc_next_ego;
+  t_ego mpc_next_ego_list[50];
   t_ego mpc_next_ego_prev;
 
   std::vector<float> axel_degenerate_x;
@@ -225,6 +226,7 @@ private:
   t_ego *mpc_now_ego;
   int32_t mpc_mode;
   int32_t mpc_step;
+  int32_T plan_length = 25;
   t_ego mpc_next_ego2;
 
   fail_safe_t fail_safe;
