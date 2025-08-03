@@ -590,7 +590,7 @@ void mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *arg_ego,
                        arg_ego->slip.beta / arg_ego1->mass -
                        rtb_BusAssignment1_o.w * arg_ego->slip.vx) * rtb_Abs6 +
       arg_ego->slip.vy;
-    rtb_Gain2_ht = std::sqrt(rtb_Add2 * rtb_Add2 + rtb_Subtract2_k *
+    rtb_Gain2_ht = t_sqrtF(rtb_Add2 * rtb_Add2 + rtb_Subtract2_k *
       rtb_Subtract2_k);
     rtb_Gain4 = mpc_tgt_calc_P.Gain1_Gain_o * rtb_Gain2_ht;
     rtb_Switch1_n_idx_1 = (rtb_Gain4 - arg_ego->v) / rtb_Abs6;
