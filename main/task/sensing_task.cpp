@@ -9,7 +9,7 @@ void SensingTask::timer_200us_callback(void *arg) {
   instance->timer_200us_callback_main();
 }
 
-void SensingTask::timer_200us_callback_main() {
+void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   if (!ready) {
     return;
   }
@@ -230,7 +230,7 @@ void IRAM_ATTR SensingTask::exec_adc(adc2_channel_t channel,
   // printf("adc: %d , %d\n", (int16_t)(end - start), *raw_out);
 }
 
-void SensingTask::task() {
+void IRAM_ATTR SensingTask::task() {
   // timer_init_grp0_timer0();
   if (!GY_MODE) {
     gyro_if.init();
@@ -598,9 +598,9 @@ void SensingTask::task() {
   }
 }
 
-float SensingTask::calc_sensor(float data, float a, float b) { return 0; }
+float IRAM_ATTR SensingTask::calc_sensor(float data, float a, float b) { return 0; }
 
-float SensingTask::calc_enc_v(float now, float old, float dt) {
+float IRAM_ATTR SensingTask::calc_enc_v(float now, float old, float dt) {
   const float tire = pt->suction_en ? param->tire2 : param->tire;
   const auto enc_delta = now - old;
   float enc_ang = 0.f;
@@ -619,7 +619,7 @@ float SensingTask::calc_enc_v(float now, float old, float dt) {
   return tire * enc_ang / dt / 2;
 }
 
-void SensingTask::calc_vel(float gyro_dt, float enc_r_dt, float enc_l_dt) {
+void IRAM_ATTR SensingTask::calc_vel(float gyro_dt, float enc_r_dt, float enc_l_dt) {
   const auto se = get_sensing_entity();
   const float tire = pt->suction_en ? param->tire2 : param->tire;
 

@@ -510,9 +510,13 @@ void PlanningTask::task() {
       } else {
         tgt_val->tgt_in.enable_slip_decel = 0;
       }
+      // auto time = esp_timer_get_time();
       mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,
                         tgt_val->motion_mode, mpc_step, &mpc_next_ego,
                         &dynamics);
+      // auto time2 = esp_timer_get_time();
+
+      // printf("mpc calc time: %lld usec\n", time2 - time);
     }
     end_calc_mpc = esp_timer_get_time();
     // check 3
@@ -1638,7 +1642,7 @@ void IRAM_ATTR PlanningTask::check_fail_safe() {
   if (ABS(ee->w.error_i) > param_ro->fail_check.w) {
     tgt_val->fss.error = 1;
   }
-  if (ABS(ee->ang.error_i)  > param_ro->fail_check.ang) {
+  if (ABS(ee->ang.error_i) > param_ro->fail_check.ang) {
     tgt_val->fss.error = 1;
   }
   if (keep_wall_off_cnt > param_ro->fail_check.wall_off) {
