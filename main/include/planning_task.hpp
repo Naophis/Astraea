@@ -124,7 +124,7 @@ public:
 
 private:
   std::vector<t_ego> trajectory_points;
-  const int trajectory_length = 25; // Number of trajectory points to generate
+  const int trajectory_length = 50; // Number of trajectory points to generate
 
   sensor_ctrl_keep_dist_t right_keep;
   sensor_ctrl_keep_dist_t left_keep;

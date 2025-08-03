@@ -58,7 +58,8 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   // auto enc_l = enc_if.read2byte(0x30, 0x03, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
-  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) / 1000000;
+  // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) /
+  // 1000000;
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
@@ -494,21 +495,25 @@ void IRAM_ATTR SensingTask::task() {
         }
         exec_adc(SEN_R45, width, &se->led_sen_after.right45.raw);
 
-        // R45_2
-        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 1);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt; i++) {
-          lec_cnt++;
-        }
-        exec_adc(SEN_R45, width, &se->led_sen_after.right45_2.raw);
+        if (pt->tgt_val->motion_type == MotionType::WALL_OFF ||
+            pt->tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
+            pt->tgt_val->motion_type == MotionType::SENSING_DUMP) {
+          // R45_2
+          led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 1);
+          lec_cnt = 0;
+          for (int i = 0; i < param->led_light_delay_cnt; i++) {
+            lec_cnt++;
+          }
+          exec_adc(SEN_R45, width, &se->led_sen_after.right45_2.raw);
 
-        // R45_3
-        led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 0);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt; i++) {
-          lec_cnt++;
+          // R45_3
+          led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 0);
+          lec_cnt = 0;
+          for (int i = 0; i < param->led_light_delay_cnt; i++) {
+            lec_cnt++;
+          }
+          exec_adc(SEN_R45, width, &se->led_sen_after.right45_3.raw);
         }
-        exec_adc(SEN_R45, width, &se->led_sen_after.right45_3.raw);
 
         led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
 
@@ -524,22 +529,25 @@ void IRAM_ATTR SensingTask::task() {
           lec_cnt++;
         }
         exec_adc(SEN_L45, width, &se->led_sen_after.left45.raw);
+        if (pt->tgt_val->motion_type == MotionType::WALL_OFF ||
+            pt->tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
+            pt->tgt_val->motion_type == MotionType::SENSING_DUMP) {
+          // L45_2
+          led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 1);
+          lec_cnt = 0;
+          for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+            lec_cnt++;
+          }
+          exec_adc(SEN_L45, width, &se->led_sen_after.left45_2.raw);
 
-        // L45_2
-        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 1);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-          lec_cnt++;
+          // L45_3
+          led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 0);
+          lec_cnt = 0;
+          for (int i = 0; i < param->led_light_delay_cnt2; i++) {
+            lec_cnt++;
+          }
+          exec_adc(SEN_L45, width, &se->led_sen_after.left45_3.raw);
         }
-        exec_adc(SEN_L45, width, &se->led_sen_after.left45_2.raw);
-
-        // L45_3
-        led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 0);
-        lec_cnt = 0;
-        for (int i = 0; i < param->led_light_delay_cnt2; i++) {
-          lec_cnt++;
-        }
-        exec_adc(SEN_L45, width, &se->led_sen_after.left45_3.raw);
         led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
       } else {
         se->led_sen_after.left45.raw = se->led_sen_after.left45_2.raw =
@@ -598,7 +606,9 @@ void IRAM_ATTR SensingTask::task() {
   }
 }
 
-float IRAM_ATTR SensingTask::calc_sensor(float data, float a, float b) { return 0; }
+float IRAM_ATTR SensingTask::calc_sensor(float data, float a, float b) {
+  return 0;
+}
 
 float IRAM_ATTR SensingTask::calc_enc_v(float now, float old, float dt) {
   const float tire = pt->suction_en ? param->tire2 : param->tire;
@@ -619,7 +629,8 @@ float IRAM_ATTR SensingTask::calc_enc_v(float now, float old, float dt) {
   return tire * enc_ang / dt / 2;
 }
 
-void IRAM_ATTR SensingTask::calc_vel(float gyro_dt, float enc_r_dt, float enc_l_dt) {
+void IRAM_ATTR SensingTask::calc_vel(float gyro_dt, float enc_r_dt,
+                                     float enc_l_dt) {
   const auto se = get_sensing_entity();
   const float tire = pt->suction_en ? param->tire2 : param->tire;
 

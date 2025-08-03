@@ -400,7 +400,7 @@ void MainTask::load_hw_param() {
   param->Km = getItem(root, "Km")->valuedouble;
   param->coulomb_friction = getItem(root, "coulomb_friction")->valuedouble;
   param->viscous_friction = getItem(root, "viscous_friction")->valuedouble;
-
+  param->trj_length = getItem(root, "trj_length")->valueint;
   param->Resist = getItem(root, "Resist")->valuedouble;
   param->Mass = getItem(root, "Mass")->valuedouble;
   param->Lm = getItem(root, "Lm")->valuedouble;

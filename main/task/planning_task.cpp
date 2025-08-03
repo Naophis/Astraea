@@ -2562,7 +2562,7 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
 void IRAM_ATTR PlanningTask::generate_trajectory() {
   // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
   //                   mpc_step, &mpc_next_ego, &dynamics);
-  for (int i = 0; i < trajectory_length; i++) {
+  for (int i = 0; i < param_ro->trj_length; i++) {
     int32_T index = i + 1;
     if (i == 0) {
       mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in,

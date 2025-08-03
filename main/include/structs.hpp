@@ -428,6 +428,7 @@ typedef struct {
 
 typedef struct {
   float dt = 0.001;
+  int trj_length = 1;
   float tire = 12;
   float tire2 = 12;
   int log_size = 1300;
