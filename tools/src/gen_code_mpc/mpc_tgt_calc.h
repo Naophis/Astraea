@@ -34,11 +34,6 @@ class mpc_tgt_calcModelClass final
     int32_T UnitDelay_DSTATE;
   };
 
-  struct P_IfActionSubsystem_mpc_tgt_c_T {
-    real32_T Constant1_Value;
-    real32_T Constant2_Value;
-  };
-
   struct P_mpc_tgt_calc_T {
     real32_T dt;
     real_T Constant1_Value;
@@ -126,6 +121,8 @@ class mpc_tgt_calcModelClass final
     real32_T Gain4_Gain_a;
     real32_T Gain5_Gain_k;
     real32_T Gain_Gain_jr;
+    real32_T Constant1_Value_dt;
+    real32_T Constant2_Value_ib;
     real32_T Constant4_Value_b;
     real32_T Constant6_Value_o;
     real32_T Constant_Value_ne4;
@@ -137,6 +134,8 @@ class mpc_tgt_calcModelClass final
     real32_T Constant7_Value;
     real32_T Constant8_Value;
     real32_T Gain1_Gain_l;
+    real32_T Constant1_Value_pl;
+    real32_T Constant2_Value_k;
     real32_T Constant4_Value_d;
     real32_T Constant6_Value_oh;
     real32_T Constant_Value_f;
@@ -180,8 +179,6 @@ class mpc_tgt_calcModelClass final
     uint8_T ManualSwitch_CurrentSetting_l;
     uint8_T ManualSwitch_CurrentSetting_o;
     uint8_T ManualSwitch_CurrentSetting_c;
-    P_IfActionSubsystem_mpc_tgt_c_T IfActionSubsystem2;
-    P_IfActionSubsystem_mpc_tgt_c_T IfActionSubsystem_g;
   };
 
   struct RT_MODEL_mpc_tgt_calc_T {
@@ -206,8 +203,6 @@ class mpc_tgt_calcModelClass final
   B_mpc_tgt_calc_T mpc_tgt_calc_B;
   DW_mpc_tgt_calc_T mpc_tgt_calc_DW;
   static P_mpc_tgt_calc_T mpc_tgt_calc_P;
-  static void mpc_tgt_calc_IfActionSubsystem(real32_T rty_Out1[2],
-    P_IfActionSubsystem_mpc_tgt_c_T *localP);
   RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
 };
 
