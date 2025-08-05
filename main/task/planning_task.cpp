@@ -1587,6 +1587,8 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
   tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
+  tgt_val->ego_in.pos_x = 0;
+  tgt_val->ego_in.pos_y = 0;
 
   tgt_val->global_pos.img_ang += mpc_next_ego.w * dt;
 
@@ -2562,6 +2564,8 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
 void IRAM_ATTR PlanningTask::generate_trajectory() {
   // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
   //                   mpc_step, &mpc_next_ego, &dynamics);
+  tgt_val->ego_in.pos_x = tgt_val->ego_in.pos_y = 0;
+
   for (int i = 0; i < param_ro->trj_length; i++) {
     int32_T index = i + 1;
     if (i == 0) {

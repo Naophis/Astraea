@@ -2,7 +2,7 @@ clear;
 
 home = pwd;
 
-sim_time = 30;
+sim_time = 0.3;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
@@ -12,6 +12,8 @@ Simulink.importExternalCTypes('../include/bus.h');
 dt = 0.001;
 
 delay_n = 25;
+
+trj_length = int32(50);
  
 test_mode = 0; % straight
 

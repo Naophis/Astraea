@@ -33,6 +33,20 @@ union LED_bit {
 };
 
 typedef struct {
+  float x = 0;
+  float y = 0;
+  float theta = 0;
+
+  float v = 0;
+  float vx = 0;
+  float vy = 0;
+  float w = 0;
+
+  float accl = 0;
+  float alpha = 0;
+} t_kinematics_state;
+
+typedef struct {
   float right = 0;
   float left = 0;
   float right_old = 0;

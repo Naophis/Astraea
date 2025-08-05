@@ -8,6 +8,8 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
     persistent slipped_y_list;
     persistent kanayama_x_list;
     persistent kanayama_y_list;
+    persistent pos_x_list;
+    persistent pos_y_list
     persistent i;
 
     if isempty(ideal_x_list)
@@ -17,6 +19,8 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
         slipped_y_list = zeros(int32(sim_time / (0.001/4)), 1);
         kanayama_x_list = zeros(int32(sim_time / (0.001/4)), 1);
         kanayama_y_list = zeros(int32(sim_time / (0.001/4)), 1);
+        pos_x_list = zeros(int32(sim_time / (0.001)), 1);
+        pos_y_list = zeros(int32(sim_time / (0.001)), 1);
         i = int32(0);
     end
 
@@ -32,6 +36,9 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
             slipped_y_list(i) = ego.slip_point.y;
             kanayama_x_list(i) = ego.kanayama_point.x;
             kanayama_y_list(i) = ego.kanayama_point.y;
+            pos_x_list(i)=ego.pos_x;
+            pos_y_list(i)=ego.pos_y;
+            
         elseif test_mode == 4
             ideal_x_list(i) = ego.ideal_point.x;
             ideal_y_list(i) = ego.ideal_point.y;
@@ -39,6 +46,8 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
             slipped_y_list(i) = ego.slip_point.y;
             kanayama_x_list(i) = ego.kanayama_point.x;
             kanayama_y_list(i) = ego.kanayama_point.y;
+            pos_x_list(i)=ego.pos_x;
+            pos_y_list(i)=ego.pos_y;
         end
         if sim_time == clock
             subplot(2, 1, 1);
@@ -90,6 +99,9 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
             
             plot([84 84], [-90 270], 'r:');
             plot([96 96], [-90 270], 'r:');
+
+            plot(pos_x_list, pos_y_list, 'b:');
+
             hold off;
 
         end
