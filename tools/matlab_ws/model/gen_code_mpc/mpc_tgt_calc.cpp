@@ -207,7 +207,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
   real_T rtb_Switch_e;
   real_T tmp;
   int32_T rtb_Merge1_decel_delay_cnt;
-  int32_T rtb_Merge2;
+  int32_T rtb_Merge1_n;
   int32_T rtb_pivot_state;
   real32_T Merge_k;
   real32_T rtb_Abs6;
@@ -268,11 +268,12 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
   boolean_T rtb_RelationalOperator_a;
   if (arg_tgt->v_max >= 0.0F) {
     rtb_Abs7 = arg_tgt->tgt_dist - arg_ego->dist;
+    rtb_Abs6 = std::abs(arg_tgt->decel);
     rtb_Merge1_pos_x = arg_ego->v * arg_ego->v - arg_tgt->end_v * arg_tgt->end_v;
     if (arg_ego->v - arg_tgt->end_v > mpc_tgt_calc_P.Constant3_Value_a &&
         (arg_ego->state == mpc_tgt_calc_P.Constant1_Value_a || std::abs
-         (rtb_Merge1_pos_x) / (mpc_tgt_calc_P.Gain1_Gain_o * std::abs
-          (arg_tgt->decel)) + arg_ego->dist >= arg_tgt->tgt_dist)) {
+         (rtb_Merge1_pos_x) / (mpc_tgt_calc_P.Gain1_Gain_o * rtb_Abs6) +
+         arg_ego->dist >= arg_tgt->tgt_dist)) {
       if (arg_ego->v > arg_tgt->end_v) {
         if (rtb_Abs7 > mpc_tgt_calc_P.Constant3_Value) {
           tmp = mpc_tgt_calc_P.Gain_Gain_n * rtb_Abs7;
@@ -286,20 +287,15 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
         rtb_Switch_e = mpc_tgt_calc_P.Constant_Value;
       }
 
-      Merge_k = static_cast<real32_T>(rtb_Switch_e);
-      if (!(mpc_tgt_calc_P.dt * static_cast<real32_T>(rtb_Switch_e) *
-            static_cast<real32_T>(arg_time_step) + arg_ego->v > arg_tgt->end_v))
+      if (std::abs(mpc_tgt_calc_P.dt * static_cast<real32_T>(rtb_Switch_e) *
+                   static_cast<real32_T>(arg_time_step) + arg_ego->v) > rtb_Abs6)
       {
-        Merge_k = (arg_tgt->end_v - arg_ego->v) / (mpc_tgt_calc_P.dt *
-          static_cast<real32_T>(arg_time_step));
+        Merge_k = static_cast<real32_T>(rtb_Switch_e);
+      } else {
+        Merge_k = arg_tgt->decel;
       }
 
       rtb_pivot_state = mpc_tgt_calc_P.Constant2_Value_p;
-      rtb_Merge2 = mpc_tgt_calc_DW.UnitDelay_DSTATE +
-        mpc_tgt_calc_P.Constant5_Value;
-      if (rtb_Merge2 > arg_tgt->accl_param.decel_delay_cnt) {
-        rtb_Merge2 = arg_tgt->accl_param.decel_delay_cnt;
-      }
     } else if (arg_ego->state == mpc_tgt_calc_P.Constant2_Value) {
       if (arg_ego->v < arg_tgt->v_max) {
         if (arg_ego->v > arg_tgt->accl_param.limit) {
@@ -318,17 +314,14 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
       }
 
       Merge_k = static_cast<real32_T>(rtb_Switch_e);
-      rtb_Merge2 = mpc_tgt_calc_P.Constant4_Value_f;
     } else {
       Merge_k = static_cast<real32_T>(mpc_tgt_calc_P.Constant_Value_cm);
       rtb_pivot_state = mpc_tgt_calc_P.Constant2_Value_pg;
-      rtb_Merge2 = mpc_tgt_calc_P.Constant4_Value_o;
     }
 
     rtb_Add1_e = std::fmax(std::fmin(arg_tgt->v_max, mpc_tgt_calc_P.dt * Merge_k
       * static_cast<real32_T>(arg_time_step) + arg_ego->v),
       mpc_tgt_calc_P.Constant_Value_ne);
-    mpc_tgt_calc_DW.UnitDelay_DSTATE = rtb_Merge2;
   } else {
     rtb_Abs7 = std::abs(arg_ego->dist);
     rtb_Abs6 = std::abs(arg_tgt->tgt_dist);
@@ -384,8 +377,8 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
   rtb_Abs7 = arg_ego->dist + rtb_Abs6;
   switch (arg_mode) {
    case 1:
-    rtb_Merge2 = arg_time_step + arg_ego->sla_param.counter;
-    if (rtb_Merge2 > arg_ego->sla_param.limit_time_count) {
+    rtb_Merge1_n = arg_time_step + arg_ego->sla_param.counter;
+    if (rtb_Merge1_n > arg_ego->sla_param.limit_time_count) {
       tmp = mpc_tgt_calc_P.Constant1_Value_m;
     } else {
       tmp = mpc_tgt_calc_P.Constant2_Value_i;
@@ -403,7 +396,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
       mpc_tgt_calc_B.Merge[0] = mpc_tgt_calc_P.Constant1_Value_dt;
       mpc_tgt_calc_B.Merge[1] = mpc_tgt_calc_P.Constant2_Value_ib;
     } else {
-      rtb_Add1_e = static_cast<real32_T>(rtb_Merge2) * mpc_tgt_calc_P.dt /
+      rtb_Add1_e = static_cast<real32_T>(rtb_Merge1_n) * mpc_tgt_calc_P.dt /
         arg_ego->sla_param.base_time - mpc_tgt_calc_P.Constant_Value_ne4;
       rtb_Power = rt_powf_snf(rtb_Add1_e, arg_ego->sla_param.pow_n -
         mpc_tgt_calc_P.Constant1_Value_mn);
@@ -477,7 +470,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
     rtb_BusAssignment1_o = *arg_ego;
     rtb_BusAssignment1_o.w = static_cast<real32_T>(rtb_Switch_e);
     rtb_BusAssignment1_o.alpha = rtb_Add1_e;
-    rtb_BusAssignment1_o.sla_param.counter = rtb_Merge2;
+    rtb_BusAssignment1_o.sla_param.counter = rtb_Merge1_n;
     if (arg_ego->sla_param.state != 0) {
       rtb_BusAssignment1_o.alpha2 = mpc_tgt_calc_P.Constant_Value_j;
     } else {
@@ -523,7 +516,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
         rtb_Subtract2 = mpc_tgt_calc_P.Constant_Value_ph;
       }
 
-      rtb_Merge2 = mpc_tgt_calc_P.Constant2_Value_gm;
+      rtb_Merge1_n = mpc_tgt_calc_P.Constant2_Value_gm;
     } else if (arg_ego->pivot_state == 0.0F) {
       if (std::abs(arg_ego->w) < std::abs(rtb_Subtract2_n)) {
         if (mpc_tgt_calc_P.ManualSwitch_CurrentSetting_c == 1) {
@@ -535,16 +528,16 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
         }
 
         rtb_Switch_e = rtb_Subtract2;
-        rtb_Merge2 = mpc_tgt_calc_P.Constant1_Value_p;
+        rtb_Merge1_n = mpc_tgt_calc_P.Constant1_Value_p;
       } else {
         rtb_Switch_e = mpc_tgt_calc_P.Constant_Value_k;
-        rtb_Merge2 = mpc_tgt_calc_P.Constant2_Value_f;
+        rtb_Merge1_n = mpc_tgt_calc_P.Constant2_Value_f;
       }
 
       rtb_Subtract2 = static_cast<real32_T>(rtb_Switch_e);
     } else {
       rtb_Subtract2 = static_cast<real32_T>(mpc_tgt_calc_P.Constant_Value_n);
-      rtb_Merge2 = mpc_tgt_calc_P.Constant2_Value_g3;
+      rtb_Merge1_n = mpc_tgt_calc_P.Constant2_Value_g3;
     }
 
     rtb_BusAssignment_b = *arg_ego;
@@ -552,7 +545,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
       static_cast<real32_T>(arg_time_step) + arg_ego->w;
     rtb_BusAssignment_b.alpha = rtb_Subtract2;
     rtb_BusAssignment_b.alpha2 = rtb_Subtract2;
-    rtb_BusAssignment_b.pivot_state = rtb_Merge2;
+    rtb_BusAssignment_b.pivot_state = rtb_Merge1_n;
     rtb_BusAssignment1_o = rtb_BusAssignment_b;
     rtb_BusAssignment1_o.w = mpc_tgt_calc_P.Constant_Value_pr;
     rtb_BusAssignment1_o.alpha = mpc_tgt_calc_P.Constant_Value_pr;
@@ -601,21 +594,21 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
         rtb_Subtract2 = mpc_tgt_calc_P.Constant_Value_hr;
       }
 
-      rtb_Merge2 = mpc_tgt_calc_P.Constant2_Value_f2;
+      rtb_Merge1_n = mpc_tgt_calc_P.Constant2_Value_f2;
     } else if (arg_ego->pivot_state == 0.0F && rtb_Add1_e < rtb_Switch1_n_idx_1)
     {
       rtb_Subtract2 = arg_tgt->alpha;
-      rtb_Merge2 = mpc_tgt_calc_P.Constant1_Value_o;
+      rtb_Merge1_n = mpc_tgt_calc_P.Constant1_Value_o;
     } else {
       rtb_Subtract2 = static_cast<real32_T>(mpc_tgt_calc_P.Constant_Value_p);
-      rtb_Merge2 = mpc_tgt_calc_P.Constant2_Value_j;
+      rtb_Merge1_n = mpc_tgt_calc_P.Constant2_Value_j;
     }
 
     rtb_BusAssignment_b = *arg_ego;
     rtb_BusAssignment_b.w = mpc_tgt_calc_P.dt * rtb_Subtract2 *
       static_cast<real32_T>(arg_time_step) + arg_ego->w;
     rtb_BusAssignment_b.alpha = rtb_Subtract2;
-    rtb_BusAssignment_b.pivot_state = rtb_Merge2;
+    rtb_BusAssignment_b.pivot_state = rtb_Merge1_n;
     rtb_BusAssignment1_o = rtb_BusAssignment_b;
     rtb_BusAssignment1_o.w = mpc_tgt_calc_P.Constant_Value_m;
     rtb_BusAssignment1_o.alpha = mpc_tgt_calc_P.Constant_Value_m;
@@ -665,7 +658,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
       rtb_Merge1_sla_param_base_time = arg_ego->sla_param.base_time;
       rtb_Merge1_sla_param_limit_time = arg_ego->sla_param.limit_time_count;
       rtb_Merge1_sla_param_pow_n = arg_ego->sla_param.pow_n;
-      rtb_Merge2 = arg_ego->sla_param.state;
+      rtb_Merge1_n = arg_ego->sla_param.state;
       rtb_Merge1_ideal_point_x = arg_ego->ideal_point.x;
       rtb_Merge1_ideal_point_y = arg_ego->ideal_point.y;
       rtb_Merge1_ideal_point_theta = arg_ego->ideal_point.theta;
@@ -709,7 +702,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
       rtb_Merge1_sla_param_base_time = arg_ego->sla_param.base_time;
       rtb_Merge1_sla_param_limit_time = arg_ego->sla_param.limit_time_count;
       rtb_Merge1_sla_param_pow_n = arg_ego->sla_param.pow_n;
-      rtb_Merge2 = arg_ego->sla_param.state;
+      rtb_Merge1_n = arg_ego->sla_param.state;
       rtb_Merge1_ideal_point_x = arg_ego->ideal_point.x;
       rtb_Merge1_ideal_point_y = arg_ego->ideal_point.y;
       rtb_Merge1_ideal_point_theta = arg_ego->ideal_point.theta;
@@ -817,7 +810,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
     rtb_BusAssignment1_o.sla_param.limit_time_count =
       rtb_Merge1_sla_param_limit_time;
     rtb_BusAssignment1_o.sla_param.pow_n = rtb_Merge1_sla_param_pow_n;
-    rtb_BusAssignment1_o.sla_param.state = rtb_Merge2;
+    rtb_BusAssignment1_o.sla_param.state = rtb_Merge1_n;
     rtb_BusAssignment1_o.state = rtb_pivot_state;
     rtb_BusAssignment1_o.ideal_point.x = rtb_Merge1_ideal_point_x;
     rtb_BusAssignment1_o.ideal_point.y = rtb_Merge1_ideal_point_y;
@@ -933,7 +926,6 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
 
 void mpc_tgt_calcModelClass::initialize()
 {
-  mpc_tgt_calc_DW.UnitDelay_DSTATE = mpc_tgt_calc_P.UnitDelay_InitialCondition;
   mpc_tgt_calc_B.Merge[0] = mpc_tgt_calc_P.Merge_InitialOutput_h;
   mpc_tgt_calc_B.Merge1[0] = mpc_tgt_calc_P.Merge1_InitialOutput;
   mpc_tgt_calc_B.Merge[1] = mpc_tgt_calc_P.Merge_InitialOutput_h;
@@ -958,7 +950,6 @@ void mpc_tgt_calcModelClass::RT_MODEL_mpc_tgt_calc_T::setErrorStatus(const
 
 mpc_tgt_calcModelClass::mpc_tgt_calcModelClass() :
   mpc_tgt_calc_B(),
-  mpc_tgt_calc_DW(),
   mpc_tgt_calc_M()
 {
 }

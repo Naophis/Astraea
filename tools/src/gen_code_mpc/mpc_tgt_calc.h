@@ -30,10 +30,6 @@ class mpc_tgt_calcModelClass final
     real32_T Merge1[2];
   };
 
-  struct DW_mpc_tgt_calc_T {
-    int32_T UnitDelay_DSTATE;
-  };
-
   struct P_mpc_tgt_calc_T {
     real32_T dt;
     real_T Constant1_Value;
@@ -65,13 +61,12 @@ class mpc_tgt_calcModelClass final
     real_T Constant_Value_p;
     real_T Constant_Value_g;
     int32_T Constant2_Value_p;
-    int32_T Constant5_Value;
     int32_T Constant1_Value_lj;
     int32_T Constant2_Value_g;
     int32_T Constant4_Value_f;
     int32_T Constant2_Value_pg;
     int32_T Constant4_Value_o;
-    int32_T UnitDelay_InitialCondition;
+    int32_T Merge2_InitialOutput;
     int32_T Constant2_Value_id;
     int32_T Constant1_Value_k;
     int32_T Constant2_Value_d;
@@ -199,7 +194,6 @@ class mpc_tgt_calcModelClass final
   ~mpc_tgt_calcModelClass();
  private:
   B_mpc_tgt_calc_T mpc_tgt_calc_B;
-  DW_mpc_tgt_calc_T mpc_tgt_calc_DW;
   static P_mpc_tgt_calc_T mpc_tgt_calc_P;
   RT_MODEL_mpc_tgt_calc_T mpc_tgt_calc_M;
 };
