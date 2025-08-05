@@ -2,7 +2,7 @@ clear;
 
 home = pwd;
 
-sim_time = 0.3;
+sim_time = 30;
 script_file = mfilename('fullpath');
 [filepath, name, ext] = fileparts(script_file);
 cd(filepath);
