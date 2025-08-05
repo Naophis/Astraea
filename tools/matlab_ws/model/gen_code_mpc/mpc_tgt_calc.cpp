@@ -155,6 +155,7 @@ float IRAM_ATTR exact_expf(float x) noexcept {
 real32_T IRAM_ATTR rt_powf_snf(real32_T u0, real32_T u1)
 {
   real32_T y;
+  return fast_pow(u0, u1);
   if (std::isnan(u0) || std::isnan(u1)) {
     y = (rtNaNF);
   } else {

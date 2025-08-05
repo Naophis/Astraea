@@ -38,7 +38,7 @@ SuctionHz: 42500
 MotorResolution: 40
 SuctionResolution: 40
 
-trj_length: 1 # Number of trajectory points to generate
+trj_length: 25 # Number of trajectory points to generate
 
 # roll
 # Ke: 0.00172 # 大：逆起電力大
