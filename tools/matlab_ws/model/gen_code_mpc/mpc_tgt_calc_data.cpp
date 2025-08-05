@@ -60,13 +60,9 @@ mpc_tgt_calcModelClass::P_mpc_tgt_calc_T mpc_tgt_calcModelClass::mpc_tgt_calc_P{
 
   0.0,
 
-  1,
-
-  1,
-
-  1,
-
   2,
+
+  1,
 
   0,
 

@@ -64,10 +64,8 @@ class mpc_tgt_calcModelClass final
     real_T Gain_Gain_g;
     real_T Constant_Value_p;
     real_T Constant_Value_g;
-    int32_T Constant6_Value;
-    int32_T Constant4_Value_m;
-    int32_T Constant5_Value;
     int32_T Constant2_Value_p;
+    int32_T Constant5_Value;
     int32_T Constant1_Value_lj;
     int32_T Constant2_Value_g;
     int32_T Constant4_Value_f;
@@ -128,7 +126,7 @@ class mpc_tgt_calcModelClass final
     real32_T Constant1_Value_pl;
     real32_T Constant2_Value_k;
     real32_T Constant4_Value_d;
-    real32_T Constant6_Value_o;
+    real32_T Constant6_Value;
     real32_T Constant_Value_f;
     real32_T Constant1_Value_i;
     real32_T Constant2_Value_m;
@@ -139,7 +137,7 @@ class mpc_tgt_calcModelClass final
     real32_T Constant1_Value_dt;
     real32_T Constant2_Value_ib;
     real32_T Constant4_Value_b;
-    real32_T Constant6_Value_o0;
+    real32_T Constant6_Value_o;
     real32_T Constant_Value_ne4;
     real32_T Constant1_Value_mn;
     real32_T Constant2_Value_e;
