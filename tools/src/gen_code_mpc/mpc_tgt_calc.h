@@ -36,18 +36,15 @@ class mpc_tgt_calcModelClass final
 
   struct P_mpc_tgt_calc_T {
     real32_T dt;
-    real_T Constant1_Value;
-    real_T Constant3_Value;
-    real_T Gain1_Gain;
     real_T Constant_Value;
     real_T Constant_Value_c;
     real_T Constant_Value_cm;
-    real_T Constant3_Value_a;
-    real_T Constant1_Value_a;
+    real_T Constant3_Value;
+    real_T Constant1_Value;
     real_T Constant2_Value;
     real_T Constant1_Value_h;
     real_T Gain_Gain;
-    real_T Gain1_Gain_c;
+    real_T Gain1_Gain;
     real_T Constant_Value_cx;
     real_T Constant_Value_cf;
     real_T Constant_Value_e;
@@ -86,6 +83,9 @@ class mpc_tgt_calcModelClass final
     int32_T DataStoreMemory_InitialValue;
     int32_T DataStoreMemory1_InitialValue;
     real32_T Gain_Gain_n;
+    real32_T Saturation_UpperSat;
+    real32_T Saturation_LowerSat;
+    real32_T Gain1_Gain_i;
     real32_T Constant3_Value_c;
     real32_T Gain1_Gain_o;
     real32_T Merge_InitialOutput;
@@ -100,7 +100,7 @@ class mpc_tgt_calcModelClass final
     real32_T Constant1_Value_g;
     real32_T Gain1_Gain_e;
     real32_T Constant_Value_pi;
-    real32_T Gain1_Gain_i;
+    real32_T Gain1_Gain_if;
     real32_T Gain_Gain_m;
     real32_T Constant1_Value_e0;
     real32_T Constant4_Value_j;

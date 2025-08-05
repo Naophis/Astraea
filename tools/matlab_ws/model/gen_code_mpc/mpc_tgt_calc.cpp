@@ -266,21 +266,22 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
   real32_T rtb_Switch2_e;
   boolean_T rtb_RelationalOperator_a;
   if (arg_tgt->v_max >= 0.0F) {
-    rtb_Abs7 = arg_tgt->tgt_dist - arg_ego->dist;
     rtb_Divide3 = arg_ego->v * arg_ego->v - arg_tgt->end_v * arg_tgt->end_v;
-    if (arg_ego->v - arg_tgt->end_v > mpc_tgt_calc_P.Constant3_Value_a &&
-        (arg_ego->state == mpc_tgt_calc_P.Constant1_Value_a || std::abs
+    if (arg_ego->v - arg_tgt->end_v > mpc_tgt_calc_P.Constant3_Value &&
+        (arg_ego->state == mpc_tgt_calc_P.Constant1_Value || std::abs
          (rtb_Divide3) / (mpc_tgt_calc_P.Gain1_Gain_o * std::abs(arg_tgt->decel))
          + arg_ego->dist >= arg_tgt->tgt_dist)) {
       if (arg_ego->v > arg_tgt->end_v) {
-        if (rtb_Abs7 > mpc_tgt_calc_P.Constant3_Value) {
-          rtb_Switch_e = mpc_tgt_calc_P.Gain_Gain_n * rtb_Abs7;
-        } else {
-          rtb_Switch_e = mpc_tgt_calc_P.Constant1_Value;
+        rtb_Abs7 = (arg_tgt->tgt_dist - arg_ego->dist) *
+          mpc_tgt_calc_P.Gain_Gain_n;
+        if (rtb_Abs7 > mpc_tgt_calc_P.Saturation_UpperSat) {
+          rtb_Abs7 = mpc_tgt_calc_P.Saturation_UpperSat;
+        } else if (rtb_Abs7 < mpc_tgt_calc_P.Saturation_LowerSat) {
+          rtb_Abs7 = mpc_tgt_calc_P.Saturation_LowerSat;
         }
 
-        rtb_Switch_e = std::abs(rtb_Divide3 / rtb_Switch_e) *
-          mpc_tgt_calc_P.Gain1_Gain;
+        rtb_Switch_e = std::abs(rtb_Divide3 / rtb_Abs7) *
+          mpc_tgt_calc_P.Gain1_Gain_i;
       } else {
         rtb_Switch_e = mpc_tgt_calc_P.Constant_Value;
       }
@@ -354,8 +355,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
         } else {
           rtb_Switch_e = std::abs(rtb_Divide3 / (std::fmax
             (mpc_tgt_calc_P.Constant1_Value_h, static_cast<real_T>(rtb_Abs6 -
-            rtb_Abs7)) * mpc_tgt_calc_P.Gain_Gain)) *
-            mpc_tgt_calc_P.Gain1_Gain_c;
+            rtb_Abs7)) * mpc_tgt_calc_P.Gain_Gain)) * mpc_tgt_calc_P.Gain1_Gain;
         }
       } else {
         rtb_Switch_e = mpc_tgt_calc_P.Constant_Value_cx;
@@ -729,7 +729,7 @@ void IRAM_ATTR mpc_tgt_calcModelClass::step(const t_tgt *arg_tgt, const t_ego *a
       rtb_Merge1_ff_duty_low_v_th = arg_ego->ff_duty_low_v_th;
       rtb_Merge1_decel_delay_cnt = arg_ego->decel_delay_cnt;
       rtb_Merge1_slip_beta = mpc_tgt_calc_P.Constant_Value_pi;
-      rtb_Add1_m = mpc_tgt_calc_P.Gain1_Gain_i * rtb_Gain1_cy;
+      rtb_Add1_m = mpc_tgt_calc_P.Gain1_Gain_if * rtb_Gain1_cy;
       rtb_Add3_kh = mpc_tgt_calc_P.Constant_Value_pi;
       rtb_Sqrt = mpc_tgt_calc_P.Gain_Gain_m * rtb_Gain1_cy;
       rtb_Divide2 = arg_ego->slip.accl;
