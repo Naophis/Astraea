@@ -127,8 +127,6 @@ class mpc_tgt_calcModelClass final
     real32_T Constant6_Value_o;
     real32_T Constant_Value_ne4;
     real32_T Constant1_Value_mn;
-    real32_T Constant5_Value_i;
-    real32_T Constant10_Value;
     real32_T Constant2_Value_e;
     real32_T Constant3_Value_j;
     real32_T Constant7_Value;
@@ -140,8 +138,6 @@ class mpc_tgt_calcModelClass final
     real32_T Constant6_Value_oh;
     real32_T Constant_Value_f;
     real32_T Constant1_Value_i;
-    real32_T Constant5_Value_j;
-    real32_T Constant10_Value_f;
     real32_T Constant2_Value_m;
     real32_T Constant3_Value_k;
     real32_T Constant7_Value_a;
