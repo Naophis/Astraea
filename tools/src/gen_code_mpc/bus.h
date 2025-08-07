@@ -111,6 +111,8 @@ typedef struct {
   float v_l;
   float pos_x;
   float pos_y;
+  float ideal_px;
+  float ideal_py;
   float accl;
   float w;
   float alpha;

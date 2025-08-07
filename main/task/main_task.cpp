@@ -2587,6 +2587,10 @@ void MainTask::test_sla() {
   nm.accl = sys.test.accl;
   nm.decel = sys.test.decel;
   nm.is_turn = true;
+  if (sys.test.sla_return > 0) {
+    nm.v_max = sla_p2.v;
+    nm.v_end = sla_p2.v;
+  }
 
   mp->slalom(sla_p, rorl, nm, false);
 

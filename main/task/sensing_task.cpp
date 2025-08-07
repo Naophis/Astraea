@@ -497,7 +497,8 @@ void IRAM_ATTR SensingTask::task() {
 
         if (pt->tgt_val->motion_type == MotionType::WALL_OFF ||
             pt->tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
-            pt->tgt_val->motion_type == MotionType::SENSING_DUMP) {
+            pt->tgt_val->motion_type == MotionType::SENSING_DUMP ||
+            pt->tgt_val->motion_type == MotionType::SLA_BACK_STR) {
           // R45_2
           led_driver(LED_EN_R90, 0, LED_EN_R45_2, 1, LED_EN_R45_1, 1);
           lec_cnt = 0;
@@ -513,6 +514,8 @@ void IRAM_ATTR SensingTask::task() {
             lec_cnt++;
           }
           exec_adc(SEN_R45, width, &se->led_sen_after.right45_3.raw);
+        } else {
+          se->led_sen_after.right45_2.raw = se->led_sen_after.right45_3.raw = 0;
         }
 
         led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
@@ -531,7 +534,8 @@ void IRAM_ATTR SensingTask::task() {
         exec_adc(SEN_L45, width, &se->led_sen_after.left45.raw);
         if (pt->tgt_val->motion_type == MotionType::WALL_OFF ||
             pt->tgt_val->motion_type == MotionType::WALL_OFF_DIA ||
-            pt->tgt_val->motion_type == MotionType::SENSING_DUMP) {
+            pt->tgt_val->motion_type == MotionType::SENSING_DUMP ||
+            pt->tgt_val->motion_type == MotionType::SLA_BACK_STR) {
           // L45_2
           led_driver(LED_EN_L90, 0, LED_EN_L45_2, 1, LED_EN_L45_1, 1);
           lec_cnt = 0;
@@ -547,6 +551,8 @@ void IRAM_ATTR SensingTask::task() {
             lec_cnt++;
           }
           exec_adc(SEN_L45, width, &se->led_sen_after.left45_3.raw);
+        } else {
+          se->led_sen_after.left45_2.raw = se->led_sen_after.left45_3.raw = 0;
         }
         led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
       } else {

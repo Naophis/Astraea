@@ -8,15 +8,15 @@ straight:
     alpha: 10
   fast_run:
     v_max: 8500
-    accl: 28000
-    decel: -30000
+    accl: 42000
+    decel: -50000
     w_max: 5
     w_end: 0.1
     alpha: 10
   fast_run_dia:
     v_max: 5000
-    accl: 28000
-    decel: -30000
+    accl: 36000
+    decel: -45000
     w_max: 5
     w_end: 0.1
     alpha: 10
@@ -24,13 +24,13 @@ orval:
   v: 2100
   ang: 180.0
   pow_n: 4
-  rad: 48.5
-  time: 0.0475468749999965
-  rad2: 48.5
-  time2: 0.0475468749999965
+  rad: 52.0
+  time: 0.05096874999999612
+  rad2: 52.0
+  time2: 0.05096874999999612
   # rad2: 49.0
   # time2: 0.04817187499999643
-  front: { left: 14, right: 14 }
+  front: { left: 4, right: 4 }
   back: { left: 25, right: 25 }
 normal:
   v: 300.000000
@@ -56,16 +56,16 @@ large:
   pow_n: 4
   rad: 58.5
   time: 0.028671874999998574
-  front: { left: 15.402694878657064, right: 11.502694878657064 }
-  back: { left: 30.59381550343086, right: 30.59381550343086 }
+  front: { left: 8.402694878657064, right: 7.402694878657064 }
+  back: { left: 55.59381550343086, right: 55.59381550343086 }
 dia45:
   v: 2100
   ang: 45.0
   pow_n: 6
   rad: 58.0
   time: 0.01306250000000001
-  front: { left: 9.016513994989235, right: 9.016513994989235 }
-  back: { left: 37.07891890533133, right: 37.07891890533133 }
+  front: { left: 2.016513994989235, right: 2.016513994989235 }
+  back: { left: 67.07891890533133, right: 67.07891890533133 }
 dia45_2:
   v: 2100
   ang: 45

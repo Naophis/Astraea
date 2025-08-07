@@ -36,8 +36,8 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
             slipped_y_list(i) = ego.slip_point.y;
             kanayama_x_list(i) = ego.kanayama_point.x;
             kanayama_y_list(i) = ego.kanayama_point.y;
-            pos_x_list(i)=ego.pos_x;
-            pos_y_list(i)=ego.pos_y;
+            pos_x_list(i)=ego.ideal_px;
+            pos_y_list(i)=ego.ideal_py;
             
         elseif test_mode == 4
             ideal_x_list(i) = ego.ideal_point.x;
@@ -46,8 +46,8 @@ function ego = debug(default_ego, clock, ego_z, test_mode, sim_time)
             slipped_y_list(i) = ego.slip_point.y;
             kanayama_x_list(i) = ego.kanayama_point.x;
             kanayama_y_list(i) = ego.kanayama_point.y;
-            pos_x_list(i)=ego.pos_x;
-            pos_y_list(i)=ego.pos_y;
+            pos_x_list(i)=ego.ideal_px;
+            pos_y_list(i)=ego.ideal_py;
         end
         if sim_time == clock
             subplot(2, 1, 1);

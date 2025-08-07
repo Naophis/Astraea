@@ -38,7 +38,7 @@ SuctionHz: 42500
 MotorResolution: 40
 SuctionResolution: 40
 
-trj_length: 25 # Number of trajectory points to generate
+trj_length: 1 # Number of trajectory points to generate
 
 # roll
 # Ke: 0.00172 # 大：逆起電力大
@@ -80,18 +80,18 @@ ff_front_dury: 0.95
 # fail_safe
 fail_duty_cnt: 150
 fail_v_cnt: 7500
-fail_w_cnt: 1500
-fail_ang_cnt: 15
+fail_w_cnt: 2500
+fail_ang_cnt: 35
 fail_wall_off_cnt: 500
-fail_check_ang_th: 20 #deg
+fail_check_ang_th: 45 #deg
 
 cell: 90
 cell2: 90
 
 # led_light_delay_cnt: 1250
 # led_light_delay_cnt2: 1250
-led_light_delay_cnt: 850
-led_light_delay_cnt2: 850
+led_light_delay_cnt: 950
+led_light_delay_cnt2: 950
 
 axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]

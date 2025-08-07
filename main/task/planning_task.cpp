@@ -1142,8 +1142,9 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     if (std::isfinite(se->ego.v_kf) && std::isfinite(se->ego.ang_kf)) {
       pos.ang += se->ego.w_kf * dt;
       pos.ang = fmod(pos.ang + M_PI, 2 * M_PI) - M_PI;
-      tgt_val->ego_in.pos_x += se->ego.v_kf * cosf(pos.ang) * dt;
-      tgt_val->ego_in.pos_y += se->ego.v_kf * sinf(pos.ang) * dt;
+      const auto tmp_dist = se->ego.v_kf * dt;
+      tgt_val->ego_in.pos_x += tmp_dist * cosf(pos.ang);
+      tgt_val->ego_in.pos_y += tmp_dist * sinf(pos.ang);
       pos.predict(tgt_val->ego_in.v, tgt_val->ego_in.w, dt);
       const std::array<float, 3> z = {tgt_val->ego_in.pos_x, //
                                       tgt_val->ego_in.pos_y, //
@@ -1587,8 +1588,6 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
 
   tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
   tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
-  tgt_val->ego_in.pos_x = 0;
-  tgt_val->ego_in.pos_y = 0;
 
   tgt_val->global_pos.img_ang += mpc_next_ego.w * dt;
 
@@ -1842,8 +1841,12 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
         tgt_val->motion_type == MotionType::PIVOT)) {
     se->ego.left90_dist_old = se->ego.left90_dist;
     se->ego.left45_dist_old = se->ego.left45_dist;
+    se->ego.left45_2_dist_old = se->ego.left45_2_dist;
+    se->ego.left45_3_dist_old = se->ego.left45_3_dist;
     se->ego.front_dist_old = se->ego.front_dist;
     se->ego.right45_dist_old = se->ego.right45_dist;
+    se->ego.right45_2_dist_old = se->ego.right45_2_dist;
+    se->ego.right45_3_dist_old = se->ego.right45_3_dist;
     se->ego.right90_dist_old = se->ego.right90_dist;
 
     se->ego.left90_dist =
@@ -2564,7 +2567,7 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
 void IRAM_ATTR PlanningTask::generate_trajectory() {
   // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
   //                   mpc_step, &mpc_next_ego, &dynamics);
-  tgt_val->ego_in.pos_x = tgt_val->ego_in.pos_y = 0;
+  tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py = 0;
 
   for (int i = 0; i < param_ro->trj_length; i++) {
     int32_T index = i + 1;
