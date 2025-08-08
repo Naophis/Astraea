@@ -9,7 +9,7 @@ pivot_angle_180: 180.0
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 # front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
-front_dist_offset: 94.50 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 102.50 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
 normal_sla_offset_front: 9
