@@ -56,7 +56,7 @@ class Plot:
             tgt_ang = 45.0
             start_ang = 0
             n = 4
-            rad = 65.0
+            rad = 62.0
 
             if hf_cl == 0:
                 # rad = 80.0
