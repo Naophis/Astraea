@@ -81,7 +81,7 @@ ff_front_dury: 0.95
 fail_duty_cnt: 150
 fail_v_cnt: 7500
 fail_w_cnt: 2500
-fail_ang_cnt: 35
+fail_ang_cnt: 120
 fail_wall_off_cnt: 500
 fail_check_ang_th: 45 #deg
 

@@ -910,6 +910,10 @@ void MainTask::load_offset_param() {
       getItem(root, "front_dist_offset_pivot")->valuedouble;
 
   param->wall_off_hold_dist = getItem(root, "wall_off_hold_dist")->valuedouble;
+  param->wall_off_diff_ref_th=
+      getItem(root, "wall_off_diff_ref_th")->valuedouble;
+  param->wall_off_diff_ref_front_th=
+      getItem(root, "wall_off_diff_ref_front_th")->valuedouble;
   param->wall_off_dist.left_str =
       getItem(root, "wall_off_hold_dist_str_l")->valuedouble;
   param->wall_off_dist.right_str =

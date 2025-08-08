@@ -95,6 +95,9 @@ wall_off_hold_noexist_th_r2: 66
 wall_off_hold_dist_str_l: 0.5
 wall_off_hold_dist_str_r: -1.5
 
+wall_off_diff_ref_th: 5
+wall_off_diff_ref_front_th: 10 # 壁切れ偏差チェックの前後距離差条件
+
 # 壁切れ 偏差(最初見えず、柱で反応)
 wall_off_hold_div_th_l: 0.5
 wall_off_hold_div_th_r: 0.5
@@ -201,3 +204,4 @@ offset_after_turn_dia_r: 24 #dia45_2, dia135_2
 # constant
 cell: 90.0
 cell2: 90.0
+

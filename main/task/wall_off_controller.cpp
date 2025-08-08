@@ -279,9 +279,17 @@ bool IRAM_ATTR WallOffController::apply_front_sensor_correction(
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
+  const auto diff_front =
+      ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
+  const auto valid_diff = diff_front < param->wall_off_diff_ref_front_th;
+
+  const auto diff_decrease = // 左右の壁が見え始めてたら
+      (se->ego.left45_dist_diff < 0 || se->ego.right45_dist_diff < 0);
+
   if (std::abs(tmp_dist_after - tmp_dist_before) >=
       std::abs(param->wall_off_front_move_dist_th)) {
-    if (param->wall_off_front_ctrl_min < se->ego.left90_dist &&
+    if (valid_diff && !diff_decrease &&
+        param->wall_off_front_ctrl_min < se->ego.left90_dist &&
         se->ego.left90_dist < param->front_dist_offset4 &&
         param->wall_off_front_ctrl_min < se->ego.right90_dist &&
         se->ego.right90_dist < param->front_dist_offset4) {
@@ -620,9 +628,9 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
                 std::abs(p_wall_off.diff_check_dist)) &&                //
                se->ego.right45_dist_diff > p_wall_off.diff_dist_th_r && //
                se->ego.right45_2_dist_diff > 0 &&                       //
-              //  se->ego.right45_3_dist_diff > 0 &&                       //
-              //  se->ego.right45_2_dist_diff < 10 &&                      //
-              //  se->ego.right45_3_dist_diff < 10 &&                      //
+               //  se->ego.right45_3_dist_diff > 0 &&                       //
+               //  se->ego.right45_2_dist_diff < 10 &&                      //
+               //  se->ego.right45_3_dist_diff < 10 &&                      //
                se->ego.right45_dist_diff < 100;
       },
       // detect_pass_through_case2
@@ -644,9 +652,16 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
       },
       // detect_wall_off
       [=]() {
+        const auto diff_ref =
+            ABS(param->sen_ref_p.normal.ref.right45 - se->ego.right45_dist);
+        const auto diff_front =
+            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
+        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                                diff_front < param->wall_off_diff_ref_front_th;
         return (se->ego.right45_dist > p_wall_off.noexist_th_r &&   //
                 se->ego.right45_dist_diff > 0) ||                   //
-               (se->ego.right45_dist_diff > p_wall_off.div_th_r3 && //
+               (valid_diff &&                                       //
+                se->ego.right45_dist_diff > p_wall_off.div_th_r3 && //
                 se->ego.right45_2_dist_diff > 0 &&                  //
                 // se->ego.right45_3_dist_diff > 0 &&                  //
                 // se->ego.right45_2_dist_diff < 10 &&                 //
@@ -655,11 +670,18 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
       },
       // detect_wall_missing_by_deviation
       [=]() {
-        return se->ego.right45_dist_diff > p_wall_off.div_th_r && //
+        const auto diff_ref =
+            ABS(param->sen_ref_p.normal.ref.right45 - se->ego.right45_dist);
+        const auto diff_front =
+            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
+        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                                diff_front < param->wall_off_diff_ref_front_th;
+        return valid_diff &&                                      //
+               se->ego.right45_dist_diff > p_wall_off.div_th_r && //
                se->ego.right45_2_dist_diff > 0 &&                 //
-              //  se->ego.right45_3_dist_diff > 0 &&                 //
-              //  se->ego.right45_2_dist_diff < 10 &&                //
-              //  se->ego.right45_3_dist_diff < 10 &&                //
+               //  se->ego.right45_3_dist_diff > 0 &&                 //
+               //  se->ego.right45_2_dist_diff < 10 &&                //
+               //  se->ego.right45_3_dist_diff < 10 &&                //
                se->ego.right45_dist < 100;
       },
       // detect_wall_off_vertical
@@ -693,7 +715,7 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
                 std::abs(p_wall_off.diff_check_dist)) &&
                se->ego.left45_dist_diff > p_wall_off.diff_dist_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                       //
-              //  se->ego.left45_3_dist_diff > 0 &&                       //
+               //  se->ego.left45_3_dist_diff > 0 &&                       //
                //  se->ego.left45_2_dist_diff < 10 &&                      //
                //  se->ego.left45_3_dist_diff < 10 &&                      //
                se->ego.left45_dist < 100;
@@ -717,9 +739,17 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
       },
       // detect_wall_off
       [=]() {
+        const auto diff_ref =
+            ABS(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
+        const auto diff_front =
+            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
+        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                                diff_front < param->wall_off_diff_ref_front_th;
+
         return (se->ego.left45_dist > p_wall_off.noexist_th_l &&   //
                 se->ego.left45_dist_diff > 0) ||                   //
-               (se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
+               (valid_diff &&                                      //
+                se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
                 se->ego.left45_2_dist_diff > 0 &&                  //
                 // se->ego.left45_3_dist_diff > 0 &&                  //
                 // se->ego.left45_2_dist_diff < 10 &&                 //
@@ -728,9 +758,16 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
       },
       // detect_wall_missing_by_deviation
       [=]() {
-        return se->ego.left45_dist_diff > p_wall_off.div_th_l && //
+        const auto diff_ref =
+            ABS(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
+        const auto diff_front =
+            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
+        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                                diff_front < param->wall_off_diff_ref_front_th;
+        return valid_diff &&                                     //
+               se->ego.left45_dist_diff > p_wall_off.div_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                 //
-              //  se->ego.left45_3_dist_diff > 0 &&                 //
+               //  se->ego.left45_3_dist_diff > 0 &&                 //
                //  se->ego.left45_2_dist_diff < 10 &&                //
                //  se->ego.left45_3_dist_diff < 10 &&                //
                se->ego.left45_dist < 100;
@@ -782,9 +819,9 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
       [=]() {
         return se->ego.left45_dist_diff > p_wall_off.div_th_dia_l && //
                se->ego.left45_2_dist_diff > 0 &&                     //
-              //  se->ego.left45_3_dist_diff > 0 &&                     //
-              //  se->ego.left45_2_dist_diff < 10 &&                    //
-              //  se->ego.left45_3_dist_diff < 10 &&                    //
+               //  se->ego.left45_3_dist_diff > 0 &&                     //
+               //  se->ego.left45_2_dist_diff < 10 &&                    //
+               //  se->ego.left45_3_dist_diff < 10 &&                    //
                se->ego.left45_dist < 100;
       },
       // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
@@ -833,7 +870,7 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
       [=]() {
         return se->ego.right45_dist_diff > p_wall_off.div_th_dia_r && //
                se->ego.right45_2_dist_diff > 0 &&                     //
-              //  se->ego.right45_3_dist_diff > 0 &&                     //
+               //  se->ego.right45_3_dist_diff > 0 &&                     //
                //  se->ego.right45_2_dist_diff < 10 &&                    //
                //  se->ego.right45_3_dist_diff < 10 &&                    //
                se->ego.right45_dist < 100;

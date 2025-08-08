@@ -562,7 +562,8 @@ typedef struct {
 
   float wall_off_hold_dist;
   wall_off_hold_dist_t wall_off_dist;
-
+  float wall_off_diff_ref_th = 5;
+  float wall_off_diff_ref_front_th = 10;
   float wall_off_wait_dist = 40;
   float wall_off_wait_dist_dia = 40;
   int search_log_enable = 0;
