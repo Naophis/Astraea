@@ -149,13 +149,64 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
       }
     }
     // 壁切れ処理をWallOffControllerに委任
-    if (wall_off_controller) {
-      auto wall_off_result =
-          wall_off_controller->execute_search_wall_off(p, search_mode);
-      if (wall_off_result == MotionResult::WALL_OFF_DETECTED) {
-        param->sen_ref_p.normal.exist.left45 = left;
-        param->sen_ref_p.normal.exist.right45 = right;
-        return go_straight(p, fake_adachi, false);
+    // if (search_mode && param->wall_off_dist.search_wall_off_enable) {
+    //   auto wall_off_result =
+    //       wall_off_controller->execute_search_wall_off(p, search_mode);
+    //   if (wall_off_result == MotionResult::WALL_OFF_DETECTED) {
+    //     param->sen_ref_p.normal.exist.left45 = left;
+    //     param->sen_ref_p.normal.exist.right45 = right;
+    //     return go_straight(p, fake_adachi, false);
+    //   }
+    // }
+
+
+ if (search_mode && param->wall_off_dist.search_wall_off_enable) {
+      // watch wall off
+      if (wall_off_state == 0) {
+        if (sensing_result->ego.right45_dist <
+                param->wall_off_dist.exist_dist_r &&
+            exist_right) {
+          wall_off_state |= 1;
+        }
+        if (sensing_result->ego.left45_dist <
+                param->wall_off_dist.exist_dist_l &&
+            exist_left) {
+          wall_off_state |= 2;
+        }
+      } else if (wall_off_state == 3 && exist_right && exist_left) {
+        if (sensing_result->ego.right45_dist >
+            param->wall_off_dist.noexist_th_r) {
+          wall_off_state = 4;
+          p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
+          return go_straight(p, fake_adachi, false);
+        } else if (sensing_result->ego.left45_dist >
+                   param->wall_off_dist.noexist_th_l) {
+          wall_off_state = 4;
+          p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
+          return go_straight(p, fake_adachi, false);
+        }
+      } else if (wall_off_state == 1 && exist_right) {
+        if (sensing_result->ego.right45_dist >
+            param->wall_off_dist.noexist_th_r) {
+          wall_off_state = 4;
+          p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
+          return go_straight(p, fake_adachi, false);
+        }
+      } else if (wall_off_state == 2 && exist_left) {
+        if (sensing_result->ego.left45_dist >
+            param->wall_off_dist.noexist_th_l) {
+          wall_off_state = 4;
+          p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          param->sen_ref_p.normal.exist.left45 = left;
+          param->sen_ref_p.normal.exist.right45 = right;
+          return go_straight(p, fake_adachi, false);
+        }
       }
     }
 

@@ -279,8 +279,8 @@ bool IRAM_ATTR WallOffController::apply_front_sensor_correction(
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
-  const auto diff_front =
-      ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
+  const auto diff_front = std::abs(se->ego.left90_far_dist -
+                                   se->ego.right90_far_dist); // 前後の距離差
   const auto valid_diff = diff_front < param->wall_off_diff_ref_front_th;
 
   const auto diff_decrease = // 左右の壁が見え始めてたら
@@ -652,12 +652,12 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
       },
       // detect_wall_off
       [=]() {
-        const auto diff_ref =
-            ABS(param->sen_ref_p.normal.ref.right45 - se->ego.right45_dist);
-        const auto diff_front =
-            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
-        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                                diff_front < param->wall_off_diff_ref_front_th;
+        float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
+                                  se->ego.right45_dist);
+        float diff_front = std::abs(se->ego.left90_far_dist -
+                                    se->ego.right90_far_dist); // 前後の距離差
+        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                          diff_front < param->wall_off_diff_ref_front_th;
         return (se->ego.right45_dist > p_wall_off.noexist_th_r &&   //
                 se->ego.right45_dist_diff > 0) ||                   //
                (valid_diff &&                                       //
@@ -670,12 +670,13 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
       },
       // detect_wall_missing_by_deviation
       [=]() {
-        const auto diff_ref =
-            ABS(param->sen_ref_p.normal.ref.right45 - se->ego.right45_dist);
-        const auto diff_front =
-            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
-        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                                diff_front < param->wall_off_diff_ref_front_th;
+        float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
+                                  se->ego.right45_dist);
+        float diff_front =
+            std::abs(se->ego.left90_far_dist - se->ego.right90_far_dist); //
+        // 前後の距離差
+        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                          diff_front < param->wall_off_diff_ref_front_th;
         return valid_diff &&                                      //
                se->ego.right45_dist_diff > p_wall_off.div_th_r && //
                se->ego.right45_2_dist_diff > 0 &&                 //
@@ -739,12 +740,12 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
       },
       // detect_wall_off
       [=]() {
-        const auto diff_ref =
-            ABS(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
-        const auto diff_front =
-            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
-        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                                diff_front < param->wall_off_diff_ref_front_th;
+        float diff_ref =
+            std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
+        float diff_front = std::abs(se->ego.left90_far_dist -
+                                    se->ego.right90_far_dist); // 前後の距離差
+        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                          diff_front < param->wall_off_diff_ref_front_th;
 
         return (se->ego.left45_dist > p_wall_off.noexist_th_l &&   //
                 se->ego.left45_dist_diff > 0) ||                   //
@@ -758,12 +759,12 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
       },
       // detect_wall_missing_by_deviation
       [=]() {
-        const auto diff_ref =
-            ABS(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
-        const auto diff_front =
-            ABS(se->ego.left90_dist - se->ego.right90_dist); // 前後の距離差
-        const auto valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                                diff_front < param->wall_off_diff_ref_front_th;
+        float diff_ref =
+            std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
+        float diff_front = std::abs(se->ego.left90_far_dist -
+                                    se->ego.right90_far_dist); // 前後の距離差
+        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
+                          diff_front < param->wall_off_diff_ref_front_th;
         return valid_diff &&                                     //
                se->ego.left45_dist_diff > p_wall_off.div_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                 //
