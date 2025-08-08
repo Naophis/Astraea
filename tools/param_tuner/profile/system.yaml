@@ -58,9 +58,9 @@ give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-mode: 0 # メイン
+# mode: 0 # メイン
 # mode: 1 # 最短スローム
-# mode: 2 # 直進
+mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
@@ -112,11 +112,11 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty: 3.75
   suction_duty_low: 3.5
   # Alter
-  suction_duty_burst: 4.75
-  suction_duty_burst_low: 4.0
+  # suction_duty_burst: 4.75
+  # suction_duty_burst_low: 4.0
   # Nova
-  # suction_duty_burst: 3.75
-  # suction_duty_burst_low: 3.5
+  suction_duty_burst: 3.75
+  suction_duty_burst_low: 3.5
   
 
   suction_gain: 50
