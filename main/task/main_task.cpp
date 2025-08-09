@@ -3048,7 +3048,7 @@ void MainTask::test_sla_walloff() {
 
     ps.v_max = sys.test.v_max;
     ps.v_end = sys.test.v_max;
-    ps.dist = param->cell;
+    ps.dist = sys.test.dist;
     ps.accl = sys.test.accl;
     ps.decel = sys.test.decel;
     ps.sct = SensorCtrlType::Straight;

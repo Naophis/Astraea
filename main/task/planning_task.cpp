@@ -754,14 +754,14 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
                   (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
   } else {
     if (enable_expand_right) {
-      exist_right45_expand = wall_th + 0.75;
+      exist_right45_expand = wall_th + 1.0;
       expand_right = (10 < se->ego.right45_dist) &&
                      (se->ego.right45_dist < exist_right45_expand);
     } else {
       exist_right45_expand = 0;
     }
     if (enable_expand_left) {
-      exist_left45_expand = wall_th + 0.75;
+      exist_left45_expand = wall_th + 1.0;
       expand_left = (10 < se->ego.left45_dist) &&
                     (se->ego.left45_dist < exist_left45_expand);
     } else {
@@ -830,6 +830,7 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   }
 
   if (check == 0) {
+    // 柱制御
     ee->sen.error_i = 0;
     ee->sen_log.gain_zz = 0;
     ee->sen_log.gain_z = 0;
@@ -837,6 +838,8 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     bool left_check = false;
     float right_error = 0;
     float left_error = 0;
+
+    //切れる前の値が規定値以上
 
     const bool range_check_passed_right =
         (prm->sen_ref_p.normal2.ref.kireme_r < se->sen.r45.sensor_dist) &&
@@ -1943,7 +1946,9 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
         = se->ego.right45_2_dist_diff //
         = se->ego.right45_3_dist_diff //
         = se->ego.left45_2_dist_diff  //
-        = se->ego.left45_3_dist_diff = 0;
+        = se->ego.left45_3_dist_diff  //
+        = se->ego.right90_dist_diff   //
+        = se->ego.left90_dist_diff = 0;
   }
 
   se->ego.left45_dist_diff = se->ego.left45_dist - se->ego.left45_dist_old;
@@ -1957,6 +1962,9 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
       se->ego.right45_2_dist - se->ego.right45_2_dist_old;
   se->ego.right45_3_dist_diff =
       se->ego.right45_3_dist - se->ego.right45_3_dist_old;
+
+  se->ego.left90_dist_diff = se->ego.left90_dist - se->ego.left90_dist_old;
+  se->ego.right90_dist_diff = se->ego.right90_dist - se->ego.right90_dist_old;
 
   // 壁からの距離に変換。あとで斜め用に変更
   calc_sensor_dist_diff();

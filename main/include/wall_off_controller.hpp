@@ -17,8 +17,8 @@ struct WallSensorStrategy {
   std::function<bool(float, float)> detect_pass_through_case2;
   std::function<bool(float, float)> detect_distance;
   std::function<bool()> detect_missing_by_deviation;
-  std::function<bool()> detect_wall_off;
-  std::function<bool()> detect_wall_missing_by_deviation;
+  std::function<bool(float)> detect_wall_off;
+  std::function<bool(float)> detect_wall_missing_by_deviation;
   std::function<bool()> detect_wall_off_vertical;
 };
 

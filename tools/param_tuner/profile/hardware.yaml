@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 14.0250 #新品 13.6165
-tire2: 14.0250 #新品 13.6165
+tire: 13.9850 #新品 13.6165
+tire2: 13.9850 #新品 13.6165
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0

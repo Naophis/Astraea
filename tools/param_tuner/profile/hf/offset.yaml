@@ -68,8 +68,8 @@ wall_off_hold_dist: 88
 ctrl_exist_wall_th_l: 47 #探索壁切れ
 ctrl_exist_wall_th_r: 47 #探索壁切れ
 go_straight_wide_ctrl_th: 75
-search_wall_off_l_dist_offset: 57.5
-search_wall_off_r_dist_offset: 56.5
+search_wall_off_l_dist_offset: 54.750
+search_wall_off_r_dist_offset: 52.5
 # search_wall_off_l_dist_offset: 50.0
 # search_wall_off_r_dist_offset: 50.0
 search_wall_off_enable: 1
@@ -84,8 +84,8 @@ wall_off_hold_exist_dist_r: 49
 wall_off_hold_noexist_th_l: 50
 wall_off_hold_noexist_th_r: 50
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: 1.5
-wall_off_hold_dist_str_r_exist: 1.0
+wall_off_hold_dist_str_l_exist: 0.5
+wall_off_hold_dist_str_r_exist: -2.5
 
 # 壁切れ In2(最初からないとき)
 wall_off_hold_exist_dist_l2: 64
@@ -94,8 +94,8 @@ wall_off_hold_exist_dist_r2: 64
 wall_off_hold_noexist_th_l2: 66
 wall_off_hold_noexist_th_r2: 66
 # 壁切れ オフセット距離(最初からないとき)
-wall_off_hold_dist_str_l: 0.5
-wall_off_hold_dist_str_r: -1.5
+wall_off_hold_dist_str_l: -2.0
+wall_off_hold_dist_str_r: -3.5
 
 wall_off_diff_ref_th: 6.5
 wall_off_diff_ref_front_th: 30 # 壁切れ偏差チェックの前後距離差条件

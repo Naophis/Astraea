@@ -139,14 +139,14 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
     }
 
     if (exist) {
-      if (strategy.detect_wall_off()) {
+      if (strategy.detect_wall_off(exist)) {
         ps_front.dist += p_wall_off.right_str_exist;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return;
       }
     } else {
       // 壁が見切れかけ始めたら
-      if (strategy.detect_wall_missing_by_deviation()) {
+      if (strategy.detect_wall_missing_by_deviation(exist)) {
         ps_front.dist += p_wall_off.right_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return;
@@ -248,14 +248,14 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
     }
 
     if (exist) {
-      if (strategy.detect_wall_off()) {
+      if (strategy.detect_wall_off(exist)) {
         ps_front.dist += p_wall_off.left_str_exist;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return;
       }
     } else {
       // 壁が見切れかけ始めたら
-      if (strategy.detect_wall_missing_by_deviation()) {
+      if (strategy.detect_wall_missing_by_deviation(exist)) {
         ps_front.dist += p_wall_off.left_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return;
@@ -651,32 +651,36 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
                se->ego.right45_dist < 100;
       },
       // detect_wall_off
-      [=]() {
+      [=](float exist) {
         float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
                                   se->ego.right45_dist);
         float diff_front = std::abs(se->ego.left90_far_dist -
                                     se->ego.right90_far_dist); // 前後の距離差
-        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                          diff_front < param->wall_off_diff_ref_front_th;
-        return (se->ego.right45_dist > p_wall_off.noexist_th_r &&   //
-                se->ego.right45_dist_diff > 0) ||                   //
-               (valid_diff &&                                       //
-                se->ego.right45_dist_diff > p_wall_off.div_th_r3 && //
-                se->ego.right45_2_dist_diff > 0 &&                  //
+        bool exist_front = false;
+
+        bool valid_diff =
+            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
+            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
+        return (se->ego.right45_dist > p_wall_off.noexist_th_r &&  //
+                se->ego.right45_dist_diff > 0) ||                  //
+               (valid_diff &&                                      //
+                se->ego.right45_dist_diff > p_wall_off.div_th_r && //
+                se->ego.right45_2_dist_diff > 0 &&                 //
                 // se->ego.right45_3_dist_diff > 0 &&                  //
                 // se->ego.right45_2_dist_diff < 10 &&                 //
                 // se->ego.right45_3_dist_diff < 10 &&                 //
                 se->ego.right45_dist < 100);
       },
       // detect_wall_missing_by_deviation
-      [=]() {
+      [=](float exist) {
         float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
                                   se->ego.right45_dist);
         float diff_front =
             std::abs(se->ego.left90_far_dist - se->ego.right90_far_dist); //
-        // 前後の距離差
-        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                          diff_front < param->wall_off_diff_ref_front_th;
+        bool exist_front = false;
+        bool valid_diff =
+            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
+            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
         return valid_diff &&                                      //
                se->ego.right45_dist_diff > p_wall_off.div_th_r && //
                se->ego.right45_2_dist_diff > 0 &&                 //
@@ -739,32 +743,41 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
                se->ego.left45_dist < 100;
       },
       // detect_wall_off
-      [=]() {
+      [=](float exist) {
         float diff_ref =
             std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
         float diff_front = std::abs(se->ego.left90_far_dist -
                                     se->ego.right90_far_dist); // 前後の距離差
-        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                          diff_front < param->wall_off_diff_ref_front_th;
+        bool exist_front = false;
 
-        return (se->ego.left45_dist > p_wall_off.noexist_th_l &&   //
-                se->ego.left45_dist_diff > 0) ||                   //
-               (valid_diff &&                                      //
-                se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
-                se->ego.left45_2_dist_diff > 0 &&                  //
+        bool valid_diff =
+            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
+            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
+        return (se->ego.left45_dist > p_wall_off.noexist_th_l &&  //
+                se->ego.left45_dist_diff > 0) ||                  //
+               (valid_diff &&                                     //
+                se->ego.left45_dist_diff > p_wall_off.div_th_l && //
+                se->ego.left45_2_dist_diff > 0 &&                 //
                 // se->ego.left45_3_dist_diff > 0 &&                  //
                 // se->ego.left45_2_dist_diff < 10 &&                 //
                 // se->ego.left45_3_dist_diff < 10 &&                 //
                 se->ego.left45_dist < 100);
       },
       // detect_wall_missing_by_deviation
-      [=]() {
+      [=](float exist) {
         float diff_ref =
             std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
         float diff_front = std::abs(se->ego.left90_far_dist -
                                     se->ego.right90_far_dist); // 前後の距離差
-        bool valid_diff = diff_ref < param->wall_off_diff_ref_th &&
-                          diff_front < param->wall_off_diff_ref_front_th;
+        bool exist_front = false;
+        // (param->wall_off_front_ctrl_min < se->ego.left90_far_dist &&
+        //  se->ego.left90_far_dist < param->front_dist_offset4 &&
+        //  param->wall_off_front_ctrl_min < se->ego.right90_far_dist &&
+        //  se->ego.right90_far_dist < param->front_dist_offset4);
+
+        bool valid_diff =
+            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
+            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
         return valid_diff &&                                     //
                se->ego.left45_dist_diff > p_wall_off.div_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                 //
@@ -800,10 +813,13 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
       },
       // detect_pass_through_case2 - 反対側の壁ありの場合の検出
       [=](float before, float after, float init) {
+        bool valid_right90 =
+            1 < se->ego.right90_mid_dist &&
+            se->ego.right90_mid_dist < param->sen_ref_p.dia.exist.right90 &&
+            se->ego.right90_dist_diff < 0;
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist_dia) &&
-               //  se->ego.left45_dist > 100 &&
-               se->ego.right45_dist < param->dia_turn_th_r;
+               se->ego.right45_dist < param->dia_turn_th_r && valid_right90;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
       [=]() {
@@ -852,9 +868,13 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
       },
       // detect_pass_through_case2 - 反対側の壁ありの場合の検出
       [=](float before, float after, float init) {
+        bool valid_left90 =
+            1 < se->ego.left90_mid_dist &&
+            se->ego.left90_mid_dist < param->sen_ref_p.dia.exist.left90 &&
+            se->ego.left90_dist_diff < 0;
         return std::abs(after - before) >=
-                   std::abs(p_wall_off.diff_check_dist_dia) && //
-               se->ego.left45_dist < param->dia_turn_th_l;
+                   std::abs(p_wall_off.diff_check_dist_dia) &&
+               se->ego.left45_dist < param->dia_turn_th_l && valid_left90;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
       [=]() {
