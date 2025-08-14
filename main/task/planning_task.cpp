@@ -82,6 +82,33 @@ void IRAM_ATTR PlanningTask::pid_val_data(pid_error_t &in, pid_error_t &save) {
   // error_entity_ptr->error_d = in.error_d;
 }
 
+int IRAM_ATTR PlanningTask::interp1d(vector<int> &vx, vector<int> &vy, float x,
+                                     bool extrapolate) {
+  int size = vx.size();
+  int i = 0;
+
+  if (size == 0)
+    return 0;
+
+  if (x >= vx[size - 2]) {
+    i = size - 2;
+  } else {
+    while (x > vx[i + 1])
+      i++;
+  }
+  float xL = vx[i], yL = vy[i], xR = vx[i + 1], yR = vy[i + 1];
+  if (!extrapolate) {
+    if (x < xL)
+      yR = yL;
+    if (x > xR)
+      yL = yR;
+  }
+
+  float dydx = (yR - yL) / (xR - xL);
+
+  return (int)(yL + dydx * (x - xL));
+}
+
 float IRAM_ATTR PlanningTask::interp1d(vector<float> &vx, vector<float> &vy,
                                        float x, bool extrapolate) {
   int size = vx.size();
@@ -215,6 +242,9 @@ void PlanningTask::reset_pos(float x, float y, float ang) {
   tgt_val->ego_in.pos_y = 0;
   pos.init(x, y, ang, param_ro->pos_init_cov, param_ro->pos_p_noise,
            param_ro->pos_m_noise);
+  kim.x = 0;
+  kim.y = 0;
+  kim.theta = ang;
 }
 
 void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
@@ -388,6 +418,7 @@ void PlanningTask::task() {
   // int64_t start2;
   // int64_t end2;
   const TickType_t xDelay = 1.0 / portTICK_PERIOD_MS;
+  mpc_next_ego.ideal_px = mpc_next_ego.ideal_py = 0;
   BaseType_t queue_recieved;
   init_gpio();
   for (int i = 0; i < 4097; i++) {
@@ -533,6 +564,13 @@ void PlanningTask::task() {
       if (tgt_val->ego_in.dist >= tgt_val->tgt_in.tgt_dist) {
         mpc_next_ego.v = tgt_val->tgt_in.end_v;
       }
+    }
+    calc_kanamaya_ctrl();
+
+    if (tgt_val->motion_type == MotionType::PIVOT ||
+        tgt_val->motion_type == MotionType::FRONT_CTRL) {
+      v_cmd = tgt_val->ego_in.v;
+      w_cmd = tgt_val->ego_in.w;
     }
 
     // 算出結果をコピー
@@ -1143,6 +1181,12 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   if (!(tgt_val->motion_type == MotionType::NONE ||
         tgt_val->motion_type == MotionType::FRONT_CTRL)) {
     if (std::isfinite(se->ego.v_kf) && std::isfinite(se->ego.ang_kf)) {
+
+      const auto pos_state_z = pos.get_state();
+      const auto pos_x_z = pos_state_z[0];
+      const auto pos_y_z = pos_state_z[1];
+      const auto pos_theta_z = pos_state_z[2];
+
       pos.ang += se->ego.w_kf * dt;
       pos.ang = fmod(pos.ang + M_PI, 2 * M_PI) - M_PI;
       const auto tmp_dist = se->ego.v_kf * dt;
@@ -1156,6 +1200,16 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
       const auto pos_state = pos.get_state();
       se->ego.pos_x = pos_state[0];
       se->ego.pos_y = pos_state[1];
+      se->ego.pos_ang = pos_state[2];
+
+      const auto d_x = se->ego.pos_x - pos_x_z;
+      const auto d_y = se->ego.pos_y - pos_y_z;
+      const auto d_ang = se->ego.pos_ang - pos_theta_z;
+
+      // calc local_pos;
+      kim.x += d_x;
+      kim.y += d_y;
+      kim.theta += d_ang;
     }
   }
 
@@ -1622,6 +1676,9 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
 
   ideal_v_r = tgt_val->ego_in.v - tgt_val->ego_in.w * param_ro->tire_tread / 2;
   ideal_v_l = tgt_val->ego_in.v + tgt_val->ego_in.w * param_ro->tire_tread / 2;
+
+  tgt_val->ego_in.ideal_px = mpc_next_ego.ideal_px;
+  tgt_val->ego_in.ideal_py = mpc_next_ego.ideal_py;
 }
 
 void IRAM_ATTR PlanningTask::check_fail_safe() {
@@ -1821,6 +1878,12 @@ void IRAM_ATTR PlanningTask::cp_request() {
     //   se->sen.l45.global_run_dist =
     //       tgt_val->global_pos.dist - param_ro->wall_off_hold_dist;
     // }
+  }
+
+  if (receive_req->nmr.motion_type == MotionType::STRAIGHT ||
+      receive_req->nmr.motion_type == MotionType::SLA_FRONT_STR) {
+    kim.x = kim.y = kim.theta = 0;
+    tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py = 0;
   }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
@@ -2149,15 +2212,28 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
       diff_ang = 0;
       ang_sum = 0;
     }
+
+    auto w_error_i = ee->w.error_i;
+    if (param_ro->kanayama.windup > 0) {
+      if (tgt_val->motion_type == MotionType::SLALOM ||
+          tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+        if (w_error_i * ee->w.error_p < 0) {
+          // float ang = param_ro->kanayama.windup_deg;
+          w_error_i = 0; // std::clamp(w_error_i * dt, -ang, ang) / dt;
+        }
+      }
+    }
+
     if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
           tgt_val->motion_type == MotionType::SLA_BACK_STR ||
           tgt_val->motion_type == MotionType::PIVOT)) {
       diff_ang = 0;
       ang_sum = 0;
     }
+
     auto kp_gain = param_ro->gyro_pid.p * ee->w.error_p;
     auto ki_gain = param_ro->gyro_pid.i * diff_ang;
-    auto kb_gain = param_ro->gyro_pid.b * ee->w.error_i;
+    auto kb_gain = param_ro->gyro_pid.b * w_error_i;
     auto kc_gain = 0; // param_ro->gyro_pid.c * ang_sum;
     auto kd_gain = param_ro->gyro_pid.d * ee->w_kf.error_d;
     limitter(kp_gain, ki_gain, kb_gain, kd_gain,
@@ -2170,7 +2246,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     set_ctrl_val(ee->w_val,
                  ee->w.error_p,    // p
                  diff_ang,         // i
-                 ee->w.error_i,    // i2
+                 w_error_i,        // i2
                  ee->w_kf.error_d, // d
                  kp_gain,          // kp*p
                  ki_gain,          // ki*i
@@ -2272,6 +2348,7 @@ void IRAM_ATTR PlanningTask::summation_duty() {
 
   auto ff_front = mpc_next_ego.ff_duty_front;
   auto ff_roll = mpc_next_ego.ff_duty_roll;
+  const auto se = get_sensing_entity();
 
   if (tgt_val->motion_type == MotionType::WALL_OFF ||
       tgt_val->motion_type == MotionType::WALL_OFF_DIA) {
@@ -2286,19 +2363,16 @@ void IRAM_ATTR PlanningTask::summation_duty() {
 
   if (tgt_val->motion_type == MotionType::SLALOM) {
     if (tgt_val->ego_in.sla_param.base_alpha > 0) {
-      if (tgt_val->ego_in.alpha < 0) {
-        ff_roll = param_ro->ff_roll_gain_after * ff_roll;
-        sensing_result->ego.duty.ff_duty_roll = ff_roll;
-        mpc_next_ego.ff_duty_roll = ff_roll;
-      }
+      ff_roll = (tgt_val->ego_in.alpha < 0)
+                    ? param_ro->ff_roll_gain_after * ff_roll
+                    : ff_roll;
     } else if (tgt_val->ego_in.sla_param.base_alpha < 0) {
-      if (tgt_val->ego_in.alpha > 0) {
-        ff_roll = param_ro->ff_roll_gain_after * ff_roll;
-        sensing_result->ego.duty.ff_duty_roll = ff_roll;
-        mpc_next_ego.ff_duty_roll = ff_roll;
-      }
+      ff_roll = (tgt_val->ego_in.alpha > 0)
+                    ? param_ro->ff_roll_gain_after * ff_roll
+                    : ff_roll;
     }
   }
+  se->ego.duty.ff_duty_roll = mpc_next_ego.ff_duty_roll = ff_roll;
   auto ff_duty_r = ff_front + ff_roll + mpc_next_ego.ff_duty_rpm_r;
   auto ff_duty_l = ff_front - ff_roll + mpc_next_ego.ff_duty_rpm_l;
 
@@ -2309,12 +2383,12 @@ void IRAM_ATTR PlanningTask::summation_duty() {
     tgt_duty.duty_r =
         (duty_c + duty_front_ctrl_trans + duty_roll + duty_front_ctrl_roll +
          duty_front_ctrl_roll_keep + ff_duty_r) /
-        sensing_result->ego.battery_lp * 100;
+        se->ego.battery_lp * 100;
 
     tgt_duty.duty_l =
         (duty_c + duty_front_ctrl_trans - duty_roll - duty_front_ctrl_roll -
          duty_front_ctrl_roll_keep + ff_duty_l) /
-        sensing_result->ego.battery_lp * 100;
+        se->ego.battery_lp * 100;
 
   } else if (param_ro->torque_mode == 1) {
   } else if (param_ro->torque_mode == 2) {
@@ -2348,8 +2422,8 @@ void IRAM_ATTR PlanningTask::summation_duty() {
     float req_v_r = torque_r * param_ro->Resist / km_gear + ff_duty_r;
     float req_v_l = torque_l * param_ro->Resist / km_gear + ff_duty_l;
 
-    tgt_duty.duty_r = req_v_r / sensing_result->ego.battery_lp * 100;
-    tgt_duty.duty_l = req_v_l / sensing_result->ego.battery_lp * 100;
+    tgt_duty.duty_r = req_v_r / se->ego.battery_lp * 100;
+    tgt_duty.duty_l = req_v_l / se->ego.battery_lp * 100;
   }
 }
 
@@ -2428,12 +2502,12 @@ void IRAM_ATTR PlanningTask::calc_pid_val() {
   ee->v_kf.error_d = ee->v_kf.error_p;
   ee->dist.error_d = ee->dist.error_p;
 
-  ee->v.error_p = tgt_val->ego_in.v - sensing_result->ego.v_c;
+  ee->v.error_p = v_cmd - sensing_result->ego.v_c;
 
   ee->v_r.error_p = ideal_v_r - sensing_result->ego.v_r;
   ee->v_l.error_p = ideal_v_l - sensing_result->ego.v_l;
-  ee->v_kf.error_p = tgt_val->ego_in.v - sensing_result->ego.v_kf;
-  ee->w_kf.error_p = tgt_val->ego_in.w - sensing_result->ego.w_kf;
+  ee->v_kf.error_p = v_cmd - sensing_result->ego.v_kf;
+  ee->w_kf.error_p = w_cmd - sensing_result->ego.w_kf;
 
   ee->dist.error_p = tgt_val->global_pos.img_dist - tgt_val->global_pos.dist;
 
@@ -2575,8 +2649,9 @@ void IRAM_ATTR PlanningTask::calc_pid_val_front_ctrl() {
 void IRAM_ATTR PlanningTask::generate_trajectory() {
   // mpc_tgt_calc.step(&tgt_val->tgt_in, &tgt_val->ego_in, tgt_val->motion_mode,
   //                   mpc_step, &mpc_next_ego, &dynamics);
-  tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py = 0;
-
+  // tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py = 0;
+  auto tmp = tgt_val->ego_in.img_ang;
+  tgt_val->ego_in.img_ang += last_tgt_angle;
   for (int i = 0; i < param_ro->trj_length; i++) {
     int32_T index = i + 1;
     if (i == 0) {
@@ -2592,5 +2667,72 @@ void IRAM_ATTR PlanningTask::generate_trajectory() {
       trajectory_points[i] = mpc_next_ego2;
       mpc_next_ego_prev = mpc_next_ego2;
     }
+  }
+  mpc_next_ego.img_ang -= last_tgt_angle;
+}
+
+void IRAM_ATTR PlanningTask::calc_kanamaya_ctrl() {
+
+  const auto idx_val =
+      interp1d(trj_idx_v, trj_idx_val, tgt_val->ego_in.v, false);
+
+  const int idx = std::min(param_ro->trj_length - 1, idx_val);
+  const auto se = get_sensing_entity();
+
+  // ideal
+  odm.x = trajectory_points[idx].ideal_px;
+  odm.y = trajectory_points[idx].ideal_py;
+  odm.theta = trajectory_points[idx].img_ang;
+
+  float vd = odm.v = trajectory_points[idx].v;
+  float wd = odm.w = trajectory_points[idx].w;
+
+  float dx = odm.x - kim.x;
+  float dy = odm.y - kim.y;
+  if (tgt_val->ego_in.v < 10) {
+    dx = dy = 0;
+  }
+
+  dx = std::clamp(dx, 0.0f, ABS(dx));
+
+  float d_theta = odm.theta - (se->ego.ang_kf + last_tgt_angle);
+  float e_theta = std::clamp(d_theta, (float)(-M_PI), (float)(M_PI));
+  const float cos_theta = std::cos(se->ego.ang_kf);
+  const float sin_theta = std::sin(se->ego.ang_kf);
+  if (tgt_val->ego_in.v < 10) {
+    e_theta = 0;
+  }
+  const float ex = cos_theta * dx + sin_theta * dy;
+  const float ey = -sin_theta * dx + cos_theta * dy;
+
+  const float cos_e_theta = std::cos(e_theta);
+  const float sin_e_theta = std::sin(e_theta);
+
+  const float kx = param_ro->kanayama.kx;
+  const float ky = param_ro->kanayama.ky;
+  const float k_theta = param_ro->kanayama.k_theta;
+
+  sensing_result->ego.knym_v = vd * cos_e_theta + kx * ex;
+  sensing_result->ego.knym_w = wd + vd * (ky * ey + k_theta * sin_e_theta);
+  sensing_result->ego.odm_x = odm.x;
+  sensing_result->ego.odm_y = odm.y;
+  sensing_result->ego.odm_theta = odm.theta;
+  sensing_result->ego.kim_x = kim.x;
+  sensing_result->ego.kim_y = kim.y;
+  sensing_result->ego.kim_theta = kim.theta;
+
+  if (param_ro->kanayama.enable > 0 &&
+      (tgt_val->motion_type == MotionType::SLALOM ||
+       tgt_val->motion_type == MotionType::SLA_BACK_STR)) {
+    v_cmd = sensing_result->ego.knym_v;
+    w_cmd = sensing_result->ego.knym_w;
+  } else {
+    v_cmd = tgt_val->ego_in.v;
+    w_cmd = tgt_val->ego_in.w;
+  }
+  if (tgt_val->motion_type != MotionType::SLALOM ||
+      tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+    sensing_result->ego.knym_v = tgt_val->ego_in.v;
+    sensing_result->ego.knym_w = tgt_val->ego_in.w;
   }
 }

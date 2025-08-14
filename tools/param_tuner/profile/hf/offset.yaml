@@ -207,3 +207,13 @@ offset_after_turn_dia_r: 24 #dia45_2, dia135_2
 cell: 90.0
 cell2: 90.0
 
+trj_idx_v: [0, 300, 400, 1200, 1500, 1800, 2000, 2200, 2400, 10000] 
+# trj_idx_val: [0, 0, 0, 10, 15, 20, 24, 24, 24, 24] # max = trj_length-1
+trj_idx_val: [0, 0, 3, 3, 3, 3, 4, 4, 4, 4] # max = trj_length-1
+kanayama:
+  kx: 20
+  ky: 0.0005
+  k_theta: 0.0005
+  enable: 1
+  windup: 1
+  windup_deg: 2.5

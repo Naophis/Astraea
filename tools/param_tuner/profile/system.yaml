@@ -1,6 +1,6 @@
 # goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
-goals: [[8, 8],[8, 9],[9, 8],[9, 9]]
-# goals: [[1, 0], [2, 0]]
+# goals: [[8, 8],[8, 9],[9, 8],[9, 9]]
+goals: [[1, 0], [2, 0]]
 # goals: [[1, 0], [2, 0], [1, 1], [2, 1]]
 # goals: [[1, 0]]
 # goals: [[3, 0]]
@@ -59,8 +59,8 @@ give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-mode: 0 # メイン
-# mode: 1 # 最短スローム
+# mode: 0 # メイン
+mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -78,21 +78,21 @@ mode: 0 # メイン
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  v_max: 400
-  accl: 2500
-  decel: -2500 
-  dia_accl: 2500
-  dia_decel: -2500
-  dist: 720 #直進
-  suction_active: 0
+  # v_max: 400
+  # accl: 2500
+  # decel: -2500 
+  # dia_accl: 2500
+  # dia_decel: -2500
+  # dist: 180 #直進
+  # suction_active: 0
 
-  # v_max: 2500
-  # accl: 42000
-  # decel: -50000
-  # dia_accl: 36000
-  # dia_decel: -45000
-  # dist: 1660 #直進
-  # suction_active: 2
+  v_max: 2500
+  accl: 42000
+  decel: -50000
+  dia_accl: 36000
+  dia_decel: -45000
+  dist: 180 #直進
+  suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -122,10 +122,10 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 12
+  file_idx: 16
   sla_dist: 90
   # sla_type: 3
-  sla_type: 4
+  sla_type: 3
   sla_type2: 6 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal

@@ -204,7 +204,25 @@ typedef struct {
 
   float pos_x;
   float pos_y;
+  float pos_ang;
+
+  float knym_v;
+  float knym_w;
+  float odm_x;
+  float odm_y;
+  float odm_theta;
+  float kim_x;
+  float kim_y;
+  float kim_theta;
 } ego_entity_t;
+
+typedef struct {
+  float x;
+  float y;
+  float theta;
+  float v;
+  float w;
+} kinematics_t;
 
 typedef struct {
   float sensor_dist = 300;
@@ -443,6 +461,15 @@ typedef struct {
 } comp_param_t;
 
 typedef struct {
+  float kx = 0;
+  float ky = 0;
+  float k_theta = 0;
+  char enable = 0;
+  char windup = 0;
+  float windup_deg = 0;
+} kanayama_t;
+
+typedef struct {
   float dt = 0.001;
   int trj_length = 1;
   float tire = 12;
@@ -507,7 +534,6 @@ typedef struct {
   pid_param_t motor_pid2;
   pid_param_t motor2_pid_gain_limitter;
   pid_param_t motor_pid3;
-  pid_param_t motor3_pid_gain_limitter;
   pid_param_t gyro_pid;
   pid_param_t gyro_pid_gain_limitter;
   pid_param_t str_ang_pid;
@@ -665,6 +691,7 @@ typedef struct {
   char enable_kalman_gyro = 0;
   char enable_kalman_encoder = 0;
   float dia90_offset = 0;
+  kanayama_t kanayama;
 } input_param_t;
 
 typedef struct {
@@ -1152,14 +1179,15 @@ typedef struct {
   real16_T pos_x;
   real16_T pos_y;
 
-  // real16_T w_lp2;
-  // real16_T w_kf2;
-  // real16_T ang2;
-  // real16_T ang_kf2;
+  real16_T knym_v;
+  real16_T knym_w;
+  real16_T odm_x;
+  real16_T odm_y;
+  real16_T odm_theta;
 
-  // real16_T kalman_w;
-  // real16_T kalman_v_r;
-  // real16_T kalman_v_l;
+  real16_T kim_x;
+  real16_T kim_y;
+  real16_T kim_theta;
 
 } log_data_t2;
 
@@ -1338,20 +1366,20 @@ typedef struct {
 
 } LogStruct8 __attribute__((packed));
 typedef struct {
-  float w_lp2 = 97;
-  float w_kf2 = 98;
-  float ang_kf2 = 99;
-  float reserve1 = 100;
+  float knym_v = 98;
+  float knym_w = 99;
+  float odm_x = 100;
+  float odm_y = 101;
 
-  float reserve2 = 101;
-  float reserve3 = 102;
-  float reserve4 = 103;
-  float reserve5 = 104;
+  float odm_theta = 102;
+  float kim_x = 103;
+  float kim_y = 104;
+  float kim_theta = 105;
 
-  float reserve6 = 105;
-  float reserve7 = 106;
-  float reserve8 = 107;
-  float reserve9 = 108;
+  float reserve1 = 106;
+  float reserve2 = 107;
+  float reserve3 = 108;
+  float reserve4 = 109;
 
 } LogStruct9 __attribute__((packed));
 

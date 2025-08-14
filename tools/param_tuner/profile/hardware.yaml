@@ -13,8 +13,6 @@ tire2: 13.9850 #新品 13.6165
 offset_start_dist_search: 15.0
 offset_start_dist: 2.0
 long_run_offset_dist: 0
-long_run_offset_dist_x: [2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 15.0] 
-long_run_offset_dist_y: [2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
 
 gear_a: 63
 gear_b: 13
@@ -38,7 +36,7 @@ SuctionHz: 42500
 MotorResolution: 40
 SuctionResolution: 40
 
-trj_length: 1 # Number of trajectory points to generate
+trj_length: 25 # Number of trajectory points to generate
 
 # roll
 # Ke: 0.00172 # 大：逆起電力大
@@ -79,7 +77,7 @@ ff_front_dury: 0.95
 
 # fail_safe
 fail_duty_cnt: 150
-fail_v_cnt: 7500
+fail_v_cnt: 75000
 fail_w_cnt: 2500
 fail_ang_cnt: 120
 fail_wall_off_cnt: 500
@@ -108,7 +106,7 @@ torque_mode: 2
 
 ff_front_gain_14: 0.325
 ff_roll_gain_before: 0.25
-ff_roll_gain_after: 0.145
+ff_roll_gain_after: 0.75
 ff_front_gain_decel: 0.5
 
 enable_kalman_gyro: 0
@@ -122,13 +120,6 @@ motor_pid_gain_limitter:
   b: 15
   c: 15
 motor2_pid_gain_limitter: 
-  mode: 1
-  p: 15
-  i: 15
-  d: 15
-  b: 15
-  c: 15
-motor3_pid_gain_limitter: 
   mode: 1
   p: 15
   i: 15

@@ -382,9 +382,8 @@ void MainTask::load_hw_param() {
         *sen_pid_dia, *accel_x, *comp_v_param, *axel_degenerate_x,
         *axel_degenerate_y, *led_blight, *gyro_pid_gain_limitter,
         *motor_pid_gain_limitter, *motor2_pid_gain_limitter,
-        *motor3_pid_gain_limitter, *sensor_deg_limitter_v,
-        *sensor_deg_limitter_str, *sensor_deg_limitter_dia,
-        *sensor_deg_limitter_piller;
+        *sensor_deg_limitter_v, *sensor_deg_limitter_str,
+        *sensor_deg_limitter_dia, *sensor_deg_limitter_piller;
 
   root = cJSON_Parse(str.c_str());
 
@@ -588,20 +587,6 @@ void MainTask::load_hw_param() {
       getItem(motor2_pid_gain_limitter, "c")->valuedouble;
   param->motor2_pid_gain_limitter.mode =
       getItem(motor2_pid_gain_limitter, "mode")->valueint;
-
-  motor3_pid_gain_limitter = getItem(root, "motor3_pid_gain_limitter");
-  param->motor3_pid_gain_limitter.p =
-      getItem(motor3_pid_gain_limitter, "p")->valuedouble;
-  param->motor3_pid_gain_limitter.i =
-      getItem(motor3_pid_gain_limitter, "i")->valuedouble;
-  param->motor3_pid_gain_limitter.d =
-      getItem(motor3_pid_gain_limitter, "d")->valuedouble;
-  param->motor3_pid_gain_limitter.b =
-      getItem(motor3_pid_gain_limitter, "b")->valuedouble;
-  param->motor3_pid_gain_limitter.c =
-      getItem(motor3_pid_gain_limitter, "c")->valuedouble;
-  param->motor3_pid_gain_limitter.mode =
-      getItem(motor3_pid_gain_limitter, "mode")->valueint;
 
   gyro_pid_gain_limitter = getItem(root, "gyro_pid_gain_limitter");
   param->gyro_pid_gain_limitter.p =
@@ -836,9 +821,29 @@ void MainTask::load_offset_param() {
 
   cJSON *root = cJSON_CreateObject(), *clear_dist_ragne_dist_list,
         *clear_dist_ragne_th_list, *clear_dist_ragne_dist_list_fast,
-        *clear_dist_ragne_th_list_fast;
+        *clear_dist_ragne_th_list_fast, *kanayama, *trj_idx_v, *trj_idx_val;
 
   root = cJSON_Parse(str.c_str());
+
+  kanayama = getItem(root, "kanayama");
+  param->kanayama.kx = getItem(kanayama, "kx")->valuedouble;
+  param->kanayama.ky = getItem(kanayama, "ky")->valuedouble;
+  param->kanayama.k_theta = getItem(kanayama, "k_theta")->valuedouble;
+  param->kanayama.enable = getItem(kanayama, "enable")->valueint;
+  param->kanayama.windup = getItem(kanayama, "windup")->valueint;
+  param->kanayama.windup_deg =
+      getItem(kanayama, "windup_deg")->valuedouble / 180 * M_PI;
+
+  trj_idx_v = getItem(root, "trj_idx_v");
+  trj_idx_val = getItem(root, "trj_idx_val");
+  int list_size3 = cJSON_GetArraySize(trj_idx_v);
+  for (int i = 0; i < list_size3; i++) {
+    const auto v = cJSON_GetArrayItem(trj_idx_v, i)->valueint;
+    const auto val = cJSON_GetArrayItem(trj_idx_val, i)->valueint;
+    pt->trj_idx_v.emplace_back(v);
+    pt->trj_idx_val.emplace_back(val);
+  }
+
   param->cell = getItem(root, "cell")->valuedouble;
   param->cell2 = getItem(root, "cell2")->valuedouble;
   param->seach_timer = getItem(root, "seach_timer")->valueint;
@@ -910,9 +915,9 @@ void MainTask::load_offset_param() {
       getItem(root, "front_dist_offset_pivot")->valuedouble;
 
   param->wall_off_hold_dist = getItem(root, "wall_off_hold_dist")->valuedouble;
-  param->wall_off_diff_ref_th=
+  param->wall_off_diff_ref_th =
       getItem(root, "wall_off_diff_ref_th")->valuedouble;
-  param->wall_off_diff_ref_front_th=
+  param->wall_off_diff_ref_front_th =
       getItem(root, "wall_off_diff_ref_front_th")->valuedouble;
   param->wall_off_dist.left_str =
       getItem(root, "wall_off_hold_dist_str_l")->valuedouble;

@@ -61,6 +61,7 @@ public:
 
   float interp1d(vector<float> &vx, vector<float> &vy, float x,
                  bool extrapolate);
+  int interp1d(vector<int> &vx, vector<int> &vy, float x, bool extrapolate);
 
   unsigned long long global_msec_timer = 0;
 
@@ -96,6 +97,8 @@ public:
   std::vector<float> sensor_deg_limitter_str;
   std::vector<float> sensor_deg_limitter_dia;
   std::vector<float> sensor_deg_limitter_piller;
+  std::vector<int> trj_idx_v;
+  std::vector<int> trj_idx_val;
 
   KalmanFilter kf_w;
   KalmanFilter kf_w2;
@@ -107,6 +110,8 @@ public:
   KalmanFilter kf_ang2;
   KalmanFilter kf_batt;
   KalmanFilterMatrix pos;
+  kinematics_t odm = {0};
+  kinematics_t kim = {0};
 
   float suction_gain = 200;
 
@@ -238,6 +243,8 @@ private:
   float check_sen_error_dia(SensingControlType &type);
 
   void calc_front_ctrl_duty();
+  void calc_kanamaya_ctrl();
+
   float error_right = 0;
   float error_left = 0;
   bool check_right = false;
@@ -270,6 +277,8 @@ private:
   std::deque<float> enc_v_q;
   std::deque<float> accl_x_q;
   float sum_v = 0;
+  float v_cmd = 0;
+  float w_cmd = 0;
 
   // PID_Controller vel_pid;
   // PID_Controller dist_pid;

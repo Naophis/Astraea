@@ -299,6 +299,21 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "ff_duty_front")
             if (record[i] > 100 || record[i] < -100)
               res = false;
+          if (data.name === "odm_y")
+            if (record[i] > 1000 || record[i] < -1000)
+              res = false;
+          if (data.name === "kim_theta")
+            if (record[i] > 400 || record[i] < -400)
+              res = false;
+          if (data.name === "odm_theta")
+            if (record[i] > 400 || record[i] < -400)
+              res = false;
+          if (data.name === "knym_v")
+            if (record[i] > 20000 || record[i] < -20000)
+              res = false;
+          if (data.name === "knym_w")
+            if (record[i] > 2000 || record[i] < -2000)
+              res = false;
           return res;
         });
         if (valid) {

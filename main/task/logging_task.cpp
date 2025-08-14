@@ -211,8 +211,7 @@ void IRAM_ATTR LoggingTask::print_header() {
   const int size = sizeof(LogStruct1) + sizeof(LogStruct2) +
                    sizeof(LogStruct3) + sizeof(LogStruct4) +
                    sizeof(LogStruct5) + sizeof(LogStruct6) +
-                   sizeof(LogStruct7) + sizeof(LogStruct8);
-  // + sizeof(LogStruct9);
+                   sizeof(LogStruct7) + sizeof(LogStruct8) + sizeof(LogStruct9);
   printf("ready___:%d\n", size);
   vTaskDelay(xDelay2);
 
@@ -344,21 +343,21 @@ void IRAM_ATTR LoggingTask::print_header() {
   printf("sen_dist_l45_3:float:%d\n", sizeof(ls8.sen_dist_l45_3));
   printf("sen_dist_r45_3:float:%d\n", sizeof(ls8.sen_dist_r45_3));
 
-  // // LogStruct9
-  // printf("w_lp2:float:%d\n", sizeof(ls9.w_lp2));
-  // printf("w_kf2:float:%d\n", sizeof(ls9.w_kf2));
-  // printf("ang_kf2:float:%d\n", sizeof(ls9.ang_kf2));
-  // printf("reserve1:float:%d\n", sizeof(ls9.reserve1));
+  // LogStruct9
+  printf("knym_v:float:%d\n", sizeof(ls9.knym_v));
+  printf("knym_w:float:%d\n", sizeof(ls9.knym_w));
+  printf("odm_x:float:%d\n", sizeof(ls9.odm_x));
+  printf("odm_y:float:%d\n", sizeof(ls9.odm_y));
 
-  // printf("reserve2:float:%d\n", sizeof(ls9.reserve2));
-  // printf("reserve3:float:%d\n", sizeof(ls9.reserve3));
-  // printf("reserve4:float:%d\n", sizeof(ls9.reserve4));
-  // printf("reserve5:float:%d\n", sizeof(ls9.reserve5));
+  printf("odm_theta:float:%d\n", sizeof(ls9.odm_theta));
+  printf("kim_x:float:%d\n", sizeof(ls9.kim_x));
+  printf("kim_y:float:%d\n", sizeof(ls9.kim_y));
+  printf("kim_theta:float:%d\n", sizeof(ls9.kim_theta));
 
-  // printf("reserve6:float:%d\n", sizeof(ls9.reserve6));
-  // printf("reserve7:float:%d\n", sizeof(ls9.reserve7));
-  // printf("reserve8:float:%d\n", sizeof(ls9.reserve8));
-  // printf("reserve9:float:%d\n", sizeof(ls9.reserve9));
+  printf("reserve1:float:%d\n", sizeof(ls9.reserve1));
+  printf("reserve2:float:%d\n", sizeof(ls9.reserve2));
+  printf("reserve3:float:%d\n", sizeof(ls9.reserve3));
+  printf("reserve4:float:%d\n", sizeof(ls9.reserve4));
 
   vTaskDelay(xDelay2);
   printf("start___\n");
@@ -543,9 +542,20 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls8.left45_2_d = l45_2;
     ls8.left45_3_d = l45_3;
 
-    // ls9.w_lp2 = halfToFloat(ld->w_lp2);
-    // ls9.w_kf2 = halfToFloat(ld->w_kf2);
-    // ls9.ang_kf2 = halfToFloat(ld->ang_kf2);
+    ls9.knym_v = halfToFloat(ld->knym_v);
+    ls9.knym_w = halfToFloat(ld->knym_w);
+    ls9.odm_x = halfToFloat(ld->odm_x);
+    ls9.odm_y = halfToFloat(ld->odm_y);
+
+    ls9.odm_theta = halfToFloat(ld->odm_theta);
+    ls9.kim_x = halfToFloat(ld->kim_x);
+    ls9.kim_y = halfToFloat(ld->kim_y);
+    ls9.kim_theta = halfToFloat(ld->kim_theta);
+
+    // ls9.reserve1 = halfToFloat(ld->reserve1);
+    // ls9.reserve2 = halfToFloat(ld->reserve2);
+    // ls9.reserve3 = halfToFloat(ld->reserve3);
+    // ls9.reserve4 = halfToFloat(ld->reserve4);
 
     uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
     uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
@@ -555,7 +565,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
     uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
     uart_write_bytes(UART_NUM_0, &ls8, sizeof(LogStruct8));
-    // uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
+    uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
 
     c++;
     if (c == 50) {
@@ -574,7 +584,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
   uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
   uart_write_bytes(UART_NUM_0, &ls8, sizeof(LogStruct8));
-  // uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
+  uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
 
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
@@ -734,6 +744,15 @@ void IRAM_ATTR LoggingTask::set_data() {
   // ld->pos_y = floatToHalf(sensing_result->ego.pos_y);
   ld->pos_x = floatToHalf(sensing_result->ego.pos_x);
   ld->pos_y = floatToHalf(sensing_result->ego.pos_y);
+
+  ld->knym_v = floatToHalf(sensing_result->ego.knym_v);
+  ld->knym_w = floatToHalf(sensing_result->ego.knym_w);
+  ld->odm_x = floatToHalf(sensing_result->ego.odm_x);
+  ld->odm_y = floatToHalf(sensing_result->ego.odm_y);
+  ld->odm_theta = floatToHalf(sensing_result->ego.odm_theta);
+  ld->kim_x = floatToHalf(sensing_result->ego.kim_x);
+  ld->kim_y = floatToHalf(sensing_result->ego.kim_y);
+  ld->kim_theta = floatToHalf(sensing_result->ego.kim_theta);
 
   if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 7500) {
     log_vec.emplace_back(std::move(ld));
