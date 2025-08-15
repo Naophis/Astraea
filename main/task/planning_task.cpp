@@ -2186,6 +2186,8 @@ void IRAM_ATTR PlanningTask::calc_front_ctrl_duty() {
       param_ro->front_ctrl_keep_angle_pid.p * ee->ang.error_p +
       param_ro->front_ctrl_keep_angle_pid.i * ee->ang.error_i +
       param_ro->front_ctrl_keep_angle_pid.d * ee->w_kf.error_p;
+  gyro_pid_windup_histerisis = false;
+  gyro_pid_histerisis_i = 0.0;
 }
 
 void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl_old() {}
@@ -2204,6 +2206,8 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
                  param_ro->gyro_pid.b * ee->w.error_i, param_ro->gyro_pid.b * 0,
                  param_ro->gyro_pid.c * ee->w.error_d, ee->ang_log.gain_zz,
                  ee->ang_log.gain_z);
+    gyro_pid_windup_histerisis = false;
+    gyro_pid_histerisis_i = 0;
   } else {
     // mode3 main
     auto diff_ang = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
@@ -2214,13 +2218,30 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     }
 
     auto w_error_i = ee->w.error_i;
-    if (param_ro->kanayama.windup > 0) {
-      if (tgt_val->motion_type == MotionType::SLALOM ||
-          tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-        if (w_error_i * ee->w.error_p < 0) {
-          // float ang = param_ro->kanayama.windup_deg;
-          w_error_i = 0; // std::clamp(w_error_i * dt, -ang, ang) / dt;
+    auto w_error_d = ee->w_kf.error_d;
+    if (param_ro->gyro_pid.antiwindup) {
+      if (w_error_i * ee->w.error_p < 0 &&
+          ((ABS(ee->w.error_p) > param_ro->gyro_pid.windup_dead_bind) ||
+           (gyro_pid_windup_histerisis &&
+            ABS(ee->w.error_p) > param_ro->gyro_pid.windup_dead_bind * 0.75))) {
+        gyro_pid_histerisis_i += ee->w.error_p;
+        w_error_i = gyro_pid_histerisis_i;
+        gyro_pid_windup_histerisis = true;
+      } else {
+        if (gyro_pid_windup_histerisis) { // true -> false
+          w_error_i = ee->w.error_i = ee->ang.error_p / dt;
         }
+        gyro_pid_windup_histerisis = false;
+        gyro_pid_histerisis_i = 0;
+      }
+      if (tgt_val->motion_type == MotionType::SLALOM) {
+        w_error_i = std::clamp(w_error_i * dt, -ABS(tgt_val->tgt_in.tgt_angle),
+                               ABS(tgt_val->tgt_in.tgt_angle)) /
+                    dt;
+      } else if (tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+        w_error_i = std::clamp(w_error_i * dt, -ABS(last_tgt_angle),
+                               ABS(last_tgt_angle)) /
+                    dt;
       }
     }
 
@@ -2235,7 +2256,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     auto ki_gain = param_ro->gyro_pid.i * diff_ang;
     auto kb_gain = param_ro->gyro_pid.b * w_error_i;
     auto kc_gain = 0; // param_ro->gyro_pid.c * ang_sum;
-    auto kd_gain = param_ro->gyro_pid.d * ee->w_kf.error_d;
+    auto kd_gain = param_ro->gyro_pid.d * w_error_d;
     limitter(kp_gain, ki_gain, kb_gain, kd_gain,
              param_ro->gyro_pid_gain_limitter);
     duty_roll = kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
@@ -2244,14 +2265,14 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     ee->ang_log.gain_zz = ee->ang_log.gain_z;
     ee->ang_log.gain_z = duty_roll;
     set_ctrl_val(ee->w_val,
-                 ee->w.error_p,    // p
-                 diff_ang,         // i
-                 w_error_i,        // i2
-                 ee->w_kf.error_d, // d
-                 kp_gain,          // kp*p
-                 ki_gain,          // ki*i
-                 kb_gain,          // kb*i2
-                 kd_gain,          // kd*d
+                 ee->w.error_p, // p
+                 diff_ang,      // i
+                 w_error_i,     // i2
+                 w_error_d,     // d
+                 kp_gain,       // kp*p
+                 ki_gain,       // ki*i
+                 kb_gain,       // kb*i2
+                 kd_gain,       // kd*d
                  ee->ang_log.gain_zz, ee->ang_log.gain_z);
   }
 }
@@ -2455,6 +2476,7 @@ void IRAM_ATTR PlanningTask::reset_pid_val() {
 }
 
 void IRAM_ATTR PlanningTask::calc_translational_ctrl() {
+  const float dt = param_ro->dt;
   if (!motor_en) {
     const unsigned char reset = 0;
     vel_pid.step(&ee->v.error_p, &param_ro->motor_pid.p, &param_ro->motor_pid.i,
@@ -2470,19 +2492,28 @@ void IRAM_ATTR PlanningTask::calc_translational_ctrl() {
         ee->v.error_i *= param_ro->ff_front_gain_decel;
       }
     }
+
+    auto v_error_i = ee->v.error_i;
+    if (param_ro->motor_pid2.antiwindup) {
+      if ((v_error_i * ee->v.error_p) < 0 &&
+          ABS(ee->v.error_p) > param_ro->motor_pid2.windup_dead_bind) {
+        v_error_i *= param_ro->motor_pid2.windup_gain;
+      }
+    }
+
     const auto diff_dist =
         tgt_val->ego_in.img_dist - sensing_result->ego.dist_kf;
     auto kp_gain = param_ro->motor_pid2.p * ee->v.error_p;
-    auto ki_gain = param_ro->motor_pid2.i * ee->v.error_i;
+    auto ki_gain = param_ro->motor_pid2.i * v_error_i;
     auto kb_gain = param_ro->motor_pid2.b * diff_dist;
     auto kd_gain = param_ro->motor_pid2.d * ee->v_kf.error_d;
     limitter(kp_gain, ki_gain, kb_gain, kd_gain,
              param_ro->motor2_pid_gain_limitter);
     duty_c = kp_gain + ki_gain + kb_gain + kd_gain;
 
-    set_ctrl_val(ee->v_val, ee->v.error_p, ee->v.error_i, diff_dist,
-                 ee->v.error_d, kp_gain, ki_gain, kb_gain, kd_gain,
-                 ee->v_log.gain_zz, ee->v_log.gain_z);
+    set_ctrl_val(ee->v_val, ee->v.error_p, v_error_i, diff_dist, ee->v.error_d,
+                 kp_gain, ki_gain, kb_gain, kd_gain, ee->v_log.gain_zz,
+                 ee->v_log.gain_z);
   }
   if (w_reset == 0 || !motor_en) {
     ee->w.error_i = ee->w.error_d = 0;
@@ -2571,17 +2602,25 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
   ee->ang.error_i += (ee->ang.error_p);
   // ee->ang.error_i += (ee->ang.error_p - offset);
 
+  auto ang_error_i = ee->ang.error_i;
+  if (param_ro->angle_pid.antiwindup) {
+    if (ang_error_i * ee->ang.error_p < 0 &&
+        ABS(ee->ang.error_p) > param_ro->angle_pid.windup_dead_bind) {
+      ang_error_i *= param_ro->angle_pid.windup_gain;
+    }
+  }
+
   duty_roll_ang = param_ro->angle_pid.p * ee->ang.error_p +
-                  param_ro->angle_pid.i * ee->ang.error_i +
+                  param_ro->angle_pid.i * ang_error_i +
                   param_ro->angle_pid.d * ee->ang.error_d;
 
   set_ctrl_val(ee->ang_val,
                ee->ang.error_p,                         // p
-               ee->ang.error_i,                         // i
+               ang_error_i,                             // i
                0,                                       // i2
                ee->ang.error_d,                         // d
                param_ro->angle_pid.p * ee->ang.error_p, // kp*p
-               param_ro->angle_pid.i * ee->ang.error_i, // ki*i
+               param_ro->angle_pid.i * ang_error_i,     // ki*i
                0,                                       // kb*i2
                param_ro->angle_pid.d * ee->ang.error_d, // kd*d
                0, 0);

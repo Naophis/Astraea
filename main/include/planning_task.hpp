@@ -128,6 +128,8 @@ public:
   float last_tgt_angle = 0;
 
 private:
+  bool gyro_pid_windup_histerisis = false;
+  float gyro_pid_histerisis_i = 0.0;
   std::vector<t_ego> trajectory_points;
   const int trajectory_length = 50; // Number of trajectory points to generate
 

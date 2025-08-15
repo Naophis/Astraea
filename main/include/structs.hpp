@@ -286,6 +286,9 @@ typedef struct {
   float b = 0;
   float c = 0;
   char mode = 0;
+  char antiwindup = 0;
+  float windup_gain = 0;
+  float windup_dead_bind = 0;
 } pid_param_t;
 
 typedef struct {
@@ -697,6 +700,7 @@ typedef struct {
 typedef struct {
   float error_p;
   float error_i;
+  float error_i_keep;
   float error_d;
   float error_dd;
 } pid_error_t;

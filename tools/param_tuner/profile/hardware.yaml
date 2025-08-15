@@ -36,8 +36,6 @@ SuctionHz: 42500
 MotorResolution: 40
 SuctionResolution: 40
 
-trj_length: 25 # Number of trajectory points to generate
-
 # roll
 # Ke: 0.00172 # 大：逆起電力大
 # Ke: 0.002560632779648483  # 大：逆起電力大
@@ -178,7 +176,9 @@ motor_pid2:
   i: 0.0000045
   b: 0.00
   d: 0.0000125
-
+  antiwindup: 1
+  windup_gain: 0.05
+  windup_dead_bind: 50
 
   # p: 0.00000825
   # i: 0.00000425
@@ -210,7 +210,11 @@ gyro_pid:
   p: 0.000325
   i: 0.01365 # dif angle
   b: 0.0000375 #summation
-  d: 0.000775
+  d: 0.000295
+
+  antiwindup: 1
+  windup_gain: 0.0125
+  windup_dead_bind: 3
 
   # p: 0.000325
   # i: 0.01365 #dif angle
@@ -241,6 +245,9 @@ angle_pid: # pid for angle
   i: 0.0
   d: 4.5
 
+  antiwindup: 0 #I制御してないので意味ない
+  windup_gain: 1
+  windup_dead_bind: 0
 
 ###### front_ctrl #######
 motor_pid: #front_ctrl

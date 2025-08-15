@@ -399,7 +399,6 @@ void MainTask::load_hw_param() {
   param->Km = getItem(root, "Km")->valuedouble;
   param->coulomb_friction = getItem(root, "coulomb_friction")->valuedouble;
   param->viscous_friction = getItem(root, "viscous_friction")->valuedouble;
-  param->trj_length = getItem(root, "trj_length")->valueint;
   param->Resist = getItem(root, "Resist")->valuedouble;
   param->Mass = getItem(root, "Mass")->valuedouble;
   param->Lm = getItem(root, "Lm")->valuedouble;
@@ -625,6 +624,11 @@ void MainTask::load_hw_param() {
   param->motor_pid2.b = getItem(motor_pid2, "b")->valuedouble;
   param->motor_pid2.c = getItem(motor_pid2, "c")->valuedouble;
   param->motor_pid2.mode = getItem(motor_pid2, "mode")->valueint;
+  param->motor_pid2.antiwindup = getItem(motor_pid2, "antiwindup")->valueint;
+  param->motor_pid2.windup_gain =
+      getItem(motor_pid2, "windup_gain")->valuedouble;
+  param->motor_pid2.windup_dead_bind =
+      getItem(motor_pid2, "windup_dead_bind")->valuedouble;
 
   motor_pid3 = getItem(root, "motor_pid3");
   param->motor_pid3.p = getItem(motor_pid3, "p")->valuedouble;
@@ -681,12 +685,20 @@ void MainTask::load_hw_param() {
   param->gyro_pid.b = getItem(gyro_pid, "b")->valuedouble;
   param->gyro_pid.c = getItem(gyro_pid, "c")->valuedouble;
   param->gyro_pid.mode = getItem(gyro_pid, "mode")->valueint;
+  param->gyro_pid.antiwindup = getItem(gyro_pid, "antiwindup")->valueint;
+  param->gyro_pid.windup_gain = getItem(gyro_pid, "windup_gain")->valuedouble;
+  param->gyro_pid.windup_dead_bind =
+      getItem(gyro_pid, "windup_dead_bind")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
   param->angle_pid.i = getItem(angle_pid, "i")->valuedouble;
   param->angle_pid.d = getItem(angle_pid, "d")->valuedouble;
   param->angle_pid.mode = getItem(angle_pid, "mode")->valueint;
+  param->angle_pid.antiwindup = getItem(angle_pid, "antiwindup")->valueint;
+  param->angle_pid.windup_gain = getItem(angle_pid, "windup_gain")->valuedouble;
+  param->angle_pid.windup_dead_bind =
+      getItem(angle_pid, "windup_dead_bind")->valuedouble;
 
   gyro_param = getItem(root, "gyro_param");
   param->gyro_param.gyro_w_gain_right =
@@ -834,6 +846,7 @@ void MainTask::load_offset_param() {
   param->kanayama.windup_deg =
       getItem(kanayama, "windup_deg")->valuedouble / 180 * M_PI;
 
+  param->trj_length = getItem(root, "trj_length")->valueint;
   trj_idx_v = getItem(root, "trj_idx_v");
   trj_idx_val = getItem(root, "trj_idx_val");
   int list_size3 = cJSON_GetArraySize(trj_idx_v);
