@@ -70,17 +70,18 @@ dia: #midを参照
     # right45: 30.625
     # left45: -33.5 #斜め45度センサー制御条件 1 < val < this_parm
     # right45: -30.75 #斜め45度センサー制御条件  1 < val < this_parm
-    left45: 32.5 #斜め45度センサー制御条件 1 < val < this_parm
-    right45: 32.5 #斜め45度センサー制御条件  1 < val < this_parm
-    left90: 135 # 137
-    right90: 109 # 105
+    left45: 33.5 #斜め45度センサー制御条件 1 < val < this_parm
+    right45: 32.25 #斜め45度センサー制御条件  1 < val < this_parm
+    left90: 135.5 # 137
+    right90: 110 # 105
+
     kireme_l: 165 # dia front over th (not use)
     kireme_r: 160 # dia front over th (not use)
   exist:
-    left45: 31.5 #斜め制御横センサー制御条件
-    right45: 31.5 #斜め制御横センサー制御条件
-    left90: 134.0 # dia.ref.left90 -5
-    right90: 108.0 # dia.ref.right90 -5
+    left45: 28.5 #斜め制御横センサー制御条件
+    right45: 27.25 #斜め制御横センサー制御条件
+    left90: 130.5 # dia.ref.left90 -5
+    right90: 105 # dia.ref.right90 -5
     # left45: 3.5 #斜め制御横センサー制御条件
     # right45: 3.5 #斜め制御横センサー制御条件
     # left90: 36.0 # dia.ref.left90 -5

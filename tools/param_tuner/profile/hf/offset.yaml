@@ -9,7 +9,7 @@ pivot_angle_180: 180.0
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 # front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
-front_dist_offset: 93.0 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 97.0 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
 normal_sla_offset_front: 9 # 探索スラローム前補正
@@ -21,7 +21,7 @@ pivot_back_offset: 6.0 # pivot時の前壁補正後のバック距離のオフ�
 pivot_back_dist0: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 pivot_back_dist1: 10.0 # pivot時の前壁補正後のバック距離のオフセット
 # スラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l: 44.50 #大→短くなる
+sla_wall_ref_l: 45.0 #大→短くなる
 sla_wall_ref_r: 45.0 #大→短くなる
 
 sla_max_offset_dist: 0 #not use
@@ -94,7 +94,7 @@ wall_off_hold_exist_dist_r2: 64
 wall_off_hold_noexist_th_l2: 66
 wall_off_hold_noexist_th_r2: 66
 # 壁切れ オフセット距離(最初からないとき)
-wall_off_hold_dist_str_l: -2.0
+wall_off_hold_dist_str_l: -3.0
 wall_off_hold_dist_str_r: -3.5
 
 wall_off_diff_ref_th: 6.5
@@ -134,8 +134,8 @@ front_dist_offset4: 135.0 # both front sensors condition th
 wall_off_wait_dist: 65
 
 # 壁切れ壁あり判定
-wall_off_exist_dia_wall_th_l: 48
-wall_off_exist_dia_wall_th_r: 48
+wall_off_exist_dia_wall_th_l: 45
+wall_off_exist_dia_wall_th_r: 45
 
 ### 最初から壁がある場合
 # 壁切れ In(斜め)
@@ -145,7 +145,7 @@ wall_off_hold_exist_dist_dia_r: 39
 wall_off_hold_noexist_dia_th_l: 40
 wall_off_hold_noexist_dia_th_r: 40
 # 壁切れ オフセット距離
-wall_off_hold_dist_dia_l: 3.0
+wall_off_hold_dist_dia_l: 2.0
 wall_off_hold_dist_dia_r: 3.0
 #斜め壁切れ時のmax接近距離
 # dia_wall_off_ref_l: 35.0
@@ -153,10 +153,10 @@ wall_off_hold_dist_dia_r: 3.0
 dia_wall_off_ref_l: 24.0 #dia135
 dia_wall_off_ref_r: 24.0 #dia135
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l_wall: 32.125 #exist_wall
-dia_wall_off_ref_r_wall: 32.125 #exist_wall
-dia_wall_off_ref_l_piller: 38.8125 #noexist_wall
-dia_wall_off_ref_r_piller: 38.8125 #noexist_wall
+dia_wall_off_ref_l_wall: 33.0 #exist_wall
+dia_wall_off_ref_r_wall: 31.625 #exist_wall
+dia_wall_off_ref_l_piller: 36.0 #noexist_wall
+dia_wall_off_ref_r_piller: 41.75 #noexist_wall
 
 # 斜め壁切れ偏差
 wall_off_hold_div_th_dia_l: 0.250
@@ -177,11 +177,11 @@ wall_off_hold_dist_dia_r2: 1.0
 dia_turn_th_l: 61.0
 dia_turn_th_r: 61.0
 
-dia_turn_ref_l: 58.5
-dia_turn_ref_r: 60.0
+dia_turn_ref_l: 48.5
+dia_turn_ref_r: 50.0
 
-dia_turn_max_dist_l: 5.0
-dia_turn_max_dist_r: 5.0
+dia_turn_max_dist_l: 15.0
+dia_turn_max_dist_r: 15.0
 
 # 壁切れ オフセット距離(反対側の壁有り)
 wall_off_hold_dist_dia_l_oppo: -2.5

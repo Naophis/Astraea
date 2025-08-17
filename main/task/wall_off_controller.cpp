@@ -460,13 +460,13 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
+    } else {
       // 微分による壁切れ終了検出
       if (strategy.detect_wall_off_by_deviation()) {
-        ps_front.dist += p_wall_off.right_dia;
+        ps_front.dist += p_wall_off.right_dia2;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
-    } else {
       // 壁切れ終了（exist=falseの場合）
       if (strategy.detect_wall_off_alt()) {
         ps_front.dist += p_wall_off.right_dia2;
@@ -546,13 +546,13 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
+    } else {
       // 微分による壁切れ終了検出
       if (strategy.detect_wall_off_by_deviation()) {
-        ps_front.dist += p_wall_off.left_dia;
+        ps_front.dist += p_wall_off.left_dia2;
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return true;
       }
-    } else {
       // 壁切れ終了（exist=falseの場合）
       if (strategy.detect_wall_off_alt()) {
         ps_front.dist += p_wall_off.left_dia2;

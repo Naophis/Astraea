@@ -2229,7 +2229,11 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
         gyro_pid_windup_histerisis = true;
       } else {
         if (gyro_pid_windup_histerisis) { // true -> false
-          w_error_i = ee->w.error_i = ee->ang.error_p / dt;
+          // w_error_i = ee->w.error_i = ee->ang.error_p / dt;
+          // w_error_i = ee->w.error_i = (ee->ang.error_p / dt) -
+          // (ee->w.error_p);
+          w_error_i = ee->w.error_i =
+              ee->ang.error_p / dt * param_ro->gyro_pid.windup_gain;
         }
         gyro_pid_windup_histerisis = false;
         gyro_pid_histerisis_i = 0;
@@ -2592,15 +2596,14 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
       tgt->motion_type == MotionType::WALL_OFF_DIA) {
   }
   ee->ang.error_p = (tgt->ego_in.img_ang + offset) - se->ego.ang_kf;
+  // ee->ang.error_p = std::clamp(ee->ang.error_p, (float)(-M_PI),
+  // (float)(M_PI));
 
-  // tgt_val->ego_in.ang
   ee->ang.error_d = ee->ang.error_p - ee->ang.error_d;
-  // ee->ang.error_d = (ee->ang.error_p - offset) - ee->ang.error_d;
 
   ee->ang.error_dd = ee->ang.error_d - ee->ang.error_dd;
 
   ee->ang.error_i += (ee->ang.error_p);
-  // ee->ang.error_i += (ee->ang.error_p - offset);
 
   auto ang_error_i = ee->ang.error_i;
   if (param_ro->angle_pid.antiwindup) {
