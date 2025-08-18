@@ -289,6 +289,11 @@ typedef struct {
   char antiwindup = 0;
   float windup_gain = 0;
   float windup_dead_bind = 0;
+  float i_theta_tau = 0;
+  float theta_gate = 0;
+  float omega_gate = 0;
+  float i_theta_slew = 0;
+  float i_theta_max = 0;
 } pid_param_t;
 
 typedef struct {
@@ -703,6 +708,8 @@ typedef struct {
   float error_i_keep;
   float error_d;
   float error_dd;
+  float i_slow;
+  float i_bias;
 } pid_error_t;
 
 typedef struct {
@@ -1193,6 +1200,9 @@ typedef struct {
   real16_T kim_y;
   real16_T kim_theta;
 
+  real16_T ang_i_bias;
+  real16_T ang_i_bias_val;
+
 } log_data_t2;
 
 typedef struct {
@@ -1380,10 +1390,10 @@ typedef struct {
   float kim_y = 104;
   float kim_theta = 105;
 
-  float reserve1 = 106;
-  float reserve2 = 107;
-  float reserve3 = 108;
-  float reserve4 = 109;
+  float ang_i_bias = 106;
+  float ang_i_bias_val = 107;
+  float reserve1 = 108;
+  float reserve2 = 109;
 
 } LogStruct9 __attribute__((packed));
 

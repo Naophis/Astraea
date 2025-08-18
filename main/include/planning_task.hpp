@@ -141,7 +141,7 @@ private:
   void summation_duty();
   void calc_translational_ctrl();
   void calc_angle_velocity_ctrl();
-  void calc_angle_velocity_ctrl_old();
+  void calc_angle_i_bias();
   void calc_pid_val_ang();
   void calc_pid_val_ang_vel();
   void calc_pid_val_front_ctrl();

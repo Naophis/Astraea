@@ -110,13 +110,13 @@ ff_front_gain_decel: 0.5
 enable_kalman_gyro: 0
 enable_kalman_encoder: 1
 
-motor_pid_gain_limitter: 
-  mode: 0
-  p: 15
-  i: 15
-  d: 15
-  b: 15
-  c: 15
+# motor_pid_gain_limitter: 
+#   mode: 0
+#   p: 15
+#   i: 15
+#   d: 15
+#   b: 15
+#   c: 15
 motor2_pid_gain_limitter: 
   mode: 1
   p: 15
@@ -226,7 +226,15 @@ gyro_pid:
   # b: 0.00
   # d: 0.00
 
-  c: 0
+  # c: 0.025
+  c: 0.0
+  i_theta_tau: 0.08      # [s] 角度I低域化の一次LPF時定数（例: 0.08〜0.15）
+  i_theta_slew: 10.0     # [/s] 角度Iバイアスの変化率制限（例: 10〜50）
+  i_theta_max: 20.0      # [-]  角度Iバイアスの振幅上限（例: 5〜20）
+  # theta_gate: 0.00875      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
+  theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
+  omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
+
 angle_pid: # pid for angle
   # p: 44.50
   # # i: 0.045
@@ -338,8 +346,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.002429
-  gyro_w_gain_right: 0.002429
+  gyro_w_gain_left: 0.002431
+  gyro_w_gain_right: 0.0024305
   lp_delay: 1
 gyro2_param:
   # gyro_w_gain_left: 0.00246095
@@ -354,11 +362,11 @@ accel_x_param:
   # gain: 0.161595
   # gain: 1.212 # 4g
 
-comp_v_param:
-  enc_v_lp: 0
-  acc_x_hp: 0.85
-  gain_v: 0.75
-  enable: 0
+# comp_v_param:
+#   enc_v_lp: 0
+#   acc_x_hp: 0.85
+#   gain_v: 0.75
+#   enable: 0
 
 battery_param:
   # lp_delay: 0.25

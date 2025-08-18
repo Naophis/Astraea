@@ -314,6 +314,12 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "knym_w")
             if (record[i] > 2000 || record[i] < -2000)
               res = false;
+          if (data.name === "ang_i_bias")
+            if (record[i] > 200 || record[i] < -200)
+              res = false;
+          if (data.name === "ang_i_bias_val")
+            if (record[i] > 200 || record[i] < -200)
+              res = false;
           return res;
         });
         if (valid) {

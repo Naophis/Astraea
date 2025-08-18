@@ -354,10 +354,10 @@ void IRAM_ATTR LoggingTask::print_header() {
   printf("kim_y:float:%d\n", sizeof(ls9.kim_y));
   printf("kim_theta:float:%d\n", sizeof(ls9.kim_theta));
 
+  printf("ang_i_bias:float:%d\n", sizeof(ls9.ang_i_bias));
+  printf("ang_i_bias_val:float:%d\n", sizeof(ls9.ang_i_bias_val));
   printf("reserve1:float:%d\n", sizeof(ls9.reserve1));
   printf("reserve2:float:%d\n", sizeof(ls9.reserve2));
-  printf("reserve3:float:%d\n", sizeof(ls9.reserve3));
-  printf("reserve4:float:%d\n", sizeof(ls9.reserve4));
 
   vTaskDelay(xDelay2);
   printf("start___\n");
@@ -551,6 +551,8 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls9.kim_x = halfToFloat(ld->kim_x);
     ls9.kim_y = halfToFloat(ld->kim_y);
     ls9.kim_theta = halfToFloat(ld->kim_theta);
+    ls9.ang_i_bias = halfToFloat(ld->ang_i_bias);
+    ls9.ang_i_bias_val = halfToFloat(ld->ang_i_bias_val);
 
     // ls9.reserve1 = halfToFloat(ld->reserve1);
     // ls9.reserve2 = halfToFloat(ld->reserve2);
@@ -753,6 +755,8 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->kim_x = floatToHalf(sensing_result->ego.kim_x);
   ld->kim_y = floatToHalf(sensing_result->ego.kim_y);
   ld->kim_theta = floatToHalf(sensing_result->ego.kim_theta);
+  ld->ang_i_bias = floatToHalf(error_entity->ang_val.i2);
+  ld->ang_i_bias_val = floatToHalf(error_entity->ang_val.i2_val);
 
   if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 7500) {
     log_vec.emplace_back(std::move(ld));

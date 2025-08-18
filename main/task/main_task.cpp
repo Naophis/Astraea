@@ -559,19 +559,19 @@ void MainTask::load_hw_param() {
   param->motor_pid.c = getItem(motor_pid, "c")->valuedouble;
   param->motor_pid.mode = getItem(motor_pid, "mode")->valueint;
 
-  motor_pid_gain_limitter = getItem(root, "motor_pid_gain_limitter");
-  param->motor_pid_gain_limitter.p =
-      getItem(motor_pid_gain_limitter, "p")->valuedouble;
-  param->motor_pid_gain_limitter.i =
-      getItem(motor_pid_gain_limitter, "i")->valuedouble;
-  param->motor_pid_gain_limitter.d =
-      getItem(motor_pid_gain_limitter, "d")->valuedouble;
-  param->motor_pid_gain_limitter.b =
-      getItem(motor_pid_gain_limitter, "b")->valuedouble;
-  param->motor_pid_gain_limitter.c =
-      getItem(motor_pid_gain_limitter, "c")->valuedouble;
-  param->motor_pid_gain_limitter.mode =
-      getItem(motor_pid_gain_limitter, "mode")->valueint;
+  // motor_pid_gain_limitter = getItem(root, "motor_pid_gain_limitter");
+  // param->motor_pid_gain_limitter.p =
+  //     getItem(motor_pid_gain_limitter, "p")->valuedouble;
+  // param->motor_pid_gain_limitter.i =
+  //     getItem(motor_pid_gain_limitter, "i")->valuedouble;
+  // param->motor_pid_gain_limitter.d =
+  //     getItem(motor_pid_gain_limitter, "d")->valuedouble;
+  // param->motor_pid_gain_limitter.b =
+  //     getItem(motor_pid_gain_limitter, "b")->valuedouble;
+  // param->motor_pid_gain_limitter.c =
+  //     getItem(motor_pid_gain_limitter, "c")->valuedouble;
+  // param->motor_pid_gain_limitter.mode =
+  //     getItem(motor_pid_gain_limitter, "mode")->valueint;
 
   motor2_pid_gain_limitter = getItem(root, "motor2_pid_gain_limitter");
   param->motor2_pid_gain_limitter.p =
@@ -689,6 +689,11 @@ void MainTask::load_hw_param() {
   param->gyro_pid.windup_gain = getItem(gyro_pid, "windup_gain")->valuedouble;
   param->gyro_pid.windup_dead_bind =
       getItem(gyro_pid, "windup_dead_bind")->valuedouble;
+  param->gyro_pid.i_theta_tau = getItem(gyro_pid, "i_theta_tau")->valuedouble;
+  param->gyro_pid.i_theta_slew = getItem(gyro_pid, "i_theta_slew")->valuedouble;
+  param->gyro_pid.i_theta_max = getItem(gyro_pid, "i_theta_max")->valuedouble;
+  param->gyro_pid.theta_gate = getItem(gyro_pid, "theta_gate")->valuedouble;
+  param->gyro_pid.omega_gate = getItem(gyro_pid, "omega_gate")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
@@ -765,12 +770,12 @@ void MainTask::load_hw_param() {
   param->pos_p_noise = getItem(pos_kalman_config, "p_noise")->valuedouble;
   param->pos_m_noise = getItem(pos_kalman_config, "m_noise")->valuedouble;
 
-  comp_v_param = getItem(root, "comp_v_param");
-  param->comp_param.v_lp_gain = getItem(comp_v_param, "enc_v_lp")->valuedouble;
-  param->comp_param.accl_x_hp_gain =
-      getItem(comp_v_param, "acc_x_hp")->valuedouble;
-  param->comp_param.gain = getItem(comp_v_param, "gain_v")->valuedouble;
-  param->comp_param.enable = getItem(comp_v_param, "enable")->valueint;
+  // comp_v_param = getItem(root, "comp_v_param");
+  // param->comp_param.v_lp_gain = getItem(comp_v_param, "enc_v_lp")->valuedouble;
+  // param->comp_param.accl_x_hp_gain =
+  //     getItem(comp_v_param, "acc_x_hp")->valuedouble;
+  // param->comp_param.gain = getItem(comp_v_param, "gain_v")->valuedouble;
+  // param->comp_param.enable = getItem(comp_v_param, "enable")->valueint;
 
   param->motor_driver_type =
       static_cast<MotorDriveType>(getItem(root, "motor_driver_type")->valueint);
