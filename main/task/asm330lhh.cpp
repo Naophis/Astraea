@@ -109,10 +109,13 @@ void ASM330LHH::setup() {
   uint8_t whoami = read1byte(0x0F);
   // begin();
 
-  write1byte(ASM330LHH_CTRL3_C, 0x83 | 0x44); // ASM330LHHをリセット
+  write1byte(ASM330LHH_CTRL3_C, 0x83); // ASM330LHHをリセット
   vTaskDelay(200.0 / portTICK_PERIOD_MS);
   while ((read1byte(ASM330LHH_CTRL3_C) & 0x01) == 0x01)
     ;
+
+  write1byte(ASM330LHH_CTRL3_C, 0x44); // BDU, 
+  vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL4_C, 0x04); // I2C/I3CモードをDisableに設定
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL7_G, 0x00); // HP_EN_G=0 -> Gyro HPF OFF
