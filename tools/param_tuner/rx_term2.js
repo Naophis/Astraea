@@ -203,7 +203,6 @@ const switchToBinaryMode = (obj) => {
     cnt++;
     index++;
     last_recived = new Date().getTime();
-    console.log(`Received data: ${binaryData.length} bytes, cnt: ${cnt}, index: ${index}`);
     const start_idx = (cnt - 1) * 12;
     const end_idx = start_idx + 12;
 
