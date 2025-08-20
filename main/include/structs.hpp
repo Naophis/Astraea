@@ -857,6 +857,8 @@ typedef struct {
   planning_req_t pl_req;
   fail_safe_state_t fss;
   volatile float gyro_zero_p_offset = 0;
+  volatile float var_unbiased_dps2 = 0;
+  volatile float var_robust_dps2 = 0;
   volatile float gyro2_zero_p_offset = 0;
   volatile float accel_x_zero_p_offset = 0;
   volatile float accel_y_zero_p_offset = 0;
@@ -1118,17 +1120,17 @@ typedef struct {
   real16_T duty_l;
   real16_T duty_r;
 
-  real16_T left90_lp;
-  real16_T left45_lp;
+  int16_t left90_lp;
+  int16_t left45_lp;
   // real16_T front_lp;
-  real16_T right45_lp;
-  real16_T right90_lp;
+  int16_t right45_lp;
+  int16_t right90_lp;
   real16_T battery_lp;
 
-  real16_T left45_2_lp;
-  real16_T right45_2_lp;
-  real16_T left45_3_lp;
-  real16_T right45_3_lp;
+  int16_t left45_2_lp;
+  int16_t right45_2_lp;
+  int16_t left45_3_lp;
+  int16_t right45_3_lp;
 
   char motion_type;
   int16_t motion_timestamp;
@@ -1272,14 +1274,14 @@ typedef struct {
   float ang = 20;
 
   float ang_kf = 21;
-  float left90 = 22;
-  float left45 = 23;
-  float front = 24;
+  int left90 = 22;
+  int left45 = 23;
+  int front = 24;
 } LogStruct2 __attribute__((packed));
 
 typedef struct {
-  float right45 = 25;
-  float right90 = 26;
+  int right45 = 25;
+  int right90 = 26;
   float left90_d = 27;
   float left45_d = 28;
 
@@ -1363,10 +1365,10 @@ typedef struct {
 } LogStruct7 __attribute__((packed));
 
 typedef struct {
-  float right45_2 = 85;
-  float right45_3 = 86;
-  float left45_2 = 87;
-  float left45_3 = 88;
+  int right45_2 = 85;
+  int right45_3 = 86;
+  int left45_2 = 87;
+  int left45_3 = 88;
 
   float right45_2_d = 89;
   float right45_3_d = 90;

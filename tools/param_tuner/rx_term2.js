@@ -203,6 +203,7 @@ const switchToBinaryMode = (obj) => {
     cnt++;
     index++;
     last_recived = new Date().getTime();
+    console.log(`Received data: ${binaryData.length} bytes, cnt: ${cnt}, index: ${index}`);
     const start_idx = (cnt - 1) * 12;
     const end_idx = start_idx + 12;
 
@@ -218,6 +219,10 @@ const switchToBinaryMode = (obj) => {
           break;
         case 'int':
           record.push(binaryData.readInt32LE(offset));
+          offset += data.size;
+          break;
+        case 'short':
+          record.push(binaryData.readInt16LE(offset));
           offset += data.size;
           break;
         default:

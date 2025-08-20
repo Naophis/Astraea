@@ -159,8 +159,7 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
     //   }
     // }
 
-
- if (search_mode && param->wall_off_dist.search_wall_off_enable) {
+    if (search_mode && param->wall_off_dist.search_wall_off_enable) {
       // watch wall off
       if (wall_off_state == 0) {
         if (sensing_result->ego.right45_dist <
@@ -873,6 +872,116 @@ void IRAM_ATTR MotionPlanning::reset_ego_data() {
   req_error_reset();
   vTaskDelay(1.0 / portTICK_RATE_MS);
 }
+struct YawBiasResultF {
+  float bias_dps;     // 推定バイアス [deg/s]（Tukey加重平均）
+  float sigma_robust; // ロバストσ ≈ 1.4826 * MAD [deg/s]
+  float
+      var_unbiased_dps2; // 不偏分散（外れ値トリム後、Tukey平均まわり）[deg/s^2]
+  float var_robust_dps2; // ロバスト分散 = sigma_robust^2 [deg/s^2]
+  int used_samples;      // 最終平均・分散に使ったサンプル数
+  bool result;
+};
+
+namespace detail {
+
+inline float median_copy(std::vector<float> v) {
+  const size_t n = v.size();
+  if (n == 0)
+    return 0.0f;
+  auto mid = v.begin() + n / 2;
+  std::nth_element(v.begin(), mid, v.end());
+  float m2 = *mid;
+  if (n & 1)
+    return m2; // 奇数
+  auto mid_low = v.begin() + (n / 2 - 1);
+  std::nth_element(v.begin(), mid_low, v.end());
+  float m1 = *mid_low;
+  return 0.5f * (m1 + m2);
+}
+
+inline float mad_copy(const std::vector<float> &x, float med) {
+  std::vector<float> dev;
+  dev.reserve(x.size());
+  for (float v : x)
+    dev.push_back(std::fabs(v - med));
+  return median_copy(std::move(dev));
+}
+
+inline float tukey_biweight_mean(const std::vector<float> &vals, float center,
+                                 float sigma, float c) {
+  if (sigma <= 0.0f)
+    return center;
+  const float scale = c * sigma;
+  float num = 0.0f, den = 0.0f;
+  for (float x : vals) {
+    float u = (x - center) / scale;
+    if (std::fabs(u) < 1.0f) {
+      float omu2 = 1.0f - u * u;
+      float w = omu2 * omu2; // (1 - u^2)^2
+      num += w * x;
+      den += w;
+    }
+  }
+  return (den > 0.0f) ? (num / den) : center;
+}
+
+} // namespace detail
+
+// 入力: yaw[deg/s]（例: 512点 @1ms, 静止中）
+// 出力: バイアス + 分散（不偏/ロバスト）
+inline YawBiasResultF calibrateYawBiasF(const std::vector<float> &yaw_dps,
+                                        float k_sigma_trim = 3.0f,
+                                        float tukey_c = 4.685f) {
+  if (yaw_dps.empty())
+    return {0.0f, 0.0f, 0.0f, 0.0f, 0, false};
+
+  // 1) 中央値 & MAD → ロバストσ
+  const float med = detail::median_copy(yaw_dps);
+  const float mad = detail::mad_copy(yaw_dps, med);
+  const float sigma_robust = (mad > 0.0f ? 1.4826f * mad : 0.0f);
+
+  // 2) kσトリム（インライア抽出）
+  std::vector<float> inliers;
+  inliers.reserve(yaw_dps.size());
+  if (sigma_robust == 0.0f) {
+    // すべて同値等：分散0として返す
+    return {med, 0.0f, 0.0f, 0.0f, static_cast<int>(yaw_dps.size()), true};
+  }
+  const float lo = med - k_sigma_trim * sigma_robust;
+  const float hi = med + k_sigma_trim * sigma_robust;
+  for (float v : yaw_dps)
+    if (v >= lo && v <= hi)
+      inliers.push_back(v);
+
+  if (inliers.empty()) {
+    return {med, sigma_robust, 0.0f, sigma_robust * sigma_robust, 0, true};
+  }
+
+  // 3) ロバスト平均（Tukey）
+  const float bias =
+      detail::tukey_biweight_mean(inliers, med, sigma_robust, tukey_c);
+
+  // 4) 不偏分散（インライアを bias まわりに、N-1 で割る）
+  float var_unbiased = 0.0f;
+  if (inliers.size() >= 2) {
+    double s2 = 0.0; // 累積はdoubleで少しだけ安定化
+    for (float v : inliers) {
+      double d = static_cast<double>(v) - static_cast<double>(bias);
+      s2 += d * d;
+    }
+    s2 /= static_cast<double>(inliers.size() - 1);
+    var_unbiased = static_cast<float>(s2);
+  } else {
+    var_unbiased = 0.0f;
+  }
+
+  return {bias,
+          sigma_robust,
+          var_unbiased,
+          sigma_robust * sigma_robust,
+          static_cast<int>(inliers.size()),
+          true};
+}
 
 void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
@@ -881,14 +990,36 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   float accel_x_raw_data_sum = 0;
   float accel_y_raw_data_sum = 0;
 
-  for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
-    gyro_raw_data_sum += sensing_result->gyro.raw;
-    gyro2_raw_data_sum += sensing_result->gyro2.raw;
-    accel_x_raw_data_sum += sensing_result->accel_x.raw;
-    accel_y_raw_data_sum += sensing_result->accel_y.raw;
-    vTaskDelay(xDelay); //他モジュールの起動待ち
+  for (int j = 0; j < 3; j++) {
+    std::vector<float> yaw_val;
+
+    yaw_val.clear();
+
+    for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
+      gyro_raw_data_sum += sensing_result->gyro.raw;
+      gyro2_raw_data_sum += sensing_result->gyro2.raw;
+      accel_x_raw_data_sum += sensing_result->accel_x.raw;
+      accel_y_raw_data_sum += sensing_result->accel_y.raw;
+      yaw_val.push_back(sensing_result->gyro.raw);
+      vTaskDelay(xDelay); //他モジュールの起動待ち
+    }
+
+    const auto gyro_bias =
+        calibrateYawBiasF(yaw_val, 3.0f, 4.685f); // Tukey c=4.685
+    tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
+    tgt_val->var_robust_dps2 =
+        gyro_bias.var_robust_dps2 * 4000.0f * 4000.0f / 32768.0f / 32768.0f;
+    tgt_val->var_unbiased_dps2 =
+        gyro_bias.var_unbiased_dps2 * 4000.0f * 4000.0f / 32768.0f / 32768.0f;
+
+    if (tgt_val->var_unbiased_dps2 < 1) {
+      break;
+    }
+    // coin();
   }
-  tgt_val->gyro_zero_p_offset = gyro_raw_data_sum / RESET_GYRO_LOOP_CNT;
+  printf("gyro bias: %f\n", tgt_val->gyro_zero_p_offset);
+  printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
+  printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
   tgt_val->gyro2_zero_p_offset = gyro2_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_y_zero_p_offset = accel_y_raw_data_sum / RESET_GYRO_LOOP_CNT;

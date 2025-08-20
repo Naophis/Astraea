@@ -243,13 +243,13 @@ void IRAM_ATTR LoggingTask::print_header() {
   printf("ang:float:%d\n", sizeof(ls2.ang));
 
   printf("ang_kf:float:%d\n", sizeof(ls2.ang_kf));
-  printf("left90:float:%d\n", sizeof(ls2.left90));
-  printf("left45:float:%d\n", sizeof(ls2.left45));
-  printf("front:float:%d\n", sizeof(ls2.front));
+  printf("left90:int:%d\n", sizeof(ls2.left90));
+  printf("left45:int:%d\n", sizeof(ls2.left45));
+  printf("front:int:%d\n", sizeof(ls2.front));
 
   // LogStruct3
-  printf("right45:float:%d\n", sizeof(ls3.right45));
-  printf("right90:float:%d\n", sizeof(ls3.right90));
+  printf("right45:int:%d\n", sizeof(ls3.right45));
+  printf("right90:int:%d\n", sizeof(ls3.right90));
   printf("left90_d:float:%d\n", sizeof(ls3.left90_d));
   printf("left45_d:float:%d\n", sizeof(ls3.left45_d));
 
@@ -328,10 +328,10 @@ void IRAM_ATTR LoggingTask::print_header() {
   printf("y:float:%d\n", sizeof(ls7.y));
 
   // LogStruct8
-  printf("right45_2:float:%d\n", sizeof(ls8.right45_2));
-  printf("right45_3:float:%d\n", sizeof(ls8.right45_3));
-  printf("left45_2:float:%d\n", sizeof(ls8.left45_2));
-  printf("left45_3:float:%d\n", sizeof(ls8.left45_3));
+  printf("right45_2:int:%d\n", sizeof(ls8.right45_2));
+  printf("right45_3:int:%d\n", sizeof(ls8.right45_3));
+  printf("left45_2:int:%d\n", sizeof(ls8.left45_2));
+  printf("left45_3:int:%d\n", sizeof(ls8.left45_3));
 
   printf("right45_2_d:float:%d\n", sizeof(ls8.right45_2_d));
   printf("right45_3_d:float:%d\n", sizeof(ls8.right45_3_d));
@@ -398,44 +398,36 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls2.ideal_ang = halfToFloat(ld->img_ang);
     ls2.ang = halfToFloat(ld->ang);
     ls2.ang_kf = halfToFloat(ld->ang_kf);
-    ls2.left90 = halfToFloat(ld->left90_lp);
-    ls2.left45 = halfToFloat(ld->left45_lp);
-    ls2.front =
-        ((halfToFloat(ld->left90_lp) + halfToFloat(ld->right90_lp)) / 2);
 
-    ls3.right45 = halfToFloat(ld->right45_lp);
-    ls3.right90 = halfToFloat(ld->right90_lp);
+    ls2.left90 = (ld->left90_lp);
+    ls2.left45 = (ld->left45_lp);
+    ls2.front = (((ld->left90_lp) + (ld->right90_lp)) / 2);
 
-    auto l90 = calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90.a,
+    ls3.right45 = (ld->right45_lp);
+    ls3.right90 = (ld->right90_lp);
+
+    auto l90 = calc_sensor((ld->left90_lp), param->sensor_gain.l90.a,
                            param->sensor_gain.l90.b, ld->motion_type);
-    auto l45 = calc_sensor(halfToFloat(ld->left45_lp), param->sensor_gain.l45.a,
+    auto l45 = calc_sensor((ld->left45_lp), param->sensor_gain.l45.a,
                            param->sensor_gain.l45.b, ld->motion_type);
-    auto r45 =
-        calc_sensor(halfToFloat(ld->right45_lp), param->sensor_gain.r45.a,
-                    param->sensor_gain.r45.b, ld->motion_type);
-    auto r45_2 =
-        calc_sensor(halfToFloat(ld->right45_2_lp), param->sensor_gain.r45_2.a,
-                    param->sensor_gain.r45_2.b, ld->motion_type);
-    auto l45_2 =
-        calc_sensor(halfToFloat(ld->left45_2_lp), param->sensor_gain.l45_2.a,
-                    param->sensor_gain.l45_2.b, ld->motion_type);
-    auto l45_3 =
-        calc_sensor(halfToFloat(ld->left45_3_lp), param->sensor_gain.l45_3.a,
-                    param->sensor_gain.l45_3.b, ld->motion_type);
-    auto r45_3 =
-        calc_sensor(halfToFloat(ld->right45_3_lp), param->sensor_gain.r45_3.a,
-                    param->sensor_gain.r45_3.b, ld->motion_type);
+    auto r45 = calc_sensor((ld->right45_lp), param->sensor_gain.r45.a,
+                           param->sensor_gain.r45.b, ld->motion_type);
+    auto r45_2 = calc_sensor((ld->right45_2_lp), param->sensor_gain.r45_2.a,
+                             param->sensor_gain.r45_2.b, ld->motion_type);
+    auto l45_2 = calc_sensor((ld->left45_2_lp), param->sensor_gain.l45_2.a,
+                             param->sensor_gain.l45_2.b, ld->motion_type);
+    auto l45_3 = calc_sensor((ld->left45_3_lp), param->sensor_gain.l45_3.a,
+                             param->sensor_gain.l45_3.b, ld->motion_type);
+    auto r45_3 = calc_sensor((ld->right45_3_lp), param->sensor_gain.r45_3.a,
+                             param->sensor_gain.r45_3.b, ld->motion_type);
 
-    auto r90 =
-        calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90.a,
-                    param->sensor_gain.r90.b, ld->motion_type);
+    auto r90 = calc_sensor((ld->right90_lp), param->sensor_gain.r90.a,
+                           param->sensor_gain.r90.b, ld->motion_type);
 
-    auto l90_far =
-        calc_sensor(halfToFloat(ld->left90_lp), param->sensor_gain.l90_far.a,
-                    param->sensor_gain.l90_far.b, ld->motion_type);
-    auto r90_far =
-        calc_sensor(halfToFloat(ld->right90_lp), param->sensor_gain.r90_far.a,
-                    param->sensor_gain.r90_far.b, ld->motion_type);
+    auto l90_far = calc_sensor((ld->left90_lp), param->sensor_gain.l90_far.a,
+                               param->sensor_gain.l90_far.b, ld->motion_type);
+    auto r90_far = calc_sensor((ld->right90_lp), param->sensor_gain.r90_far.a,
+                               param->sensor_gain.r90_far.b, ld->motion_type);
     float front = 0;
     if (l90 > 0 && r90 > 0) {
       front = (l90 + r90) / 2;
@@ -528,10 +520,10 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls7.x = halfToFloat(ld->pos_x);
     ls7.y = halfToFloat(ld->pos_y);
 
-    ls8.right45_2 = halfToFloat(ld->right45_2_lp);
-    ls8.right45_3 = halfToFloat(ld->right45_3_lp);
-    ls8.left45_2 = halfToFloat(ld->left45_2_lp);
-    ls8.left45_3 = halfToFloat(ld->left45_3_lp);
+    ls8.right45_2 = (ld->right45_2_lp);
+    ls8.right45_3 = (ld->right45_3_lp);
+    ls8.left45_2 = (ld->left45_2_lp);
+    ls8.left45_3 = (ld->left45_3_lp);
     ls8.sen_dist_l45_2 = halfToFloat(ld->sen_log_l45_2);
     ls8.sen_dist_r45_2 = halfToFloat(ld->sen_log_r45_2);
     ls8.sen_dist_l45_3 = halfToFloat(ld->sen_log_l45_3);
@@ -592,7 +584,13 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
 
   printf("end___\n"); // csvファイル追記終了トリガー
 
+  vTaskDelay(3250.0 / portTICK_PERIOD_MS);
+
   printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+
+  printf("gyro bias: %f\n", tgt_val->gyro_zero_p_offset);
+  printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
+  printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
   log_vec.clear();
   // umount();
   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
@@ -660,16 +658,16 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->ang_kf = floatToHalf(sensing_result->ego.ang_kf * 180 / m_PI);
   // ld->ang_kf2 = floatToHalf(sensing_result->ego.ang_kf2 * 180 / m_PI);
 
-  ld->left90_lp = floatToHalf(sensing_result->ego.left90_lp);
-  ld->left45_lp = floatToHalf(sensing_result->ego.left45_lp);
+  ld->left90_lp = (sensing_result->led_sen.left90.raw);
+  ld->left45_lp = (sensing_result->led_sen.left45.raw);
   // ld->front_lp = floatToHalf(sensing_result->ego.front_lp);
-  ld->right45_lp = floatToHalf(sensing_result->ego.right45_lp);
-  ld->right90_lp = floatToHalf(sensing_result->ego.right90_lp);
+  ld->right45_lp = (sensing_result->led_sen.right45.raw);
+  ld->right90_lp = (sensing_result->led_sen.right90.raw);
 
-  ld->left45_2_lp = floatToHalf(sensing_result->ego.left45_2_lp);
-  ld->right45_2_lp = floatToHalf(sensing_result->ego.right45_2_lp);
-  ld->left45_3_lp = floatToHalf(sensing_result->ego.left45_3_lp);
-  ld->right45_3_lp = floatToHalf(sensing_result->ego.right45_3_lp);
+  ld->left45_2_lp = (sensing_result->led_sen.left45_2.raw);
+  ld->right45_2_lp = (sensing_result->led_sen.right45_2.raw);
+  ld->left45_3_lp = (sensing_result->led_sen.left45_3.raw);
+  ld->right45_3_lp = (sensing_result->led_sen.right45_3.raw);
 
   ld->battery_lp = floatToHalf(sensing_result->ego.batt_kf);
   ld->duty_l = floatToHalf(sensing_result->ego.duty.duty_l);

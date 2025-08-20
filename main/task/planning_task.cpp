@@ -2281,7 +2281,8 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
           // w_error_i = ee->w.error_i = ee->ang.error_p / dt;
           // w_error_i = ee->w.error_i = (ee->ang.error_p / dt) -
           // (ee->w.error_p);
-          // float tmp_ang_p = (tgt->ego_in.img_ang + offset) - tgt_val->ego_in.ang;
+          // float tmp_ang_p = (tgt->ego_in.img_ang + offset) -
+          // tgt_val->ego_in.ang;
 
           w_error_i = ee->w.error_i =
               ee->ang.error_p / dt * param_ro->gyro_pid.windup_gain;
@@ -2756,6 +2757,9 @@ void IRAM_ATTR PlanningTask::generate_trajectory() {
 }
 
 void IRAM_ATTR PlanningTask::calc_kanamaya_ctrl() {
+
+  if (trj_idx_v.size() == 0 || trj_idx_val.size() == 0)
+    return;
 
   const auto idx_val =
       interp1d(trj_idx_v, trj_idx_val, tgt_val->ego_in.v, false);

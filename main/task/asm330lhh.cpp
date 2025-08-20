@@ -120,7 +120,8 @@ void ASM330LHH::setup() {
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL7_G, 0x00); // HP_EN_G=0 -> Gyro HPF OFF
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  write1byte(ASM330LHH_CTRL2_G, 0xA1); // ODR: 6667Hz, scale: 4000deg/s
+  // write1byte(ASM330LHH_CTRL2_G, 0xA1); // ODR: 6667Hz, scale: 4000deg/s
+  write1byte(ASM330LHH_CTRL2_G, 0x91); // ODR: 3333Hz, scale: 4000deg/s
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL8_XL, 0x00); // LPF2_XL_EN=0, HP_SLOPE_XL_EN=0
 
