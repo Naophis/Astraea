@@ -22,6 +22,10 @@ WallOffController::get_sensing_entity() {
   return sensing_result;
 }
 
+std::shared_ptr<input_param_t> WallOffController::get_input_param_entity() {
+  return param;
+}
+
 void WallOffController::set_task_handler(TaskHandle_t &_th) { th = &_th; }
 
 void IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
@@ -605,53 +609,78 @@ wall_off_hold_dist_t IRAM_ATTR &WallOffController::get_wall_off_param() {
 }
 
 WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
-  const auto se = get_sensing_entity();
-  const auto p_wall_off = get_wall_off_param();
   if (right_strategy.has_value()) {
     return *right_strategy;
   }
 
   right_strategy = WallSensorStrategy{
       // wall_missing
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return se->ego.right45_dist_diff > p_wall_off.div_th_r2 &&
                se->ego.right45_2_dist_diff > 0 && //
                se->ego.right45_dist < 70;
       },
       // exist_wall
-      [=]() { return se->ego.right45_dist < p_wall_off.exist_dist_r; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.right45_dist < p_wall_off.exist_dist_r;
+      },
       // find_vertical_wall
-      [=]() { return se->ego.right45_dist < p_wall_off.exist_dist_r2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.right45_dist < p_wall_off.exist_dist_r2;
+      },
       // detect_pass_through_case1
-      [=](float before, float after) {
+      [this](float before, float after) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return (std::abs(after - before) >=                             //
                 std::abs(p_wall_off.diff_check_dist)) &&                //
                se->ego.right45_dist_diff > p_wall_off.diff_dist_th_r && //
                se->ego.right45_2_dist_diff > 0 &&                       //
-               //  se->ego.right45_3_dist_diff > 0 &&                       //
-               //  se->ego.right45_2_dist_diff < 10 &&                      //
-               //  se->ego.right45_3_dist_diff < 10 &&                      //
+               //  se->ego.right45_3_dist_diff > 0 && //
+               //  se->ego.right45_2_dist_diff < 10 && //
+               //  se->ego.right45_3_dist_diff < 10 && //
                se->ego.right45_dist_diff < 100;
       },
       // detect_pass_through_case2
-      [=](float before, float after) {
+      [this](float before, float after) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist) &&
                se->ego.right45_dist > 170;
       },
       // detect_distance
-      [=](float before, float after) {
+      [this](float before, float after) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return std::abs(after - before) >=
                    std::abs(param->wall_off_front_move_dist_th) &&
                std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist);
       },
       // detect_missing_by_deviation
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return std::abs(se->ego.right45_dist_diff) > p_wall_off.right_diff_th &&
                se->ego.right45_dist < 100;
       },
       // detect_wall_off
-      [=](float exist) {
+      [this](float exist) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
                                   se->ego.right45_dist);
         float diff_front = std::abs(se->ego.left90_far_dist -
@@ -666,13 +695,16 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
                (valid_diff &&                                      //
                 se->ego.right45_dist_diff > p_wall_off.div_th_r && //
                 se->ego.right45_2_dist_diff > 0 &&                 //
-                // se->ego.right45_3_dist_diff > 0 &&                  //
-                // se->ego.right45_2_dist_diff < 10 &&                 //
-                // se->ego.right45_3_dist_diff < 10 &&                 //
+                // se->ego.right45_3_dist_diff > 0 && //
+                // se->ego.right45_2_dist_diff < 10 && //
+                // se->ego.right45_3_dist_diff < 10 && //
                 se->ego.right45_dist < 100);
       },
       // detect_wall_missing_by_deviation
-      [=](float exist) {
+      [this](float exist) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
                                   se->ego.right45_dist);
         float diff_front =
@@ -690,14 +722,16 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
                se->ego.right45_dist < 100;
       },
       // detect_wall_off_vertical
-      [=]() { return se->ego.right45_dist > p_wall_off.noexist_th_r2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        return se->ego.right45_dist > p_wall_off.noexist_th_r2;
+      },
   };
   return *right_strategy;
 }
 
 WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
-  const auto se = get_sensing_entity();
-  const auto p_wall_off = get_wall_off_param();
 
   if (left_strategy.has_value()) {
     return *left_strategy;
@@ -705,17 +739,29 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
 
   left_strategy = WallSensorStrategy{
       // wall_missing
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
                se->ego.left45_2_dist_diff > 0 &&                  //
                se->ego.left45_dist < 70;
       },
       // exist_wall
-      [=]() { return se->ego.left45_dist < p_wall_off.exist_dist_l; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        return se->ego.left45_dist < p_wall_off.exist_dist_l;
+      },
       // find_vertical_wall
-      [=]() { return se->ego.left45_dist < p_wall_off.exist_dist_l2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        return se->ego.left45_dist < p_wall_off.exist_dist_l2;
+      },
       // detect_pass_through_case1
-      [=](float before, float after) {
+      [this](float before, float after) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return (std::abs(after - before) >=
                 std::abs(p_wall_off.diff_check_dist)) &&
                se->ego.left45_dist_diff > p_wall_off.diff_dist_th_l && //
@@ -726,24 +772,34 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
                se->ego.left45_dist < 100;
       },
       // detect_pass_through_case2
-      [=](float before, float after) {
+      [this](float before, float after) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist) &&
                se->ego.left45_dist > 170;
       },
       // detect_distance
-      [=](float before, float after) {
+      [this](float before, float after) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return std::abs(after - before) >=
                    std::abs(param->wall_off_front_move_dist_th) &&
                std::abs(tgt_val->ego_in.dist) >= std::abs(tgt_val->nmr.dist);
       },
       // detect_missing_by_deviation
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return std::abs(se->ego.left45_dist_diff) > p_wall_off.left_diff_th &&
                se->ego.left45_dist < 100;
       },
       // detect_wall_off
-      [=](float exist) {
+      [this](float exist) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         float diff_ref =
             std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
         float diff_front = std::abs(se->ego.left90_far_dist -
@@ -764,7 +820,10 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
                 se->ego.left45_dist < 100);
       },
       // detect_wall_missing_by_deviation
-      [=](float exist) {
+      [this](float exist) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         float diff_ref =
             std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
         float diff_front = std::abs(se->ego.left90_far_dist -
@@ -781,20 +840,22 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
         return valid_diff &&                                     //
                se->ego.left45_dist_diff > p_wall_off.div_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                 //
-               //  se->ego.left45_3_dist_diff > 0 &&                 //
+                se->ego.left45_3_dist_diff > 0 &&                 //
                //  se->ego.left45_2_dist_diff < 10 &&                //
                //  se->ego.left45_3_dist_diff < 10 &&                //
                se->ego.left45_dist < 100;
       },
       // detect_wall_off_vertical
-      [=]() { return se->ego.left45_dist > p_wall_off.noexist_th_l2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        return se->ego.left45_dist > p_wall_off.noexist_th_l2;
+      },
   };
   return *left_strategy;
 }
 
 DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
-  const auto se = get_sensing_entity();
-  const auto p_wall_off = get_wall_off_param();
 
   if (left_dia_strategy.has_value()) {
     return *left_dia_strategy;
@@ -802,17 +863,33 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
 
   left_dia_strategy = DiagonalWallOffStrategy{
       // exist_dia_wall_start - 斜め壁切れ開始の判定（exist=trueの場合）
-      [=]() { return se->ego.left45_dist < p_wall_off.exist_dia_th_l; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.left45_dist < p_wall_off.exist_dia_th_l;
+      },
       // exist_dia_wall_start_alt - 斜め壁切れ開始の判定（exist=falseの場合）
-      [=]() { return se->ego.left45_dist < p_wall_off.exist_dia_th_l2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.left45_dist < p_wall_off.exist_dia_th_l2;
+      },
       // detect_pass_through_case1 - 見切れた場合の検出
-      [=](float before, float after, float init) {
+      [this](float before, float after, float init) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist_dia_2) &&
                (se->ego.left45_dist - init) > param->wall_off_pass_dist;
       },
       // detect_pass_through_case2 - 反対側の壁ありの場合の検出
-      [=](float before, float after, float init) {
+      [this](float before, float after, float init) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         bool valid_right90 =
             1 < se->ego.right90_mid_dist &&
             se->ego.right90_mid_dist < param->sen_ref_p.dia.exist.right90 &&
@@ -822,7 +899,9 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
                se->ego.right45_dist < param->dia_turn_th_r && valid_right90;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return (se->ego.left45_dist > p_wall_off.noexist_dia_th_l &&  //
                 se->ego.left45_dist_diff > 0) ||                      //
                (se->ego.left45_dist_diff > p_wall_off.div_th_dia_l && //
@@ -833,7 +912,9 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
                 se->ego.left45_dist < 100);
       },
       // detect_wall_off_by_deviation - 微分による壁切れ終了検出
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
         return se->ego.left45_dist_diff > p_wall_off.div_th_dia_l && //
                se->ego.left45_2_dist_diff > 0 &&                     //
                //  se->ego.left45_3_dist_diff > 0 &&                     //
@@ -842,14 +923,16 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
                se->ego.left45_dist < 100;
       },
       // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
-      [=]() { return se->ego.left45_dist > p_wall_off.noexist_dia_th_l2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        return se->ego.left45_dist > p_wall_off.noexist_dia_th_l2;
+      },
   };
   return *left_dia_strategy;
 }
 
 DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
-  const auto se = get_sensing_entity();
-  const auto p_wall_off = get_wall_off_param();
 
   if (right_dia_strategy.has_value()) {
     return *right_dia_strategy;
@@ -857,17 +940,33 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
 
   right_dia_strategy = DiagonalWallOffStrategy{
       // exist_dia_wall_start - 斜め壁切れ開始の判定（exist=trueの場合）
-      [=]() { return se->ego.right45_dist < p_wall_off.exist_dia_th_r; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.right45_dist < p_wall_off.exist_dia_th_r;
+      },
       // exist_dia_wall_start_alt - 斜め壁切れ開始の判定（exist=falseの場合）
-      [=]() { return se->ego.right45_dist < p_wall_off.exist_dia_th_r2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.right45_dist < p_wall_off.exist_dia_th_r2;
+      },
       // detect_pass_through_case1 - 見切れた場合の検出
-      [=](float before, float after, float init) {
+      [this](float before, float after, float init) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist_dia_2) &&
                (se->ego.right45_dist - init) > param->wall_off_pass_dist;
       },
       // detect_pass_through_case2 - 反対側の壁ありの場合の検出
-      [=](float before, float after, float init) {
+      [this](float before, float after, float init) -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         bool valid_left90 =
             1 < se->ego.left90_mid_dist &&
             se->ego.left90_mid_dist < param->sen_ref_p.dia.exist.left90 &&
@@ -877,7 +976,10 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
                se->ego.left45_dist < param->dia_turn_th_l && valid_left90;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return (se->ego.right45_dist > p_wall_off.noexist_dia_th_r &&  //
                 se->ego.right45_dist_diff > 0) ||                      //
                (se->ego.right45_dist_diff > p_wall_off.div_th_dia_r && //
@@ -888,7 +990,10 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
                 se->ego.right45_dist < 100);
       },
       // detect_wall_off_by_deviation - 微分による壁切れ終了検出
-      [=]() {
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
         return se->ego.right45_dist_diff > p_wall_off.div_th_dia_r && //
                se->ego.right45_2_dist_diff > 0 &&                     //
                //  se->ego.right45_3_dist_diff > 0 &&                     //
@@ -897,7 +1002,12 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
                se->ego.right45_dist < 100;
       },
       // detect_wall_off_alt - 壁切れ終了（exist=falseの場合）
-      [=]() { return se->ego.right45_dist > p_wall_off.noexist_dia_th_r2; },
+      [this]() -> bool {
+        const auto p_wall_off = get_wall_off_param();
+        const auto se = get_sensing_entity();
+        const auto param = get_input_param_entity();
+        return se->ego.right45_dist > p_wall_off.noexist_dia_th_r2;
+      },
   };
   return *right_dia_strategy;
 }

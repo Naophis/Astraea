@@ -134,7 +134,8 @@ void IRAM_ATTR LoggingTask::task() {
     }
   }
 }
-float LoggingTask::calc_sensor(float data, float a, float b, char motion_type) {
+float IRAM_ATTR LoggingTask::calc_sensor(float data, float a, float b,
+                                         char motion_type) {
   if ((motion_type == static_cast<char>(MotionType::NONE) ||
        motion_type == static_cast<char>(MotionType::PIVOT))) {
     return 0;
@@ -211,7 +212,9 @@ void IRAM_ATTR LoggingTask::print_header() {
   const int size = sizeof(LogStruct1) + sizeof(LogStruct2) +
                    sizeof(LogStruct3) + sizeof(LogStruct4) +
                    sizeof(LogStruct5) + sizeof(LogStruct6) +
-                   sizeof(LogStruct7) + sizeof(LogStruct8) + sizeof(LogStruct9);
+                   sizeof(LogStruct7) + sizeof(LogStruct8) +
+                   sizeof(LogStruct9) + sizeof(LogStruct10);
+
   printf("ready___:%d\n", size);
   vTaskDelay(xDelay2);
 
@@ -356,8 +359,24 @@ void IRAM_ATTR LoggingTask::print_header() {
 
   printf("ang_i_bias:float:%d\n", sizeof(ls9.ang_i_bias));
   printf("ang_i_bias_val:float:%d\n", sizeof(ls9.ang_i_bias_val));
-  printf("reserve1:float:%d\n", sizeof(ls9.reserve1));
-  printf("reserve2:float:%d\n", sizeof(ls9.reserve2));
+  printf("left90_d_diff:float:%d\n", sizeof(ls9.left90_d_diff));
+  printf("right90_d_diff:float:%d\n", sizeof(ls9.right90_d_diff));
+
+  // LogStruct10
+  printf("right45_3_d_diff:float:%d\n", sizeof(ls10.right45_3_d_diff));
+  printf("right45_2_d_diff:float:%d\n", sizeof(ls10.right45_2_d_diff));
+  printf("right45_d_diff:float:%d\n", sizeof(ls10.right45_d_diff));
+  printf("left45_d_diff:float:%d\n", sizeof(ls10.left45_d_diff));
+
+  printf("left45_2_d_diff:float:%d\n", sizeof(ls10.left45_2_d_diff));
+  printf("left45_3_d_diff:float:%d\n", sizeof(ls10.left45_3_d_diff));
+  printf("reserve1:int:%d\n", sizeof(ls10.reserve1));
+  printf("reserve2:int:%d\n", sizeof(ls10.reserve2));
+
+  printf("reserve3:int:%d\n", sizeof(ls10.reserve3));
+  printf("reserve4:int:%d\n", sizeof(ls10.reserve4));
+  printf("reserve5:int:%d\n", sizeof(ls10.reserve5));
+  printf("reserve6:int:%d\n", sizeof(ls10.reserve6));
 
   vTaskDelay(xDelay2);
   printf("start___\n");
@@ -367,15 +386,40 @@ void IRAM_ATTR LoggingTask::print_header() {
 void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
   const float PI = 3.141592653589793238;
+  const float th = 10;
   int i = 0;
   int c = 0;
   print_header();
+
+  float left90_d_z = 0;
+  float right90_d_z = 0;
+  float left45_3_d_z = 0;
+  float left45_2_d_z = 0;
+  float left45_d_z = 0;
+  float right45_d_z = 0;
+  float right45_2_d_z = 0;
+  float right45_3_d_z = 0;
 
   const auto len = log_vec.size();
   for (const auto &ld : log_vec) {
     ls1.index = i++;
     if (i == len) {
       break;
+    }
+
+    left90_d_z = ls3.left90_d;
+    left45_d_z = ls3.left45_d;
+    right45_d_z = ls3.right45_d;
+    right90_d_z = ls3.right90_d;
+
+    left45_2_d_z = ls8.left45_2_d;
+    right45_2_d_z = ls8.right45_2_d;
+    left45_3_d_z = ls8.left45_3_d;
+    right45_3_d_z = ls8.right45_3_d;
+
+    if (ls1.index == 0) {
+      left90_d_z = right90_d_z = left45_3_d_z = left45_2_d_z = left45_d_z =
+          right45_d_z = right45_2_d_z = right45_3_d_z = 0;
     }
     ls1.ideal_v = halfToFloat(ld->img_v);
     ls1.v_c = halfToFloat(ld->v_c);
@@ -546,10 +590,16 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls9.ang_i_bias = halfToFloat(ld->ang_i_bias);
     ls9.ang_i_bias_val = halfToFloat(ld->ang_i_bias_val);
 
-    // ls9.reserve1 = halfToFloat(ld->reserve1);
-    // ls9.reserve2 = halfToFloat(ld->reserve2);
-    // ls9.reserve3 = halfToFloat(ld->reserve3);
-    // ls9.reserve4 = halfToFloat(ld->reserve4);
+    ls9.left90_d_diff = std::clamp(l90 - left90_d_z, -th, th);
+    ls9.right90_d_diff = std::clamp(r90 - right90_d_z, -th, th);
+
+    ls10.right45_3_d_diff = std::clamp(r45_3 - right45_3_d_z, -th, th);
+    ls10.right45_2_d_diff = std::clamp(r45_2 - right45_2_d_z, -th, th);
+    ls10.right45_d_diff = std::clamp(r45 - right45_d_z, -th, th);
+
+    ls10.left45_d_diff = std::clamp(l45 - left45_d_z, -th, th);
+    ls10.left45_2_d_diff = std::clamp(l45_2 - left45_2_d_z, -th, th);
+    ls10.left45_3_d_diff = std::clamp(l45_3 - left45_3_d_z, -th, th);
 
     uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
     uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
@@ -560,6 +610,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
     uart_write_bytes(UART_NUM_0, &ls8, sizeof(LogStruct8));
     uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
+    uart_write_bytes(UART_NUM_0, &ls10, sizeof(LogStruct10));
 
     c++;
     if (c == 50) {
@@ -579,6 +630,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
   uart_write_bytes(UART_NUM_0, &ls8, sizeof(LogStruct8));
   uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
+  uart_write_bytes(UART_NUM_0, &ls10, sizeof(LogStruct10));
 
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 

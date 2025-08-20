@@ -70,6 +70,7 @@ private:
   // センサーデータ取得
   std::shared_ptr<sensing_result_entity_t> get_sensing_entity();
   wall_off_hold_dist_t &get_wall_off_param();
+  std::shared_ptr<input_param_t> get_input_param_entity();
 
   // 右壁の壁切れ処理
   void process_right_wall_off(param_straight_t &ps_front);

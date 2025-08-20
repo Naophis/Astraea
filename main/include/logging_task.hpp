@@ -12,6 +12,7 @@
 #include <esp_heap_caps.h>
 #include <fstream>
 #include <driver/uart.h>
+#include <algorithm>
 
 class LoggingTask {
 public:
@@ -60,6 +61,7 @@ private:
   LogStruct7 ls7;
   LogStruct8 ls8;
   LogStruct9 ls9;
+  LogStruct10 ls10;
 
   bool logging_active = false;
   bool log_mode = true;

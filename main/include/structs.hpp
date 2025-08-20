@@ -1394,9 +1394,27 @@ typedef struct {
 
   float ang_i_bias = 106;
   float ang_i_bias_val = 107;
-  float reserve1 = 108;
-  float reserve2 = 109;
-
+  float left90_d_diff = 108;
+  float right90_d_diff = 109;
+  
 } LogStruct9 __attribute__((packed));
+
+typedef struct {
+  float right45_3_d_diff = 110;
+  float right45_2_d_diff = 111;
+  float right45_d_diff = 112;
+  float left45_d_diff = 113;
+
+  float left45_2_d_diff = 114;
+  float left45_3_d_diff = 115;
+  int reserve1 = 116;
+  int reserve2 = 117;
+
+  int reserve3 = 118;
+  int reserve4 = 119;
+  int reserve5 = 120;
+  int reserve6 = 121;
+
+} LogStruct10 __attribute__((packed));
 
 #endif

@@ -1,22 +1,23 @@
 #include <math.h>
 #include <string.h>
 #include "half_type.h"
+#include "esp_system.h"
 
-uint32_T getBitfieldFromFloat(real32_T a)
+uint32_T IRAM_ATTR getBitfieldFromFloat(real32_T a)
 {
   uint32_T bitfield;
   memcpy(&bitfield, &a, sizeof(real32_T));
   return bitfield;
 }
 
-real32_T getFloatFromBitfield(uint32_T a)
+real32_T IRAM_ATTR getFloatFromBitfield(uint32_T a)
 {
   real32_T value;
   memcpy(&value, &a, sizeof(real32_T));
   return value;
 }
 
-real32_T halfToFloat(real16_T a)
+real32_T IRAM_ATTR halfToFloat(real16_T a)
 {
   const real32_T eExp = 5.192296858534828e+33f;
   uint16_T aExpComp = (uint16_T)((uint32_T)(~a.bitPattern) & 0x7C00U);
@@ -34,7 +35,7 @@ real32_T halfToFloat(real16_T a)
   return ans;
 }
 
-real16_T floatToHalf(real32_T a)
+real16_T IRAM_ATTR floatToHalf(real32_T a)
 {
   uint32_T input = getBitfieldFromFloat(a);
   uint32_T aExponent = (input & 0x7F800000U) >> 23;
@@ -86,12 +87,12 @@ real16_T floatToHalf(real32_T a)
   return out;
 }
 
-real64_T halfToDouble(real16_T a)
+real64_T IRAM_ATTR halfToDouble(real16_T a)
 {
   return ((real64_T) halfToFloat(a));
 }
 
-real16_T doubleToHalf(real64_T a)
+real16_T IRAM_ATTR doubleToHalf(real64_T a)
 {
   const uint32_T *aBitsPointer;
   uint32_T mostSignificantChunk;
