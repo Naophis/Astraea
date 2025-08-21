@@ -324,6 +324,24 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "ang_i_bias_val")
             if (record[i] > 200 || record[i] < -200)
               res = false;
+          if (data.name === "left45_d_diff")
+            if (record[i] > 50 || record[i] < -50)
+              res = false;
+          if (data.name === "left45_2_d_diff")
+            if (record[i] > 50 || record[i] < -50)
+              res = false;
+          if (data.name === "left45_3_d_diff")
+            if (record[i] > 50 || record[i] < -50)
+              res = false;
+          if (data.name === "right45_d_diff")
+            if (record[i] > 50 || record[i] < -50)
+              res = false;
+          if (data.name === "right45_2_d_diff")
+            if (record[i] > 50 || record[i] < -50)
+              res = false;
+          if (data.name === "right45_3_d_diff")
+            if (record[i] > 50 || record[i] < -50)
+              res = false;
           return res;
         });
         if (valid) {

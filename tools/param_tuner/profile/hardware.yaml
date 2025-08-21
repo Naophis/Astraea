@@ -208,7 +208,7 @@ gyro_pid:
   # d: 0.000775
 
   p: 0.000285
-  i: 0.01365 # dif angle
+  i: 0.01465 # dif angle
   b: 0.0000375 #summation
   d: 0.000295
 
@@ -242,7 +242,7 @@ angle_pid: # pid for angle
   # i: 0.0
   # d: 9.5
   mode: 0
-  b: 0
+  b: 999 #deg
   c: 0
 
   # p: 7.50
@@ -346,8 +346,11 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.00242975
-  gyro_w_gain_right: 0.00242995
+  gyro_w_gain_left: 0.00242925
+  gyro_w_gain_right: 0.0024285
+  retry_min_th: 0.9
+  retry_max_th: 1.1
+  robust_th: 0.65
   lp_delay: 1
 gyro2_param:
   # gyro_w_gain_left: 0.00246095

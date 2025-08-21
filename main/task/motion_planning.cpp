@@ -880,6 +880,7 @@ struct YawBiasResultF {
   float var_robust_dps2; // ロバスト分散 = sigma_robust^2 [deg/s^2]
   int used_samples;      // 最終平均・分散に使ったサンプル数
   bool result;
+  int retry = 0;
 };
 
 namespace detail {
@@ -975,11 +976,12 @@ inline YawBiasResultF calibrateYawBiasF(const std::vector<float> &yaw_dps,
     var_unbiased = 0.0f;
   }
 
-  return {bias,
-          sigma_robust,
-          var_unbiased,
-          sigma_robust * sigma_robust,
-          static_cast<int>(inliers.size()),
+  return {bias,                                                        //
+          sigma_robust,                                                //
+          var_unbiased * 4000.0f * 4000.0f / 32768.0f / 32768.0f,      //
+          sigma_robust * sigma_robust * 4000.0f * 4000.0f / 32768.0f / //
+              32768.0f,                                                //
+          static_cast<int>(inliers.size()),                            //
           true};
 }
 
@@ -990,7 +992,12 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   float accel_x_raw_data_sum = 0;
   float accel_y_raw_data_sum = 0;
 
-  for (int j = 0; j < 3; j++) {
+  float min_robust_dps2 = 1000.0f;
+  bool check = false;
+  bool check2 = false;
+  tgt_val->gyro_retry = 0;
+
+  for (int j = 0; j < 20; j++) {
     std::vector<float> yaw_val;
 
     yaw_val.clear();
@@ -1006,20 +1013,42 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
 
     const auto gyro_bias =
         calibrateYawBiasF(yaw_val, 3.0f, 4.685f); // Tukey c=4.685
-    tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
-    tgt_val->var_robust_dps2 =
-        gyro_bias.var_robust_dps2 * 4000.0f * 4000.0f / 32768.0f / 32768.0f;
-    tgt_val->var_unbiased_dps2 =
-        gyro_bias.var_unbiased_dps2 * 4000.0f * 4000.0f / 32768.0f / 32768.0f;
 
-    if (tgt_val->var_unbiased_dps2 < 1) {
+    printf("gyro bias: %f\n", tgt_val->gyro_zero_p_offset);
+    printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
+    printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
+    printf("gyro retry: %d\n", tgt_val->gyro_retry);
+
+    if (param->gyro_param.retry_min_th < gyro_bias.bias_dps &&
+        gyro_bias.bias_dps < param->gyro_param.retry_max_th) {
+
+      if (min_robust_dps2 > tgt_val->var_robust_dps2) {
+        min_robust_dps2 = tgt_val->var_robust_dps2;
+
+        tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
+        tgt_val->gyro_retry = j;
+        tgt_val->var_robust_dps2 = gyro_bias.var_robust_dps2;
+        tgt_val->var_unbiased_dps2 = gyro_bias.var_unbiased_dps2;
+        check = true;
+      }
+    }
+
+    if ((tgt_val->var_robust_dps2 < param->gyro_param.robust_th) &&
+        (param->gyro_param.retry_min_th < gyro_bias.bias_dps &&
+         gyro_bias.bias_dps < param->gyro_param.retry_max_th)) {
+      tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
+      tgt_val->gyro_retry = j;
+      tgt_val->var_robust_dps2 = gyro_bias.var_robust_dps2;
+      tgt_val->var_unbiased_dps2 = gyro_bias.var_unbiased_dps2;
+      check2 = true;
       break;
     }
-    // coin();
+
+    if (skip_gyro_bias_check) {
+      break;
+    }
   }
-  printf("gyro bias: %f\n", tgt_val->gyro_zero_p_offset);
-  printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
-  printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
+
   tgt_val->gyro2_zero_p_offset = gyro2_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_y_zero_p_offset = accel_y_raw_data_sum / RESET_GYRO_LOOP_CNT;

@@ -643,6 +643,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   printf("gyro bias: %f\n", tgt_val->gyro_zero_p_offset);
   printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
   printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
+  printf("gyro retry: %d\n", tgt_val->gyro_retry);
   log_vec.clear();
   // umount();
   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);

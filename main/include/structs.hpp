@@ -299,6 +299,9 @@ typedef struct {
 typedef struct {
   float gyro_w_gain_right = 0;
   float gyro_w_gain_left = 0;
+  float retry_min_th = 0;
+  float retry_max_th = 0;
+  float robust_th = 0;
   float lp_delay = 0;
 } gyro_param_t;
 
@@ -859,6 +862,7 @@ typedef struct {
   volatile float gyro_zero_p_offset = 0;
   volatile float var_unbiased_dps2 = 0;
   volatile float var_robust_dps2 = 0;
+  volatile int gyro_retry = 0;
   volatile float gyro2_zero_p_offset = 0;
   volatile float accel_x_zero_p_offset = 0;
   volatile float accel_y_zero_p_offset = 0;
@@ -1396,7 +1400,7 @@ typedef struct {
   float ang_i_bias_val = 107;
   float left90_d_diff = 108;
   float right90_d_diff = 109;
-  
+
 } LogStruct9 __attribute__((packed));
 
 typedef struct {

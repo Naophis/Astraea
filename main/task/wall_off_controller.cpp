@@ -840,7 +840,7 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
         return valid_diff &&                                     //
                se->ego.left45_dist_diff > p_wall_off.div_th_l && //
                se->ego.left45_2_dist_diff > 0 &&                 //
-                se->ego.left45_3_dist_diff > 0 &&                 //
+               // se->ego.left45_3_dist_diff > 0 &&                 //
                //  se->ego.left45_2_dist_diff < 10 &&                //
                //  se->ego.left45_3_dist_diff < 10 &&                //
                se->ego.left45_dist < 100;

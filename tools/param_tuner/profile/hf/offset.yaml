@@ -101,8 +101,8 @@ wall_off_diff_ref_th: 6.5
 wall_off_diff_ref_front_th: 30 # 壁切れ偏差チェックの前後距離差条件
 
 # 壁切れ 偏差(最初見えず、柱で反応)
-wall_off_hold_div_th_l: 0.5
-wall_off_hold_div_th_r: 0.5
+wall_off_hold_div_th_l: 0.25
+wall_off_hold_div_th_r: 0.25
 # 壁切れ 偏差(壁が見える前に過ぎてた場合)
 wall_off_hold_div_th_l2: 0.5
 wall_off_hold_div_th_r2: 0.5

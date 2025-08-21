@@ -11,10 +11,10 @@
 #include "include/trajectory_creator.hpp"
 #include "include/ui.hpp"
 #include "include/wall_off_controller.hpp"
+#include <numeric>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <numeric>
 
 class MotionPlanning {
 public:
@@ -82,6 +82,8 @@ public:
     xTaskNotifyGive(notify_handle); //
   }
   std::shared_ptr<WallOffController> wall_off_controller;
+
+  volatile bool skip_gyro_bias_check = false;
 
 private:
   TaskHandle_t notify_handle = xTaskGetCurrentTaskHandle();

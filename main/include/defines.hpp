@@ -139,7 +139,7 @@ constexpr float BATTERY_GAIN = 3.262909449727357; // 2.97324;
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 11.8;
 
-constexpr uint16_t RESET_GYRO_LOOP_CNT = 512;
+constexpr uint16_t RESET_GYRO_LOOP_CNT = 256;
 
 static const std::string slalom_log_file("/spiflash/sla.log");
 static const std::string sysid_log_file("/spiflash/sysid.log");

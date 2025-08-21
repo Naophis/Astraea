@@ -667,6 +667,10 @@ void MainTask::load_hw_param() {
       getItem(front_ctrl_keep_angle_pid, "d")->valuedouble;
   param->front_ctrl_keep_angle_pid.mode =
       getItem(front_ctrl_keep_angle_pid, "mode")->valueint;
+  param->front_ctrl_keep_angle_pid.b =
+      getItem(front_ctrl_keep_angle_pid, "b")->valuedouble / 180 * M_PI;
+  param->front_ctrl_keep_angle_pid.c =
+      getItem(front_ctrl_keep_angle_pid, "c")->valuedouble;
 
   front_ctrl_angle_pid = getItem(root, "front_ctrl_angle_pid");
   param->front_ctrl_angle_pid.p =
@@ -711,6 +715,11 @@ void MainTask::load_hw_param() {
   param->gyro_param.gyro_w_gain_left =
       getItem(gyro_param, "gyro_w_gain_left")->valuedouble;
   param->gyro_param.lp_delay = getItem(gyro_param, "lp_delay")->valuedouble;
+  param->gyro_param.retry_min_th =
+      getItem(gyro_param, "retry_min_th")->valuedouble;
+  param->gyro_param.retry_max_th =
+      getItem(gyro_param, "retry_max_th")->valuedouble;
+  param->gyro_param.robust_th = getItem(gyro_param, "robust_th")->valuedouble;
 
   gyro2_param = getItem(root, "gyro2_param");
   param->gyro2_param.gyro_w_gain_right =
@@ -771,8 +780,8 @@ void MainTask::load_hw_param() {
   param->pos_m_noise = getItem(pos_kalman_config, "m_noise")->valuedouble;
 
   // comp_v_param = getItem(root, "comp_v_param");
-  // param->comp_param.v_lp_gain = getItem(comp_v_param, "enc_v_lp")->valuedouble;
-  // param->comp_param.accl_x_hp_gain =
+  // param->comp_param.v_lp_gain = getItem(comp_v_param,
+  // "enc_v_lp")->valuedouble; param->comp_param.accl_x_hp_gain =
   //     getItem(comp_v_param, "acc_x_hp")->valuedouble;
   // param->comp_param.gain = getItem(comp_v_param, "gain_v")->valuedouble;
   // param->comp_param.enable = getItem(comp_v_param, "enable")->valueint;
@@ -1816,8 +1825,9 @@ void MainTask::rx_uart_json() {
     }
   }
   free(data);
-
+  mp->skip_gyro_bias_check = true;
   mp->reset_gyro_ref();
+  mp->skip_gyro_bias_check = false;
   if (update) {
     load_param();
     ui->coin(40);

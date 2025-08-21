@@ -148,7 +148,7 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   if (std::isfinite(alpha) && std::isfinite(se->ego.w_lp)) {
     se->gyro.raw = se->gyro.data = gyro;
     if (gyro_dt > 0) {
-      if (tgt_val->motion_dir == MotionDirection::LEFT) {
+      if ((gyro - tgt_val->gyro_zero_p_offset) >= 0) {
         se->ego.w_raw = param->gyro_param.gyro_w_gain_left *
                         (gyro - tgt_val->gyro_zero_p_offset);
       } else {
@@ -314,6 +314,16 @@ void IRAM_ATTR SensingTask::task() {
     se->calc_time = (int16_t)(start - start_before);
     se->sensing_timestamp = start;
     start2 = now_gyro_time; // esp_timer_get_time();
+
+    now_gyro_time = esp_timer_get_time();
+    const auto gyro_dt = ((float)(now_gyro_time - last_gyro_time)) / 1000000.0;
+
+    auto enc_r_dt = dt;
+    auto enc_l_dt = dt;
+
+    timer_200us_callback_main();
+
+    calc_vel(gyro_dt, enc_l_dt, enc_r_dt);
 
     if (skip_sensing) {
       exec_adc(BATTERY, width, &sensing_result->battery.raw);
@@ -595,16 +605,6 @@ void IRAM_ATTR SensingTask::task() {
                   se->led_sen.left45_3.raw = se->led_sen.left90.raw =
                       se->led_sen.front.raw = 0;
     }
-
-    now_gyro_time = esp_timer_get_time();
-    const auto gyro_dt = ((float)(now_gyro_time - last_gyro_time)) / 1000000.0;
-
-    auto enc_r_dt = dt;
-    auto enc_l_dt = dt;
-
-    timer_200us_callback_main();
-
-    calc_vel(gyro_dt, enc_l_dt, enc_r_dt);
 
     end = esp_timer_get_time();
     se->calc_time2 = (int16_t)(end - start);
