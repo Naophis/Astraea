@@ -166,6 +166,8 @@ void IRAM_ATTR PlanningTask::motor_enable() {
   kf_ang.reset(0);
   kf_v.reset(0);
   kf_w.reset(0);
+  kf_w_x.reset(0);
+  kf_w_y.reset(0);
   kf_w2.reset(0);
   kf_v_l.reset(0);
   kf_v_r.reset(0);
@@ -245,6 +247,7 @@ void PlanningTask::reset_pos(float x, float y, float ang) {
   kim.x = 0;
   kim.y = 0;
   kim.theta = ang;
+  ang_x = ang_y = 0.0f;
 }
 
 void PlanningTask::set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val) {
@@ -355,6 +358,9 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
   kf_v_r.dt = 0.001 / 1;
   kf_v_l.dt = 0.001 / 1;
 
+  yaw_est.resetAll(0.0f, 0.0f, 0.0f);
+  ang_x = ang_y = ang_x_raw = ang_y_raw = 0.0f;
+
   if (reset_battery) {
     kf_batt.init(sensing_result->ego.battery_raw, //
                  param_ro->battery_init_cov,      //
@@ -378,6 +384,15 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
              param_ro->w_init_cov, //
              param_ro->w_p_noise,  //
              param_ro->w_m_noise);
+  kf_w_x.init(initial_state,        //
+              param_ro->w_init_cov, //
+              param_ro->w_p_noise,  //
+              param_ro->w_m_noise);
+  kf_w_y.init(initial_state,        //
+              param_ro->w_init_cov, //
+              param_ro->w_p_noise,  //
+              param_ro->w_m_noise);
+
   kf_v.init(initial_state,        //
             param_ro->v_init_cov, //
             param_ro->v_p_noise,  //
@@ -398,6 +413,14 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
               param_ro->ang_init_cov, //
               param_ro->ang_p_noise,  //
               param_ro->ang_m_noise);
+  kf_ang_x.init(initial_state,          //
+                param_ro->ang_init_cov, //
+                param_ro->ang_p_noise,  //
+                param_ro->ang_m_noise);
+  kf_ang_y.init(initial_state,          //
+                param_ro->ang_init_cov, //
+                param_ro->ang_p_noise,  //
+                param_ro->ang_m_noise);
   kf_ang2.init(initial_state,          //
                param_ro->ang_init_cov, //
                param_ro->ang_p_noise,  //
@@ -1171,6 +1194,11 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     kf_ang2.predict(tgt_val->ego_in.w);
     kf_ang2.update(tgt_val->ego_in.ang);
 
+    kf_ang_x.predict(0);
+    kf_ang_x.update(ang_x);
+    kf_ang_y.predict(0);
+    kf_ang_y.update(ang_y);
+
     if (param_ro->enable_kalman_gyro == 1) {
       se->ego.ang_kf = kf_ang.get_state();
       se->ego.ang_kf2 = kf_ang2.get_state();
@@ -1181,7 +1209,8 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
       se->ego.ang_kf = tgt_val->ego_in.ang;
       se->ego.ang_kf2 = tgt_val->ego_in.ang;
     }
-
+    se->ego.ang_x = kf_ang_x.get_state();
+    se->ego.ang_y = kf_ang_y.get_state();
     // const auto angle = kf_ang.get_state();
     // se->ego.ang_kf = fmod(angle + M_PI, 2 * M_PI) - M_PI;
   }

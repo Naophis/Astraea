@@ -22,6 +22,7 @@
 
 #include "include/kalman_filter.hpp"
 #include "include/kalman_filter_matrix.hpp"
+#include "yaw_estimator.hpp"
 #include <algorithm>
 #include <array>
 // #include "hal/mcpwm_ll.h"
@@ -101,17 +102,28 @@ public:
   std::vector<int> trj_idx_val;
 
   KalmanFilter kf_w;
+  KalmanFilter kf_w_x;
+  KalmanFilter kf_w_y;
   KalmanFilter kf_w2;
   KalmanFilter kf_v;
   KalmanFilter kf_v_r;
   KalmanFilter kf_v_l;
   KalmanFilter kf_dist;
   KalmanFilter kf_ang;
+  KalmanFilter kf_ang_x;
+  KalmanFilter kf_ang_y;
   KalmanFilter kf_ang2;
   KalmanFilter kf_batt;
   KalmanFilterMatrix pos;
   kinematics_t odm = {0};
   kinematics_t kim = {0};
+
+  int gyro_x;
+  int gyro_y;
+  float ang_x;
+  float ang_y;
+  float ang_x_raw;
+  float ang_y_raw;
 
   float suction_gain = 200;
 
@@ -126,6 +138,10 @@ public:
   void reset_kf_state(bool reset_battery);
   void generate_trajectory();
   float last_tgt_angle = 0;
+
+  estimator::YawEstimator yaw_est;
+  estimator::Calibration calib_;
+  estimator::ImuSample s;
 
 private:
   bool gyro_pid_windup_histerisis = false;

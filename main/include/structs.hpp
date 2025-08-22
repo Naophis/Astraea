@@ -105,6 +105,8 @@ typedef struct {
   float main_v = 0;
 
   float w_raw = 0;
+  float w_x_raw = 0;
+  float w_y_raw = 0;
   float w_raw2 = 0;
   float w_lp = 0;
   float w_lp2 = 0;
@@ -114,6 +116,8 @@ typedef struct {
   float dist_kf = 0;
   float ang_kf = 0;
   float ang_kf2 = 0;
+  float ang_x = 0;
+  float ang_y = 0;
   float batt_kf = 0;
   float accel_x_raw = 0;
 
@@ -256,6 +260,8 @@ typedef struct {
   led_sensor_t led_sen_after;
   led_sensor_t led_sen_before;
   sensing_data_t gyro;
+  sensing_data_t gyro_x;
+  sensing_data_t gyro_y;
   sensing_data_t gyro2;
   sensing_data_t accel_x;
   sensing_data_t accel_y;
@@ -299,6 +305,8 @@ typedef struct {
 typedef struct {
   float gyro_w_gain_right = 0;
   float gyro_w_gain_left = 0;
+  float gyro_x_gain = 0;
+  float gyro_y_gain = 0;
   float retry_min_th = 0;
   float retry_max_th = 0;
   float robust_th = 0;
@@ -860,6 +868,8 @@ typedef struct {
   planning_req_t pl_req;
   fail_safe_state_t fss;
   volatile float gyro_zero_p_offset = 0;
+  volatile float gyro_zero_p_offset_x = 0;
+  volatile float gyro_zero_p_offset_y = 0;
   volatile float var_unbiased_dps2 = 0;
   volatile float var_robust_dps2 = 0;
   volatile int gyro_retry = 0;
@@ -1209,6 +1219,9 @@ typedef struct {
   real16_T ang_i_bias;
   real16_T ang_i_bias_val;
 
+  real16_T ang_x;
+  real16_T ang_y;
+
 } log_data_t2;
 
 typedef struct {
@@ -1411,8 +1424,8 @@ typedef struct {
 
   float left45_2_d_diff = 114;
   float left45_3_d_diff = 115;
-  int reserve1 = 116;
-  int reserve2 = 117;
+  float ang_x = 116;
+  float ang_y = 117;
 
   int reserve3 = 118;
   int reserve4 = 119;

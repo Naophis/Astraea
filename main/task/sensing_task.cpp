@@ -26,6 +26,8 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   se->encoder.right_old = se->encoder.right;
 
   gyro_timestamp_old = gyro_timestamp_now;
+  gyro_y_timestamp_old = gyro_y_timestamp_now;
+  gyro_x_timestamp_old = gyro_x_timestamp_now;
   enc_r_timestamp_old = enc_r_timestamp_now;
   enc_l_timestamp_old = enc_l_timestamp_now;
 
@@ -35,6 +37,12 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   gyro_timestamp_now = esp_timer_get_time();
   // gyro_if.use_2 = false; // Use 1st SPI bus for gyro
   auto gyro = gyro_if.read_gyro_z();
+
+  gyro_y_timestamp_now = esp_timer_get_time();
+  auto gyro_y = gyro_if.read_gyro_y();
+
+  gyro_x_timestamp_now = esp_timer_get_time();
+  auto gyro_x = gyro_if.read_gyro_x();
 
   // printf("Gyro Z: %d\n", gyro);
   // gyro2_timestamp_now = esp_timer_get_time();
@@ -58,12 +66,19 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   // auto enc_l = enc_if.read2byte(0x30, 0x03, false) & 0x3FFF;
 
   auto gyro_dt = (float)(gyro_timestamp_now - gyro_timestamp_old) / 1000000;
+  auto gyro_y_dt =
+      (float)(gyro_y_timestamp_now - gyro_y_timestamp_old) / 1000000;
+  auto gyro_x_dt =
+      (float)(gyro_x_timestamp_now - gyro_x_timestamp_old) / 1000000;
+
   // auto gyro2_dt = (float)(gyro2_timestamp_now - gyro2_timestamp_old) /
   // 1000000;
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
   pt->kf_w.dt = gyro_dt;
+  pt->kf_w_x.dt = gyro_x_dt;
+  pt->kf_w_y.dt = gyro_y_dt;
   // pt->kf_w2.dt = gyro2_dt;
 
   pt->kf_v_r.dt = enc_r_dt;
@@ -145,6 +160,20 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
     se->ego.v_r = se->ego.v_r;
   }
   const auto alpha = (tgt_val->ego_in.w - w_old) / dt;
+
+  se->ego.w_x_raw =
+      param->gyro_param.gyro_x_gain * (gyro_x - tgt_val->gyro_zero_p_offset_x);
+  se->ego.w_y_raw =
+      param->gyro_param.gyro_y_gain * (gyro_y - tgt_val->gyro_zero_p_offset_y);
+
+  pt->gyro_x = gyro_x;
+  pt->gyro_y = gyro_y;
+
+  pt->kf_w_x.predict(0);
+  pt->kf_w_y.predict(0);
+  pt->kf_w_x.update(se->ego.w_x_raw);
+  pt->kf_w_y.update(se->ego.w_y_raw);
+
   if (std::isfinite(alpha) && std::isfinite(se->ego.w_lp)) {
     se->gyro.raw = se->gyro.data = gyro;
     if (gyro_dt > 0) {
@@ -155,27 +184,20 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
         se->ego.w_raw = param->gyro_param.gyro_w_gain_right *
                         (gyro - tgt_val->gyro_zero_p_offset);
       }
+      // x,y,z
+      pt->s.p = pt->kf_w_x.get_state();
+      pt->s.q = pt->kf_w_y.get_state();
+      pt->s.r = se->ego.w_raw;
+      pt->s.ax = pt->s.ay = pt->s.az = 0;
+      pt->s.dt = dt;
+
+      se->ego.w_raw = pt->yaw_est.yaw_rate_kinematic(pt->s);
+
       pt->kf_w.predict(alpha);
       const float tread = param->tire_tread;
       const float w_enc = -(se->ego.v_r - se->ego.v_l) / tread;
       pt->kf_w.update(se->ego.w_raw);
-      // pt->kf_w.update2(se->ego.w_raw, w_enc);
     }
-    // se->gyro2.raw = se->gyro2.data = gyro2;
-    // if (gyro2_dt > 0) {
-    //   if (tgt_val->motion_dir == MotionDirection::LEFT) {
-    //     se->ego.w_raw2 = param->gyro2_param.gyro_w_gain_left *
-    //                      (gyro2 - tgt_val->gyro_zero_p_offset);
-    //   } else {
-    //     se->ego.w_raw2 = param->gyro2_param.gyro_w_gain_right *
-    //                      (gyro2 - tgt_val->gyro_zero_p_offset);
-    //   }
-    //   pt->kf_w2.predict(alpha);
-    //   const float tread = param->tire_tread;
-    //   const float w_enc = -(se->ego.v_r - se->ego.v_l) / tread;
-    //   pt->kf_w2.update(se->ego.w_raw2);
-    //   // pt->kf_w.update2(se->ego.w_raw, w_enc);
-    // }
   }
 
   if (param->enable_kalman_gyro == 1) {
@@ -241,6 +263,15 @@ void IRAM_ATTR SensingTask::task() {
     // gyro_if.setup();
     // gyro_if.use_2 = false; // Use 1st SPI bus for gyro
     enc_if.init();
+
+    pt->calib_.eps_zx = 0.0f;
+    pt->calib_.eps_zy = 0.0f;
+    pt->calib_.kgzx = 0.0f;
+    pt->calib_.kgzy = 0.0f;
+    pt->calib_.kgzz = 0.0f;
+
+    pt->yaw_est.setCalibration(pt->calib_);
+    pt->yaw_est.enableAccelFusion(false);
   }
   // esp_timer_start_periodic(timer_200us, 200);
 
@@ -661,6 +692,11 @@ void IRAM_ATTR SensingTask::calc_vel(float gyro_dt, float enc_r_dt,
     tgt_val->ego_in.ang += se->ego.w_raw * gyro_dt;
     tgt_val->global_pos.ang += se->ego.w_raw * gyro_dt;
   }
+
+  pt->ang_x += pt->s.p * gyro_dt;
+  pt->ang_y += pt->s.q * gyro_dt;
+  pt->ang_x_raw += se->ego.w_x_raw * gyro_dt;
+  pt->ang_y_raw += se->ego.w_y_raw * gyro_dt;
 
   w_old = tgt_val->ego_in.w;
   vl_old = se->ego.v_l;

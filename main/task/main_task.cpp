@@ -105,13 +105,10 @@ void IRAM_ATTR MainTask::dump1() {
 
     printf("SW1 %d \n", gpio_get_level(SW1));
 
-    printf("gyro: %d\t(%0.3f)\n", sensing_result->gyro.raw,
-           tgt_val->gyro_zero_p_offset);
-    printf("gyro2: %d\t(%0.3f)\n", sensing_result->gyro2.raw,
-           tgt_val->gyro2_zero_p_offset);
-    printf("accel_x: %f\t(%f)\n", sensing_result->ego.accel_x_raw,
-           sensing_result->ego.accel_x_raw / 9806.65 *
-               param->accel_x_param.gain);
+    printf("gyro[r,p,y]: %d, %d, %d\t(%0.3f, %0.3f, %0.3f)\n", pt->gyro_x,
+           pt->gyro_y, sensing_result->gyro.raw, tgt_val->gyro_zero_p_offset_x,
+           tgt_val->gyro_zero_p_offset_y, tgt_val->gyro_zero_p_offset);
+
     // printf("accel_y: %d\n", sensing_result->accel_y.raw);
     printf("battery: %0.3f (%d)\n", sensing_result->ego.battery_lp,
            sensing_result->battery.raw);
@@ -183,9 +180,14 @@ void IRAM_ATTR MainTask::dump1() {
 
     printf("calc_v: %4.3f, %3.3f\n", tgt_val->ego_in.v, tgt_val->ego_in.w);
 
-    printf("ego_w: %2.3f, %2.3f, %2.3f, %3.3f deg\n", sensing_result->ego.w_raw,
-           sensing_result->ego.w_lp, tgt_val->ego_in.ang,
+    printf("ego_w: %2.3f,  %3.3f deg\n", sensing_result->ego.w_raw,
            tgt_val->ego_in.ang * 180 / m_PI);
+    printf("ego_w_x: %2.3f, %2.3f[deg/s],  %3.3f, %3.3f deg\n", pt->s.r,
+           pt->kf_w_x.get_state(), pt->ang_x * 180 / m_PI,
+           pt->ang_x_raw * 180 / m_PI);
+    printf("ego_w_y: %2.3f, %2.3f[deg/s],  %3.3f, %3.3f deg\n", pt->s.p,
+           pt->kf_w_y.get_state(), pt->ang_y * 180 / m_PI,
+           pt->ang_y_raw * 180 / m_PI);
 
     printf("gyro_raw[]: %4d, %4d, %4d, %4d, %4d\n",
            sensing_result->gyro_list[0], sensing_result->gyro_list[1],
@@ -714,6 +716,12 @@ void MainTask::load_hw_param() {
       getItem(gyro_param, "gyro_w_gain_right")->valuedouble;
   param->gyro_param.gyro_w_gain_left =
       getItem(gyro_param, "gyro_w_gain_left")->valuedouble;
+
+  param->gyro_param.gyro_x_gain =
+      getItem(gyro_param, "gyro_x_gain")->valuedouble;
+  param->gyro_param.gyro_y_gain =
+      getItem(gyro_param, "gyro_y_gain")->valuedouble;
+
   param->gyro_param.lp_delay = getItem(gyro_param, "lp_delay")->valuedouble;
   param->gyro_param.retry_min_th =
       getItem(gyro_param, "retry_min_th")->valuedouble;
@@ -721,12 +729,13 @@ void MainTask::load_hw_param() {
       getItem(gyro_param, "retry_max_th")->valuedouble;
   param->gyro_param.robust_th = getItem(gyro_param, "robust_th")->valuedouble;
 
-  gyro2_param = getItem(root, "gyro2_param");
-  param->gyro2_param.gyro_w_gain_right =
-      getItem(gyro2_param, "gyro_w_gain_right")->valuedouble;
-  param->gyro2_param.gyro_w_gain_left =
-      getItem(gyro2_param, "gyro_w_gain_left")->valuedouble;
-  param->gyro2_param.lp_delay = getItem(gyro2_param, "lp_delay")->valuedouble;
+  // gyro2_param = getItem(root, "gyro2_param");
+  // param->gyro2_param.gyro_w_gain_right =
+  //     getItem(gyro2_param, "gyro_w_gain_right")->valuedouble;
+  // param->gyro2_param.gyro_w_gain_left =
+  //     getItem(gyro2_param, "gyro_w_gain_left")->valuedouble;
+  // param->gyro2_param.lp_delay = getItem(gyro2_param,
+  // "lp_delay")->valuedouble;
 
   accel_x = getItem(root, "accel_x_param");
   param->accel_x_param.gain = getItem(accel_x, "gain")->valuedouble;

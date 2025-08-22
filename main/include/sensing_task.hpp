@@ -68,6 +68,10 @@ private:
   float vl_old = 0;
   int64_t gyro_timestamp_old = 0;
   int64_t gyro_timestamp_now = 0;
+  int64_t gyro_y_timestamp_old = 0;
+  int64_t gyro_y_timestamp_now = 0;
+  int64_t gyro_x_timestamp_old = 0;
+  int64_t gyro_x_timestamp_now = 0;
   int64_t gyro2_timestamp_old = 0;
   int64_t gyro2_timestamp_now = 0;
   int64_t enc_r_timestamp_old = 0;
@@ -177,6 +181,10 @@ private:
 
   float offset_enc_val(float val, vector<float> &coef_list);
   float calc_enc_v(float now, float old, float dt);
+
+  std::shared_ptr<sensing_result_entity_t> get_sensing_entity() {
+    return sensing_result;
+  }
 };
 
 #endif

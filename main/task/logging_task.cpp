@@ -370,8 +370,8 @@ void IRAM_ATTR LoggingTask::print_header() {
 
   printf("left45_2_d_diff:float:%d\n", sizeof(ls10.left45_2_d_diff));
   printf("left45_3_d_diff:float:%d\n", sizeof(ls10.left45_3_d_diff));
-  printf("reserve1:int:%d\n", sizeof(ls10.reserve1));
-  printf("reserve2:int:%d\n", sizeof(ls10.reserve2));
+  printf("ang_x:float:%d\n", sizeof(ls10.ang_x));
+  printf("ang_y:float:%d\n", sizeof(ls10.ang_y));
 
   printf("reserve3:int:%d\n", sizeof(ls10.reserve3));
   printf("reserve4:int:%d\n", sizeof(ls10.reserve4));
@@ -601,6 +601,9 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls10.left45_2_d_diff = std::clamp(l45_2 - left45_2_d_z, -th, th);
     ls10.left45_3_d_diff = std::clamp(l45_3 - left45_3_d_z, -th, th);
 
+    ls10.ang_x = halfToFloat(ld->ang_x);
+    ls10.ang_y = halfToFloat(ld->ang_y);
+
     uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
     uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
     uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
@@ -808,6 +811,9 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->kim_theta = floatToHalf(sensing_result->ego.kim_theta);
   ld->ang_i_bias = floatToHalf(error_entity->ang_val.i2);
   ld->ang_i_bias_val = floatToHalf(error_entity->ang_val.i2_val);
+
+  ld->ang_x = floatToHalf(sensing_result->ego.ang_x);
+  ld->ang_y = floatToHalf(sensing_result->ego.ang_y);
 
   if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 7500) {
     log_vec.emplace_back(std::move(ld));

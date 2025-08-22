@@ -29,6 +29,7 @@ set(COMPONENT_SRCS
     "task/kalman_filter.cpp"
     "task/kalman_filter_matrix.cpp"
     "task/wall_off_controller.cpp"
+    "task/yaw_estimator.cpp"
     "search/adachi.cpp"
     "search/logic.cpp"
     "search/search_controller.cpp"

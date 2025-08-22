@@ -988,6 +988,8 @@ inline YawBiasResultF calibrateYawBiasF(const std::vector<float> &yaw_dps,
 void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
   float gyro_raw_data_sum = 0;
+  float gyro_x_raw_data_sum = 0;
+  float gyro_y_raw_data_sum = 0;
   float gyro2_raw_data_sum = 0;
   float accel_x_raw_data_sum = 0;
   float accel_y_raw_data_sum = 0;
@@ -997,7 +999,7 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   bool check2 = false;
   tgt_val->gyro_retry = 0;
 
-  for (int j = 0; j < 20; j++) {
+  for (int j = 0; j < 10; j++) {
     std::vector<float> yaw_val;
 
     yaw_val.clear();
@@ -1005,6 +1007,9 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
     for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
       gyro_raw_data_sum += sensing_result->gyro.raw;
       gyro2_raw_data_sum += sensing_result->gyro2.raw;
+      gyro_x_raw_data_sum += pt->s.r;
+      gyro_y_raw_data_sum += pt->s.p;
+
       accel_x_raw_data_sum += sensing_result->accel_x.raw;
       accel_y_raw_data_sum += sensing_result->accel_y.raw;
       yaw_val.push_back(sensing_result->gyro.raw);
@@ -1048,6 +1053,9 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
       break;
     }
   }
+
+  tgt_val->gyro_zero_p_offset_x = gyro_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
+  tgt_val->gyro_zero_p_offset_y = gyro_y_raw_data_sum / RESET_GYRO_LOOP_CNT;
 
   tgt_val->gyro2_zero_p_offset = gyro2_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
