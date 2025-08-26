@@ -185,6 +185,8 @@ typedef struct {
   volatile float left90_dist_diff = 0;
   volatile float right90_dist_diff = 0;
 
+  volatile float temp = 0;
+
   float front_dist_old = 0;
   float left45_dist_old = 0;
   float left45_2_dist_old = 0;
@@ -303,6 +305,8 @@ typedef struct {
   float retry_max_th = 0;
   float robust_th = 0;
   float lp_delay = 0;
+  int list_size = 256;
+  int loop_size = 10;
 } gyro_param_t;
 
 typedef struct {
@@ -863,9 +867,11 @@ typedef struct {
   volatile float var_unbiased_dps2 = 0;
   volatile float var_robust_dps2 = 0;
   volatile int gyro_retry = 0;
+  volatile CalibrationMode calibration_mode = CalibrationMode::NONE;
   volatile float gyro2_zero_p_offset = 0;
   volatile float accel_x_zero_p_offset = 0;
   volatile float accel_y_zero_p_offset = 0;
+  volatile float temp_zero_p_offset = 0;
   buzzer_t buzzer;
   new_motion_req_t nmr;
   pos_t p;
@@ -874,6 +880,7 @@ typedef struct {
   float w_error;
   TurnDirection td;
   TurnType tt;
+  float duty_suction = 0;
 } motion_tgt_val_t;
 
 typedef struct {
@@ -1411,13 +1418,13 @@ typedef struct {
 
   float left45_2_d_diff = 114;
   float left45_3_d_diff = 115;
-  int reserve1 = 116;
-  int reserve2 = 117;
+  float duty_suction = 116;
+  int reserve1 = 117;
 
-  int reserve3 = 118;
-  int reserve4 = 119;
-  int reserve5 = 120;
-  int reserve6 = 121;
+  int reserve2 = 118;
+  int reserve3 = 119;
+  int reserve4 = 120;
+  int reserve5 = 121;
 
 } LogStruct10 __attribute__((packed));
 

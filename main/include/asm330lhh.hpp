@@ -41,6 +41,7 @@ public:
   int16_t read_gyro_z();
   int16_t read_accel_x();
   int16_t read_accel_y();
+  int16_t read_temp();
   int get_unread_fifo_data_length();
   int get_fifo_data();
   int get_fifo_tag();

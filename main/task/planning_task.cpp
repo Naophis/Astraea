@@ -673,12 +673,13 @@ float IRAM_ATTR PlanningTask::calc_sensor_pid() {
                      tgt_val->ego_in.v, false);
   }
   duty = std::clamp(duty, -limit, limit);
-  // if (!search_mode) {
-  //   if (tgt_val->motion_type == MotionType::WALL_OFF ||
-  //       tgt_val->motion_type == MotionType::SLA_FRONT_STR) {
-  //     duty = std::clamp(duty, -param_ro->angle_pid.b, param_ro->angle_pid.b);
-  //   }
-  // }
+  if (!search_mode) {
+    if (tgt_val->motion_type == MotionType::WALL_OFF ||
+        tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+      duty = std::clamp(duty, -param_ro->angle_pid.b, param_ro->angle_pid.b);
+    }
+  }
   return duty;
 }
 float IRAM_ATTR PlanningTask::calc_sensor_pid_dia() {
@@ -1445,11 +1446,15 @@ void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
     if (tgt_val->tgt_in.tgt_dist > 60 &&
         (tgt_val->ego_in.state == 0 || tgt_val->ego_in.state == 1) &&
         tgt_val->motion_type == MotionType::STRAIGHT) {
+      tgt_val->duty_suction = tgt_duty.duty_suction_low;
       duty_suction_in =
-          100.0 * tgt_duty.duty_suction_low / sensing_result->ego.batt_kf;
+          // 100.0 * tgt_duty.duty_suction_low / sensing_result->ego.batt_kf;
+          100.0 * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
     } else {
+      tgt_val->duty_suction = tgt_duty.duty_suction;
       duty_suction_in =
-          100.0 * tgt_duty.duty_suction / sensing_result->ego.batt_kf;
+          // 100.0 * tgt_duty.duty_suction / sensing_result->ego.batt_kf;
+          100.0 * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
     }
     if (duty_suction_in > 100) {
       duty_suction_in = 100.0;

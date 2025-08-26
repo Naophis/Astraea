@@ -63,6 +63,11 @@ void IRAM_ATTR SensingTask::timer_200us_callback_main() {
   auto enc_r_dt = (float)(enc_r_timestamp_now - enc_r_timestamp_old) / 1000000;
   auto enc_l_dt = (float)(enc_l_timestamp_now - enc_l_timestamp_old) / 1000000;
 
+  if (pt->tgt_val->calibration_mode == CalibrationMode::DOING ||
+      pt->tgt_val->motion_type == MotionType::SENSING_DUMP) {
+    se->ego.temp = 25.0 + (float)gyro_if.read_temp() / 256;
+  }
+
   pt->kf_w.dt = gyro_dt;
   // pt->kf_w2.dt = gyro2_dt;
 

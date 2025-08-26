@@ -319,7 +319,7 @@ const switchToBinaryMode = (obj) => {
             if (record[i] > 2000 || record[i] < -2000)
               res = false;
           if (data.name === "ang_i_bias")
-            if (record[i] > 200 || record[i] < -200)
+            if (record[i] > 3 || record[i] < -3)
               res = false;
           if (data.name === "ang_i_bias_val")
             if (record[i] > 200 || record[i] < -200)

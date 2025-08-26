@@ -881,6 +881,7 @@ struct YawBiasResultF {
   int used_samples;      // 最終平均・分散に使ったサンプル数
   bool result;
   int retry = 0;
+  float temp_data;
 };
 
 namespace detail {
@@ -991,56 +992,70 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   float gyro2_raw_data_sum = 0;
   float accel_x_raw_data_sum = 0;
   float accel_y_raw_data_sum = 0;
+  float temp_data_sum = 0;
 
   float min_robust_dps2 = 1000.0f;
   bool check = false;
   bool check2 = false;
   tgt_val->gyro_retry = 0;
+  tgt_val->calibration_mode = CalibrationMode::DOING;
+  tgt_val->nmr.timstamp++;
+  vTaskDelay(10 / portTICK_PERIOD_MS); //他モジュールの起動待ち
 
-  for (int j = 0; j < 20; j++) {
-    std::vector<float> yaw_val;
-
-    yaw_val.clear();
-
-    for (int i = 0; i < RESET_GYRO_LOOP_CNT; i++) {
-      gyro_raw_data_sum += sensing_result->gyro.raw;
-      gyro2_raw_data_sum += sensing_result->gyro2.raw;
-      accel_x_raw_data_sum += sensing_result->accel_x.raw;
-      accel_y_raw_data_sum += sensing_result->accel_y.raw;
-      yaw_val.push_back(sensing_result->gyro.raw);
-      vTaskDelay(xDelay); //他モジュールの起動待ち
-    }
-
-    const auto gyro_bias =
-        calibrateYawBiasF(yaw_val, 3.0f, 4.685f); // Tukey c=4.685
-
+  auto print = [=]() -> void {
     printf("gyro bias: %f\n", tgt_val->gyro_zero_p_offset);
     printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
     printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
     printf("gyro retry: %d\n", tgt_val->gyro_retry);
+    printf("gyro temp: %f\n", sensing_result->ego.temp);
+    printf("----------\n");
+  };
+
+  auto set_val = [&](YawBiasResultF &gyro_bias, int idx) -> void {
+    tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
+    tgt_val->gyro_retry = idx;
+    tgt_val->var_robust_dps2 = gyro_bias.var_robust_dps2;
+    tgt_val->var_unbiased_dps2 = gyro_bias.var_unbiased_dps2;
+  };
+
+  for (int j = 0; j < param->gyro_param.loop_size; j++) {
+    std::vector<float> yaw_val;
+
+    yaw_val.clear();
+
+    for (int i = 0; i < param->gyro_param.list_size; i++) {
+      gyro_raw_data_sum += sensing_result->gyro.raw;
+      gyro2_raw_data_sum += sensing_result->gyro2.raw;
+      accel_x_raw_data_sum += sensing_result->accel_x.raw;
+      accel_y_raw_data_sum += sensing_result->accel_y.raw;
+      temp_data_sum += sensing_result->ego.temp;
+      yaw_val.push_back(sensing_result->gyro.raw);
+      vTaskDelay(xDelay); //他モジュールの起動待ち
+    }
+
+    auto gyro_bias = calibrateYawBiasF(yaw_val, 3.0f, 4.685f); // Tukey c=4.685
+
+    if (!check && min_robust_dps2 > tgt_val->var_robust_dps2) {
+      min_robust_dps2 = tgt_val->var_robust_dps2;
+      set_val(gyro_bias, j); //初回は許容
+    }
 
     if (param->gyro_param.retry_min_th < gyro_bias.bias_dps &&
         gyro_bias.bias_dps < param->gyro_param.retry_max_th) {
-
       if (min_robust_dps2 > tgt_val->var_robust_dps2) {
         min_robust_dps2 = tgt_val->var_robust_dps2;
-
-        tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
-        tgt_val->gyro_retry = j;
-        tgt_val->var_robust_dps2 = gyro_bias.var_robust_dps2;
-        tgt_val->var_unbiased_dps2 = gyro_bias.var_unbiased_dps2;
+        set_val(gyro_bias, j);
         check = true;
       }
     }
+    print();
 
     if ((tgt_val->var_robust_dps2 < param->gyro_param.robust_th) &&
         (param->gyro_param.retry_min_th < gyro_bias.bias_dps &&
          gyro_bias.bias_dps < param->gyro_param.retry_max_th)) {
-      tgt_val->gyro_zero_p_offset = gyro_bias.bias_dps;
-      tgt_val->gyro_retry = j;
-      tgt_val->var_robust_dps2 = gyro_bias.var_robust_dps2;
-      tgt_val->var_unbiased_dps2 = gyro_bias.var_unbiased_dps2;
+      set_val(gyro_bias, j);
       check2 = true;
+      printf("select: %d\n", j);
       break;
     }
 
@@ -1052,8 +1067,16 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
   tgt_val->gyro2_zero_p_offset = gyro2_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_x_zero_p_offset = accel_x_raw_data_sum / RESET_GYRO_LOOP_CNT;
   tgt_val->accel_y_zero_p_offset = accel_y_raw_data_sum / RESET_GYRO_LOOP_CNT;
+  tgt_val->temp_zero_p_offset = temp_data_sum / RESET_GYRO_LOOP_CNT;
 
-  printf("gyro initial data : %f\n", pt->get_sensing_entity()->ego.battery_raw);
+  tgt_val->calibration_mode = CalibrationMode::NONE;
+  tgt_val->nmr.timstamp++;
+  vTaskDelay(10 / portTICK_PERIOD_MS); //他モジュールの起動待ち
+
+  print();
+
+  printf("battery initial data : %f\n",
+         pt->get_sensing_entity()->ego.battery_raw);
 
   printf("kf_batt:\n");
   pt->kf_batt.print_state();

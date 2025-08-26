@@ -110,11 +110,11 @@ test: # テスト走行時に使用するパラメータ群
   ang: 3600
   search_mode: 0
   
-  suction_duty: 3.75
-  suction_duty_low: 3.5
+  suction_duty: 2.75
+  suction_duty_low: 2.50
   # Alter
-  suction_duty_burst: 4.35
-  suction_duty_burst_low: 4.0
+  suction_duty_burst: 3.75
+  suction_duty_burst_low: 3.5
   # Nova
   # suction_duty_burst: 3.75
   # suction_duty_burst_low: 3.5
@@ -122,11 +122,11 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 12
+  file_idx: 8
   sla_dist: 90
   # sla_type: 3
-  sla_type: 4
-  sla_type2: 8 # 復路ターン種類
+  sla_type: 3
+  sla_type2: 3 # 復路ターン種類
   sla_return: 1 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval

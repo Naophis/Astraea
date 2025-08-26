@@ -370,13 +370,13 @@ void IRAM_ATTR LoggingTask::print_header() {
 
   printf("left45_2_d_diff:float:%d\n", sizeof(ls10.left45_2_d_diff));
   printf("left45_3_d_diff:float:%d\n", sizeof(ls10.left45_3_d_diff));
+  printf("duty_suction:float:%d\n", sizeof(ls10.duty_suction));
   printf("reserve1:int:%d\n", sizeof(ls10.reserve1));
   printf("reserve2:int:%d\n", sizeof(ls10.reserve2));
 
   printf("reserve3:int:%d\n", sizeof(ls10.reserve3));
   printf("reserve4:int:%d\n", sizeof(ls10.reserve4));
   printf("reserve5:int:%d\n", sizeof(ls10.reserve5));
-  printf("reserve6:int:%d\n", sizeof(ls10.reserve6));
 
   vTaskDelay(xDelay2);
   printf("start___\n");
@@ -600,6 +600,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls10.left45_d_diff = std::clamp(l45 - left45_d_z, -th, th);
     ls10.left45_2_d_diff = std::clamp(l45_2 - left45_2_d_z, -th, th);
     ls10.left45_3_d_diff = std::clamp(l45_3 - left45_3_d_z, -th, th);
+    ls10.duty_suction = tgt_val->duty_suction / ls3.battery * 100;
 
     uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
     uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
@@ -636,7 +637,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
 
   printf("end___\n"); // csvファイル追記終了トリガー
 
-  vTaskDelay(3250.0 / portTICK_PERIOD_MS);
+  vTaskDelay(2500.0 / portTICK_PERIOD_MS);
 
   printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 

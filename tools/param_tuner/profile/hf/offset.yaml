@@ -85,7 +85,7 @@ wall_off_hold_noexist_th_l: 50
 wall_off_hold_noexist_th_r: 50
 # 壁切れ オフセット距離(最初からあるとき)
 wall_off_hold_dist_str_l_exist: 0.5
-wall_off_hold_dist_str_r_exist: -2.5
+wall_off_hold_dist_str_r_exist: 0.5
 
 # 壁切れ In2(最初からないとき)
 wall_off_hold_exist_dist_l2: 64
@@ -95,7 +95,7 @@ wall_off_hold_noexist_th_l2: 66
 wall_off_hold_noexist_th_r2: 66
 # 壁切れ オフセット距離(最初からないとき)
 wall_off_hold_dist_str_l: -3.0
-wall_off_hold_dist_str_r: -3.5
+wall_off_hold_dist_str_r: -3.0
 
 wall_off_diff_ref_th: 6.5
 wall_off_diff_ref_front_th: 30 # 壁切れ偏差チェックの前後距離差条件

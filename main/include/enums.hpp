@@ -12,6 +12,11 @@ enum class LogFileType : int {
   STRAIGHT = 1,
 };
 
+enum class CalibrationMode : int {
+  NONE = 0,
+  DOING = 1,
+};
+
 enum class SensorCtrlType : int {
   NONE = 0,
   Straight = 1,
