@@ -990,6 +990,12 @@ void MainTask::load_offset_param() {
       getItem(root, "wall_off_diff_check_dist")->valuedouble;
   param->wall_off_dist.diff_check_dist_dia =
       getItem(root, "wall_off_diff_check_dist_dia")->valuedouble;
+  param->wall_off_dist.diff_check_dist_dia_2 =
+      getItem(root, "diff_check_dist_dia_2")->valuedouble;
+  param->wall_off_pass_through_offset_l =
+      getItem(root, "wall_off_pass_through_offset_l")->valuedouble;
+  param->wall_off_pass_through_offset_r =
+      getItem(root, "wall_off_pass_through_offset_r")->valuedouble;
 
   param->wall_off_wait_dist = getItem(root, "wall_off_wait_dist")->valuedouble;
   param->wall_off_wait_dist_dia =

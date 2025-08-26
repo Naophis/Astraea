@@ -1035,15 +1035,15 @@ void IRAM_ATTR MotionPlanning::reset_gyro_ref() {
 
     auto gyro_bias = calibrateYawBiasF(yaw_val, 3.0f, 4.685f); // Tukey c=4.685
 
-    if (!check && min_robust_dps2 > tgt_val->var_robust_dps2) {
-      min_robust_dps2 = tgt_val->var_robust_dps2;
+    if (!check && min_robust_dps2 > gyro_bias.var_robust_dps2) {
+      min_robust_dps2 = gyro_bias.var_robust_dps2;
       set_val(gyro_bias, j); //初回は許容
     }
 
     if (param->gyro_param.retry_min_th < gyro_bias.bias_dps &&
         gyro_bias.bias_dps < param->gyro_param.retry_max_th) {
-      if (min_robust_dps2 > tgt_val->var_robust_dps2) {
-        min_robust_dps2 = tgt_val->var_robust_dps2;
+      if (min_robust_dps2 > gyro_bias.var_robust_dps2) {
+        min_robust_dps2 = gyro_bias.var_robust_dps2;
         set_val(gyro_bias, j);
         check = true;
       }

@@ -109,11 +109,11 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
       return;
     }
 
-    // 見逃し対策：壁がないときに見切れた場合
-    if (!exist && strategy.detect_missing_by_deviation()) {
-      ps_front.dist -= param->wall_off_pass_through_offset_r;
-      ps_front.dist = MAX(ps_front.dist, 0.1);
-    }
+    // // 見逃し対策：壁がないときに見切れた場合
+    // if (!exist && strategy.detect_missing_by_deviation()) {
+    //   ps_front.dist -= param->wall_off_pass_through_offset_r;
+    //   ps_front.dist = MAX(ps_front.dist, 0.1);
+    // }
 
     // フロントセンサー補正
     if (apply_front_sensor_correction(ps_front, tmp_dist_before,
@@ -137,10 +137,10 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
   while (true) {
     tmp_dist_after = tgt_val->global_pos.dist;
 
-    if (apply_front_sensor_correction(ps_front, tmp_dist_before,
-                                      tmp_dist_after)) {
-      return;
-    }
+    // if (apply_front_sensor_correction(ps_front, tmp_dist_before,
+    //                                   tmp_dist_after)) {
+    //   return;
+    // }
 
     if (exist) {
       if (strategy.detect_wall_off(exist)) {
@@ -155,11 +155,11 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return;
       }
-      if (strategy.detect_wall_off_vertical()) {
-        ps_front.dist += p_wall_off.right_str;
-        ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
-      }
+      // if (strategy.detect_wall_off_vertical()) {
+      //   ps_front.dist += p_wall_off.right_str;
+      //   ps_front.dist = MAX(ps_front.dist, 0.1);
+      //   return;
+      // }
     }
 
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -218,11 +218,11 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
       return;
     }
 
-    // 見逃し対策：壁がないときに見切れた場合
-    if (!exist && strategy.detect_missing_by_deviation()) {
-      ps_front.dist -= param->wall_off_pass_through_offset_l;
-      ps_front.dist = MAX(ps_front.dist, 0.1);
-    }
+    // // 見逃し対策：壁がないときに見切れた場合
+    // if (!exist && strategy.detect_missing_by_deviation()) {
+    //   ps_front.dist -= param->wall_off_pass_through_offset_l;
+    //   ps_front.dist = MAX(ps_front.dist, 0.1);
+    // }
 
     // フロントセンサー補正
     if (apply_front_sensor_correction(ps_front, tmp_dist_before,
@@ -246,10 +246,10 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
   while (true) {
     tmp_dist_after = tgt_val->global_pos.dist;
 
-    if (apply_front_sensor_correction(ps_front, tmp_dist_before,
-                                      tmp_dist_after)) {
-      return;
-    }
+    // if (apply_front_sensor_correction(ps_front, tmp_dist_before,
+    //                                   tmp_dist_after)) {
+    //   return;
+    // }
 
     if (exist) {
       if (strategy.detect_wall_off(exist)) {
@@ -264,11 +264,11 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
         ps_front.dist = MAX(ps_front.dist, 0.1);
         return;
       }
-      if (strategy.detect_wall_off_vertical()) {
-        ps_front.dist += p_wall_off.left_str;
-        ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
-      }
+      // if (strategy.detect_wall_off_vertical()) {
+      //   ps_front.dist += p_wall_off.left_str;
+      //   ps_front.dist = MAX(ps_front.dist, 0.1);
+      //   return;
+      // }
     }
 
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
@@ -283,8 +283,8 @@ bool IRAM_ATTR WallOffController::apply_front_sensor_correction(
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
-  const auto diff_front = std::abs(se->ego.left90_far_dist -
-                                   se->ego.right90_far_dist); // 前後の距離差
+  const auto diff_front = std::abs(se->ego.left90_dist -
+                                   se->ego.right90_dist); // 前後の距離差
   const auto valid_diff = diff_front < param->wall_off_diff_ref_front_th;
 
   const auto diff_decrease = // 左右の壁が見え始めてたら
@@ -681,19 +681,9 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
         const auto p_wall_off = get_wall_off_param();
         const auto se = get_sensing_entity();
         const auto param = get_input_param_entity();
-        float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
-                                  se->ego.right45_dist);
-        float diff_front = std::abs(se->ego.left90_far_dist -
-                                    se->ego.right90_far_dist); // 前後の距離差
-        bool exist_front = false;
-
-        bool valid_diff =
-            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
-            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
         return (se->ego.right45_dist > p_wall_off.noexist_th_r &&  //
-                se->ego.right45_dist_diff > 0) ||                  //
-               (valid_diff &&                                      //
-                se->ego.right45_dist_diff > p_wall_off.div_th_r && //
+                se->ego.right45_dist_diff > 0) &&                  //
+               (se->ego.right45_dist_diff > p_wall_off.div_th_r3 && //
                 se->ego.right45_2_dist_diff > 0 &&                 //
                 // se->ego.right45_3_dist_diff > 0 && //
                 // se->ego.right45_2_dist_diff < 10 && //
@@ -704,18 +694,11 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_right_strategy() {
       [this](float exist) -> bool {
         const auto p_wall_off = get_wall_off_param();
         const auto se = get_sensing_entity();
-        const auto param = get_input_param_entity();
-        float diff_ref = std::abs(param->sen_ref_p.normal.ref.right45 -
-                                  se->ego.right45_dist);
-        float diff_front =
-            std::abs(se->ego.left90_far_dist - se->ego.right90_far_dist); //
-        bool exist_front = false;
-        bool valid_diff =
-            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
-            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
-        return valid_diff &&                                      //
-               se->ego.right45_dist_diff > p_wall_off.div_th_r && //
-               se->ego.right45_2_dist_diff > 0 &&                 //
+        const auto p = get_input_param_entity();
+        return ((se->ego.right45_dist > p->wall_off_dist.noexist_th_r2) || //
+                (se->sen.r45.sensor_dist + 1) < se->ego.right45_dist) &&   //
+               se->ego.right45_dist_diff > p_wall_off.div_th_r3 &&          //
+               se->ego.right45_2_dist_diff > 0 &&                          //
                //  se->ego.right45_3_dist_diff > 0 &&                 //
                //  se->ego.right45_2_dist_diff < 10 &&                //
                //  se->ego.right45_3_dist_diff < 10 &&                //
@@ -800,19 +783,9 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
         const auto p_wall_off = get_wall_off_param();
         const auto se = get_sensing_entity();
         const auto param = get_input_param_entity();
-        float diff_ref =
-            std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
-        float diff_front = std::abs(se->ego.left90_far_dist -
-                                    se->ego.right90_far_dist); // 前後の距離差
-        bool exist_front = false;
-
-        bool valid_diff =
-            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
-            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
         return (se->ego.left45_dist > p_wall_off.noexist_th_l &&  //
-                se->ego.left45_dist_diff > 0) ||                  //
-               (valid_diff &&                                     //
-                se->ego.left45_dist_diff > p_wall_off.div_th_l && //
+                se->ego.left45_dist_diff > 0) &&                  //
+               (se->ego.left45_dist_diff > p_wall_off.div_th_l3 && //
                 se->ego.left45_2_dist_diff > 0 &&                 //
                 // se->ego.left45_3_dist_diff > 0 &&                  //
                 // se->ego.left45_2_dist_diff < 10 &&                 //
@@ -824,22 +797,11 @@ WallSensorStrategy IRAM_ATTR &WallOffController::get_left_strategy() {
         const auto p_wall_off = get_wall_off_param();
         const auto se = get_sensing_entity();
         const auto param = get_input_param_entity();
-        float diff_ref =
-            std::abs(param->sen_ref_p.normal.ref.left45 - se->ego.left45_dist);
-        float diff_front = std::abs(se->ego.left90_far_dist -
-                                    se->ego.right90_far_dist); // 前後の距離差
-        bool exist_front = false;
-        // (param->wall_off_front_ctrl_min < se->ego.left90_far_dist &&
-        //  se->ego.left90_far_dist < param->front_dist_offset4 &&
-        //  param->wall_off_front_ctrl_min < se->ego.right90_far_dist &&
-        //  se->ego.right90_far_dist < param->front_dist_offset4);
-
-        bool valid_diff =
-            (!exist || diff_ref < param->wall_off_diff_ref_th) &&
-            (!exist_front || diff_front < param->wall_off_diff_ref_front_th);
-        return valid_diff &&                                     //
-               se->ego.left45_dist_diff > p_wall_off.div_th_l && //
-               se->ego.left45_2_dist_diff > 0 &&                 //
+        // se->ego.left45_dist < 100;
+        return ((se->ego.left45_dist > param->wall_off_dist.noexist_th_l2) || //
+                (se->sen.l45.sensor_dist + 1) < se->ego.left45_dist) &&       //
+               se->ego.left45_dist_diff > p_wall_off.div_th_l3 &&              //
+               se->ego.left45_2_dist_diff > 0 &&                              //
                // se->ego.left45_3_dist_diff > 0 &&                 //
                //  se->ego.left45_2_dist_diff < 10 &&                //
                //  se->ego.left45_3_dist_diff < 10 &&                //
@@ -915,6 +877,7 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
       [this]() -> bool {
         const auto p_wall_off = get_wall_off_param();
         const auto se = get_sensing_entity();
+
         return se->ego.left45_dist_diff > p_wall_off.div_th_dia_l && //
                se->ego.left45_2_dist_diff > 0 &&                     //
                //  se->ego.left45_3_dist_diff > 0 &&                     //
