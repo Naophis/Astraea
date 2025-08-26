@@ -136,11 +136,11 @@ wall_off_pass_through_offset_r: -5
 
 
 # 壁切れ：前壁補正　リファレンス値(大：前に近づく)
-front_dist_offset2: 138 #ref
+front_dist_offset2: 135 # ref
 # 壁切れ：前壁補正  しきい値(far: center)
-front_dist_offset3: 125.0 #th
+front_dist_offset3: 135.0 # th
 # 壁切れ：前壁補正　しきい値(far: both)
-front_dist_offset4: 135.0 # both front sensors condition th
+front_dist_offset4: 150.0 # both front sensors condition th
 
 # 壁切れ街制限距離
 wall_off_wait_dist: 65
@@ -165,10 +165,10 @@ wall_off_hold_dist_dia_r: 3.0
 dia_wall_off_ref_l: 24.0 #dia135
 dia_wall_off_ref_r: 24.0 #dia135
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l_wall: 33.0 #exist_wall
-dia_wall_off_ref_r_wall: 31.625 #exist_wall
-dia_wall_off_ref_l_piller: 36.0 #noexist_wall
-dia_wall_off_ref_r_piller: 41.75 #noexist_wall
+dia_wall_off_ref_l_wall: 33.5 #exist_wall
+dia_wall_off_ref_r_wall: 32.45 #exist_wall
+dia_wall_off_ref_l_piller: 41.06 #noexist_wall
+dia_wall_off_ref_r_piller: 39.45 #noexist_wall
 
 # 斜め壁切れ偏差
 wall_off_hold_div_th_dia_l: 0.250
@@ -186,8 +186,8 @@ wall_off_hold_dist_dia_l2: 1.0
 wall_off_hold_dist_dia_r2: 1.0
 
 #斜めターン壁有り補正
-dia_turn_th_l: 61.0
-dia_turn_th_r: 61.0
+dia_turn_th_l: 50.0
+dia_turn_th_r: 50.0
 
 dia_turn_ref_l: 48.5
 dia_turn_ref_r: 50.0

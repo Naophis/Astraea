@@ -171,10 +171,13 @@ const switchToBinaryMode = (obj) => {
   let last_index = 0;
   let last_recived = new Date().getTime();
   let now = new Date().getTime();
+  let force_save = false;
+
+  let last_idx = 0;
 
   let interval = setInterval(() => {
     console.log("force save");
-    if (now - last_recived > 1000) {
+    if ((now - last_recived > 1000) || force_save) {
       console.log('timeout');
       fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
         flag: "w+",
@@ -202,32 +205,50 @@ const switchToBinaryMode = (obj) => {
     let offset = 0;
     cnt++;
     index++;
-    last_recived = new Date().getTime();
+
+    let bind = false;
     const start_idx = (cnt - 1) * 12;
     const end_idx = start_idx + 12;
 
     for (let i = start_idx; i < end_idx; i++) {
+
       const data = obj.data_struct[i];
       if (data === undefined) {
         continue;
       }
+      const tmp_data = offset;
       switch (data.type) {
         case 'float':
-          record.push(binaryData.readFloatLE(offset));
+          record.push(binaryData.readFloatLE(tmp_data));
           offset += data.size;
+          bind = true;
           break;
         case 'int':
-          record.push(binaryData.readInt32LE(offset));
+          record.push(binaryData.readInt32LE(tmp_data));
           offset += data.size;
+          bind = true;
           break;
         case 'short':
-          record.push(binaryData.readInt16LE(offset));
+          record.push(binaryData.readInt16LE(tmp_data));
           offset += data.size;
+          bind = true;
           break;
         default:
           throw new Error(`Unsupported data type: ${data.type}`);
       }
+      if (data.name === 'index') {
+        const idx = parseInt(binaryData.readInt32LE(tmp_data));
+        console.log(last_idx, idx);
+        if (idx < last_idx) {
+          force_save = true;
+        }
+        last_idx = idx;
+      }
     }
+    if (bind) {
+      last_recived = new Date().getTime();
+    }
+
     if (cnt === LOG_STRUCT_SIZE) {
       cnt = 0;
       if (index > 10 && record[0] <= 0 && !finish) {

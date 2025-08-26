@@ -1001,6 +1001,7 @@ float IRAM_ATTR PlanningTask::check_sen_error_dia(SensingControlType &type) {
         1 < se->ego.left90_mid_dist &&
         se->ego.left90_mid_dist < param_ro->sen_ref_p.dia.exist.left90;
 
+    // 右センサーが一定距離以内のとき
     const bool valid_right45 =
         1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param_ro->sen_ref_p.dia.exist.right45 &&

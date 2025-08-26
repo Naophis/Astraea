@@ -68,13 +68,13 @@ class Plot:
             n = 4.0
 
             if hf_cl == 0:
-                rad = 52.0
+                rad = 36.0
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":
             start_ang = 45
             n = 4
-            rad = 60
+            rad = 52
             tgt_ang = 45
             if hf_cl == 0:
                 end_pos = {"x": 90, "y": 45}
