@@ -5,11 +5,11 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-# tire: 13.590 #10deg 
-# tire2: 13.590 #10deg
+tire: 13.900 #10deg 
+tire2: 13.900 #10deg
 
-tire: 14.120 #新品(#30) 14.12
-tire2: 14.120 #新品(#30) 14.12
+# tire: 14.120 #新品(#30) 14.12
+# tire2: 14.120 #新品(#30) 14.12
 # tire: 13.4645
 # tire2: 13.4645
 # offset_start_dist: 21.0
@@ -165,29 +165,19 @@ front_ctrl_roll_pid:
 motor_pid2:
   #AS5147P 
   mode: 7
-  # p: 0.0000075
-  # i: 0.000003625
-  # b: 0.00
-  # d: 0.0000085
 
-  # p: 0.0000085
-  # i: 0.000009125
+  # p: 0.0000175
+  # i: 0.0000045
   # b: 0.00
-  # d: 0.0000195
-
-  p: 0.0000175
-  i: 0.0000045
+  # d: 0.0000125
+  p: 0.0000225
+  i: 0.00000425
   b: 0.00
-  d: 0.0000125
+  d: 0.0000175
+
   antiwindup: 0
   windup_gain: 0.05
   windup_dead_bind: 50
-
-  # p: 0.00000825
-  # i: 0.00000425
-  # b: 0.00
-  # d: 0.00000925
-
 
   # test: 0
   # p: 0.0
@@ -213,13 +203,13 @@ gyro_pid:
   p: 0.000325
   i: 0.01465 # dif angle
   # b: 0.0000375 #summation
-  b: 0.00005295 #summation
+  b: 0.0000595 #summation
   # b: 0.0000425 #summation
   d: 0.000295
 
   antiwindup: 1
   windup_gain: 1.0
-  windup_dead_bind: 3
+  windup_dead_bind: 1.50
 
   # p: 0.000325
   # i: 0.01365 #dif angle

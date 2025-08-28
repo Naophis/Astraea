@@ -84,7 +84,7 @@ wall_off_hold_exist_dist_r: 48
 wall_off_hold_noexist_th_l: 49
 wall_off_hold_noexist_th_r: 49
 # 壁切れ オフセット距離(最初からあるとき)
-wall_off_hold_dist_str_l_exist: -1.0  #p_wall_off.left_str_exist
+wall_off_hold_dist_str_l_exist: -0.25  #p_wall_off.left_str_exist
 wall_off_hold_dist_str_r_exist: -1.25 #p_wall_off.right_str_exist
 
 # 壁切れ In2(最初からないとき)
@@ -94,7 +94,7 @@ wall_off_hold_exist_dist_r2: 59 #p_wall_off.exist_dist_r2
 wall_off_hold_noexist_th_l2: 60
 wall_off_hold_noexist_th_r2: 60
 # 壁切れ オフセット距離(最初からないとき)
-wall_off_hold_dist_str_l: -4.0 #p_wall_off.left_str
+wall_off_hold_dist_str_l: -4.5 #p_wall_off.left_str
 wall_off_hold_dist_str_r: -3.50 #p_wall_off.right_str
 
 wall_off_diff_ref_th: 6.5
@@ -136,11 +136,11 @@ wall_off_pass_through_offset_r: -5
 
 
 # 壁切れ：前壁補正　リファレンス値(大：前に近づく)
-front_dist_offset2: 135 # ref
+front_dist_offset2: 142 # ref
 # 壁切れ：前壁補正  しきい値(far: center)
 front_dist_offset3: 135.0 # th
 # 壁切れ：前壁補正　しきい値(far: both)
-front_dist_offset4: 150.0 # both front sensors condition th
+front_dist_offset4: 135.0 # both front sensors condition th
 
 # 壁切れ街制限距離
 wall_off_wait_dist: 65
@@ -203,7 +203,7 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値
+dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 

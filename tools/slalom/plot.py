@@ -37,7 +37,7 @@ class Plot:
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
-                rad = 62.5
+                rad = 56.5
                 n = 4
                 tgt_ang = 90.0
                 start_ang = 0
@@ -56,7 +56,7 @@ class Plot:
             tgt_ang = 45.0
             start_ang = 0
             n = 4
-            rad = 54.0
+            rad = 52.0
 
             if hf_cl == 0:
                 # rad = 80.0
@@ -82,7 +82,7 @@ class Plot:
         elif type == "dia135_2":
             start_ang = 45
             if hf_cl == 0:
-                rad = 46.0
+                rad = 44.0
                 n = 4
                 tgt_ang = 135.0
                 end_pos = {"x": -45, "y": 90}
