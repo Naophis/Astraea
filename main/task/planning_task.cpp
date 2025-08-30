@@ -1189,7 +1189,14 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
   }
 
   if (!(tgt_val->motion_type == MotionType::NONE ||
-        tgt_val->motion_type == MotionType::FRONT_CTRL)) {
+        tgt_val->motion_type == MotionType::FRONT_CTRL ||
+        tgt_val->motion_type == MotionType::PIVOT ||
+        tgt_val->motion_type == MotionType::PIVOT_PRE ||
+        tgt_val->motion_type == MotionType::PIVOT_PRE2 ||
+        tgt_val->motion_type == MotionType::PIVOT_AFTER ||
+        tgt_val->motion_type == MotionType::PIVOT_OFFSET ||
+        tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
+        tgt_val->motion_type == MotionType::READY)) {
     if (std::isfinite(se->ego.v_kf) && std::isfinite(se->ego.ang_kf)) {
 
       const auto pos_state_z = pos.get_state();
@@ -1198,7 +1205,7 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
       const auto pos_theta_z = pos_state_z[2];
 
       pos.ang += se->ego.w_kf * dt;
-      pos.ang = fmod(pos.ang + M_PI, 2 * M_PI) - M_PI;
+      // pos.ang = fmod(pos.ang + M_PI, 2 * M_PI) - M_PI;
       const auto tmp_dist = se->ego.v_kf * dt;
       tgt_val->ego_in.pos_x += tmp_dist * cosf(pos.ang);
       tgt_val->ego_in.pos_y += tmp_dist * sinf(pos.ang);
@@ -1824,6 +1831,7 @@ void IRAM_ATTR PlanningTask::cp_request() {
     kf_dist.reset(0);
   } else {
     tgt_val->ego_in.ang -= last_tgt_angle;
+    kim.theta -= last_tgt_angle;
     tgt_val->ego_in.img_ang = 0;
     kf_ang.offset(-last_tgt_angle);
   }
@@ -1899,8 +1907,11 @@ void IRAM_ATTR PlanningTask::cp_request() {
 
   if (receive_req->nmr.motion_type == MotionType::STRAIGHT ||
       receive_req->nmr.motion_type == MotionType::SLA_FRONT_STR) {
-    kim.x = kim.y = kim.theta = 0;
-    tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py = 0;
+    kim.x = kim.y = 0;
+    tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py =
+        tgt_val->ego_in.img_ang = 0;
+  } else if (receive_req->nmr.motion_type == MotionType::WALL_OFF ||
+             receive_req->nmr.motion_type == MotionType::WALL_OFF_DIA) {
   }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
@@ -2215,44 +2226,60 @@ void IRAM_ATTR PlanningTask::calc_angle_i_bias() {
   // --- 角度I（ee->ang.error_i）から“低帯域だけ”を取り出す ---
   const float dt = param_ro->dt; // 既存の制御周期
 
-  // 1) Iの低域化（一次LPF）
-  {
-    float tau = std::max(1e-6f, param_ro->gyro_pid.i_theta_tau);
-    float a = std::clamp(dt / tau, 0.0f, 1.0f);
-    ee->ang.i_slow += a * (ee->ang.error_i - ee->ang.i_slow);
+  // // 1) Iの低域化（一次LPF）
+  // {
+  //   float tau = std::max(1e-6f, param_ro->gyro_pid.i_theta_tau);
+  //   float a = std::clamp(dt / tau, 0.0f, 1.0f);
+  //   ee->ang.i_slow += a * (ee->ang.error_i - ee->ang.i_slow);
+  // }
+
+  // // 2) 終盤だけ効かせるゲート：|eθ|が小さい・|ω_ref|が小さい時ほど1
+  // float e_theta_abs =
+  //     std::abs(tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
+  // float w_ref_abs = std::abs(tgt_val->ego_in.w); // 目標角速度
+
+  // // |eθ|: 大→小 で 0→1 にしたいので、閾値で反転気味の重みを作る
+  // float w_theta =
+  //     1.0f - smoothstep01(e_theta_abs /
+  //                         std::max(1e-9f, param_ro->gyro_pid.theta_gate));
+  // // |ω|: 大→小 で 0→1
+  // float w_omega =
+  //     1.0 -
+  //     smoothstep01(w_ref_abs / std::max(1e-9f,
+  //     param_ro->gyro_pid.omega_gate));
+
+  // float w_gate = std::clamp(w_theta * w_omega, 0.0f, 1.0f);
+
+  // // 3) スルーレート＆振幅制限つきで target に追従
+  // float i_target = ee->ang.i_slow * w_gate;
+  // float max_step = std::max(0.0f, param_ro->gyro_pid.i_theta_slew) * dt;
+  // float di = std::clamp(i_target - ee->ang.i_bias, -max_step, +max_step);
+  // ee->ang.i_bias =
+  //     std::clamp(ee->ang.i_bias + di,
+  //     -std::abs(param_ro->gyro_pid.i_theta_max),
+  //                +std::abs(param_ro->gyro_pid.i_theta_max));
+
+  if (tgt_val->motion_type == MotionType::NONE ||
+      tgt_val->motion_type == MotionType::PIVOT ||
+      tgt_val->motion_type == MotionType::PIVOT_PRE ||
+      tgt_val->motion_type == MotionType::PIVOT_PRE2 ||
+      tgt_val->motion_type == MotionType::PIVOT_AFTER ||
+      tgt_val->motion_type == MotionType::PIVOT_OFFSET ||
+      tgt_val->motion_type == MotionType::BACK_STRAIGHT ||
+      tgt_val->motion_type == MotionType::READY ||
+      tgt_val->motion_type == MotionType::FRONT_CTRL) {
+    ee->ang.i_bias = 0;
+  } else {
+    ee->ang.i_bias = tgt_val->ego_in.img_ang - kim.theta;
   }
 
-  // 2) 終盤だけ効かせるゲート：|eθ|が小さい・|ω_ref|が小さい時ほど1
-  float e_theta_abs =
-      std::abs(tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-  float w_ref_abs = std::abs(tgt_val->ego_in.w); // 目標角速度
-
-  // |eθ|: 大→小 で 0→1 にしたいので、閾値で反転気味の重みを作る
-  float w_theta =
-      1.0f - smoothstep01(e_theta_abs /
-                          std::max(1e-9f, param_ro->gyro_pid.theta_gate));
-  // |ω|: 大→小 で 0→1
-  float w_omega =
-      1.0 -
-      smoothstep01(w_ref_abs / std::max(1e-9f, param_ro->gyro_pid.omega_gate));
-
-  float w_gate = std::clamp(w_theta * w_omega, 0.0f, 1.0f);
-
-  // 3) スルーレート＆振幅制限つきで target に追従
-  float i_target = ee->ang.i_slow * w_gate;
-  float max_step = std::max(0.0f, param_ro->gyro_pid.i_theta_slew) * dt;
-  float di = std::clamp(i_target - ee->ang.i_bias, -max_step, +max_step);
-  ee->ang.i_bias =
-      std::clamp(ee->ang.i_bias + di, -std::abs(param_ro->gyro_pid.i_theta_max),
-                 +std::abs(param_ro->gyro_pid.i_theta_max));
-
-  // 4) モーション種別での無効化（あなたの既存ルールに追従）
-  if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-        tgt_val->motion_type == MotionType::SLA_BACK_STR ||
-        tgt_val->motion_type == MotionType::PIVOT)) {
-    // 終盤以外は角度系補正を殺す
-    // ee->ang.i_bias = 0.0;
-  }
+  // // 4) モーション種別での無効化（あなたの既存ルールに追従）
+  // if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+  //       tgt_val->motion_type == MotionType::SLA_BACK_STR ||
+  //       tgt_val->motion_type == MotionType::PIVOT)) {
+  //   // 終盤以外は角度系補正を殺す
+  //   // ee->ang.i_bias = 0.0;
+  // }
 }
 
 void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
@@ -2294,12 +2321,9 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
       } else {
         if (gyro_pid_windup_histerisis) { // true -> false
 
-          w_error_i = ee->w.error_i = ee->ang.error_p / dt;
-          // float ang_e_p =
-          //     (tgt_val->ego_in.img_ang + duty_sen) - se->ego.pos_ang;
-          // w_error_i = ee->w.error_i = ang_e_p / dt;
+          // w_error_i = ee->w.error_i = ee->ang.error_p / dt;
 
-          // w_error_i = ee->w.error_i = ee->w_kf.error_i;
+          w_error_i = ee->w.error_i = ee->ang.i_bias / dt;
         }
         gyro_pid_windup_histerisis = false;
         gyro_pid_histerisis_i = 0;
@@ -2800,7 +2824,8 @@ void IRAM_ATTR PlanningTask::calc_kanamaya_ctrl() {
   dx = std::clamp(dx, 0.0f, ABS(dx));
 
   float d_theta = odm.theta - (se->ego.ang_kf + last_tgt_angle);
-  float e_theta = std::clamp(d_theta, (float)(-M_PI), (float)(M_PI));
+  float e_theta = d_theta;
+  // std::clamp(d_theta, (float)(-M_PI), (float)(M_PI));
   const float cos_theta = std::cos(se->ego.ang_kf);
   const float sin_theta = std::sin(se->ego.ang_kf);
   if (tgt_val->ego_in.v < 10) {

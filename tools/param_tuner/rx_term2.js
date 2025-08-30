@@ -300,6 +300,9 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "timestamp")
             if (record[i] > 10000 || record[i] < 0)
               res = false;
+          if (data.name === "m_pid_i_v")
+            if (record[i] > 0.1 || record[i] < -0.1)
+              res = false;
           if (data.name === "dist")
             if (record[i] > 180 * 64 || record[i] < 0)
               res = false;

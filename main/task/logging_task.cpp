@@ -583,10 +583,10 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls9.odm_x = halfToFloat(ld->odm_x);
     ls9.odm_y = halfToFloat(ld->odm_y);
 
-    ls9.odm_theta = halfToFloat(ld->odm_theta);
+    ls9.odm_theta = halfToFloat(ld->odm_theta) * 180 / M_PI;
     ls9.kim_x = halfToFloat(ld->kim_x);
     ls9.kim_y = halfToFloat(ld->kim_y);
-    ls9.kim_theta = halfToFloat(ld->kim_theta);
+    ls9.kim_theta = halfToFloat(ld->kim_theta) * 180 / M_PI;
     ls9.ang_i_bias = halfToFloat(ld->ang_i_bias);
     ls9.ang_i_bias_val = halfToFloat(ld->ang_i_bias_val);
 

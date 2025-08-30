@@ -44,7 +44,7 @@ class Plot:
                 end_pos = {"x": 90, "y": 90}
         elif type == "orval":
             if hf_cl == 0:
-                rad = 55.0
+                rad = 52.0
                 n = 4
                 tgt_ang = 180.0
                 # tgt_ang = 180
@@ -55,8 +55,8 @@ class Plot:
             end_pos = {"x": 90, "y": 45}
             tgt_ang = 45.0
             start_ang = 0
-            n = 4
-            rad = 52.0
+            n = 6
+            rad = 56.0
 
             if hf_cl == 0:
                 # rad = 80.0
