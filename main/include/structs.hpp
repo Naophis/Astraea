@@ -1216,6 +1216,8 @@ typedef struct {
   real16_T ang_i_bias;
   real16_T ang_i_bias_val;
 
+  real16_T duty_suction;
+
 } log_data_t2;
 
 typedef struct {

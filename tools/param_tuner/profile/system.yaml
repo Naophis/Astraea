@@ -55,7 +55,6 @@ goals: [[1, 0], [2, 0]]
 
 #  27 *55
 maze_size: 32
-give_up_time: 30
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
@@ -83,7 +82,7 @@ test: # テスト走行時に使用するパラメータ群
   decel: -2500 
   dia_accl: 2500
   dia_decel: -2500
-  dist: 180 #直進
+  dist: 120 #直進
   suction_active: 0
 
   # v_max: 1800
@@ -122,10 +121,10 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 6
+  file_idx: 1
   sla_dist: 90
   # sla_type: 3
-  sla_type: 2
+  sla_type: 5
   sla_type2: 6 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal

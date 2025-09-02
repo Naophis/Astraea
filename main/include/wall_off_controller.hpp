@@ -43,7 +43,7 @@ public:
   ~WallOffController() = default;
 
   // 直進時の壁切れ処理
-  void execute_wall_off(TurnDirection td, param_straight_t &ps_front);
+  bool execute_wall_off(TurnDirection td, param_straight_t &ps_front);
 
   // 斜め走行時の壁切れ処理
   bool execute_wall_off_dia(TurnDirection td, param_straight_t &ps_front,
@@ -73,10 +73,10 @@ private:
   std::shared_ptr<input_param_t> get_input_param_entity();
 
   // 右壁の壁切れ処理
-  void process_right_wall_off(param_straight_t &ps_front);
+  bool process_right_wall_off(param_straight_t &ps_front);
 
   // 左壁の壁切れ処理
-  void process_left_wall_off(param_straight_t &ps_front);
+  bool process_left_wall_off(param_straight_t &ps_front);
 
   // フロントセンサーによる距離補正
   bool apply_front_sensor_correction(param_straight_t &ps_front,

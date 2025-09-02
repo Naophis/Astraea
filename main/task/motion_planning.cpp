@@ -489,7 +489,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r2
                                                  : param->offset_after_turn_l2;
     if (b && !next_motion.skip_wall_off) {
-      wall_off(td, ps_front);
+      if (!wall_off(td, ps_front)) {
+        return MotionResult::ERROR;
+      }
     }
     if (ps_front.dist > 0 && !next_motion.skip_wall_off) {
       res_f = go_straight(ps_front);
@@ -524,7 +526,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     ps_back.dist -= (td == TurnDirection::Right) ? param->offset_after_turn_r2
                                                  : param->offset_after_turn_l2;
     if (b) {
-      wall_off(td, ps_front);
+      if (!wall_off(td, ps_front)) {
+        return MotionResult::ERROR;
+      }
     }
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
@@ -545,7 +549,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     //   b = false;
     // }
     if (b && !next_motion.skip_wall_off) {
-      wall_off(td, ps_front);
+      if (!wall_off(td, ps_front)) {
+        return MotionResult::ERROR;
+      }
     }
     if (sp.type == TurnType::Dia135) {
       // calc_dia135_offset(ps_front, ps_back, td, !b);
@@ -565,6 +571,10 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     bool use_oppo_wall = false;
     bool exist_wall = false;
     bool result = wall_off_dia(td, ps_front, use_oppo_wall, exist_wall);
+
+    if (!result) {
+      return MotionResult::ERROR;
+    }
     float dist = 0;
     if (result && !use_oppo_wall) {
       dist = wall_off_controller->calculate_dia_wall_off_distance(td, sp.type,
@@ -1423,9 +1433,9 @@ MotionResult IRAM_ATTR MotionPlanning::wall_off(param_straight_t &p, bool dia) {
   return MotionResult::NONE;
 }
 
-void IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
+bool IRAM_ATTR MotionPlanning::wall_off(TurnDirection td,
                                         param_straight_t &ps_front) {
-  wall_off_controller->execute_wall_off(td, ps_front);
+  return wall_off_controller->execute_wall_off(td, ps_front);
 }
 
 bool IRAM_ATTR MotionPlanning::wall_off_dia(TurnDirection td,

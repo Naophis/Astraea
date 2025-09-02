@@ -203,7 +203,7 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
+dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 

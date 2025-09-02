@@ -600,7 +600,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls10.left45_d_diff = std::clamp(l45 - left45_d_z, -th, th);
     ls10.left45_2_d_diff = std::clamp(l45_2 - left45_2_d_z, -th, th);
     ls10.left45_3_d_diff = std::clamp(l45_3 - left45_3_d_z, -th, th);
-    ls10.duty_suction = tgt_val->duty_suction / ls3.battery * 100;
+    ls10.duty_suction = halfToFloat(ld->duty_suction);
 
     uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
     uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
@@ -809,6 +809,7 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->kim_theta = floatToHalf(sensing_result->ego.kim_theta);
   ld->ang_i_bias = floatToHalf(error_entity->ang_val.i2);
   ld->ang_i_bias_val = floatToHalf(error_entity->ang_val.i2_val);
+  ld->duty_suction = floatToHalf(tgt_val->duty_suction);
 
   if (heap_caps_get_free_size(MALLOC_CAP_INTERNAL) > 7500) {
     log_vec.emplace_back(std::move(ld));

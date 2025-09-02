@@ -350,10 +350,10 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
   // float process_noise = 0.05;       // プロセスノイズの共分散
   // float measurement_noise = 0.35;   // 観測ノイズの共分散
 
-  kf_w.dt = 0.001 / 1;
-  kf_w2.dt = 0.001 / 1;
-  kf_v_r.dt = 0.001 / 1;
-  kf_v_l.dt = 0.001 / 1;
+  kf_w.dt = 0.001f / 1;
+  kf_w2.dt = 0.001f / 1;
+  kf_v_r.dt = 0.001f / 1;
+  kf_v_l.dt = 0.001f / 1;
 
   if (reset_battery) {
     kf_batt.init(sensing_result->ego.battery_raw, //
@@ -417,7 +417,7 @@ void PlanningTask::task() {
   // int64_t end2;
   // int64_t start2;
   // int64_t end2;
-  const TickType_t xDelay = 1.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay = 1.0f / portTICK_PERIOD_MS;
   mpc_next_ego.ideal_px = mpc_next_ego.ideal_py = 0;
   BaseType_t queue_recieved;
   init_gpio();
@@ -796,14 +796,14 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
                   (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
   } else {
     if (enable_expand_right) {
-      exist_right45_expand = wall_th + 1.0;
+      exist_right45_expand = wall_th + 1.0f;
       expand_right = (10 < se->ego.right45_dist) &&
                      (se->ego.right45_dist < exist_right45_expand);
     } else {
       exist_right45_expand = 0;
     }
     if (enable_expand_left) {
-      exist_left45_expand = wall_th + 1.0;
+      exist_left45_expand = wall_th + 1.0f;
       expand_left = (10 < se->ego.left45_dist) &&
                     (se->ego.left45_dist < exist_left45_expand);
     } else {
@@ -1454,32 +1454,33 @@ void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
     if (tgt_val->tgt_in.tgt_dist > 60 &&
         (tgt_val->ego_in.state == 0 || tgt_val->ego_in.state == 1) &&
         tgt_val->motion_type == MotionType::STRAIGHT) {
-      tgt_val->duty_suction = tgt_duty.duty_suction_low;
       duty_suction_in =
           // 100.0 * tgt_duty.duty_suction_low / sensing_result->ego.batt_kf;
-          100.0 * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
+          100.0f * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
     } else {
-      tgt_val->duty_suction = tgt_duty.duty_suction;
       duty_suction_in =
           // 100.0 * tgt_duty.duty_suction / sensing_result->ego.batt_kf;
-          100.0 * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
+          100.0f * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
     }
     if (duty_suction_in > 100) {
-      duty_suction_in = 100.0;
+      duty_suction_in = 100.0f;
     }
-    gain_cnt += 1.0;
+    gain_cnt += 1.0f;
     if (gain_cnt > suction_gain) {
       gain_cnt = suction_gain;
     }
     duty_suction_in = duty_suction_in * gain_cnt / suction_gain;
     if (duty_suction_in > 100) {
-      duty_suction_in = 100;
+      duty_suction_in = 100.0f;
     }
+    tgt_val->duty_suction = duty_suction_in;
     // printf("duty_suction_in: %f\n", duty_suction_in);
     // mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
     mcpwm_set_duty(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A, duty_suction_in);
     // mcpwm_set_duty_type(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A,
     //                     MCPWM_DUTY_MODE_0);
+  } else {
+    tgt_val->duty_suction = 0;
   }
 }
 
@@ -1734,6 +1735,10 @@ void IRAM_ATTR PlanningTask::check_fail_safe() {
     tgt_val->fss.error = 1;
   }
   if (keep_wall_off_cnt > param_ro->fail_check.wall_off) {
+    tgt_val->fss.error = 1;
+  }
+
+  if (!gpio_get_level(SW1)) {
     tgt_val->fss.error = 1;
   }
 
@@ -2216,7 +2221,7 @@ void IRAM_ATTR PlanningTask::calc_front_ctrl_duty() {
       param_ro->front_ctrl_keep_angle_pid.i * ee->ang.error_i +
       param_ro->front_ctrl_keep_angle_pid.d * ee->w_kf.error_p;
   gyro_pid_windup_histerisis = false;
-  gyro_pid_histerisis_i = 0.0;
+  gyro_pid_histerisis_i = 0.0f;
 }
 inline float smoothstep01(float x) {
   x = std::clamp(x, 0.0f, 1.0f);

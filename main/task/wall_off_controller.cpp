@@ -28,7 +28,7 @@ std::shared_ptr<input_param_t> WallOffController::get_input_param_entity() {
 
 void WallOffController::set_task_handler(TaskHandle_t &_th) { th = &_th; }
 
-void IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
+bool IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
                                                    param_straight_t &ps_front) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
@@ -60,7 +60,7 @@ void IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
                                       : process_left_wall_off(ps_front);
 }
 
-void IRAM_ATTR
+bool IRAM_ATTR
 WallOffController::process_right_wall_off(param_straight_t &ps_front) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
@@ -84,13 +84,13 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
       if (strategy.wall_missing()) {
         ps_front.dist += p_wall_off.right_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
     } else {
       if (strategy.wall_missing()) {
         ps_front.dist += p_wall_off.right_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
       break;
     }
@@ -99,14 +99,14 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
     if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after)) {
       ps_front.dist -= param->wall_off_pass_through_offset_r;
       ps_front.dist = MAX(ps_front.dist, 0.1);
-      return;
+      return true;
     }
 
     // 見逃し対応：通過して完全に壁がなくなった場合
     if (strategy.detect_pass_through_case2(tmp_dist_before, tmp_dist_after)) {
       ps_front.dist -= param->wall_off_pass_through_offset_r;
       ps_front.dist = MAX(ps_front.dist, 0.1);
-      return;
+      return true;
     }
 
     // // 見逃し対策：壁がないときに見切れた場合
@@ -118,17 +118,17 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
     // フロントセンサー補正
     if (apply_front_sensor_correction(ps_front, tmp_dist_before,
                                       tmp_dist_after)) {
-      return;
+      return true;
     }
 
     if (strategy.detect_distance(tmp_dist_before, tmp_dist_after)) {
       ps_front.dist -= param->wall_off_pass_through_offset_r;
       ps_front.dist = MAX(ps_front.dist, 0.1);
-      return;
+      return true;
     }
 
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return;
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
@@ -146,14 +146,14 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
       if (strategy.detect_wall_off(exist)) {
         ps_front.dist += p_wall_off.right_str_exist;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
     } else {
       // 壁が見切れかけ始めたら
       if (strategy.detect_wall_missing_by_deviation(exist)) {
         ps_front.dist += p_wall_off.right_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
       // if (strategy.detect_wall_off_vertical()) {
       //   ps_front.dist += p_wall_off.right_str;
@@ -163,13 +163,14 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
     }
 
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return;
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
+  return false;
 }
 
-void IRAM_ATTR
+bool IRAM_ATTR
 WallOffController::process_left_wall_off(param_straight_t &ps_front) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
@@ -193,13 +194,13 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
       if (strategy.wall_missing()) {
         ps_front.dist += p_wall_off.left_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
     } else {
       if (strategy.wall_missing()) {
         ps_front.dist += p_wall_off.left_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
       break;
     }
@@ -208,14 +209,14 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
     if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after)) {
       ps_front.dist -= param->wall_off_pass_through_offset_l;
       ps_front.dist = MAX(ps_front.dist, 0.1);
-      return;
+      return true;
     }
 
     // 見逃し対応：通過して完全に壁がなくなった場合
     if (strategy.detect_pass_through_case2(tmp_dist_before, tmp_dist_after)) {
       ps_front.dist -= param->wall_off_pass_through_offset_l;
       ps_front.dist = MAX(ps_front.dist, 0.1);
-      return;
+      return true;
     }
 
     // // 見逃し対策：壁がないときに見切れた場合
@@ -227,17 +228,17 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
     // フロントセンサー補正
     if (apply_front_sensor_correction(ps_front, tmp_dist_before,
                                       tmp_dist_after)) {
-      return;
+      return true;
     }
 
     if (strategy.detect_distance(tmp_dist_before, tmp_dist_after)) {
       ps_front.dist -= param->wall_off_pass_through_offset_l;
       ps_front.dist = MAX(ps_front.dist, 0.1);
-      return;
+      return true;
     }
 
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return;
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
@@ -255,14 +256,14 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
       if (strategy.detect_wall_off(exist)) {
         ps_front.dist += p_wall_off.left_str_exist;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
     } else {
       // 壁が見切れかけ始めたら
       if (strategy.detect_wall_missing_by_deviation(exist)) {
         ps_front.dist += p_wall_off.left_str;
         ps_front.dist = MAX(ps_front.dist, 0.1);
-        return;
+        return true;
       }
       // if (strategy.detect_wall_off_vertical()) {
       //   ps_front.dist += p_wall_off.left_str;
@@ -272,10 +273,11 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
     }
 
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return;
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
+  return false;
 }
 
 bool IRAM_ATTR WallOffController::apply_front_sensor_correction(
@@ -447,10 +449,10 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
                         param->dia_turn_max_dist_l);
       ps_front.dist = ps_front.dist + diff;
       use_oppo_wall = true;
-      return false;
+      return true;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return false;
+      return true;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
@@ -533,10 +535,10 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
                         param->dia_turn_max_dist_r);
       ps_front.dist = ps_front.dist + diff;
       use_oppo_wall = true;
-      return false;
+      return true;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return false;
+      return true;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
