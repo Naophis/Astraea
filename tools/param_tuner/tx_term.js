@@ -41,7 +41,7 @@ const callerFun = async (mode) => {
   while (true) {
     const files = fs.readdirSync(__dirname + `/profile/${mode}/`);
     var list = ["system.yaml", "hardware.yaml"].concat(files.filter((file) => {
-      return file.match(/.yaml$/);
+      return file.match(/.yaml$/) || file.match(/.maze$/);
     }));
     let col = 5;
     for (var i = 0; list.length;) {
@@ -69,7 +69,13 @@ const callerFun = async (mode) => {
           let txt = fs.readFileSync(`${__dirname}/profile/${mode}/${file}`, {
             encoding: "utf-8",
           });
-          var file_name = file.replace("yaml", mode);
+          let file_name = "";
+          if (file.match(/.maze$/)) {
+            file_name = "maze.txt";
+            console.log(txt)
+          } else if (file.match(/.yaml$/)) {
+            file_name = file.replace("yaml", mode);
+          }
           if (file === "maze.yaml") {
             // var str = `${file_name}@${txt}`;
             // write(str);
@@ -90,7 +96,15 @@ const callerFun = async (mode) => {
         let txt = fs.readFileSync(`${__dirname}/profile/${file}`, {
           encoding: "utf-8",
         });
-        var file_name = file.replace("yaml", "txt");
+
+        let file_name = "";
+        if (file.match(/.maze$/)) {
+          file_name = "maze.txt";
+          console.log(txt)
+        } else if (file.match(/.yaml$/)) {
+          file_name = file.replace("yaml", "txt");
+        }
+
         var saveData = yaml.load(txt);
         // console.log(saveData)
         var str = `${file_name}@${JSON.stringify(saveData)}`;
@@ -122,7 +136,14 @@ const callerFun = async (mode) => {
         let txt = fs.readFileSync(`${__dirname}/profile/${mode}/${list[idx]}`, {
           encoding: "utf-8",
         });
-        var file_name = list[idx].replace("yaml", mode);
+
+        let file_name = "";
+        if (list[idx].match(/.maze$/)) {
+          file_name = `maze.${mode}`;
+        } else if (list[idx].match(/.yaml$/)) {
+          file_name = list[idx].replace("yaml", mode);
+        }
+
         console.log(file_name)
 
         if (file_name === "maze.hf") {

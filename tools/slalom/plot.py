@@ -37,14 +37,14 @@ class Plot:
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
-                rad = 56.5
+                rad = 60.5
                 n = 4
                 tgt_ang = 90.0
                 start_ang = 0
                 end_pos = {"x": 90, "y": 90}
         elif type == "orval":
             if hf_cl == 0:
-                rad = 52.0
+                rad = 50.250
                 n = 4
                 tgt_ang = 180.0
                 # tgt_ang = 180
@@ -56,7 +56,7 @@ class Plot:
             tgt_ang = 45.0
             start_ang = 0
             n = 6
-            rad = 56.0
+            rad = 54.0
 
             if hf_cl == 0:
                 # rad = 80.0
@@ -68,7 +68,7 @@ class Plot:
             n = 4.0
 
             if hf_cl == 0:
-                rad = 33.0
+                rad = 49.0
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":

@@ -237,7 +237,7 @@ angle_pid: # pid for angle
   # i: 0.0
   # d: 9.5
   mode: 0
-  b: 0.2 #deg
+  b: 40 #deg
   c: 0
 
   # p: 7.50
@@ -317,18 +317,18 @@ str_ang_pid:
   # i: 0.125
   # c: 0
 
-str_ang_dia_pid: #not use
-  # p: 0.095
-  # d: 1.25
-  p: 0.0
-  # p: 0.0125
-  # d: 0.000275
-  # p: 0
-  d: 0
-  i: 0.0
-  mode: 1
-  b: 0
-  c: 0
+# str_ang_dia_pid: #not use
+#   # p: 0.095
+#   # d: 1.25
+#   p: 0.0
+#   # p: 0.0125
+#   # d: 0.000275
+#   # p: 0
+#   d: 0
+#   i: 0.0
+#   mode: 1
+#   b: 0
+#   c: 0
 sensor_pid_dia:
   p: 0.0975
   # p: 0.15
@@ -356,12 +356,8 @@ gyro_param:
 #   gyro_w_gain_left: 0.0024475
 #   gyro_w_gain_right: 0.0024475
 #   lp_delay: 1
-accel_x_param:
-  # gain: 315.56 # 16g
-  # gain: 155.75 # 8g
-  gain: 77.5 # 4g
-  # gain: 0.161595
-  # gain: 1.212 # 4g
+# accel_x_param: # not use
+#   gain: 77.5 # 4g
 
 # comp_v_param:
 #   enc_v_lp: 0

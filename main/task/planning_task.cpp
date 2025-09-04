@@ -1102,8 +1102,8 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     tgt_val->ego_in.v = 0;
     tgt_val->ego_in.w = 0;
   }
-  se->ego.accel_x_raw = param_ro->accel_x_param.gain *
-                        (se->accel_x.raw - tgt_val->accel_x_zero_p_offset);
+  // se->ego.accel_x_raw = param_ro->accel_x_param.gain *
+  //                       (se->accel_x.raw - tgt_val->accel_x_zero_p_offset);
 
   if (param_ro->comp_param.enable == 1) {
     // se->ego.v_lp = (1 - param_ro->comp_param.v_lp_gain) * se->ego.v_c +
@@ -2587,7 +2587,9 @@ void IRAM_ATTR PlanningTask::calc_translational_ctrl() {
                  vel_pid.simple_pid_controller_DW.Integrator_DSTATE, 0, 0, 0,
                  0);
   } else {
-    if (tgt_val->motion_type == MotionType::STRAIGHT) {
+    if (tgt_val->motion_type == MotionType::STRAIGHT ||
+        tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
       //加速から減速に切り替わったら
       if (last_accl > 0 && tgt_val->ego_in.accl < 0) {
         ee->v.error_i *= param_ro->ff_front_gain_decel;

@@ -610,13 +610,13 @@ void MainTask::load_hw_param() {
   param->str_ang_pid.c = getItem(str_ang_pid, "c")->valuedouble;
   param->str_ang_pid.mode = getItem(str_ang_pid, "mode")->valueint;
 
-  str_ang_dia_pid = getItem(root, "str_ang_dia_pid");
-  param->str_ang_dia_pid.p = getItem(str_ang_dia_pid, "p")->valuedouble;
-  param->str_ang_dia_pid.i = getItem(str_ang_dia_pid, "i")->valuedouble;
-  param->str_ang_dia_pid.d = getItem(str_ang_dia_pid, "d")->valuedouble;
-  param->str_ang_dia_pid.b = getItem(str_ang_dia_pid, "b")->valuedouble;
-  param->str_ang_dia_pid.c = getItem(str_ang_dia_pid, "c")->valuedouble;
-  param->str_ang_dia_pid.mode = getItem(str_ang_dia_pid, "mode")->valueint;
+  // str_ang_dia_pid = getItem(root, "str_ang_dia_pid");
+  // param->str_ang_dia_pid.p = getItem(str_ang_dia_pid, "p")->valuedouble;
+  // param->str_ang_dia_pid.i = getItem(str_ang_dia_pid, "i")->valuedouble;
+  // param->str_ang_dia_pid.d = getItem(str_ang_dia_pid, "d")->valuedouble;
+  // param->str_ang_dia_pid.b = getItem(str_ang_dia_pid, "b")->valuedouble;
+  // param->str_ang_dia_pid.c = getItem(str_ang_dia_pid, "c")->valuedouble;
+  // param->str_ang_dia_pid.mode = getItem(str_ang_dia_pid, "mode")->valueint;
 
   motor_pid2 = getItem(root, "motor_pid2");
   param->motor_pid2.p = getItem(motor_pid2, "p")->valuedouble;
@@ -733,8 +733,8 @@ void MainTask::load_hw_param() {
   // param->gyro2_param.lp_delay = getItem(gyro2_param,
   // "lp_delay")->valuedouble;
 
-  accel_x = getItem(root, "accel_x_param");
-  param->accel_x_param.gain = getItem(accel_x, "gain")->valuedouble;
+  // accel_x = getItem(root, "accel_x_param");
+  // param->accel_x_param.gain = getItem(accel_x, "gain")->valuedouble;
 
   battery_param = getItem(root, "battery_param");
   param->battery_param.lp_delay =
@@ -2028,29 +2028,29 @@ void MainTask::task() {
           vTaskDelay(10.0 / portTICK_RATE_MS);
         }
         search_ctrl->print_maze();
-      } else if (mode_num == 2) {
+      } else if (mode_num == 2) { //...o..
         path_run(1, 1, 1);
-      } else if (mode_num == 3) {
+      } else if (mode_num == 3) { //...o.o
         path_run(2, 2, 2);
-      } else if (mode_num == 4) {
+      } else if (mode_num == 4) { //...oo.
         path_run(3, 3, 3);
-      } else if (mode_num == 5) {
+      } else if (mode_num == 5) { //...ooo
         path_run(6, 4, 3);
-      } else if (mode_num == 6) {
+      } else if (mode_num == 6) { //..o...
         path_run(7, 5, 3);
-      } else if (mode_num == 7) {
+      } else if (mode_num == 7) { //..o..o
         path_run(8, 6, 3);
-      } else if (mode_num == 8) {
+      } else if (mode_num == 8) { //..o.o.
         path_run(9, 7, 3);
-      } else if (mode_num == 9) {
+      } else if (mode_num == 9) { //..o.oo
         path_run(10, 8, 3);
-      } else if (mode_num == 10) {
+      } else if (mode_num == 10) { //..oo..
         path_run(10, 9, 3);
-      } else if (mode_num == 11) {
+      } else if (mode_num == 11) { //..oo.o
         path_run(11, 10, 3);
-      } else if (mode_num == 12) {
+      } else if (mode_num == 12) { //..ooo.
         path_run(12, 11, 3);
-      } else if (mode_num == 13) {
+      } else if (mode_num == 13) { //..oooo
         path_run(13, 12, 3);
       } else if (mode_num == 14) {
         printf("keep_pivot\n");
