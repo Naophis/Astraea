@@ -1,0 +1,295 @@
+vel_prof:
+  - search:
+      v_max: 400
+      accl: 2500
+      decel: -2500
+      w_max: 20.5
+      w_end: 0.1
+      alpha: 180
+    fast_run:
+      v_max: 550
+      accl: 1500
+      decel: -2500
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 500
+      accl: 2500
+      decel: -2500
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 400
+      accl: 2500
+      decel: -2500
+      w_max: 20.5
+      w_end: 0.1
+      alpha: 180
+    fast_run:
+      v_max: 1000
+      accl: 2500
+      decel: -4500
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 1000
+      accl: 2500
+      decel: -4500
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 4500
+      accl: 38000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 4500
+      accl: 32000
+      decel: -38000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 5000
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 4500
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 7750
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 7750
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+  - search:
+      v_max: 500
+      accl: 1000
+      decel: -1000
+      w_max: 5
+      w_end: 0.1
+      alpha: 10
+    fast_run:
+      v_max: 8500
+      accl: 42000
+      decel: -50000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120
+    fast_run_dia:
+      v_max: 5000
+      accl: 36000
+      decel: -45000
+      w_max: 22.5
+      w_end: 0.1
+      alpha: 120

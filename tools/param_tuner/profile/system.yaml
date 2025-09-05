@@ -58,8 +58,8 @@ maze_size: 32
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-# mode: 0 # メイン
-mode: 1 # 最短スローム
+mode: 0 # メイン
+# mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -112,8 +112,8 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty: 2.75
   suction_duty_low: 2.50
   # Alter
-  suction_duty_burst: 4.0
-  suction_duty_burst_low: 3.75
+  suction_duty_burst: 4.25
+  suction_duty_burst_low: 4.0
   # Nova
   # suction_duty_burst: 3.75
   # suction_duty_burst_low: 3.5

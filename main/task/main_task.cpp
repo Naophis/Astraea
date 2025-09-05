@@ -1600,9 +1600,14 @@ void MainTask::load_straight(
     return;
   }
   const auto file_name = tpp.file_list[idx];
-  const auto path = std::string("/spiflash/" + file_name);
+  string fileName = "/spiflash/vel_prof.txt";
 
-  std::ifstream ifs(path);
+  if (sys.hf_cl == 0) {
+    fileName = "/spiflash/vel_prof.hf";
+  } else {
+    fileName = "/spiflash/vel_prof.cl";
+  }
+  std::ifstream ifs(fileName);
   std::string str = "";
   std::string buf;
   while (!ifs.eof()) {
@@ -1610,28 +1615,29 @@ void MainTask::load_straight(
     str += buf;
   }
   ifs.close();
-  cJSON *root = cJSON_CreateObject();
+  cJSON *root = cJSON_CreateObject(), *vel_prof;
   root = cJSON_Parse(str.c_str());
   str.shrink_to_fit();
-  const auto key = "straight";
+
+  vel_prof = getItem(root, "vel_prof");
+  int prof_size = cJSON_GetArraySize(vel_prof);
+
+  const auto vel_prof_detail = cJSON_GetArrayItem(vel_prof, idx);
+
   for (const auto &p2 : straight_name_list) {
-    str_p.v_max =
-        getItem(getItem(getItem(root, key), p2.second.c_str()), "v_max")
-            ->valuedouble;
-    str_p.accl = getItem(getItem(getItem(root, key), p2.second.c_str()), "accl")
+
+    str_p.v_max = getItem(getItem(vel_prof_detail, p2.second.c_str()), "v_max")
+                      ->valuedouble;
+    str_p.accl = getItem(getItem(vel_prof_detail, p2.second.c_str()), "accl")
                      ->valuedouble;
-    str_p.decel =
-        getItem(getItem(getItem(root, key), p2.second.c_str()), "decel")
-            ->valuedouble;
-    str_p.w_max =
-        getItem(getItem(getItem(root, key), p2.second.c_str()), "w_max")
-            ->valuedouble;
-    str_p.w_end =
-        getItem(getItem(getItem(root, key), p2.second.c_str()), "w_end")
-            ->valuedouble;
-    str_p.alpha =
-        getItem(getItem(getItem(root, key), p2.second.c_str()), "alpha")
-            ->valuedouble;
+    str_p.decel = getItem(getItem(vel_prof_detail, p2.second.c_str()), "decel")
+                      ->valuedouble;
+    str_p.w_max = getItem(getItem(vel_prof_detail, p2.second.c_str()), "w_max")
+                      ->valuedouble;
+    str_p.w_end = getItem(getItem(vel_prof_detail, p2.second.c_str()), "w_end")
+                      ->valuedouble;
+    str_p.alpha = getItem(getItem(vel_prof_detail, p2.second.c_str()), "alpha")
+                      ->valuedouble;
     str_map[p2.first] = str_p;
     if (!silent_load) {
       printf("[%d][%d]: (v_max, accl, decel, w_max, w_end, alpha) = (%4.1f, "
