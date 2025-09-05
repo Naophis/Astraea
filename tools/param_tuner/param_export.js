@@ -3,17 +3,18 @@ function main() {
   const sheet = SpreadsheetApp.getActiveSheet();
 
   const { file_list, profile_idx } = get_vel_list(sheet);
-  const profile = get_vel_profile(sheet);
-  let obj = {}
+  const vel_prof = get_vel_profile(sheet);
 
-  obj.list = file_list;
-  obj.profile_idx_size = file_list.length;
-  obj.profile_idx = profile_idx;
-  obj.vel_prof = profile
+  const yaml = yamlStringify({
+    list: file_list,
+    profile_idx_size: file_list.length,
+    profile_idx: profile_idx,
+  });
+  const yaml2 = yamlStringify({
+    vel_prof: vel_prof
+  });
 
-  const yaml = yamlStringify(obj);
-
-  showCopyDialog(yaml);
+  showCopyDialog(yaml, yaml2);
 }
 /** YAMLテキストをHTMLに安全に埋め込むためのエスケープ */
 const escapeHtml_ = (s) => {
@@ -23,11 +24,15 @@ const escapeHtml_ = (s) => {
     .replace(/>/g, '&gt;');
 }
 
-const showCopyDialog = (text, title = 'コピー') => {
+const showCopyDialog = (text, text2, title = 'convert') => {
   const html = HtmlService.createHtmlOutput(`
     <div style="font: 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; padding:12px; width: 560px;">
       <p style="margin:0 0 8px;">生成された YAML</p>
-      <textarea id="yaml" style="width:100%; height:300px; box-sizing:border-box;">${escapeHtml_(text)}</textarea>
+      <div style="display:flex; gap:8px;">
+        <textarea id="yaml" style="width:50%; height:300px; box-sizing:border-box;">${escapeHtml_(text)}</textarea>
+        <textarea id="yaml2" style="width:50%; height:300px; box-sizing:border-box;">${escapeHtml_(text2)}</textarea>
+      <div/>
+      <div/>
       <div style="margin-top:10px; display:flex; gap:8px;">
         <button onclick="copyYaml()" style="padding:6px 12px;">クリップボードにコピー</button>
         <button onclick="google.script.host.close()" style="padding:6px 12px;">閉じる</button>
