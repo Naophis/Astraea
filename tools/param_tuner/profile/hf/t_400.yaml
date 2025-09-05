@@ -1,27 +1,3 @@
-straight:
-  search:
-    # v_max: 420
-    v_max: 400
-    # v_max: 550
-    accl: 2500
-    decel: -2500
-    w_max: 22.5
-    w_end: 0.1
-    alpha: 240
-  fast_run:
-    v_max: 1000
-    accl: 2500
-    decel: -4500
-    w_max: 22.5
-    w_end: 0.1
-    alpha: 240
-  fast_run_dia:
-    v_max: 1000
-    accl: 2500
-    decel: -4500
-    w_max: 22.5
-    w_end: 0.1
-    alpha: 240
 orval:
   v: 400
   ang: 180
