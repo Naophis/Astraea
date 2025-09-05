@@ -202,8 +202,8 @@ private:
 
   std::vector<std::pair<StraightType, std::string>> straight_name_list = {
       {StraightType::Search, "search"},          //
-      {StraightType::FastRun, "fast_run"},       //
-      {StraightType::FastRunDia, "fast_run_dia"} //
+      {StraightType::FastRun, "fast"},       //
+      {StraightType::FastRunDia, "dia"} //
   };
 };
 

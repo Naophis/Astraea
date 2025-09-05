@@ -1,295 +1,358 @@
-vel_prof:
+v_prof:
   - search:
-      v_max: 400
-      accl: 2500
-      decel: -2500
-      w_max: 20.5
-      w_end: 0.1
-      alpha: 180
-    fast_run:
-      v_max: 550
-      accl: 1500
-      decel: -2500
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 500
-      accl: 2500
-      decel: -2500
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 400
+      a: 2500
+      d: -2500
+      w0: 20.5
+      w1: 0.1
+      a2: 180
+    fast:
+      v: 550
+      a: 1500
+      d: -2500
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 500
+      a: 2500
+      d: -2500
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 400
-      accl: 2500
-      decel: -2500
-      w_max: 20.5
-      w_end: 0.1
-      alpha: 180
-    fast_run:
-      v_max: 1000
-      accl: 2500
-      decel: -4500
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 1000
-      accl: 2500
-      decel: -4500
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 400
+      a: 2500
+      d: -2500
+      w0: 20.5
+      w1: 0.1
+      a2: 180
+    fast:
+      v: 1000
+      a: 2500
+      d: -4500
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 1000
+      a: 2500
+      d: -4500
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 4500
-      accl: 38000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 4500
-      accl: 32000
-      decel: -38000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 4500
+      a: 38000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 4500
+      a: 32000
+      d: -38000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 5000
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 4500
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 5000
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 4500
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 7750
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 7750
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 7750
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 7750
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
   - search:
-      v_max: 500
-      accl: 1000
-      decel: -1000
-      w_max: 5
-      w_end: 0.1
-      alpha: 10
-    fast_run:
-      v_max: 8500
-      accl: 42000
-      decel: -50000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
-    fast_run_dia:
-      v_max: 5000
-      accl: 36000
-      decel: -45000
-      w_max: 22.5
-      w_end: 0.1
-      alpha: 120
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+  - search:
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+  - search:
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+  - search:
+      v: 500
+      a: 1000
+      d: -1000
+      w0: 5
+      w1: 0.1
+      a2: 10
+    fast:
+      v: 8500
+      a: 42000
+      d: -50000
+      w0: 22.5
+      w1: 0.1
+      a2: 120
+    dia:
+      v: 5000
+      a: 36000
+      d: -45000
+      w0: 22.5
+      w1: 0.1
+      a2: 120

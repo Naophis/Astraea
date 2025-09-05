@@ -11,7 +11,7 @@ function main() {
     profile_idx: profile_idx,
   });
   const yaml2 = yamlStringify({
-    vel_prof: vel_prof
+    v_prof: vel_prof
   });
 
   showCopyDialog(yaml, yaml2);
@@ -169,13 +169,13 @@ const get_vel_profile = (sheet) => {
 
     return {
       search: search_profile[idx],
-      fast_run: fast_profile[idx],
-      fast_run_dia: fast_dia_profile[idx]
+      fast: fast_profile[idx],
+      dia: fast_dia_profile[idx]
     };
   }).filter((ele) => {
     return (ele.search !== undefined) &&
-      (ele.fast_run !== undefined) &&
-      (ele.fast_run_dia !== undefined);
+      (ele.fast !== undefined) &&
+      (ele.dia !== undefined);
   });
 }
 
@@ -208,12 +208,12 @@ const get_vel_profile_detail = (sheet, slice_from, slice_to, get_header) => {
     })
   }).map((ele, idx) => {
     return {
-      v_max: ele[0],
-      accl: ele[1],
-      decel: ele[2],
-      w_max: ele[3],
-      w_end: ele[4],
-      alpha: ele[5]
+      v: ele[0],
+      a: ele[1],
+      d: ele[2],
+      w0: ele[3],
+      w1: ele[4],
+      a2: ele[5]
     }
   });
   // console.log(prof);

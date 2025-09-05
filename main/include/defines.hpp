@@ -126,7 +126,7 @@ constexpr uint8_t READ_FLAG = 0x80;
 constexpr uint16_t READ_FLAG2 = 0b01000000;
 constexpr uint16_t PARITY_FLAG = 0b10000000;
 constexpr uint8_t ESC = 0x1B;
-constexpr uint16_t BUF_SIZE = 4096;
+constexpr uint16_t BUF_SIZE = 8192;
 
 constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 90 * 1;

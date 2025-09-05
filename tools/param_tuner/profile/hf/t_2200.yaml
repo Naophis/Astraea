@@ -1,25 +1,3 @@
-straight:
-  search:
-    v_max: 500
-    accl: 1000
-    decel: -1000
-    w_max: 5
-    w_end: 0.1
-    alpha: 10
-  fast_run:
-    v_max: 8500
-    accl: 42000
-    decel: -50000
-    w_max: 5
-    w_end: 0.1
-    alpha: 10
-  fast_run_dia:
-    v_max: 5000
-    accl: 36000
-    decel: -45000
-    w_max: 5
-    w_end: 0.1
-    alpha: 10
 orval:
   v: 2200
   ang: 180.5
@@ -54,8 +32,8 @@ large:
   pow_n: 4
   rad: 62.5
   time: 0.02924999999999851
-  front: { left: 4.5052694878657064, right: 4.5052694878657064 }
-  back: { left: 49.59381550343086, right: 55.59381550343086 }
+  front: { left: 7.5052694878657064, right: 7.5052694878657064 }
+  back: { left: 55.59381550343086, right: 55.59381550343086 }
 dia45:
   v: 2200
   ang: 45.0
