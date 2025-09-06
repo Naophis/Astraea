@@ -69,7 +69,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 9500
+log_size: 9000
 
 front_ctrl_error_th: 1
 
@@ -433,8 +433,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 126 #125~144
-normal_sla_r_wall_off_ref_cnt: 129 #125~144
+normal_sla_l_wall_off_ref_cnt: 127 #125~144
+normal_sla_r_wall_off_ref_cnt: 128 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6

@@ -9,7 +9,7 @@ orval:
   front: { left: 12, right: 12 }
   back: { left: 5, right: 5 }
 
-normal:
+normal: # not used
   v: 300
   ang: 90
   pow_n: 2

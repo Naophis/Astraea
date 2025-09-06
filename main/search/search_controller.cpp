@@ -692,12 +692,12 @@ SearchResult SearchController::exec(param_set_t &p_set, SearchMode sm) {
   if (timeup) {
     timeup_motion(p_set);
   }
+  lt->stop_slalom_log();
   if (state) {
     save_maze_data();
     mp->coin();
     mp->coin();
   }
-  lt->stop_slalom_log();
   lt->save(slalom_log_file);
   mp->coin();
   pt->search_mode = false;
@@ -901,12 +901,23 @@ void SearchController::print_maze() {
 void SearchController::save_maze_data() {
   // auto *f = fopen(maze_log_kata_file.c_str(), "wb");
   mount();
-  auto *f = fopen(maze_log_file.c_str(), "wb");
-  if (f == NULL)
+  FILE *f;
+  for (int i = 0; i < 10; i++) {
+    errno = 0; // ← 毎回リセット
+    f = fopen(maze_log_file.c_str(), "wb");
+    if (f != NULL) {
+      break;
+    }
+  }
+  if (f == NULL) {
+    ui->error();
+    umount();
     return;
+  }
   for (const auto d : lgc->map) {
     fprintf(f, "%d,", d);
   }
+  fflush(f);
   fclose(f);
   umount();
 }

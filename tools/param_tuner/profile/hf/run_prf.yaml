@@ -1,0 +1,40 @@
+exec_prof:
+  - fast: 1
+    normal: 1
+    slow: 1
+  - fast: 2
+    normal: 2
+    slow: 2
+  - fast: 3
+    normal: 3
+    slow: 3
+  - fast: 6
+    normal: 4
+    slow: 5
+  - fast: 7
+    normal: 5
+    slow: 5
+  - fast: 8
+    normal: 6
+    slow: 5
+  - fast: 9
+    normal: 7
+    slow: 5
+  - fast: 10
+    normal: 8
+    slow: 5
+  - fast: 10
+    normal: 9
+    slow: 5
+  - fast: 11
+    normal: 10
+    slow: 5
+  - fast: 12
+    normal: 11
+    slow: 5
+  - fast: 13
+    normal: 12
+    slow: 5
+  - fast: 13
+    normal: 12
+    slow: 5

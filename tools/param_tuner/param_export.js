@@ -14,7 +14,11 @@ function main() {
     v_prof: vel_prof
   });
 
-  showCopyDialog(yaml, yaml2);
+  const yaml3 = yamlStringify({
+    exec_prof: get_exe_params(sheet)
+  });
+
+  showCopyDialog(yaml, yaml2, yaml3);
 }
 /** YAMLテキストをHTMLに安全に埋め込むためのエスケープ */
 const escapeHtml_ = (s) => {
@@ -24,13 +28,14 @@ const escapeHtml_ = (s) => {
     .replace(/>/g, '&gt;');
 }
 
-const showCopyDialog = (text, text2, title = 'convert') => {
+const showCopyDialog = (text, text2, text3, title = 'convert') => {
   const html = HtmlService.createHtmlOutput(`
     <div style="font: 13px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Helvetica Neue', Arial, sans-serif; padding:12px; width: 560px;">
       <p style="margin:0 0 8px;">生成された YAML</p>
       <div style="display:flex; gap:8px;">
         <textarea id="yaml" style="width:50%; height:300px; box-sizing:border-box;">${escapeHtml_(text)}</textarea>
         <textarea id="yaml2" style="width:50%; height:300px; box-sizing:border-box;">${escapeHtml_(text2)}</textarea>
+        <textarea id="yaml2" style="width:50%; height:300px; box-sizing:border-box;">${escapeHtml_(text3)}</textarea>
       <div/>
       <div/>
       <div style="margin-top:10px; display:flex; gap:8px;">
@@ -165,8 +170,6 @@ const get_vel_profile = (sheet) => {
   const fast_dia_profile = get_vel_profile_detail(sheet, 16, 22);
 
   return headers.map((ele, idx) => {
-    console.log(search_profile[idx]);
-
     return {
       search: search_profile[idx],
       fast: fast_profile[idx],
@@ -217,5 +220,38 @@ const get_vel_profile_detail = (sheet, slice_from, slice_to, get_header) => {
     }
   });
   // console.log(prof);
+  return prof;
+}
+
+
+const get_exe_params = (sheet) => {
+  const values = sheet.getRange("C14:U18").getValues();
+
+  const headers = values[0];       // C14〜Z14
+
+  const prof_row = values.slice(1, 4);
+
+  let prof = headers.map((head, idx) => {
+    let tmp = {};
+    if (head !== "" && head !== null) {
+      // 各列の20〜26行目だけ抽出
+      const colValues = prof_row.map(row => row[idx]);
+      tmp = colValues;
+    }
+    return tmp;
+  }).filter((ele) => {
+    if (ele === undefined || ele[0] === undefined) {
+      return false;
+    }
+    return ele.every((e) => {
+      return typeof e === "number";
+    })
+  }).map((ele, idx) => {
+    return {
+      fast: ele[0],
+      normal: ele[1],
+      slow: ele[2],
+    }
+  });
   return prof;
 }

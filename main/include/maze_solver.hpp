@@ -163,6 +163,11 @@ enum class StraightType : int {
   FastRun = 1,
   FastRunDia = 2,
 };
+enum class ExecParamType : int {
+  Fast = 0,
+  Normal = 1,
+  Slow = 2,
+};
 
 enum class TurnType : int {
   None = 0,

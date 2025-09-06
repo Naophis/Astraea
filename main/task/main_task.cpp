@@ -265,13 +265,15 @@ void MainTask::dump2() {
 int MainTask::select_mode() {
   int mode_num = 0;
   lbit.byte = 0;
+
+  char max_mode_idx = 2 + exec_param_list.size() + 4;
   while (1) {
     int res = ui->encoder_operation();
     mode_num += res;
     if (mode_num == -1) {
-      mode_num = 17;
-    } else if (mode_num == 18) {
-      mode_num = (int)(MODE::SEARCH);
+      mode_num = max_mode_idx - 1;
+    } else if (mode_num == max_mode_idx) {
+      mode_num = 0;
     }
     lbit.byte = mode_num + 1;
     ui->LED_bit(lbit.b0, lbit.b1, lbit.b2, lbit.b3, lbit.b4, lbit.b5);
@@ -347,8 +349,10 @@ void MainTask::save_json_data(std::string &str) {
   // mount領域+ファイル名を指定しファイルを開く
   auto tgt_file = "/spiflash/" + res[0];
   auto *f = fopen(tgt_file.c_str(), "wb");
-  if (f == NULL)
+  if (f == NULL) {
+    umount();
     return;
+  }
   // 書き込み&ファイルclose
   fprintf(f, res[1].c_str());
   fflush(f);
@@ -1386,6 +1390,44 @@ void MainTask::load_sensor_param() {
   cJSON_Delete(root);
 }
 
+void MainTask::exec_param_prof() {
+  mount();
+  string fileName = "/spiflash/run_prf.txt";
+  if (sys.hf_cl == 0) {
+    fileName = "/spiflash/run_prf.hf";
+  } else {
+    fileName = "/spiflash/run_prf.cl";
+  }
+  std::ifstream ifs(fileName);
+  if (!ifs) {
+    printf("not found\n");
+    return;
+  }
+  std::string str;
+  std::string buf;
+  while (!ifs.eof()) {
+    std::getline(ifs, buf);
+    str += buf;
+  }
+  exec_param_list.clear();
+  cJSON *root = cJSON_CreateObject(), *exec_prof;
+  root = cJSON_Parse(str.c_str());
+  exec_prof = getItem(root, "exec_prof");
+  int exec_prof_size = cJSON_GetArraySize(exec_prof);
+  printf("exec_prof_size: %d\n", exec_prof_size);
+
+  for (int i = 0; i < exec_prof_size; i++) {
+    const auto prof = cJSON_GetArrayItem(exec_prof, i);
+    exec_pram_t ep;
+    ep.fast_idx = getItem(prof, "fast")->valueint;     // 0
+    ep.normal_idx = getItem(prof, "normal")->valueint; // 1
+    ep.slow_idx = getItem(prof, "slow")->valueint;     // 2
+    exec_param_list.emplace_back(ep);
+  }
+  printf("exec_prof_size2: %d\n", exec_param_list.size());
+  cJSON_Delete(root);
+  umount();
+}
 void MainTask::load_circuit_path() {
   mount();
   string fileName = "/spiflash/circuit.hf";
@@ -1422,8 +1464,6 @@ void MainTask::load_circuit_path() {
     pc->path_s.emplace_back(str);
     pc->path_t.emplace_back(turn);
   }
-
-  printf("path_size2: %d %d\n", pc->path_s.size(), pc->path_t.size());
 
   cJSON_Delete(root);
   umount();
@@ -1737,7 +1777,8 @@ void MainTask::load_slas(
     //     printf("     - rad2: %f\n", turn_map[p.first].rad2);
     //     printf("     - time2: %f\n", turn_map[p.first].time2);
     //   }
-    //   printf("     - front: [%0.2f, %0.2f]\n", turn_map[p.first].front.left,
+    //   printf("     - front: [%0.2f, %0.2f]\n",
+    //   turn_map[p.first].front.left,
     //          turn_map[p.first].front.right);
     //   printf("     - back: [%0.2f, %0.2f]\n", turn_map[p.first].back.left,
     //          turn_map[p.first].back.right);
@@ -1754,6 +1795,7 @@ void MainTask::load_slas(
 }
 void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
   mount();
+  printf("load_slalom_param: %d, %d, %d\n", idx, idx2, idx3);
   param_set.suction = tpp.profile_map[idx][TurnType::Finish];
 
   if (param_set.suction == 1) {
@@ -1781,6 +1823,7 @@ void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
   for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
     load_slas(itr->first, itr->second, param_set.map_fast);
   }
+  printf("------\n");
   // load normal param
   turn_map.clear();
   for (const auto &p : turn_name_list) {
@@ -1794,6 +1837,8 @@ void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
     load_slas(itr->first, itr->second, param_set.map);
   }
   // load slow param
+
+  printf("------\n");
   turn_map.clear();
   for (const auto &p : turn_name_list) {
     if (p.first == TurnType::None) {
@@ -1808,7 +1853,7 @@ void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
   load_straight(idx2, param_set.str_map);
   umount();
 }
-void MainTask::load_slalom_param() {}
+// void MainTask::load_slalom_param() {}
 
 void MainTask::load_param() {
   if (!ui->button_state_hold()) {
@@ -1817,6 +1862,7 @@ void MainTask::load_param() {
     load_sensor_param();
     load_turn_param_profiles(false, 0);
     load_offset_param();
+    exec_param_prof();
     mp->wall_off_controller->get_right_strategy();
     mp->wall_off_controller->get_left_strategy();
     mp->wall_off_controller->get_right_dia_strategy();
@@ -1995,6 +2041,7 @@ void MainTask::task() {
       pt->mode_select = true;
       mode_num = select_mode();
       pt->mode_select = false;
+      exec_param_prof();
       printf("%d\n", mode_num);
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
@@ -2031,51 +2078,32 @@ void MainTask::task() {
           sr = search_ctrl->exec(param_set, SearchMode::Kata);
         else
           sr = search_ctrl->exec(param_set, SearchMode::Return);
-        if (sr == SearchResult::SUCCESS)
+        if (sr == SearchResult::SUCCESS) {
           save_maze_data(true);
+        }
         while (1) {
           if (ui->button_state_hold())
             break;
           vTaskDelay(10.0 / portTICK_RATE_MS);
         }
         search_ctrl->print_maze();
-      } else if (mode_num == 2) { //...o..
-        path_run(1, 1, 1);
-      } else if (mode_num == 3) { //...o.o
-        path_run(2, 2, 2);
-      } else if (mode_num == 4) { //...oo.
-        path_run(3, 3, 3);
-      } else if (mode_num == 5) { //...ooo
-        path_run(6, 4, 3);
-      } else if (mode_num == 6) { //..o...
-        path_run(7, 5, 3);
-      } else if (mode_num == 7) { //..o..o
-        path_run(8, 6, 3);
-      } else if (mode_num == 8) { //..o.o.
-        path_run(9, 7, 3);
-      } else if (mode_num == 9) { //..o.oo
-        path_run(10, 8, 3);
-      } else if (mode_num == 10) { //..oo..
-        path_run(10, 9, 3);
-      } else if (mode_num == 11) { //..oo.o
-        path_run(11, 10, 3);
-      } else if (mode_num == 12) { //..ooo.
-        path_run(12, 11, 3);
-      } else if (mode_num == 13) { //..oooo
-        path_run(13, 12, 3);
-      } else if (mode_num == 14) {
+      } else if (2 <= mode_num && mode_num <= exec_param_list.size() - 1) {
+        const auto p = exec_param_list[mode_num - 2];
+        exec_param_list.clear();
+        path_run(p.fast_idx, p.normal_idx, p.slow_idx);
+      } else if (mode_num == (2 + exec_param_list.size())) {
         printf("keep_pivot\n");
         keep_pivot();
-      } else if (mode_num == 15) {
+      } else if (mode_num == (2 + exec_param_list.size() + 1)) {
         // dump1(); // taskの最終行に配置すること
         printf("suction\n");
         mp->reset_gyro_ref_with_check();
         pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
         vTaskDelay(1000 * 10 / portTICK_PERIOD_MS);
         pt->suction_disable();
-      } else if (mode_num == 16) {
+      } else if (mode_num == (2 + exec_param_list.size() + 2)) {
         sim_run_time_all();
-      } else if (mode_num == 17) {
+      } else if (mode_num == (2 + exec_param_list.size() + 3)) {
         save_maze_data(false);
         ui->coin(25);
         save_maze_kata_data(false);
@@ -3187,8 +3215,10 @@ void MainTask::test_sla_walloff() {
 void MainTask::save_maze_data(bool write) {
   mount();
   auto *f = fopen(maze_log_file.c_str(), "wb");
-  if (f == NULL)
+  if (f == NULL) {
+    umount();
     return;
+  }
   if (write) {
     for (const auto d : lgc->map) {
       fprintf(f, "%d,", d);
@@ -3225,8 +3255,10 @@ void MainTask::save_maze_data(bool write) {
 void MainTask::save_maze_kata_data(bool write) {
   mount();
   auto *f = fopen(maze_log_kata_file.c_str(), "wb");
-  if (f == NULL)
+  if (f == NULL) {
+    umount();
     return;
+  }
   if (write) {
     for (const auto d : lgc->map) {
       fprintf(f, "%d,", d);
@@ -3242,8 +3274,10 @@ void MainTask::save_maze_kata_data(bool write) {
 void MainTask::save_maze_return_data(bool write) {
   mount();
   auto *f = fopen(maze_log_return_file.c_str(), "wb");
-  if (f == NULL)
+  if (f == NULL) {
+    umount();
     return;
+  }
   if (write) {
     for (const auto d : lgc->map) {
       fprintf(f, "%d,", d);
@@ -3260,8 +3294,10 @@ void MainTask::save_maze_return_data(bool write) {
 void MainTask::read_maze_data() {
   mount();
   auto *f = fopen(maze_log_file.c_str(), "rb");
-  if (f == NULL)
+  if (f == NULL) {
+    umount();
     return;
+  }
   // char line_buf[LINE_BUF_SIZE];
   std::string str = "";
   while (fgets(line_buf, sizeof(line_buf), f) != NULL) {
@@ -3270,6 +3306,7 @@ void MainTask::read_maze_data() {
     str += std::string(line_buf);
   }
   printf("\n");
+  fflush(f);
   fclose(f);
   // std::string str = std::string(line_buf);
   if (str == "null")
@@ -3543,7 +3580,8 @@ void MainTask::path_run(int idx, int idx2, int idx3) {
 
   pc->calc_goal_time(param_set, true);
   pc->print_path();
-  // printf("after: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+  // printf("after: %d bytes\n",
+  // heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
   const auto backup_l45 = param->sen_ref_p.normal.exist.left45;
   const auto backup_r45 = param->sen_ref_p.normal.exist.right45;

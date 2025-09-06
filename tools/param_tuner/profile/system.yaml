@@ -1,10 +1,10 @@
 # goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
 # goals: [[8, 8],[8, 9],[9, 8],[9, 9]]
-goals: [[1, 0], [2, 0]]
+# goals: [[1, 0], [2, 0]]
 # goals: [[1, 0], [2, 0], [1, 1], [2, 1]]
 # goals: [[1, 0]]
 # goals: [[3, 0]]
-# goals: [[7, 0], [8, 0]]
+goals: [[7, 0], [8, 0]]
 # goals: [[3, 0], [4, 0]]
 # goals: [[1, 1], [1, 2], [2, 1], [2, 2]]
 # goals: [[3, 0], [3, 1], [2, 0], [2, 1]]
@@ -58,8 +58,8 @@ maze_size: 32
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-# mode: 0 # メイン
-mode: 1 # 最短スローム
+mode: 0 # メイン
+# mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -121,11 +121,11 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 16
+  file_idx: 5
   sla_dist: 90
   # sla_type: 3
-  sla_type: 3
-  sla_type2: 9 # 復路ターン種類
+  sla_type: 5
+  sla_type2: 6 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval

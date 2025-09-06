@@ -8,4 +8,5 @@
 
 void mount();
 void umount();
+bool get_mount_state();
 #endif

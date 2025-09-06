@@ -1106,6 +1106,12 @@ union uint16_bitmap {
 };
 
 typedef struct {
+  char fast_idx;
+  char normal_idx;
+  char slow_idx;
+} exec_pram_t;
+
+typedef struct {
   // int idx;
   real16_T img_v;
   real16_T v_l;

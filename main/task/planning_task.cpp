@@ -1455,12 +1455,12 @@ void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
         (tgt_val->ego_in.state == 0 || tgt_val->ego_in.state == 1) &&
         tgt_val->motion_type == MotionType::STRAIGHT) {
       duty_suction_in =
-          // 100.0 * tgt_duty.duty_suction_low / sensing_result->ego.batt_kf;
-          100.0f * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
+          100.0 * tgt_duty.duty_suction_low / sensing_result->ego.batt_kf;
+          // 100.0f * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
     } else {
       duty_suction_in =
-          // 100.0 * tgt_duty.duty_suction / sensing_result->ego.batt_kf;
-          100.0f * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
+          100.0 * tgt_duty.duty_suction / sensing_result->ego.batt_kf;
+          // 100.0f * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
     }
     if (duty_suction_in > 100) {
       duty_suction_in = 100.0f;
@@ -2276,6 +2276,9 @@ void IRAM_ATTR PlanningTask::calc_angle_i_bias() {
     ee->ang.i_bias = 0;
   } else {
     ee->ang.i_bias = tgt_val->ego_in.img_ang - kim.theta;
+  }
+  if (search_mode) {
+    ee->ang.i_bias = 0;
   }
 
   // // 4) モーション種別での無効化（あなたの既存ルールに追従）

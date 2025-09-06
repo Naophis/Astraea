@@ -24,8 +24,8 @@
 #include "include/motion_planning.hpp"
 #include "include/path_creator.hpp"
 #include "include/search_controller.hpp"
-#include "include/wall_off_controller.hpp"
 #include "include/ui.hpp"
+#include "include/wall_off_controller.hpp"
 
 // #include "libs/nlohmnn-json/json.hpp"
 #include <iostream>
@@ -163,6 +163,7 @@ private:
   load_straight(int idx,
                 std::unordered_map<StraightType, straight_param_t> &str_map);
   void load_circuit_path();
+  void exec_param_prof();
   void save_maze_data(bool write);
   void save_maze_kata_data(bool write);
   void save_maze_return_data(bool write);
@@ -187,6 +188,7 @@ private:
   float backup_r_expand;
   int file_idx;
   slalom_param2_t sla_p;
+  std::vector<exec_pram_t> exec_param_list;
 
   std::vector<std::pair<TurnType, std::string>> turn_name_list = {
       {TurnType::None, "straight"},    //
@@ -201,9 +203,14 @@ private:
   };
 
   std::vector<std::pair<StraightType, std::string>> straight_name_list = {
-      {StraightType::Search, "search"},          //
-      {StraightType::FastRun, "fast"},       //
+      {StraightType::Search, "search"}, //
+      {StraightType::FastRun, "fast"},  //
       {StraightType::FastRunDia, "dia"} //
+  };
+  std::vector<std::pair<ExecParamType, std::string>> exec_param_name_list = {
+      {ExecParamType::Fast, "fast"},     //
+      {ExecParamType::Normal, "normal"}, //
+      {ExecParamType::Slow, "slow"},     //
   };
 };
 
