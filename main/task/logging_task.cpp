@@ -637,7 +637,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
 
   printf("end___\n"); // csvファイル追記終了トリガー
 
-  vTaskDelay(2500.0 / portTICK_PERIOD_MS);
+  vTaskDelay(500.0 / portTICK_PERIOD_MS);
 
   printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 

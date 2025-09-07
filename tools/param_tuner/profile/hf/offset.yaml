@@ -12,7 +12,7 @@ sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 front_dist_offset: 98.0 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
-normal_sla_offset_front: 9 # 探索スラローム前補正
+normal_sla_offset_front: 6 # 探索スラローム前補正
 normal_sla_offset_back: 6 # 探索スラローム後補正
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
@@ -39,7 +39,7 @@ dia135_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
-front_diff_th: 9 # 前壁制御左右偏差条件
+front_diff_th: 10.5 # 前壁制御左右偏差条件
 front_dist_offset_pivot_th: 84 #前壁制御接近条件
 front_dist_offset_pivot: 90
 
@@ -65,11 +65,11 @@ clear_dist_ragne_to2: 35 # 探索時制御範囲拡張移動距離
 wall_off_hold_dist: 88
 
 # 探索壁あり判定
-ctrl_exist_wall_th_l: 47 #探索壁切れ
-ctrl_exist_wall_th_r: 47 #探索壁切れ
+ctrl_exist_wall_th_l: 46.5 #探索壁切れ
+ctrl_exist_wall_th_r: 46.5 #探索壁切れ
 go_straight_wide_ctrl_th: 75
 search_wall_off_l_dist_offset: 54.750
-search_wall_off_r_dist_offset: 52.5
+search_wall_off_r_dist_offset: 55.25
 # search_wall_off_l_dist_offset: 50.0
 # search_wall_off_r_dist_offset: 50.0
 search_wall_off_enable: 1

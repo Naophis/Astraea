@@ -1158,6 +1158,12 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
     kf_v.predict(tgt_val->ego_in.accl);
     kf_v.update((tmp_v_l + tmp_v_r) / 2);
     se->ego.v_kf = kf_v.get_state();
+
+    if ((tgt_val->motion_type == MotionType::NONE ||
+         tgt_val->motion_type == MotionType::READY)) {
+      se->ego.v_kf = 0;
+    }
+
     // printf("kf_v: %f\n", se->ego.v_kf);
     // kf_v.print_state();
   }
@@ -1456,11 +1462,11 @@ void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
         tgt_val->motion_type == MotionType::STRAIGHT) {
       duty_suction_in =
           100.0 * tgt_duty.duty_suction_low / sensing_result->ego.batt_kf;
-          // 100.0f * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
+      // 100.0f * tgt_duty.duty_suction_low / sensing_result->ego.battery_raw;
     } else {
       duty_suction_in =
           100.0 * tgt_duty.duty_suction / sensing_result->ego.batt_kf;
-          // 100.0f * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
+      // 100.0f * tgt_duty.duty_suction / sensing_result->ego.battery_raw;
     }
     if (duty_suction_in > 100) {
       duty_suction_in = 100.0f;

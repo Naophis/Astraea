@@ -452,7 +452,7 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
       return true;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return true;
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
@@ -538,7 +538,7 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
       return true;
     }
     if (tgt_val->fss.error != static_cast<int>(FailSafe::NONE)) {
-      return true;
+      return false;
     }
     vTaskDelay(1.0 / portTICK_RATE_MS);
   }
