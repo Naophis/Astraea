@@ -987,12 +987,14 @@ inline YawBiasResultF calibrateYawBiasF(const std::vector<float> &yaw_dps,
     var_unbiased = 0.0f;
   }
 
-  return {bias,                                                        //
-          sigma_robust,                                                //
-          var_unbiased * 4000.0f * 4000.0f / 32768.0f / 32768.0f,      //
-          sigma_robust * sigma_robust * 4000.0f * 4000.0f / 32768.0f / //
-              32768.0f,                                                //
-          static_cast<int>(inliers.size()),                            //
+  const float deg_per_count = 4000.0f / 32768.0f; // 1カウントあたりの角速度
+  const float deg_per_count2 = deg_per_count * deg_per_count;
+
+  return {bias,                                         //
+          sigma_robust,                                 //
+          var_unbiased * deg_per_count2,                //
+          sigma_robust * sigma_robust * deg_per_count2, //
+          static_cast<int>(inliers.size()),             //
           true};
 }
 
