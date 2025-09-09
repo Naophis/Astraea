@@ -9,10 +9,10 @@ pivot_angle_180: 180.0
 th_offset_dist: 52
 sla_front_ctrl_th: 135.0 # 探索時前壁補正条件しきい時間
 # front_dist_offset: 94.750 # 探索時の前壁補正 大→手前になる
-front_dist_offset: 98.0 # 探索時の前壁補正 大→手前になる
+front_dist_offset: 96.0 # 探索時の前壁補正 大→手前になる
 # front_dist_offset: 92.1250 # 探索時の前壁補正 大→短くなる
 
-normal_sla_offset_front: 6 # 探索スラローム前補正
+normal_sla_offset_front: 9 # 探索スラローム前補正
 normal_sla_offset_back: 6 # 探索スラローム後補正
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
@@ -203,7 +203,7 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
+dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 
