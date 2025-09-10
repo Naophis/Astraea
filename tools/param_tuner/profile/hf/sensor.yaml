@@ -48,8 +48,6 @@ normal2: #壁なし補正時
     left45: 60.0
     right45: 60.0
     # front: 47
-    # kireme_l: 55.0 # ref.right/leftより少し多くする
-    # kireme_r: 60.50 # 串制御条件。これより遠くないと発動しない
     kireme_l: 62.0 # ref.right/leftより少し多くする
     kireme_r: 62.0 # 串制御条件。これより遠くないと発動しない
     right90: 180 # 串制御条件。これより近くないと発動しない

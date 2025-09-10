@@ -146,7 +146,7 @@ sensor_deg_limitter_str: [5, 5, 7.5, 125, 125, 125, 125, 125, 125, 125]
 # sensor_deg_limitter_dia: [3, 3, 6, 6, 8, 8, 6, 4.5, 4.5, 4.5]
 sensor_deg_limitter_dia: [3, 3, 6, 12, 12, 8, 6, 4.5, 4.5, 4.5]
 # sensor_deg_limitter_dia: [3, 3, 4.5, 4.5, 4.5, 4.6, 4.5, 4.5, 4.5]
-sensor_deg_limitter_piller: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+sensor_deg_limitter_piller: [3, 3, 3, 10, 10, 10, 10, 3, 3, 3]
 # sensor_deg_limitter_piller: [0, 0, 0, 0, 3, 3, 3, 3, 3, 3]
 
 front_ctrl_roll_pid:
@@ -433,8 +433,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 126 #125~144
-normal_sla_r_wall_off_ref_cnt: 127 #125~144
+normal_sla_l_wall_off_ref_cnt: 132 #125~144
+normal_sla_r_wall_off_ref_cnt: 130 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6
