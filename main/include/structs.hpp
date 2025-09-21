@@ -494,6 +494,7 @@ typedef struct {
   float gear_b = 8;
   float max_duty = 99;
   float min_duty = 8;
+  float battery_gain = 3.3;
   float Ke = 0;
   float Km = 0;
   float Resist = 0;

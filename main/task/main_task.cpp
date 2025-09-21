@@ -55,7 +55,7 @@ void MainTask::check_battery() {
 
   printf("battery= %f\n", sensing_result->ego.battery_raw);
   if (sensing_result->ego.battery_raw > LOW_BATTERY_TH ||
-      sensing_result->ego.battery_raw < 9.5)
+      sensing_result->ego.battery_raw < 10.5)
     return;
   while (1) {
     ui->music_sync(MUSIC::G5_, 250);
@@ -68,7 +68,7 @@ void MainTask::check_battery() {
   }
 }
 
-TurnType MainTask::cast_turn_type(std::string str) {
+TurnType IRAM_ATTR MainTask::cast_turn_type(std::string str) {
   if (str == "normal")
     return TurnType::Normal;
   if (str == "large")
@@ -361,7 +361,7 @@ void MainTask::save_json_data(std::string &str) {
   ui->coin(25);
 }
 
-void MainTask::load_hw_param() {
+void IRAM_ATTR MainTask::load_hw_param() {
   string fileName = "/spiflash/hardware.txt";
 
   std::ifstream ifs(fileName);
@@ -400,6 +400,7 @@ void MainTask::load_hw_param() {
   param->gear_b = getItem(root, "gear_b")->valuedouble;
   param->max_duty = getItem(root, "max_duty")->valuedouble;
   param->min_duty = getItem(root, "min_duty")->valuedouble;
+  param->battery_gain = getItem(root, "battery_gain")->valuedouble;
   param->Ke = getItem(root, "Ke")->valuedouble;
   param->Km = getItem(root, "Km")->valuedouble;
   param->coulomb_friction = getItem(root, "coulomb_friction")->valuedouble;
@@ -832,7 +833,7 @@ void MainTask::load_hw_param() {
   cJSON_Delete(root);
 }
 
-void MainTask::load_offset_param() {
+void IRAM_ATTR MainTask::load_offset_param() {
   string fileName = "/spiflash/offset.txt";
 
   if (sys.hf_cl == 0) {
@@ -1150,7 +1151,7 @@ void MainTask::load_offset_param() {
 
   cJSON_Delete(root);
 }
-void MainTask::load_sensor_param() {
+void IRAM_ATTR MainTask::load_sensor_param() {
   string fileName = "/spiflash/sensor.txt";
 
   if (sys.hf_cl == 0) {
@@ -1390,7 +1391,7 @@ void MainTask::load_sensor_param() {
   cJSON_Delete(root);
 }
 
-void MainTask::exec_param_prof() {
+void IRAM_ATTR MainTask::exec_param_prof() {
   mount();
   string fileName = "/spiflash/run_prf.txt";
   if (sys.hf_cl == 0) {
@@ -1469,7 +1470,7 @@ void MainTask::load_circuit_path() {
   umount();
 }
 
-void MainTask::load_sys_param() {
+void IRAM_ATTR MainTask::load_sys_param() {
   string fileName = "/spiflash/system.txt";
   std::ifstream ifs(fileName);
   if (!ifs) {
@@ -1550,7 +1551,7 @@ void MainTask::load_sys_param() {
   cJSON_Delete(root);
 }
 
-void MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
+void IRAM_ATTR MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
   string fileName = "/spiflash/profiles.txt";
 
   if (sys.hf_cl == 0) {
@@ -1855,7 +1856,7 @@ void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
 }
 // void MainTask::load_slalom_param() {}
 
-void MainTask::load_param() {
+void IRAM_ATTR MainTask::load_param() {
   if (!ui->button_state_hold()) {
     load_sys_param();
     load_hw_param();
@@ -1870,10 +1871,11 @@ void MainTask::load_param() {
     // load_slalom_param();
   }
 }
-void MainTask::rx_uart_json() {
+void IRAM_ATTR MainTask::rx_uart_json() {
 
   mount();
   load_param();
+  check_battery();
 
   uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
   ui->coin(40);
@@ -1905,14 +1907,13 @@ void MainTask::rx_uart_json() {
   ui->coin(100);
   vTaskDelay(100.0 / portTICK_PERIOD_MS);
 }
-void MainTask::task() {
+void IRAM_ATTR MainTask::task() {
   mp->set_userinterface(ui);
   search_ctrl->set_userinterface(ui);
   pt->ready = true;
   vTaskDelay(100.0 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
-  check_battery();
   // ui->init();
 
   ui->coin(80);

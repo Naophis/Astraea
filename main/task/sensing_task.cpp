@@ -580,7 +580,8 @@ void IRAM_ATTR SensingTask::task() {
     led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
     led_driver(LED_EN_R90, 0, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
 
-    se->battery.data = BATTERY_GAIN * 4 * sensing_result->battery.raw / 4096;
+    se->battery.data =
+        param->battery_gain * 4 * sensing_result->battery.raw / 4096;
     if (led_on) {
       se->led_sen.right90.raw = std::max(
           se->led_sen_after.right90.raw - se->led_sen_before.right90.raw, 0);
