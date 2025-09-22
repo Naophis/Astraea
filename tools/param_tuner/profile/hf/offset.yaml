@@ -69,7 +69,7 @@ ctrl_exist_wall_th_l: 46.5 #探索壁切れ
 ctrl_exist_wall_th_r: 46.5 #探索壁切れ
 go_straight_wide_ctrl_th: 75
 search_wall_off_l_dist_offset: 54.750
-search_wall_off_r_dist_offset: 55.25
+search_wall_off_r_dist_offset: 54.25
 # search_wall_off_l_dist_offset: 50.0
 # search_wall_off_r_dist_offset: 50.0
 search_wall_off_enable: 1

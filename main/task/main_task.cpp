@@ -68,7 +68,7 @@ void MainTask::check_battery() {
   }
 }
 
-TurnType IRAM_ATTR MainTask::cast_turn_type(std::string str) {
+TurnType MainTask::cast_turn_type(std::string str) {
   if (str == "normal")
     return TurnType::Normal;
   if (str == "large")
@@ -361,7 +361,7 @@ void MainTask::save_json_data(std::string &str) {
   ui->coin(25);
 }
 
-void IRAM_ATTR MainTask::load_hw_param() {
+void MainTask::load_hw_param() {
   string fileName = "/spiflash/hardware.txt";
 
   std::ifstream ifs(fileName);
@@ -833,7 +833,7 @@ void IRAM_ATTR MainTask::load_hw_param() {
   cJSON_Delete(root);
 }
 
-void IRAM_ATTR MainTask::load_offset_param() {
+void MainTask::load_offset_param() {
   string fileName = "/spiflash/offset.txt";
 
   if (sys.hf_cl == 0) {
@@ -1151,7 +1151,7 @@ void IRAM_ATTR MainTask::load_offset_param() {
 
   cJSON_Delete(root);
 }
-void IRAM_ATTR MainTask::load_sensor_param() {
+void MainTask::load_sensor_param() {
   string fileName = "/spiflash/sensor.txt";
 
   if (sys.hf_cl == 0) {
@@ -1391,7 +1391,7 @@ void IRAM_ATTR MainTask::load_sensor_param() {
   cJSON_Delete(root);
 }
 
-void IRAM_ATTR MainTask::exec_param_prof() {
+void MainTask::exec_param_prof() {
   mount();
   string fileName = "/spiflash/run_prf.txt";
   if (sys.hf_cl == 0) {
@@ -1470,7 +1470,7 @@ void MainTask::load_circuit_path() {
   umount();
 }
 
-void IRAM_ATTR MainTask::load_sys_param() {
+void MainTask::load_sys_param() {
   string fileName = "/spiflash/system.txt";
   std::ifstream ifs(fileName);
   if (!ifs) {
@@ -1551,7 +1551,7 @@ void IRAM_ATTR MainTask::load_sys_param() {
   cJSON_Delete(root);
 }
 
-void IRAM_ATTR MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
+void MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
   string fileName = "/spiflash/profiles.txt";
 
   if (sys.hf_cl == 0) {
@@ -1856,7 +1856,7 @@ void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
 }
 // void MainTask::load_slalom_param() {}
 
-void IRAM_ATTR MainTask::load_param() {
+void MainTask::load_param() {
   if (!ui->button_state_hold()) {
     load_sys_param();
     load_hw_param();
@@ -1871,11 +1871,10 @@ void IRAM_ATTR MainTask::load_param() {
     // load_slalom_param();
   }
 }
-void IRAM_ATTR MainTask::rx_uart_json() {
+void MainTask::rx_uart_json() {
 
   mount();
   load_param();
-  check_battery();
 
   uint8_t *data = (uint8_t *)malloc(BUF_SIZE);
   ui->coin(40);
@@ -1907,13 +1906,21 @@ void IRAM_ATTR MainTask::rx_uart_json() {
   ui->coin(100);
   vTaskDelay(100.0 / portTICK_PERIOD_MS);
 }
-void IRAM_ATTR MainTask::task() {
+void MainTask::task() {
   mp->set_userinterface(ui);
   search_ctrl->set_userinterface(ui);
   pt->ready = true;
   vTaskDelay(100.0 / portTICK_RATE_MS);
   pt->motor_disable();
   pt->suction_disable();
+
+  if (!ui->button_state_hold()) {
+    mount();
+    load_hw_param();
+    umount();
+  }
+
+  check_battery();
   // ui->init();
 
   ui->coin(80);
@@ -1923,7 +1930,7 @@ void IRAM_ATTR MainTask::task() {
   reset_ego_data();
 
   if (sys.user_mode != 0) {
-    mount();
+    // mount();
     // mock slalom();
     // test_search_sla(false);
     if (sys.user_mode == 1) {
