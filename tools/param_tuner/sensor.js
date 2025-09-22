@@ -10,7 +10,7 @@ let parser;
 
 let rorl = process.argv[2].toUpperCase();
 let dist = parseFloat(process.argv[3]);
-console.log(`dist,L90,L45,F,R45,R90`);
+console.log(`dist,L90,L45_3,L45_2,L45,F,R45,R45_2,R45_3,R90`);
 let ready = function () {
   port = new SerialPort(
     comport,

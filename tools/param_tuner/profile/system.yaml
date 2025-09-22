@@ -59,9 +59,9 @@ maze_size: 32
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-mode: 0 # メイン
+# mode: 0 # メイン
 # mode: 1 # 最短スローム
-# mode: 2 # 直進
+mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
@@ -78,21 +78,21 @@ mode: 0 # メイン
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  v_max: 400
-  accl: 2500
-  decel: -2500 
-  dia_accl: 2500
-  dia_decel: -2500
-  dist: 720 #直進
-  suction_active: 0
+  # v_max: 400
+  # accl: 2500
+  # decel: -2500 
+  # dia_accl: 2500
+  # dia_decel: -2500
+  # dist: 220 #直進
+  # suction_active: 0
 
-  # v_max: 3800
-  # accl: 47500
-  # decel: -55000
-  # dia_accl: 36000
-  # dia_decel: -45000
-  # dist: 720 #直進
-  # suction_active: 2
+  v_max: 18000
+  accl: 47500
+  decel: -55000
+  dia_accl: 36000
+  dia_decel: -45000
+  dist: 720 #直進
+  suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -108,7 +108,7 @@ test: # テスト走行時に使用するパラメータ群
   w_max: 12.5
   alpha: 180
   ang: 3600
-  search_mode: 1
+  search_mode: 0
   
   suction_duty: 2.75
   suction_duty_low: 2.50
@@ -116,17 +116,17 @@ test: # テスト走行時に使用するパラメータ群
   # suction_duty_burst: 4.0
   # suction_duty_burst_low: 3.750
   # Nova
-  suction_duty_burst: 3.75
-  suction_duty_burst_low: 3.5
+  suction_duty_burst: 7.75
+  suction_duty_burst_low: 7.5
 
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 10
+  file_idx: 8
   sla_dist: 90
   # sla_type: 3
   sla_type: 3
-  sla_type2: 2 # 復路ターン種類
+  sla_type2: 9 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval
