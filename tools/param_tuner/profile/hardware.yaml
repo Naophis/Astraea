@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 14.07500 #10deg 
-tire2: 14.0750 #10deg
+tire: 14.06500 #10deg 
+tire2: 14.0650 #10deg
 
 battery_gain: 3.2119264895753674
 
@@ -435,8 +435,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 132 #125~144
-normal_sla_r_wall_off_ref_cnt: 130 #125~144
+normal_sla_l_wall_off_ref_cnt: 127 #125~144
+normal_sla_r_wall_off_ref_cnt: 126 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6
