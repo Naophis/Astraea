@@ -127,6 +127,9 @@ public:
   void generate_trajectory();
   float last_tgt_angle = 0;
 
+  float adjust_b_to_target45(float data, float a);
+  float adjust_b_to_target90(float data, float a);
+
 private:
   bool gyro_pid_windup_histerisis = false;
   float gyro_pid_histerisis_i = 0.0;

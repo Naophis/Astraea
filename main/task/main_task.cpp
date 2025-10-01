@@ -125,26 +125,6 @@ void IRAM_ATTR MainTask::dump1() {
         sensing_result->led_sen.right45_2.raw,
         sensing_result->led_sen.right45.raw,
         sensing_result->led_sen.right90.raw);
-    printf("sensor_before: %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d\n",
-           sensing_result->led_sen_before.left90.raw,
-           sensing_result->led_sen_before.left45_3.raw,
-           sensing_result->led_sen_before.left45_2.raw,
-           sensing_result->led_sen_before.left45.raw,
-           sensing_result->led_sen_before.front.raw,
-           sensing_result->led_sen_before.right45.raw,
-           sensing_result->led_sen_before.right45_2.raw,
-           sensing_result->led_sen_before.right45_3.raw,
-           sensing_result->led_sen_before.right90.raw);
-    printf("sensor_after: %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d, %4d\n",
-           sensing_result->led_sen_after.left90.raw,
-           sensing_result->led_sen_after.left45_3.raw,
-           sensing_result->led_sen_after.left45_2.raw,
-           sensing_result->led_sen_after.left45.raw,
-           sensing_result->led_sen_after.front.raw,
-           sensing_result->led_sen_after.right45.raw,
-           sensing_result->led_sen_after.right45_2.raw,
-           sensing_result->led_sen_after.right45_3.raw,
-           sensing_result->led_sen_after.right90.raw);
     printf("sensor_dist(near): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, %3.2f, "
            "%3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_dist,    //
@@ -156,25 +136,42 @@ void IRAM_ATTR MainTask::dump1() {
            sensing_result->ego.right45_2_dist, //
            sensing_result->ego.right45_3_dist, //
            sensing_result->ego.right90_dist);
-    printf("sensor_dist(mid): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
+
+    printf("sensor_dist(mid): %3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_mid_dist, //
-           sensing_result->ego.left45_dist,     //
            sensing_result->ego.front_mid_dist,  //
-           sensing_result->ego.right45_dist,    //
            sensing_result->ego.right90_mid_dist);
-    printf("sensor_dist(far): %3.2f, %3.2f, %3.2f, %3.2f, %3.2f\n",
+    printf("sensor_dist(far): %3.2f, %3.2f, %3.2f\n",
            sensing_result->ego.left90_far_dist, //
-           sensing_result->ego.left45_dist,     //
            sensing_result->ego.front_far_dist,  //
-           sensing_result->ego.right45_dist,    //
            sensing_result->ego.right90_far_dist);
 
-    printf("sensor: %0.1f, %0.1f, %0.1f, %0.1f, %0.1f\n",
-           param->sen_ref_p.search_exist.left90,
-           param->sen_ref_p.search_exist.left45,
-           param->sen_ref_p.search_exist.front,
-           param->sen_ref_p.search_exist.right45,
-           param->sen_ref_p.search_exist.right90);
+    auto l90_b = pt->adjust_b_to_target90(sensing_result->led_sen.left90.raw,
+                                          param->sensor_gain.l90.a);
+    auto l90_far_b = pt->adjust_b_to_target90(
+        sensing_result->led_sen.left90.raw, param->sensor_gain.l90_far.a);
+    auto l45_b = pt->adjust_b_to_target45(sensing_result->led_sen.left45.raw,
+                                          param->sensor_gain.l45.a);
+    auto l45_2_b = pt->adjust_b_to_target45(
+        sensing_result->led_sen.left45_2.raw, param->sensor_gain.l45_2.a);
+    auto l45_3_b = pt->adjust_b_to_target45(
+        sensing_result->led_sen.left45_3.raw, param->sensor_gain.l45_3.a);
+    auto front_b = pt->adjust_b_to_target90(sensing_result->led_sen.front.raw,
+                                            param->sensor_gain.front.a);
+    auto r45_3_b = pt->adjust_b_to_target45(
+        sensing_result->led_sen.right45_3.raw, param->sensor_gain.r45_3.a);
+    auto r45_2_b = pt->adjust_b_to_target45(
+        sensing_result->led_sen.right45_2.raw, param->sensor_gain.r45_2.a);
+    auto r45_b = pt->adjust_b_to_target45(sensing_result->led_sen.right45.raw,
+                                          param->sensor_gain.r45.a);
+    auto r90_b = pt->adjust_b_to_target90(sensing_result->led_sen.right90.raw,
+                                          param->sensor_gain.r90.a);
+    auto r90_far_b = pt->adjust_b_to_target90(
+        sensing_result->led_sen.right90.raw, param->sensor_gain.r90_far.a);
+    printf("side_sensor_b: %f, %f, %f, %f, %f, %ff\n", //
+           l45_3_b, l45_2_b, l45_b, r45_b, r45_2_b, r45_3_b);
+    printf("front_sensor_b: %f, %f, %f, %f\n", //
+           l90_b, l90_far_b, r90_b, r90_far_b);
 
     printf("ego_v: %4.3f, %4.3f, %4.3f, %4.3f, (%4ld, %4ld)\n",
            sensing_result->ego.v_l, sensing_result->ego.v_c,
