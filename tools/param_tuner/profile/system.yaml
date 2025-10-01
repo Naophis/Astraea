@@ -1,6 +1,6 @@
 # goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
 # goals: [[8, 8],[8, 9],[9, 8],[9, 9]]
-# goals: [[1, 0], [2, 0]]
+goals: [[1, 0], [2, 0]]
 # goals: [[1, 0], [2, 0], [1, 1], [2, 1]]
 # goals: [[1, 0]]
 # goals: [[3, 0]]
@@ -11,7 +11,7 @@
 # goals: [[3, 0], [3, 1], [2, 0], [2, 1]]
 # goals: [[7, 3], [7, 4], [8, 3], [8, 4]]
 # goals: [[1, 1]]
-goals: [[6, 9], [6, 10], [7, 9], [7, 10]]
+# goals: [[6, 9], [6, 10], [7, 9], [7, 10]]
 # goals: [[11, 0], [11, 1], [12, 0], [12, 1]]
 # goals: [[5, 0], [5, 1], [6, 0], [6, 1]]
 # goals: [[9, 9], [9, 10], [10, 9], [10, 10]] #北信越
@@ -59,14 +59,14 @@ maze_size: 32
 debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-mode: 0 # メイン
+# mode: 0 # メイン
 # mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
 # mode: 9 # wall off, search_mode(1)->search_wall_off, 0->fast_run_wall_off
-# mode: 11 # vacume/suction test
+mode: 11 # vacume/suction test
 # mode: 12 # silent_keep
 # mode: 13 # keep_pos
 # mode: 14 # sensing
@@ -78,21 +78,21 @@ mode: 0 # メイン
 # mode: 22 # encoder_test
 
 test: # テスト走行時に使用するパラメータ群
-  v_max: 400
-  accl: 2500
-  decel: -2500 
-  dia_accl: 2500
-  dia_decel: -2500
-  dist: 120 #直進
-  suction_active: 0
+  # v_max: 400
+  # accl: 2500
+  # decel: -2500 
+  # dia_accl: 2500
+  # dia_decel: -2500
+  # dist: 120 #直進
+  # suction_active: 0
 
-  # v_max: 7500
-  # accl: 47500
-  # decel: -55000
-  # dia_accl: 36000
-  # dia_decel: -45000
-  # dist: 1350 #直進
-  # suction_active: 2
+  v_max: 2000
+  accl: 47500
+  decel: -55000
+  dia_accl: 36000
+  dia_decel: -45000
+  dist: 120 #直進
+  suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -119,13 +119,15 @@ test: # テスト走行時に使用するパラメータ群
   suction_duty_burst: 3.75
   suction_duty_burst_low: 3.5
 
+  # suction_duty_burst: 4.0
+  # suction_duty_burst_low: 3.75
 
   suction_gain: 50
   # suction_duty: 3.25
   file_idx: 10
   sla_dist: 90
   # sla_type: 3
-  sla_type: 3
+  sla_type: 4
   sla_type2: 2 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
