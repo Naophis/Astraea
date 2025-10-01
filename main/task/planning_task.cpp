@@ -1940,6 +1940,42 @@ float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
   return res;
 }
 
+float IRAM_ATTR PlanningTask::adjust_b_to_target45(float data, float a) {
+  int idx = static_cast<int>(data);
+
+  // インデックス範囲チェック（※ここは index としての妥当性を見るのが自然）
+  if (idx < 0 || idx >= static_cast<int>(log_table.size())) {
+    return NAN;  // 計算不能
+  }
+
+  float L = log_table.at(idx);
+  if (!isfinite(L) || L == 0.0f) {
+    return NAN;
+  }
+
+  // 目標 45 に合う b'
+  float b_new = a / L - 45.0f;
+  return b_new;
+}
+
+float IRAM_ATTR PlanningTask::adjust_b_to_target90(float data, float a) {
+  int idx = static_cast<int>(data);
+
+  // インデックス範囲チェック（※ここは index としての妥当性を見るのが自然）
+  if (idx < 0 || idx >= static_cast<int>(log_table.size())) {
+    return NAN;  // 計算不能
+  }
+
+  float L = log_table.at(idx);
+  if (!isfinite(L) || L == 0.0f) {
+    return NAN;
+  }
+
+  // 目標 90 に合う b'
+  float b_new = a / L - 90.0f;
+  return b_new;
+}
+
 void IRAM_ATTR PlanningTask::calc_sensor_dist_all() {
   const auto se = get_sensing_entity();
   if (!(tgt_val->motion_type == MotionType::NONE ||
