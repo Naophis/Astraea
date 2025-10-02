@@ -108,7 +108,7 @@ test: # テスト走行時に使用するパラメータ群
   w_max: 12.5
   alpha: 180
   ang: 3600
-  search_mode: 0
+  search_mode: 1
   
   suction_duty: 2.75
   suction_duty_low: 2.50
