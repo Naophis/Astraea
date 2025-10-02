@@ -2795,15 +2795,6 @@ void MainTask::test_search_sla(bool mode) {
                                          : (TurnDirection::Right);
   mp->reset_gyro_ref_with_check();
 
-  if (sys.test.suction_active == 1) {
-    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
-    vTaskDelay(xDelay500);
-  } else if (sys.test.suction_active == 2) {
-    pt->suction_enable(sys.test.suction_duty_burst,
-                       sys.test.suction_duty_burst_low);
-    vTaskDelay(xDelay500);
-  }
-
   reset_tgt_data();
   reset_ego_data();
   pt->motor_enable();
@@ -2829,6 +2820,7 @@ void MainTask::test_search_sla(bool mode) {
   nm.decel = str_p.decel;
   nm.is_turn = true;
 
+  pt->search_mode = true;
   mp->slalom(sla_p, rorl, nm);
   for (int i = 0; i < sys.test.turn_times; i++) {
     mp->slalom(sla_p, rorl2, nm);
