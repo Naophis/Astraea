@@ -92,7 +92,7 @@ test: # テスト走行時に使用するパラメータ群
   dia_accl: 36000
   dia_decel: -45000
   dist: 120 #直進
-  suction_active: 1
+  suction_active: 2
 
   # sla_accl: 28000
   # sla_decel: -30000
