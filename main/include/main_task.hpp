@@ -136,6 +136,7 @@ private:
   void test_turn();
   void test_pivot_n();
   void test_pivot_n2();
+  void test_search_pivot();
   void test_sla();
   void test_run_sla();
   void test_search_sla(bool mode);
