@@ -1392,7 +1392,8 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
            ego.dir == Direction::SouthEast || ego.dir == Direction::SouthWest);
     }
   }
-  float dist = sensing_result->ego.front_dist - param->cell2 / 2;
+  float dist =
+      std::min(sensing_result->ego.front_dist - param->cell2 / 2, 90.0f);
   if (dist < 0) {
     dist = 1;
   }
