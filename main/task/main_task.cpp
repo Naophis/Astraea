@@ -2240,7 +2240,9 @@ void MainTask::test_system_identification(bool para) {
 
 void MainTask::test_run() {
   mp->reset_gyro_ref_with_check();
-
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
   if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay500);
@@ -2376,6 +2378,9 @@ void MainTask::test_back() {
 void MainTask::test_run_sla() {
   mp->reset_gyro_ref_with_check();
 
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
   if (sys.test.suction_active == 1) {
     pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
     vTaskDelay(xDelay500);

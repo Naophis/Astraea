@@ -1231,7 +1231,9 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
   ps.search_str_wide_ctrl_l = ps.search_str_wide_ctrl_r = false;
 
   reset_gyro_ref_with_check();
-
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
   if (p_set.suction) {
     pt->suction_enable(p_set.suction_duty, p_set.suction_duty_low);
     vTaskDelay(900.0 / portTICK_PERIOD_MS);
