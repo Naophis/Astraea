@@ -155,6 +155,7 @@ private:
   void load_sys_param();
   void load_turn_param_profiles(bool const_mode, int const_index);
   void load_slalom_param();
+  void load_slalom_param2(int idx);
   void load_slalom_param(int idx, int idx2, int idx3);
   void load_sla(int idx, string turn_name, slalom_param2_t &sla_p);
   void load_slas(int idx, vector<pair<TurnType, string>> &turn_name_list,

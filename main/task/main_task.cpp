@@ -1586,8 +1586,10 @@ void MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
     printf("tpp.file_list.size() = %d\n", tpp.file_list.size());
 
   tpp.profile_idx_size = getItem(root, "profile_idx_size")->valueint;
-  if (!silent_load)
-    printf("tpp.profile_idx_size= %d\n", tpp.profile_idx_size);
+  if (!silent_load) {
+    printf("tpp.profile_idx_size= %d, const_index= %d\n", tpp.profile_idx_size,
+           const_index);
+  }
 
   tpp.profile_map.clear();
   profile_idx = getItem(root, "profile_idx");
@@ -1766,31 +1768,64 @@ void MainTask::load_slas(
         getItem(getItem(getItem(root, p.second.c_str()), "back"), "left")
             ->valuedouble;
 
-    // if (!silent_load) {
-    //   printf(" - %s\n", p.second.c_str());
-    //   printf("   - v: %f\n", turn_map[p.first].v);
-    //   printf("     - rad: %f\n", turn_map[p.first].rad);
-    //   printf("     - time: %f\n", turn_map[p.first].time);
-    //   if (p.first == TurnType::Orval) {
-    //     printf("     - rad2: %f\n", turn_map[p.first].rad2);
-    //     printf("     - time2: %f\n", turn_map[p.first].time2);
-    //   }
-    //   printf("     - front: [%0.2f, %0.2f]\n",
-    //   turn_map[p.first].front.left,
-    //          turn_map[p.first].front.right);
-    //   printf("     - back: [%0.2f, %0.2f]\n", turn_map[p.first].back.left,
-    //          turn_map[p.first].back.right);
-    // }
-
-    // if (!silent_load) {
-    //   printf(" - %s: v= %0.2f\n", p.second.c_str(), turn_map[p.first].v);
-    // }
+    if (!silent_load) {
+      printf(" - %s\n", p.second.c_str());
+      printf("   - v: %f\n", turn_map[p.first].v);
+      printf("     - rad: %f\n", turn_map[p.first].rad);
+      printf("     - time: %f\n", turn_map[p.first].time);
+      if (p.first == TurnType::Orval) {
+        printf("     - rad2: %f\n", turn_map[p.first].rad2);
+        printf("     - time2: %f\n", turn_map[p.first].time2);
+      }
+      printf("     - front: [%0.2f, %0.2f]\n", turn_map[p.first].front.left,
+             turn_map[p.first].front.right);
+      printf("     - back: [%0.2f, %0.2f]\n", turn_map[p.first].back.left,
+             turn_map[p.first].back.right);
+    }
 
     turn_map[p.first].type = cast_turn_type(p.second);
   }
   cJSON_Delete(root);
   umount();
 }
+
+void MainTask::load_slalom_param2(int idx) {
+  param_set.map.clear();
+  param_set.map_slow.clear();
+  mount();
+  printf("load_slalom_param: %d\n", idx);
+  param_set.suction = tpp.profile_map[idx][TurnType::Finish];
+
+  if (param_set.suction == 1) {
+    param_set.suction_duty = sys.test.suction_duty;
+    param_set.suction_duty_low = sys.test.suction_duty_low;
+  } else if (param_set.suction == 2) {
+    param_set.suction_duty = sys.test.suction_duty_burst;
+    param_set.suction_duty_low = sys.test.suction_duty_burst_low;
+  }
+
+  param_set.map.clear();
+  param_set.map_slow.clear();
+  param_set.map_fast.clear();
+  param_set.str_map.clear();
+
+  // load fast param
+  turn_map.clear();
+  for (const auto &p : turn_name_list) {
+    if (p.first == TurnType::None) {
+      continue;
+    }
+    turn_map[idx].emplace_back(p);
+  }
+  for (auto itr = turn_map.begin(); itr != turn_map.end(); ++itr) {
+    // load_slas(itr->first, itr->second, param_set.map_fast);
+    load_slas(itr->first, itr->second, param_set.map);
+    // load_slas(itr->first, itr->second, param_set.map_slow);
+  }
+  load_straight(idx, param_set.str_map);
+  umount();
+}
+
 void MainTask::load_slalom_param(int idx, int idx2, int idx3) {
   mount();
   printf("load_slalom_param: %d, %d, %d\n", idx, idx2, idx3);
@@ -2594,8 +2629,9 @@ void MainTask::test_sla() {
     ui->error();
     return;
   }
+  // silent_load = false;
   load_turn_param_profiles(true, file_idx);
-  load_slalom_param(file_idx, file_idx, file_idx);
+  load_slalom_param2(file_idx);
   sla_p = param_set.map[static_cast<TurnType>(sys.test.sla_type)];
   auto sla_p2 = param_set.map[static_cast<TurnType>(sys.test.sla_type2)];
   printf("slalom params[0]:\n");
