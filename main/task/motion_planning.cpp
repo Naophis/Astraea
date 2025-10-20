@@ -1305,7 +1305,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
       if (turn_type == TurnType::Finish) {
         ps.dist -= param->cell / 2;
         if (p_set.suction) {
-          ps.v_end = 2500;
+          ps.v_end = 3000;
         } else {
           ps.v_end = p_set.map[TurnType::Large].v;
         }
