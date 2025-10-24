@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.96250 #10deg 
-tire2: 13.96250 #10deg
+tire: 13.88250 #10deg 
+tire2: 13.88250 #10deg
 
 battery_gain: 3.854311787490441
 
@@ -97,7 +97,8 @@ led_light_delay_cnt2: 950
 axel_degenerate_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_y: [1, 1, 0.2, 0.1, 0.1, 0.1, 0.1]
 # axel_degenerate_y: [1, 1, 0.5, 0.2, 0.2, 0.1, 0.1]
-axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
+# axel_degenerate_y: [1, 1, 0.8, 0.75, 0.5, 0.2, 0.1]
+axel_degenerate_y: [1, 1, 0.9, 0.85, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
@@ -435,11 +436,11 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 131 #125~144
-normal_sla_r_wall_off_ref_cnt: 136 #125~144
+normal_sla_l_wall_off_ref_cnt: 132 #125~144
+normal_sla_r_wall_off_ref_cnt: 134 #125~144
 
-normal_sla_l_wall_off_dist: 6
-normal_sla_r_wall_off_dist: 6
+normal_sla_l_wall_off_dist: 0
+normal_sla_r_wall_off_dist: 0
 # normal_sla_l_wall_off_dist: 0
 # normal_sla_r_wall_off_dist: 0
 normal_sla_l_wall_off_margin: 4
