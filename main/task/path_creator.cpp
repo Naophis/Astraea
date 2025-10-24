@@ -978,7 +978,7 @@ float PathCreator::slalom_dummy(
     turn_back_dist = turn_param[turn_type].back.left;
   }
 
-  turn_front_dist += 25; // wall_off
+  turn_front_dist += 5; // wall_off
   // turn_back_dist += 15;
 
   // float front_time = go_straight_dummy(v, v, v, 10000, -10000,

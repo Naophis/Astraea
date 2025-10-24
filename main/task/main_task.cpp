@@ -168,8 +168,15 @@ void IRAM_ATTR MainTask::dump1() {
                                           param->sensor_gain.r90.a);
     auto r90_far_b = pt->adjust_b_to_target90(
         sensing_result->led_sen.right90.raw, param->sensor_gain.r90_far.a);
-    printf("side_sensor_b: %f, %f, %f, %f, %f, %ff\n", //
-           l45_3_b, l45_2_b, l45_b, r45_b, r45_2_b, r45_3_b);
+    // printf("side_sensor_b: %f, %f, %f, %f, %f, %f\n", //
+    //        l45_3_b, l45_2_b, l45_b, r45_b, r45_2_b, r45_3_b);
+    printf("L45_3: [%f, %f]\n", param->sensor_gain.l45_3.a, l45_3_b);
+    printf("L45_2: [%f, %f]\n", param->sensor_gain.l45_2.a, l45_2_b);
+    printf("L45: [%f, %f]\n", param->sensor_gain.l45.a, l45_b);
+    printf("R45: [%f, %f]\n", param->sensor_gain.r45.a, r45_b);
+    printf("R45_2: [%f, %f]\n", param->sensor_gain.r45_2.a, r45_2_b);
+    printf("R45_3: [%f, %f]\n", param->sensor_gain.r45_3.a, r45_3_b);
+
     printf("front_sensor_b: %f, %f, %f, %f\n", //
            l90_b, l90_far_b, r90_b, r90_far_b);
 
