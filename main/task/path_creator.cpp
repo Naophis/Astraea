@@ -966,9 +966,12 @@ float PathCreator::slalom_dummy(
   float turn_back_dist = 0;
   float v = turn_param[turn_type].v;
 
-  if (turn_type == TurnType::Orval) {
-    // TODO
-  }
+  const float offset_after_turn_l = 10;
+  const float offset_after_turn_r = 10;
+  const float offset_after_turn_l2 = 18;
+  const float offset_after_turn_r2 = 18;
+  const float offset_after_turn_dia_l = 24;
+  const float offset_after_turn_dia_r = 24;
 
   if (td == TurnDirection::Right) {
     turn_front_dist = turn_param[turn_type].front.right;
@@ -977,8 +980,23 @@ float PathCreator::slalom_dummy(
     turn_front_dist = turn_param[turn_type].front.left;
     turn_back_dist = turn_param[turn_type].back.left;
   }
+  if (turn_type == TurnType::Large || turn_type == TurnType::Orval) {
+    turn_back_dist -= (td == TurnDirection::Right) ? offset_after_turn_r2
+                                                   : offset_after_turn_l2;
+  } else if (turn_type == TurnType::Dia45 || turn_type == TurnType::Dia135) {
+    turn_back_dist -= (td == TurnDirection::Right) ? offset_after_turn_r
+                                                   : offset_after_turn_l;
+  } else if (turn_type == TurnType::Dia45_2 ||
+             turn_type == TurnType::Dia135_2 || turn_type == TurnType::Dia90) {
+    turn_back_dist -= (td == TurnDirection::Right) ? offset_after_turn_dia_r
+                                                   : offset_after_turn_dia_l;
+  }
 
-  turn_front_dist += 5; // wall_off
+  if (turn_front_dist < 0)
+    turn_front_dist = 0;
+  if (turn_back_dist < 0)
+    turn_back_dist = 0;
+
   // turn_back_dist += 15;
 
   // float front_time = go_straight_dummy(v, v, v, 10000, -10000,
