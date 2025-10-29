@@ -797,7 +797,7 @@ float PathCreator::calc_goal_time(param_set_t &p_set, bool debug) {
       if (turn_type == TurnType::Finish) {
         ps.dist -= p_set.cell_size / 2;
         if (p_set.suction) {
-          ps.v_end = 2500;
+          ps.v_end = 3500;
         } else {
           ps.v_end = p_set.map[TurnType::Large].v;
         }
