@@ -1,10 +1,10 @@
-goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
+# goals: [[7, 7], [7, 8], [8, 7], [8, 8]]
 # goals: [[8, 8],[8, 9],[9, 8],[9, 9]]
 # goals: [[1, 0], [2, 0]]
 # goals: [[1, 0], [2, 0], [1, 1], [2, 1]]
 # goals: [[1, 0]]
 # goals: [[3, 0]]
-# goals: [[7, 0], [8, 0]]
+goals: [[7, 0], [8, 0]]
 # goals: [[6, 2], [7, 2]]
 # goals: [[3, 0], [4, 0]]
 # goals: [[1, 1], [1, 2], [2, 1], [2, 2]]
@@ -87,7 +87,7 @@ test: # テスト走行時に使用するパラメータ群
   # suction_active: 0
 
   v_max: 1800
-  accl: 47500
+  accl: 52500
   decel: -55000
   dia_accl: 42000
   dia_decel: -47500
@@ -121,10 +121,10 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 12
+  file_idx: 5
   sla_dist: 90
   # sla_type: 3
-  sla_type: 3
+  sla_type: 4
   sla_type2: 9 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
