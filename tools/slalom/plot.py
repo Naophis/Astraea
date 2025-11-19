@@ -11,8 +11,8 @@ plot_col = 2
 
 
 class Plot:
-    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0):
-
+    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0, rad=None):
+        plt.close('all')
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=200, tight_layout=True)
         spec = gridspec.GridSpec(ncols=2, nrows=1,
@@ -21,7 +21,7 @@ class Plot:
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
         v = tgt_v
-        rad = 54
+        default_rad = 54
         n = 2
         tgt_ang = 90
         slip_gain = 250
@@ -30,21 +30,21 @@ class Plot:
 
         tgt_ang1 = tgt_ang2 = tgt_ang3 = 0
         if type == "normal":
-            rad = 27
+            default_rad = 27
             n = 2
             tgt_ang = 90
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
             if hf_cl == 0:
-                rad = 60.5
+                default_rad = 60.5
                 n = 4
                 tgt_ang = 90.0
                 start_ang = 0
                 end_pos = {"x": 90, "y": 90}
         elif type == "orval":
             if hf_cl == 0:
-                rad = 52.25
+                default_rad = 52.25
                 n = 4
                 tgt_ang = 180.0
                 # tgt_ang = 180
@@ -56,7 +56,7 @@ class Plot:
             tgt_ang = 45.0
             start_ang = 0
             n = 6
-            rad = 54.0
+            default_rad = 54.0
 
             if hf_cl == 0:
                 # rad = 80.0
@@ -68,13 +68,13 @@ class Plot:
             n = 4.0
 
             if hf_cl == 0:
-                rad = 45.0
+                default_rad = 45.0
                 end_pos = {"x": 45, "y": 90}
 
         elif type == "dia45_2":
             start_ang = 45
             n = 4
-            rad = 52
+            default_rad = 52
             tgt_ang = 45
             if hf_cl == 0:
                 end_pos = {"x": 90, "y": 45}
@@ -82,7 +82,7 @@ class Plot:
         elif type == "dia135_2":
             start_ang = 45
             if hf_cl == 0:
-                rad = 45.0
+                default_rad = 45.0
                 n = 4
                 tgt_ang = 135.0
                 end_pos = {"x": -45, "y": 90}
@@ -90,8 +90,13 @@ class Plot:
             start_ang = 0
             n = 4
             tgt_ang = 90
-            rad = 42.0
+            default_rad = 42.0
             end_pos = {"x": 90/math.sqrt(2), "y": 90/math.sqrt(2)}
+        
+        if rad is not None:
+            rad = rad
+        else:
+            rad = default_rad
 
         res = {}
         if mode > 0:
