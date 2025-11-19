@@ -14,7 +14,7 @@ class Plot:
     def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0, rad=None):
         plt.close('all')
         # fig = plt.figure(figsize=(5, 5), dpi=500)
-        fig = plt.figure(dpi=200, tight_layout=True)
+        fig = plt.figure(dpi=100, tight_layout=True)
         spec = gridspec.GridSpec(ncols=2, nrows=1,
                                  width_ratios=[2, 1])
         trj = plt.subplot2grid((plot_row, plot_col), (0, 0), rowspan=4)
@@ -239,4 +239,6 @@ class Plot:
         if show:
             acc_y = np.abs(res["acc_y"]).max()
             plt.suptitle("{}[G]".format(acc_y / 9.8))
-            plt.show()
+            # plt.show()
+        
+        return fig

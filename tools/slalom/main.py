@@ -13,6 +13,7 @@ import yaml
 import tkinter
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 def read_yaml(filename):
     # 現在のスクリプトのディレクトリを取得
@@ -40,8 +41,9 @@ class SlalomGUI:
         self.master = master
         master.title("Slalom Simulator")
         
-        self.window_width = 600
-        master.geometry(f"{self.window_width}x600")
+        self.window_width = 1260
+        self.window_height = 540
+        master.geometry(f"{self.window_width}x{self.window_height}")
 
         self.data = read_yaml("../param_tuner/profile/hardware.yaml")
         self.plot = Plot()
@@ -125,6 +127,11 @@ class SlalomGUI:
         
         # Initialize radius
         self.update_radius()
+        
+        # Plot Frame (Right Side)
+        self.plot_frame = ttk.Frame(self.master, padding="10")
+        self.plot_frame.grid(row=0, column=1, sticky=(tkinter.W, tkinter.E, tkinter.N, tkinter.S))
+        self.canvas = None
 
     def update_radius(self, event=None):
         t_type = self.turn_type.get()
@@ -172,10 +179,18 @@ class SlalomGUI:
              # The original code had `p.exe("orval", ...)` commented out and `po = PlotOrval()`.
              # Looking at plot.py, it handles "orval" type in `exe`.
              # Let's stick to using `self.plot.exe` as it seems to handle "orval" too based on line 45 of plot.py.
-             self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+             fig = self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
         else:
              # dia45_mode was 0 in original code, passing 0 for mode
-             self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+             fig = self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+        
+        # Embed plot
+        if self.canvas:
+            self.canvas.get_tk_widget().destroy()
+        
+        self.canvas = FigureCanvasTkAgg(fig, master=self.plot_frame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(side=tkinter.TOP, fill=tkinter.BOTH, expand=1)
 
 if __name__ == "__main__":
     root = tkinter.Tk()
