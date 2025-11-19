@@ -55,7 +55,6 @@ class SlalomGUI:
         self.k = tkinter.DoubleVar(value=self.data["slip_param_k2"])
         self.k_y = tkinter.StringVar(value=str(self.data["slip_param_K"]))
         self.hf_cl = tkinter.IntVar(value=0)
-        self.show_plot = tkinter.BooleanVar(value=False)
 
         self.create_widgets()
 
@@ -110,9 +109,6 @@ class SlalomGUI:
         ttk.Label(frame, text="Radius (Optional):").grid(row=5, column=0, sticky=tkinter.W)
         self.rad = tkinter.StringVar(value="")
         ttk.Entry(frame, textvariable=self.rad).grid(row=5, column=1, sticky=(tkinter.W, tkinter.E))
-
-        # Show Plot Checkbox
-        ttk.Checkbutton(frame, text="Show Plot", variable=self.show_plot).grid(row=6, column=0, columnspan=2, sticky=tkinter.W)
 
         # Plot Button
         ttk.Button(frame, text="Plot", command=self.run_plot).grid(row=7, column=0, columnspan=2, pady=10)
@@ -172,17 +168,15 @@ class SlalomGUI:
             "after_dia": 7,
         }
 
-        show = self.show_plot.get()
-
         if t_type == "orval":
              # Assuming PlotOrval has a similar interface or handling it via Plot if it supports it.
              # The original code had `p.exe("orval", ...)` commented out and `po = PlotOrval()`.
              # Looking at plot.py, it handles "orval" type in `exe`.
              # Let's stick to using `self.plot.exe` as it seems to handle "orval" too based on line 45 of plot.py.
-             fig = self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
         else:
              # dia45_mode was 0 in original code, passing 0 for mode
-             fig = self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
         
         # Embed plot
         if self.canvas:
