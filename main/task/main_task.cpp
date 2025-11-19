@@ -371,7 +371,7 @@ void MainTask::load_hw_param() {
     std::getline(ifs, buf);
     str += buf;
   }
-
+  ifs.close();
   // printf("%s\n", str.c_str());
 
   cJSON *root = cJSON_CreateObject(), *front_ctrl_roll_pid, *motor_pid,
@@ -851,7 +851,7 @@ void MainTask::load_offset_param() {
     std::getline(ifs, buf);
     str += buf;
   }
-
+  ifs.close();
   cJSON *root = cJSON_CreateObject(), *clear_dist_ragne_dist_list,
         *clear_dist_ragne_th_list, *clear_dist_ragne_dist_list_fast,
         *clear_dist_ragne_th_list_fast, *kanayama, *trj_idx_v, *trj_idx_val;
@@ -1167,6 +1167,7 @@ void MainTask::load_sensor_param() {
     std::getline(ifs, buf);
     str += buf;
   }
+  ifs.close();
   cJSON *root = cJSON_CreateObject(), *normal, *normal_ref, *normal_expand,
         *normal_exist, *dia, *normal2, *normal2_ref, *normal2_exist, *dia_ref,
         *dia_exist, *search, *search_ref, *search_exist, *gain;
@@ -1407,6 +1408,7 @@ void MainTask::exec_param_prof() {
     std::getline(ifs, buf);
     str += buf;
   }
+  ifs.close();
   exec_param_list.clear();
   cJSON *root = cJSON_CreateObject(), *exec_prof;
   root = cJSON_Parse(str.c_str());
@@ -1447,6 +1449,7 @@ void MainTask::load_circuit_path() {
     std::getline(ifs, buf);
     str += buf;
   }
+  ifs.close();
   cJSON *root = cJSON_CreateObject(), *path_str, *path_turn;
   root = cJSON_Parse(str.c_str());
   path_str = getItem(root, "path_str");
@@ -1479,7 +1482,7 @@ void MainTask::load_sys_param() {
     std::getline(ifs, buf);
     str += buf;
   }
-
+  ifs.close();
   cJSON *root = cJSON_CreateObject(), *test, *goals;
   root = cJSON_Parse(str.c_str());
 
@@ -1567,7 +1570,7 @@ void MainTask::load_turn_param_profiles(bool const_mode, int const_index) {
     std::getline(ifs, buf);
     str += buf;
   }
-
+  ifs.close();
   cJSON *root = cJSON_CreateObject(), *profile_list, *profile_idx;
   root = cJSON_Parse(str.c_str());
 

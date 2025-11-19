@@ -554,9 +554,9 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       }
     }
     if (sp.type == TurnType::Dia135) {
-      // calc_dia135_offset(ps_front, ps_back, td, !b);
+      calc_dia135_offset(ps_front, ps_back, td, !b);
     } else if (sp.type == TurnType::Dia45) {
-      // calc_dia45_offset(ps_front, ps_back, td, !b);
+      calc_dia45_offset(ps_front, ps_back, td, !b);
     }
     if (ps_front.dist > (0) && !next_motion.skip_wall_off) {
       res_f = go_straight(ps_front);
