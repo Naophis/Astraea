@@ -183,4 +183,6 @@ class PlotOrval:
         if show:
             acc_y = np.abs(res["acc_y"]).max()
             plt.suptitle("{}[G]".format(acc_y/9.8))
-            plt.show()
+            # plt.show()
+        
+        return fig
