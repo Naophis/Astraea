@@ -10,8 +10,8 @@ plot_col = 2
 
 
 class PlotOrval:
-    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}):
-
+    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, rad=None):
+        plt.close('all')
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=200, tight_layout=True)
         spec = gridspec.GridSpec(ncols=2, nrows=1,
@@ -20,7 +20,7 @@ class PlotOrval:
         trj.set(facecolor="dimgrey")
         # trj.set(facecolor="black")
         v = tgt_v
-        rad = 54
+        default_rad = 54
         n = 2
         tgt_ang = 90
         slip_gain = 250
@@ -28,53 +28,58 @@ class PlotOrval:
         end_pos = {"x": 90, "y": 90}
         start_ang = 0
         if type == "normal":
-            rad = 26
+            default_rad = 26
             n = 2
             tgt_ang = 90
             end_pos = {"x": 45, "y": 45}
             start_ang = 0
         elif type == "large":
-            rad = 60
+            default_rad = 60
             n = 4
             tgt_ang = 90
             end_pos = {"x": 90, "y": 90}
             start_ang = 0
         elif type == "orval":
-            rad = 76
+            default_rad = 76
             n = 4
             tgt_ang = 180
             end_pos = {"x": 0, "y": 180}
             start_ang = 0
         elif type == "dia45":
-            rad = 58
+            default_rad = 58
             n = 2
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 0
         elif type == "dia135":
-            rad = 40
+            default_rad = 40
             n = 2
             tgt_ang = 135
             end_pos = {"x": 45, "y": 90}
             start_ang = 0
         elif type == "dia45_2":
-            rad = 54
+            default_rad = 54
             n = 2
             tgt_ang = 45
             end_pos = {"x": 90, "y": 45}
             start_ang = 45
         elif type == "dia135_2":
-            rad = 42
+            default_rad = 42
             n = 4
             tgt_ang = 135
             end_pos = {"x": -45, "y": 90}
             start_ang = 45
         elif type == "dia90":
-            rad = 35
+            default_rad = 35
             n = 2
             tgt_ang = 90
             end_pos = {"x": 0, "y": 90}
             start_ang = 0
+        
+        if rad is not None:
+            rad = rad
+        else:
+            rad = default_rad
 
         sla = Slalom(v, rad, n, tgt_ang, end_pos, slip_gain, type, K, list_K_y)
         sla.calc_base_time()
