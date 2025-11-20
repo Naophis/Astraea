@@ -111,8 +111,9 @@ class SlalomGUI:
         self.rad = tkinter.StringVar(value="")
         ttk.Entry(frame, textvariable=self.rad).grid(row=5, column=1, sticky=(tkinter.W, tkinter.E))
 
-        # Show Plot Checkbox
-        ttk.Checkbutton(frame, text="Show Plot", variable=self.show_plot).grid(row=6, column=0, columnspan=2, sticky=tkinter.W)
+        # Integration Method
+        self.use_rk4 = tkinter.BooleanVar(value=False)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4)", variable=self.use_rk4).grid(row=6, column=0, columnspan=2, sticky=tkinter.W)
 
         # Plot Button
         ttk.Button(frame, text="Plot", command=self.run_plot).grid(row=7, column=0, columnspan=2, pady=10)
@@ -164,6 +165,9 @@ class SlalomGUI:
             except ValueError:
                 print("Invalid format for Radius")
                 return
+        
+        method = "rk4" if self.use_rk4.get() else "euler"
+        print(f"Integration method: {method}")
 
         offset = {
             "prev": 7,
@@ -179,10 +183,10 @@ class SlalomGUI:
              # The original code had `p.exe("orval", ...)` commented out and `po = PlotOrval()`.
              # Looking at plot.py, it handles "orval" type in `exe`.
              # Let's stick to using `self.plot.exe` as it seems to handle "orval" too based on line 45 of plot.py.
-             fig = self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method)
         else:
              # dia45_mode was 0 in original code, passing 0 for mode
-             fig = self.plot.exe(t_type, v, show, 0, k, list_k_y, offset, hf_cl, rad=rad_val)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method)
         
         # Embed plot
         if self.canvas:
