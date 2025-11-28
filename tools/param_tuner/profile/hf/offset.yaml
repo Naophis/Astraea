@@ -14,6 +14,9 @@ front_dist_offset: 97.50 # 探索時の前壁補正 大→手前になる
 
 normal_sla_offset_front: 9 # 探索スラローム前補正
 normal_sla_offset_back: 6 # 探索スラローム後補正
+dia45_offset_enable: 1
+dia135_offset_enable: 0
+dia_offset_max_dist: 0 # 斜め壁切れ距離補正最大値
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
 pivot_back_enable_front_th: 120 # バック判断のための壁有無しきい値
@@ -33,9 +36,6 @@ sla_wall_ref_r_orval: 45.0
 orval_rad_offset_l: 0
 orval_rad_offset_r: 0
 orval_offset_enable: 0
-
-dia45_offset_enable: 0
-dia135_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
@@ -203,7 +203,6 @@ wall_off_diff_check_dist_dia: 10.5
 
 # dia_wall_off_ref_l: 33.90
 # dia_wall_off_ref_r: 33.675
-dia_offset_max_dist: 1 # 斜め壁切れ距離補正最大値
 
 wall_off_pass_dist: 10
 
@@ -214,6 +213,11 @@ offset_after_turn_l2: 18 #large, orval
 offset_after_turn_r2: 18 #large, orval
 offset_after_turn_dia_l: 24 #dia45_2, dia135_2
 offset_after_turn_dia_r: 24 #dia45_2, dia135_2
+
+# 45, 135ターン時のオフセット距離計算用閾値
+dia_turn_offset_calc_th: 52
+
+
 
 # constant
 cell: 90.0
