@@ -11,7 +11,7 @@ plot_col = 2
 
 
 class Plot:
-    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0, rad=None, method="euler"):
+    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0, rad=None, method="euler", method_w="euler", method_time="euler"):
         plt.close('all')
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=100, tight_layout=True)
@@ -105,7 +105,7 @@ class Plot:
             res = sla.calc(start_ang)
         else:
             sla = Slalom(v, rad, n, tgt_ang, end_pos,
-                         slip_gain, type, K, list_K_y, method=method)
+                         slip_gain, type, K, list_K_y, method=method, method_w=method_w, method_time=method_time)
             if hf_cl == 0:
                 sla.set_cell_size(90)
             elif hf_cl == 1:

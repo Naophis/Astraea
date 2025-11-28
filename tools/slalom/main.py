@@ -42,7 +42,7 @@ class SlalomGUI:
         master.title("Slalom Simulator")
         
         self.window_width = 1260
-        self.window_height = 540
+        self.window_height = 600
         master.geometry(f"{self.window_width}x{self.window_height}")
 
         self.data = read_yaml("../param_tuner/profile/hardware.yaml")
@@ -112,15 +112,21 @@ class SlalomGUI:
 
         # Integration Method
         self.use_rk4 = tkinter.BooleanVar(value=False)
-        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4)", variable=self.use_rk4).grid(row=6, column=0, columnspan=2, sticky=tkinter.W)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Position", variable=self.use_rk4).grid(row=6, column=0, columnspan=2, sticky=tkinter.W)
+        
+        self.use_rk4_w = tkinter.BooleanVar(value=False)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Angular Velocity", variable=self.use_rk4_w).grid(row=7, column=0, columnspan=2, sticky=tkinter.W)
+
+        self.use_rk4_time = tkinter.BooleanVar(value=False)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Turn Time", variable=self.use_rk4_time).grid(row=8, column=0, columnspan=2, sticky=tkinter.W)
 
         # Plot Button
-        ttk.Button(frame, text="Plot", command=self.run_plot).grid(row=7, column=0, columnspan=2, pady=10)
+        ttk.Button(frame, text="Plot", command=self.run_plot).grid(row=9, column=0, columnspan=2, pady=10)
 
         # Output Log
-        ttk.Label(frame, text="Output Log:").grid(row=8, column=0, sticky=tkinter.W)
+        ttk.Label(frame, text="Output Log:").grid(row=10, column=0, sticky=tkinter.W)
         self.log_text = ScrolledText(frame, height=10, width=80)
-        self.log_text.grid(row=9, column=0, columnspan=2, sticky=(tkinter.W, tkinter.E))
+        self.log_text.grid(row=11, column=0, columnspan=2, sticky=(tkinter.W, tkinter.E))
 
         # Redirect stdout
         sys.stdout = RedirectText(self.log_text)
@@ -166,7 +172,9 @@ class SlalomGUI:
                 return
         
         method = "rk4" if self.use_rk4.get() else "euler"
-        print(f"Integration method: {method}")
+        method_w = "rk4" if self.use_rk4_w.get() else "euler"
+        method_time = "rk4" if self.use_rk4_time.get() else "euler"
+        print(f"Integration method: Position={method}, Angular Velocity={method_w}, Turn Time={method_time}")
 
         offset = {
             "prev": 7,
@@ -180,10 +188,10 @@ class SlalomGUI:
              # The original code had `p.exe("orval", ...)` commented out and `po = PlotOrval()`.
              # Looking at plot.py, it handles "orval" type in `exe`.
              # Let's stick to using `self.plot.exe` as it seems to handle "orval" too based on line 45 of plot.py.
-             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method, method_w=method_w, method_time=method_time)
         else:
              # dia45_mode was 0 in original code, passing 0 for mode
-             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method, method_w=method_w, method_time=method_time)
         
         # Embed plot
         if self.canvas:

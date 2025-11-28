@@ -45,7 +45,7 @@ class Slalom:
     K = 1
     list_K_y = []
 
-    def __init__(self, v, rad, n, ang, end_pos, slip_gain, type, K, list_K_y, method="euler"):
+    def __init__(self, v, rad, n, ang, end_pos, slip_gain, type, K, list_K_y, method="euler", method_w="euler", method_time="euler"):
         self.v = v
         self.rad = rad
         self.ang = ang * math.pi / 180
@@ -57,8 +57,14 @@ class Slalom:
         self.K = K
         self.list_K_y = list_K_y
         self.method = method
+        self.method_w = method_w
+        self.method_time = method_time
 
         dx = 0.0001/64
+
+        def safe_integrand(x, n):
+            if abs(x) >= 1: return 0
+            return np.exp(1) * np.exp(-1 / (1 - x**n))
 
         def safe_integrand_array(x, n):
             result = np.zeros_like(x)
@@ -66,10 +72,34 @@ class Slalom:
             result[valid_indices] = np.exp(
                 1)*np.exp(-1 / (1 - (x[valid_indices])**n))
             return result
-        x_values_corrected = np.linspace(0, 1, int(1 / dx))
-        self.Et = np.trapz(safe_integrand_array(
-            x_values_corrected, n), x_values_corrected)
-        print(self.Et)
+        
+        if self.method_time == "rk4":
+            # RK4 Integration for Et from 0 to 1
+            # dy/dx = safe_integrand(x, n)
+            # y(0) = 0, find y(1)
+            
+            y = 0
+            x = 0
+            step_size = dx
+            steps = int(1 / step_size)
+            
+            for _ in range(steps):
+                k1 = safe_integrand(x, n)
+                k2 = safe_integrand(x + step_size/2, n)
+                k3 = safe_integrand(x + step_size/2, n)
+                k4 = safe_integrand(x + step_size, n)
+                
+                y += (step_size / 6) * (k1 + 2*k2 + 2*k3 + k4)
+                x += step_size
+            
+            self.Et = y
+        else:
+            # Original Trapezoidal/Euler method using numpy
+            x_values_corrected = np.linspace(0, 1, int(1 / dx))
+            self.Et = np.trapz(safe_integrand_array(
+                x_values_corrected, n), x_values_corrected)
+            
+        print(f"Et ({self.method_time}): {self.Et}")
         self.base_alpha = v / rad
 
     def set_cell_size(self, size):
@@ -89,22 +119,23 @@ class Slalom:
                 return
             c = c + 1
 
-    def get_w_alpha(self, t):
-        # Helper to get w and alpha at time t
-        # Note: w is integral of alpha.
-        # In original code:
-        # tmp_alpha = self.base_alpha * self.calc_neipire(dt * i, self.base_time, self.pow_n)
-        # tmp_w2 = self.base_alpha * self.calc_neipire_w(dt * i, self.base_time, self.pow_n)
-        # The original code calculates w by accumulation in Euler, but also calculates w2 directly?
-        # In calc: tmp_w = tmp_w + tmp_alpha * dt
-        # In calc_slip: tmp_w = self.base_alpha * self.calc_neipire_w(...)
-        # So for RK4, we should use the direct calculation for w if possible, or integrate alpha.
-        # calc_neipire_w seems to be the analytical integral or similar?
-        # Let's use calc_neipire_w for w(t) as it depends only on t.
-        
-        alpha = self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
-        w = self.base_alpha * self.calc_neipire_w(t, self.base_time, self.pow_n)
-        return w, alpha
+    def get_alpha(self, t):
+        return self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
+
+    def integrate_w(self, t, w_curr, dt):
+        # Integrate alpha to get next w using selected method
+        if self.method_w == "rk4":
+            k1 = self.get_alpha(t)
+            k2 = self.get_alpha(t + dt/2)
+            k3 = self.get_alpha(t + dt/2)
+            k4 = self.get_alpha(t + dt)
+            w_next = w_curr + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
+            return w_next
+        else:
+            # Euler
+            alpha = self.get_alpha(t)
+            w_next = w_curr + alpha * dt
+            return w_next
 
     def calc(self, start_ang):
         res = {}
@@ -120,37 +151,47 @@ class Slalom:
         res["ang"] = np.array([])
         
         # State: [x, y, theta]
-        # w is calculated analytically
+        # w is calculated separately
         
         state = {
             "x": 0,
             "y": 0,
             "theta": start_ang * math.pi / 180,
-            "w": 0 # Placeholder, updated in loop
+            "w": 0 
         }
         
         for i in range(1, int(self.limit_time_count + 1)):
-            t = dt * i
+            t = dt * (i - 1) # Start of interval
             
-            # Recalculate alpha/w2 for logging (these are functions of t)
-            tmp_alpha = self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
-            tmp_w_analytical = self.base_alpha * self.calc_neipire_w(t, self.base_time, self.pow_n) * math.exp(1)
+            # Store w_start for RK4 position integration
+            w_start = state["w"]
+            
+            # Update w for the next step
+            w_next = self.integrate_w(t, w_start, dt)
 
             if self.method == "rk4":
-                state = self.step_rk4_calc(t, state, dt)
-                state["w"] = tmp_w_analytical # Use analytical w for consistency
+                # Pass w_start to step function, it will integrate w internally for intermediate steps
+                state = self.step_rk4_calc(t, state, dt, w_start)
             else:
-                state = self.step_euler_calc(t, state, dt)
-                # Euler integrates w, so state["w"] is the integrated value
+                # Euler uses w_next (Backward Euler style for theta update)
+                state = self.step_euler_calc(t, state, dt, w_next)
+
+            # Force update w in state to w_next (as RK4 step might return w_start)
+            state["w"] = w_next
 
             vx = self.v * math.cos(self.start_theta + state["theta"])
             vy = self.v * math.sin(self.start_theta + state["theta"])
             
+            # Recalculate alpha/w2 for logging (these are functions of t + dt)
+            tmp_alpha = self.get_alpha(t + dt)
+            # tmp_w2 is just for logging, maybe analytical?
+            tmp_w2 = self.base_alpha * self.calc_neipire_w(t + dt, self.base_time, self.pow_n) * math.exp(1)
+
             res["x"] = np.append(res["x"], state["x"])
             res["y"] = np.append(res["y"], state["y"])
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
             res["w"] = np.append(res["w"], state["w"])
-            res["w2"] = np.append(res["w2"], tmp_w_analytical)
+            res["w2"] = np.append(res["w2"], tmp_w2)
             res["v"] = np.append(res["v"], self.v/1000)
             res["vx"] = np.append(res["vx"], vx/1000)
             res["vy"] = np.append(res["vy"], vy/1000)
@@ -160,32 +201,44 @@ class Slalom:
         self.res = res
         return res
 
-    def step_euler_calc(self, t, state, dt):
-        # Original logic
-        tmp_alpha = self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
+    def step_euler_calc(self, t, state, dt, w_next):
+        # Euler step for Position
+        # x_{n+1} = x_n + v * cos(theta_n) * dt
+        # theta_{n+1} = theta_n + w_n * dt
         
-        # Initialize w if not present (for first step consistency if needed, though calc initializes it)
-        current_w = state.get("w", 0)
+        # Note: w_next is the w value at the end of the interval (t+dt)
+        # Original code used w_next for theta update.
         
-        new_w = current_w + tmp_alpha * dt
-        new_theta = state["theta"] + new_w * dt
+        w = w_next
+        theta = state["theta"]
+        
+        new_theta = theta + w * dt
         
         new_x = state["x"] + self.v * math.cos(self.start_theta + new_theta) * dt
         new_y = state["y"] + self.v * math.sin(self.start_theta + new_theta) * dt
         
-        return {"x": new_x, "y": new_y, "theta": new_theta, "w": new_w}
+        return {"x": new_x, "y": new_y, "theta": new_theta, "w": w}
 
-    def step_rk4_calc(self, t, state, dt):
+    def step_rk4_calc(self, t, state, dt, w_start):
         # State vector y = [x, y, theta]
         # dy/dt = f(t, y)
         # dx/dt = v * cos(start_theta + theta)
         # dy/dt = v * sin(start_theta + theta)
         # dtheta/dt = w(t)
         
+        # We need w(t) at intermediate points.
+        # w is integrated separately.
+        # w_start is w at time t.
+        
+        def get_w_at_offset(offset):
+            # Integrate w from t to t + offset
+            return self.integrate_w(t, w_start, offset)
+            
         def derivs(t_curr, y_curr):
             x, y, theta = y_curr
-            # Use analytical w
-            w = self.base_alpha * self.calc_neipire_w(t_curr, self.base_time, self.pow_n) * math.exp(1)
+            # t_curr is t + offset
+            offset = t_curr - t
+            w = get_w_at_offset(offset)
             
             dxdt = self.v * math.cos(self.start_theta + theta)
             dydt = self.v * math.sin(self.start_theta + theta)
@@ -201,7 +254,7 @@ class Slalom:
         
         y_next = y0 + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
         
-        return {"x": y_next[0], "y": y_next[1], "theta": y_next[2]}
+        return {"x": y_next[0], "y": y_next[1], "theta": y_next[2], "w": w_start}
 
     def calc_slip(self, start_ang):
         res = {}
@@ -225,25 +278,33 @@ class Slalom:
             "vx": self.v / 1000,
             "vy": 0,
             "beta": 0,
-            "w": 0 # In calc_slip, w is calculated from t directly, but let's track it if needed or just use t
+            "w": 0 
         }
         
         # For Euler compatibility, we need to track 's' (integral of error)
         self.s_err = 0 
 
         for i in range(1, int(self.limit_time_count + 1)):
-            t = dt * i
+            t = dt * (i - 1) # Start of interval
+            
+            # Store w_start for RK4
+            w_start = state["w"]
+            
+            # Calculate next w
+            w_next = self.integrate_w(t, w_start, dt)
             
             if self.method == "rk4":
-                state = self.step_rk4_slip(t, state, dt)
+                # Pass w_start to step function, it will integrate w internally for intermediate steps
+                state = self.step_rk4_slip(t, state, dt, w_start)
             else:
-                state = self.step_euler_slip(t, state, dt)
+                state = self.step_euler_slip(t, state, dt, w_next) # Euler uses w_next (Backward Euler style)
+
+            # Update w in state
+            state["w"] = w_next
 
             # Logging
             tmp_v = np.sqrt(state["vx"] ** 2 + state["vy"] ** 2)
-            tmp_alpha = self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
-            # In slip, w is calculated directly from t in original code
-            tmp_w = self.base_alpha * self.calc_neipire_w(t, self.base_time, self.pow_n)
+            tmp_alpha = self.get_alpha(t + dt)
             
             res["v"] = np.append(res["v"], tmp_v)
             res["vx"] = np.append(res["vx"], state["vx"])
@@ -252,58 +313,36 @@ class Slalom:
             res["x"] = np.append(res["x"], state["x"])
             res["y"] = np.append(res["y"], state["y"])
             res["alpha"] = np.append(res["alpha"], tmp_alpha)
-            res["w"] = np.append(res["w"], tmp_w)
-            res["w2"] = np.append(res["w2"], tmp_w)
-            res["acc_y"] = np.append(res["acc_y"], (tmp_v * tmp_w))
+            res["w"] = np.append(res["w"], state["w"])
+            res["w2"] = np.append(res["w2"], state["w"])
+            res["acc_y"] = np.append(res["acc_y"], (tmp_v * state["w"]))
             res["beta"] = np.append(res["beta"], state["beta"])
             res["ang"] = np.append(res["ang"], state["theta"])
 
         self.res = res
         return res
 
-    def step_euler_slip(self, t, state, dt):
-        # Original logic
-        tmp_alpha = self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
-        tmp_w = self.base_alpha * self.calc_neipire_w(t, self.base_time, self.pow_n)
+    def step_euler_slip(self, t, state, dt, w_next):
+        # Original logic used w_next (tmp_w calculated at current time i*dt)
         
-        # Note: Original code had delta_beta logic which seems to be for theta update?
-        # tmp_theta = tmp_theta + tmp_w * dt + delta_beta
-        # delta_beta = beta - old_beta
-        # This implies theta tracks the heading of velocity vector? Or body heading?
-        # "tmp_theta" usually means body heading (yaw).
-        # If tmp_theta += w * dt + delta_beta, then tmp_theta is actually Course Angle (yaw + beta)?
-        # Let's check: vx, vy are body frame?
-        # If vx, vy are body frame, then global velocity is:
-        # V_global_x = vx * cos(theta) - vy * sin(theta)
-        # V_global_y = vx * sin(theta) + vy * cos(theta)
-        # The code:
-        # tmp_x += tmp_v * cos(start_theta + tmp_theta)
-        # This implies tmp_theta is the direction of velocity vector.
-        # If tmp_theta = yaw + beta, then yaw = tmp_theta - beta.
-        # And w = d(yaw)/dt.
-        # So d(tmp_theta)/dt = d(yaw)/dt + d(beta)/dt = w + d(beta)/dt.
-        # So tmp_theta += w * dt + delta_beta is correct if tmp_theta is Course Angle.
-        
-        # Let's replicate exactly.
         vx = state["vx"]
         vy = state["vy"]
         beta = state["beta"]
-        theta = state["theta"] # This is "tmp_theta"
+        theta = state["theta"]
         
         # Control inputs
         err = self.v / 1000 - np.sqrt(vx ** 2 + vy ** 2)
         self.s_err = self.s_err + err
         Fx = 100.0 * err + 0.01 * self.s_err
-        Fx = 0 # Original code overrides Fx to 0
+        Fx = 0 
         
         v2 = np.sqrt(vx ** 2 + vy ** 2)
         tmpK = np.interp(v2 * 1000, list_K_x, self.list_K_y)
         Fy = -tmpK * beta
         
         # Dynamics
-        w_current = tmp_w
-        w_prev = self.base_alpha * self.calc_neipire_w(t - dt, self.base_time, self.pow_n)
-        if t - dt < 0: w_prev = 0
+        # Original used old_w (w_prev) for acceleration
+        w_prev = state["w"] # This is w at time t (start of interval)
         
         ax = Fx / m + w_prev * vy
         ay = Fy / m - w_prev * vx
@@ -318,43 +357,36 @@ class Slalom:
         new_y = state["y"] + tmp_v * 1000 * np.sin(self.start_theta + theta) * dt
         
         # Beta update
-        # beta = (old_beta / dt - tmp_w) / (1.0 / dt + self.K / tmp_v)
-        # This is implicit Euler for beta?
-        # (beta - old_beta)/dt = -w - K/v * beta
-        # beta - old_beta = -w*dt - K/v * beta * dt
-        # beta (1 + K/v * dt) = old_beta - w*dt
-        # beta = (old_beta - w*dt) / (1 + K/v * dt)
-        # Multiply top and bottom by 1/dt:
-        # beta = (old_beta/dt - w) / (1/dt + K/v) -> MATCHES CODE
-        
-        new_beta = (beta / dt - w_current) / (1.0 / dt + self.K / tmp_v)
+        # Uses w_next (current w)
+        new_beta = (beta / dt - w_next) / (1.0 / dt + self.K / tmp_v)
         
         delta_beta = new_beta - beta
-        new_theta = theta + w_current * dt + delta_beta
+        new_theta = theta + w_next * dt + delta_beta
         
         return {
             "x": new_x, "y": new_y, "theta": new_theta, 
-            "vx": new_vx, "vy": new_vy, "beta": new_beta, "w": w_current
+            "vx": new_vx, "vy": new_vy, "beta": new_beta, "w": w_next
         }
 
-    def step_rk4_slip(self, t, state, dt):
+    def step_rk4_slip(self, t, state, dt, w_start):
         # State: [x, y, theta, vx, vy, beta, s_err]
-        # Note: s_err is integral of velocity error.
+        
+        def get_w_at_offset(offset):
+            # Integrate w from t to t + offset
+            return self.integrate_w(t, w_start, offset)
         
         def derivs(t_curr, y_curr):
             x, y, theta, vx, vy, beta, s_err = y_curr
             
-            w = self.base_alpha * self.calc_neipire_w(t_curr, self.base_time, self.pow_n)
+            offset = t_curr - t
+            w = get_w_at_offset(offset)
             
             v_curr = np.sqrt(vx**2 + vy**2)
-            if v_curr < 1e-6: v_curr = 1e-6 # Avoid div by zero
+            if v_curr < 1e-6: v_curr = 1e-6 
             
-            # Fx control
             err = self.v / 1000 - v_curr
-            # d(s_err)/dt = err
-            
             Fx = 100.0 * err + 0.01 * s_err
-            Fx = 0 # Original code overrides Fx to 0
+            Fx = 0 
             
             tmpK = np.interp(v_curr * 1000, list_K_x, self.list_K_y)
             Fy = -tmpK * beta
@@ -362,16 +394,9 @@ class Slalom:
             ax = Fx / m + w * vy
             ay = Fy / m - w * vx
             
-            # d(beta)/dt = -w - K/v * beta
             dbetadt = -w - (self.K / v_curr) * beta
-            
-            # d(theta)/dt. theta is Course Angle.
-            # theta = yaw + beta
-            # d(theta)/dt = d(yaw)/dt + d(beta)/dt = w + dbetadt
             dthetadt = w + dbetadt
             
-            # Position
-            # v is magnitude. Direction is theta.
             dxdt = v_curr * 1000 * np.cos(self.start_theta + theta)
             dydt = v_curr * 1000 * np.sin(self.start_theta + theta)
             
@@ -386,12 +411,11 @@ class Slalom:
         
         y_next = y0 + (dt/6) * (k1 + 2*k2 + 2*k3 + k4)
         
-        # Update s_err in object
         self.s_err = y_next[6]
         
         return {
             "x": y_next[0], "y": y_next[1], "theta": y_next[2], 
-            "vx": y_next[3], "vy": y_next[4], "beta": y_next[5], "w": 0 # w not needed for next state
+            "vx": y_next[3], "vy": y_next[4], "beta": y_next[5], "w": 0 # w updated outside
         }
 
 
@@ -546,19 +570,27 @@ class Slalom:
             if state == 3:
                 break
 
+
         self.res = res
 
         return res
 
     def calc_neipire(self, t, s, N):
-        z = 1
+        if t <= 0: return 0
         t = t / s
-        t_z = (t - z)
-        P = math.pow(t_z, N - z)
-        Q = P * t_z
-        res = -N * P / ((Q - z) * (Q - z)) * \
-            (math.exp(z + z / (Q - z)) / s)
-        return res
+        if t >= 2: return 0
+        
+        try:
+            z = math.pow(t - 1, N)
+            Q = 1
+            P = math.exp(-1 / (1 - z))
+            res = -N * P / ((Q - z) * (Q - z)) * \
+                math.pow(t - 1, N - 1) / s * math.exp(1)
+            return res
+        except ZeroDivisionError:
+            return 0
+        except ValueError:
+            return 0
         # if t < s/2:
         #     z = 1
         #     t = t / s
