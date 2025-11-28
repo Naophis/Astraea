@@ -1576,6 +1576,8 @@ void IRAM_ATTR MotionPlanning::calc_dia45_offset(param_straight_t &front,
     offset = offset_r;
   }
   if (param->dia45_offset_enable) {
+    // offset = std::clamp(offset, -param->dia_offset_max_dist,
+    // param->dia_offset_max_dist);
     front.dist -= offset;
     back.dist += offset * ROOT2;
   }
