@@ -84,7 +84,7 @@ class SlalomGUI:
         # Default Radius Mapping (based on Plot class in plot.py, assuming hf_cl=0)
         self.DEFAULT_RADIUS = {
             "normal": 27,
-            "large": 60.5,
+            "large": 58.5,
             "orval": 52.25,
             "dia45": 54.0,
             "dia135": 45.0,
