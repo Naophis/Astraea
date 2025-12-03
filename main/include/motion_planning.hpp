@@ -95,6 +95,7 @@ public:
 
 private:
   TaskHandle_t notify_handle = xTaskGetCurrentTaskHandle();
+  float calc_orval_offset(TurnDirection dir);
   void calc_large_offset(param_straight_t &front, param_straight_t &back,
                          TurnDirection dir, bool exec_wall_off);
   void calc_dia135_offset(param_straight_t &front, param_straight_t &back,

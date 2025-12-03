@@ -375,6 +375,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   bool find_r = false;
   bool find_l = false;
   const auto se = get_sensing_entity();
+  float orval_offset = 0;
 
   ps_front.search_str_wide_ctrl_l = ps_front.search_str_wide_ctrl_r =
       ps_back.search_str_wide_ctrl_l = ps_back.search_str_wide_ctrl_r = false;
@@ -532,6 +533,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       if (!wall_off(td, ps_front)) {
         return MotionResult::ERROR;
       }
+      orval_offset = calc_orval_offset(td);
     }
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);
@@ -639,14 +641,32 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   // tgt_val->ego_in.v = sp.v;//強制的に速度を指定
 
   if (sp.type == TurnType::Orval) {
+    const static float Et = 0.7632146181989743f;
     if (td == TurnDirection::Left) {
       tgt_val->nmr.sla_time = sp.time;
       tgt_val->nmr.sla_rad = sp.rad;
       tgt_val->nmr.sla_alpha = (sp.v / sp.rad);
+      if (param->orval_offset_enable) {
+        const float new_rad = sp.rad - orval_offset / 2;
+        const float new_time = (new_rad * sp.ang) / (2.0 * sp.v * Et);
+        tgt_val->nmr.sla_rad = new_rad;
+        tgt_val->nmr.sla_time = new_time;
+        tgt_val->nmr.sla_alpha = (sp.v / new_rad);
+        g_offset_x1 = new_rad;
+      }
+
     } else {
       tgt_val->nmr.sla_time = sp.time2;
       tgt_val->nmr.sla_rad = sp.rad2;
       tgt_val->nmr.sla_alpha = -(sp.v / sp.rad2);
+      if (param->orval_offset_enable) {
+        const float new_rad = sp.rad2 - orval_offset / 2;
+        const float new_time = (new_rad * sp.ang) / (2.0 * sp.v * Et);
+        tgt_val->nmr.sla_rad = new_rad;
+        tgt_val->nmr.sla_time = new_time;
+        tgt_val->nmr.sla_alpha = -(sp.v / new_rad);
+        g_offset_x1 = new_rad;
+      }
     }
   }
 
@@ -743,7 +763,8 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
           }
         }
       }
-      if (tgt_val->ego_in.sla_param.counter >= (sp.time * 2 / dt)) {
+      if (tgt_val->ego_in.sla_param.counter >=
+          (tgt_val->nmr.sla_time * 2 / dt)) {
         tgt_val->ego_in.w = 0;
         tgt_val->ego_in.img_ang =
             (td == TurnDirection::Left) ? sp.ref_ang : -sp.ref_ang;
@@ -1521,6 +1542,62 @@ void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,
     front.dist -= total_offset;
   }
   // back.dist += offset * ROOT2;
+}
+
+float IRAM_ATTR MotionPlanning::calc_orval_offset(TurnDirection dir) {
+  const auto se = get_sensing_entity();
+  float offset_l = 0;
+  float offset_r = 0;
+  float offset = 0;
+  bool valid_l = false;
+  bool valid_r = false;
+
+  if (dir == TurnDirection::Left) {
+    if (1 < se->sen.l45.sensor_dist &&
+        se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
+      offset_l = param->sen_ref_p.normal.ref.left45 - se->sen.l45.sensor_dist;
+      g_sen_l_dist = se->sen.l45.sensor_dist;
+      valid_l = true;
+    }
+    if (1 < se->sen.r45.sensor_dist &&
+        se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
+      offset_r = se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
+      g_sen_r_dist = se->sen.r45.sensor_dist;
+      valid_r = true;
+    }
+  } else {
+    if (1 < se->sen.r45.sensor_dist &&
+        se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
+      offset_r = param->sen_ref_p.normal.ref.right45 - se->sen.r45.sensor_dist;
+      g_sen_r_dist = se->sen.r45.sensor_dist;
+      valid_r = true;
+    }
+    if (1 < se->sen.l45.sensor_dist &&
+        se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
+      offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
+      g_sen_l_dist = se->sen.l45.sensor_dist;
+      valid_l = true;
+    }
+  }
+  if (valid_l && valid_r) {
+    if (std::abs(offset_l) < std::abs(offset_r)) {
+      offset = offset_l;
+    } else {
+      offset = offset_r;
+    }
+  } else if (valid_l) {
+    offset = offset_l;
+  } else if (valid_r) {
+    offset = offset_r;
+  }
+
+  g_offset_y_l = g_offset_y_r = 0;
+  g_offset_y_l = offset_l;
+  g_offset_y_r = offset_r;
+  g_total_offset = offset;
+
+  return std::clamp(offset, -param->orval_offset_max_dist,
+                    param->orval_offset_max_dist);
 }
 
 void IRAM_ATTR MotionPlanning::calc_large_offset(param_straight_t &front,

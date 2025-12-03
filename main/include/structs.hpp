@@ -590,13 +590,15 @@ typedef struct {
   float sla_wall_ref_r_orval = 45;
   float orval_rad_offset_l = 0;
   float orval_rad_offset_r = 0;
-  int orval_enable = 0;
   bool large_offset_enable = false;
   bool dia45_offset_enable = false;
   bool dia135_offset_enable = false;
+  bool orval_offset_enable = false;
   float large_offset_max_dist = 5;
   float dia45_offset_max_dist = 0;
   float dia135_offset_max_dist = 0;
+  float orval_offset_max_dist = 0;
+  
   float front_ctrl_error_th = 4;
 
   float clear_dist_ragne_from = 0;
