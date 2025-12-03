@@ -14,9 +14,11 @@ front_dist_offset: 97.50 # 探索時の前壁補正 大→手前になる
 
 normal_sla_offset_front: 9 # 探索スラローム前補正
 normal_sla_offset_back: 6 # 探索スラローム後補正
+orval_offset_enable: 1
 large_offset_enable: 1
 dia45_offset_enable: 1
 dia135_offset_enable: 1
+orval_offset_max_dist: 6 # orvalターン半径の変化量上限
 large_offset_max_dist: 5 # large壁切れ距離補正最大値
 dia45_offset_max_dist: 5 # 斜め壁切れ距離補正最大値
 dia135_offset_max_dist: 10 # 斜め壁切れ距離補正最大値
@@ -32,14 +34,6 @@ sla_wall_ref_l: 45.0 #大→短くなる
 sla_wall_ref_r: 45.0 #大→短くなる
 
 sla_max_offset_dist: 0 #not use
-
-# Orvalスラロームオフセット距離壁補正リファレンス値
-sla_wall_ref_l_orval: 45.0
-sla_wall_ref_r_orval: 45.0
-# orval_rad_offset_l: 5
-orval_rad_offset_l: 0
-orval_rad_offset_r: 0
-orval_offset_enable: 0
 
 # front_dist_offset2: 137.0
 
