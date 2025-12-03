@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.9650 #10deg 
-tire2: 13.9650 #10deg
+tire: 13.9550 #10deg 
+tire2: 13.9550 #10deg
 
 battery_gain: 3.854311787490441
 
