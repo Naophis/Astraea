@@ -100,7 +100,9 @@
         "matrixfunctions": "cpp",
         "nonlinearoptimization": "cpp",
         "openglsupport": "cpp",
-        "polynomials": "cpp"
+        "polynomials": "cpp",
+        "hash_set": "cpp",
+        "slist": "cpp"
     },
     "idf.adapterTargetName": "esp32s3",
     "clang-format.executable": "/usr/bin/clang-format",
