@@ -1103,13 +1103,6 @@ void MainTask::load_offset_param() {
   param->sla_wall_ref_l = getItem(root, "sla_wall_ref_l")->valuedouble;
   param->sla_wall_ref_r = getItem(root, "sla_wall_ref_r")->valuedouble;
 
-  param->sla_wall_ref_l_orval =
-      getItem(root, "sla_wall_ref_l_orval")->valuedouble;
-  param->sla_wall_ref_r_orval =
-      getItem(root, "sla_wall_ref_r_orval")->valuedouble;
-  param->orval_rad_offset_l = getItem(root, "orval_rad_offset_l")->valuedouble;
-  param->orval_rad_offset_r = getItem(root, "orval_rad_offset_r")->valuedouble;
-
   param->orval_offset_enable = getItem(root, "orval_offset_enable")->valueint;
   param->large_offset_enable = getItem(root, "large_offset_enable")->valueint;
   param->dia45_offset_enable = getItem(root, "dia45_offset_enable")->valueint;

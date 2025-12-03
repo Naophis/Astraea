@@ -586,10 +586,6 @@ typedef struct {
   float sla_wall_ref_l = 45;
   float sla_wall_ref_r = 45;
   float sla_max_offset_dist = 45;
-  float sla_wall_ref_l_orval = 45;
-  float sla_wall_ref_r_orval = 45;
-  float orval_rad_offset_l = 0;
-  float orval_rad_offset_r = 0;
   bool large_offset_enable = false;
   bool dia45_offset_enable = false;
   bool dia135_offset_enable = false;
