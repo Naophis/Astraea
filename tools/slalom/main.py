@@ -93,6 +93,18 @@ class SlalomGUI:
             "dia90": 42.0
         }
 
+        # Default N Mapping
+        self.DEFAULT_N = {
+            "normal": 2.0,
+            "large": 4.0,
+            "orval": 4.0,
+            "dia45": 6.0,
+            "dia135": 4.0,
+            "dia45_2": 4.0,
+            "dia135_2": 4.0,
+            "dia90": 4.0
+        }
+
         # K
         ttk.Label(frame, text="Slip Param K:").grid(row=2, column=0, sticky=tkinter.W)
         ttk.Entry(frame, textvariable=self.k).grid(row=2, column=1, sticky=(tkinter.W, tkinter.E))
@@ -110,18 +122,23 @@ class SlalomGUI:
         self.rad = tkinter.StringVar(value="")
         ttk.Entry(frame, textvariable=self.rad).grid(row=5, column=1, sticky=(tkinter.W, tkinter.E))
 
+        # Turn Parameter n (Optional)
+        ttk.Label(frame, text="Turn Parameter n:").grid(row=6, column=0, sticky=tkinter.W)
+        self.n = tkinter.StringVar(value="")
+        ttk.Entry(frame, textvariable=self.n).grid(row=6, column=1, sticky=(tkinter.W, tkinter.E))
+
         # Integration Method
         self.use_rk4 = tkinter.BooleanVar(value=False)
-        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Position", variable=self.use_rk4).grid(row=6, column=0, columnspan=2, sticky=tkinter.W)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Position", variable=self.use_rk4).grid(row=7, column=0, columnspan=2, sticky=tkinter.W)
         
         self.use_rk4_w = tkinter.BooleanVar(value=False)
-        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Angular Velocity", variable=self.use_rk4_w).grid(row=7, column=0, columnspan=2, sticky=tkinter.W)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Angular Velocity", variable=self.use_rk4_w).grid(row=8, column=0, columnspan=2, sticky=tkinter.W)
 
         self.use_rk4_time = tkinter.BooleanVar(value=False)
-        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Turn Time", variable=self.use_rk4_time).grid(row=8, column=0, columnspan=2, sticky=tkinter.W)
+        ttk.Checkbutton(frame, text="Use Runge-Kutta (RK4) for Turn Time", variable=self.use_rk4_time).grid(row=9, column=0, columnspan=2, sticky=tkinter.W)
 
         # Plot Button
-        ttk.Button(frame, text="Plot", command=self.run_plot).grid(row=9, column=0, columnspan=2, pady=10)
+        ttk.Button(frame, text="Plot", command=self.run_plot).grid(row=10, column=0, columnspan=2, pady=10)
 
         # Output Log
         ttk.Label(frame, text="Output Log:").grid(row=10, column=0, sticky=tkinter.W)
@@ -143,6 +160,8 @@ class SlalomGUI:
         t_type = self.turn_type.get()
         if t_type in self.DEFAULT_RADIUS:
             self.rad.set(str(self.DEFAULT_RADIUS[t_type]))
+        if t_type in self.DEFAULT_N:
+            self.n.set(str(self.DEFAULT_N[t_type]))
 
     def run_plot(self):
         # Clear previous log
@@ -170,6 +189,16 @@ class SlalomGUI:
             except ValueError:
                 print("Invalid format for Radius")
                 return
+
+        # Parse n
+        n_val = None
+        n_str = self.n.get().strip()
+        if n_str:
+            try:
+                n_val = float(n_str)
+            except ValueError:
+                print("Invalid format for n")
+                return
         
         method = "rk4" if self.use_rk4.get() else "euler"
         method_w = "rk4" if self.use_rk4_w.get() else "euler"
@@ -188,10 +217,10 @@ class SlalomGUI:
              # The original code had `p.exe("orval", ...)` commented out and `po = PlotOrval()`.
              # Looking at plot.py, it handles "orval" type in `exe`.
              # Let's stick to using `self.plot.exe` as it seems to handle "orval" too based on line 45 of plot.py.
-             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method, method_w=method_w, method_time=method_time)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, input_n=n_val, method=method, method_w=method_w, method_time=method_time)
         else:
              # dia45_mode was 0 in original code, passing 0 for mode
-             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, method=method, method_w=method_w, method_time=method_time)
+             fig = self.plot.exe(t_type, v, True, 0, k, list_k_y, offset, hf_cl, rad=rad_val, input_n=n_val, method=method, method_w=method_w, method_time=method_time)
         
         # Embed plot
         if self.canvas:

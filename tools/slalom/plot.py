@@ -11,7 +11,7 @@ plot_col = 2
 
 
 class Plot:
-    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0, rad=None, method="euler", method_w="euler", method_time="euler"):
+    def exe(self, type, tgt_v, show, mode=0, K=1, list_K_y=[], offset={}, hf_cl=0, rad=None, input_n=None, method="euler", method_w="euler", method_time="euler"):
         plt.close('all')
         # fig = plt.figure(figsize=(5, 5), dpi=500)
         fig = plt.figure(dpi=100, tight_layout=True)
@@ -97,7 +97,7 @@ class Plot:
             rad = rad
         else:
             rad = default_rad
-
+        n = input_n
         res = {}
         if mode > 0:
             sla = Slalom2(v, rad, n, tgt_ang1, tgt_ang2, tgt_ang3,
