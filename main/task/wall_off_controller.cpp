@@ -860,6 +860,7 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_left_dia_strategy() {
             se->ego.right90_dist_diff < 0;
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist_dia) &&
+               45 < se->ego.right45_dist &&
                se->ego.right45_dist < param->dia_turn_th_r && valid_right90;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）
@@ -939,6 +940,7 @@ DiagonalWallOffStrategy IRAM_ATTR &WallOffController::get_right_dia_strategy() {
             se->ego.left90_dist_diff < 0;
         return std::abs(after - before) >=
                    std::abs(p_wall_off.diff_check_dist_dia) &&
+               45 < se->ego.left45_dist &&
                se->ego.left45_dist < param->dia_turn_th_l && valid_left90;
       },
       // detect_wall_off_exist - 壁切れ終了（exist=trueの場合）

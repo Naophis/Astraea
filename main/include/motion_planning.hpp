@@ -85,8 +85,18 @@ public:
 
   volatile bool skip_gyro_bias_check = false;
 
+  float g_offset_y_l = 0;
+  float g_offset_y_r = 0;
+  float g_offset_x1 = 0;
+  float g_offset_x2 = 0;
+  float g_total_offset = 0;
+  float g_sen_r_dist = 0;
+  float g_sen_l_dist = 0;
+
 private:
   TaskHandle_t notify_handle = xTaskGetCurrentTaskHandle();
+  void calc_large_offset(param_straight_t &front, param_straight_t &back,
+                         TurnDirection dir, bool exec_wall_off);
   void calc_dia135_offset(param_straight_t &front, param_straight_t &back,
                           TurnDirection dir, bool exec_wall_off);
   void calc_dia45_offset(param_straight_t &front, param_straight_t &back,

@@ -1111,8 +1111,17 @@ void MainTask::load_offset_param() {
   param->orval_rad_offset_r = getItem(root, "orval_rad_offset_r")->valuedouble;
 
   param->orval_enable = getItem(root, "orval_offset_enable")->valueint;
+  param->large_offset_enable = getItem(root, "large_offset_enable")->valueint;
   param->dia45_offset_enable = getItem(root, "dia45_offset_enable")->valueint;
   param->dia135_offset_enable = getItem(root, "dia135_offset_enable")->valueint;
+  param->large_offset_max_dist =
+      getItem(root, "large_offset_max_dist")->valuedouble;
+  param->dia45_offset_max_dist =
+      getItem(root, "dia45_offset_max_dist")->valuedouble;
+  param->dia135_offset_max_dist =
+      getItem(root, "dia135_offset_max_dist")->valuedouble;
+  param->dia_turn_offset_calc_th =
+      getItem(root, "dia_turn_offset_calc_th")->valuedouble;
 
   clear_dist_ragne_th_list = getItem(root, "clear_dist_ragne_th_list");
   clear_dist_ragne_dist_list = getItem(root, "clear_dist_ragne_dist_list");
@@ -2801,6 +2810,9 @@ void MainTask::test_sla() {
     vTaskDelay(10.0 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
+  printf("offset: min(%f, %f) + %f = %f\n", mp->g_offset_y_l, mp->g_offset_y_r,
+         mp->g_offset_x1, mp->g_total_offset);
+  printf("sensor dist: %f, %f\n", mp->g_sen_l_dist, mp->g_sen_r_dist);
   while (1) {
     if (ui->button_state_hold())
       break;

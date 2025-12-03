@@ -1945,7 +1945,7 @@ float IRAM_ATTR PlanningTask::adjust_b_to_target45(float data, float a) {
 
   // インデックス範囲チェック（※ここは index としての妥当性を見るのが自然）
   if (idx < 0 || idx >= static_cast<int>(log_table.size())) {
-    return NAN;  // 計算不能
+    return NAN; // 計算不能
   }
 
   float L = log_table.at(idx);
@@ -1963,7 +1963,7 @@ float IRAM_ATTR PlanningTask::adjust_b_to_target90(float data, float a) {
 
   // インデックス範囲チェック（※ここは index としての妥当性を見るのが自然）
   if (idx < 0 || idx >= static_cast<int>(log_table.size())) {
-    return NAN;  // 計算不能
+    return NAN; // 計算不能
   }
 
   float L = log_table.at(idx);
@@ -2114,7 +2114,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   if (se->sen.l45.sensor_dist > se->ego.left45_dist ||
       se->sen.l45.sensor_dist == 0) {
     se->sen.l45.sensor_dist = se->ego.left45_dist;
-    se->sen.l45.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.l45.global_run_dist = se->sen.l45_2.global_run_dist =
+        se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.l45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
@@ -2127,7 +2128,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   if (se->sen.r45.sensor_dist > se->ego.right45_dist ||
       se->sen.r45.sensor_dist == 0) {
     se->sen.r45.sensor_dist = se->ego.right45_dist;
-    se->sen.r45.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.r45.global_run_dist = se->sen.r45_2.global_run_dist =
+        se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.r45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
@@ -2140,7 +2142,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   if (se->sen.l45_2.sensor_dist > se->ego.left45_2_dist ||
       se->sen.l45_2.sensor_dist == 0) {
     se->sen.l45_2.sensor_dist = se->ego.left45_2_dist;
-    se->sen.l45_2.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.l45.global_run_dist = se->sen.l45_2.global_run_dist =
+        se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.l45_2.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
@@ -2153,7 +2156,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   if (se->sen.r45_2.sensor_dist > se->ego.right45_2_dist ||
       se->sen.r45_2.sensor_dist == 0) {
     se->sen.r45_2.sensor_dist = se->ego.right45_2_dist;
-    se->sen.r45_2.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.r45.global_run_dist = se->sen.r45_2.global_run_dist =
+        se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.r45_2.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
@@ -2166,7 +2170,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   if (se->sen.l45_3.sensor_dist > se->ego.left45_3_dist ||
       se->sen.l45_3.sensor_dist == 0) {
     se->sen.l45_3.sensor_dist = se->ego.left45_3_dist;
-    se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.l45.global_run_dist = se->sen.l45_2.global_run_dist =
+        se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.l45_3.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
@@ -2179,7 +2184,8 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
   if (se->sen.r45_3.sensor_dist > se->ego.right45_3_dist ||
       se->sen.r45_3.sensor_dist == 0) {
     se->sen.r45_3.sensor_dist = se->ego.right45_3_dist;
-    se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.r45.global_run_dist = se->sen.r45_2.global_run_dist =
+        se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.r45_3.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
