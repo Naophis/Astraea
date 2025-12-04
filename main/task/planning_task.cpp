@@ -1781,7 +1781,9 @@ void IRAM_ATTR PlanningTask::cp_request() {
     tgt_val->td = receive_req->nmr.td;
     tgt_val->tt = receive_req->nmr.tt;
   }
-
+  if (receive_req->nmr.motion_type == MotionType::SLA_BACK_STR) {
+    left_keep.star_dist = right_keep.star_dist = tgt_val->global_pos.dist;
+  }
   tgt_val->tgt_in.end_v = receive_req->nmr.v_end;
   tgt_val->tgt_in.accl = receive_req->nmr.accl;
   tgt_val->tgt_in.decel = receive_req->nmr.decel;

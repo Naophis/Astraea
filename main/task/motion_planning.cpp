@@ -536,6 +536,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
       orval_offset = calc_orval_offset(td);
     }
     if (ps_front.dist > (0)) {
+      ps_front.sct = SensorCtrlType::NONE;
       res_f = go_straight(ps_front);
       if (res_f != MotionResult::NONE) {
         return MotionResult::ERROR;
@@ -822,8 +823,8 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   ps_back.motion_type = MotionType::SLA_BACK_STR;
   ps_back.sct = SensorCtrlType::Straight;
 
-  if (sp.type == TurnType::Dia45 || sp.type == TurnType::Dia135 ||
-      sp.type == TurnType::Dia90) {
+  if (sp.type == TurnType::Orval || sp.type == TurnType::Dia45 ||
+      sp.type == TurnType::Dia135 || sp.type == TurnType::Dia90) {
     ps_back.sct = SensorCtrlType::NONE;
   }
   // ps_back.sct = SensorCtrlType::NONE;
