@@ -111,13 +111,21 @@ class Slalom:
         t1 = 0
         tmp_dt = 0.001 / 64
 
-        while c < 10000000:
-            t1 = t1 + tmp_dt
-            if (2 * self.v / self.rad * self.Et * t1) >= self.ang:
-                self.base_time = t1
-                self.limit_time_count = t1 * 2 / dt
-                return
-            c = c + 1
+        base_time = (self.rad * self.ang)/(2 * self.v *self.Et )
+        self.base_time = base_time
+        self.limit_time_count = base_time * 2 / dt
+        return
+
+        # while c < 10000000:
+        #     t1 = t1 + tmp_dt
+        #     if (2 * self.v / self.rad * self.Et * t1) >= self.ang:
+        #         self.base_time = t1
+        #         self.limit_time_count = t1 * 2 / dt
+        #         print(f"Base time: {self.base_time}")
+        #         print(f"Limit time count: {self.limit_time_count}")
+        #         print(f"test time: {(self.rad * self.ang)/(2 * self.v *self.Et )}")
+        #         return
+        #     c = c + 1
 
     def get_alpha(self, t):
         return self.base_alpha * self.calc_neipire(t, self.base_time, self.pow_n)
