@@ -316,6 +316,8 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
+  se->sen.r45.sensor_dist = se->ego.right45_dist;
+  se->sen.l45.sensor_dist = se->ego.left45_dist;
   // モーション設定
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
