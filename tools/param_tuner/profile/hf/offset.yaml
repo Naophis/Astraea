@@ -164,7 +164,7 @@ dia_wall_off_ref_l: 24.0 #dia135
 dia_wall_off_ref_r: 24.0 #dia135
 #斜め壁切れ時のmax接近距離
 dia_wall_off_ref_l_wall: 30.75 #exist_wall
-dia_wall_off_ref_r_wall: 33.95 #exist_wall
+dia_wall_off_ref_r_wall: 38.95 #exist_wall
 dia_wall_off_ref_l_piller: 37.0 #noexist_wall
 dia_wall_off_ref_r_piller: 42.375 #noexist_wall
 
@@ -214,7 +214,6 @@ offset_after_turn_dia_r: 24 #dia45_2, dia135_2
 
 # 45, 135ターン時のオフセット距離計算用閾値
 dia_turn_offset_calc_th: 52
-
 
 
 # constant
