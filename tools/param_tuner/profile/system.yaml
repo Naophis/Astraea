@@ -76,6 +76,7 @@ mode: 0 # メイン
 # mode: 20 # pivot turn n
 # mode: 21 # pivot turn n2
 # mode: 22 # encoder_test
+# mode: 23 # search pivot turn
 
 test: # テスト走行時に使用するパラメータ群
   # v_max: 400
@@ -86,13 +87,13 @@ test: # テスト走行時に使用するパラメータ群
   # dist: 120 #直進
   # suction_active: 0
 
-  v_max: 1800
-  accl: 52500
-  decel: -55000
-  dia_accl: 42000
-  dia_decel: -47500
+  v_max: 1200
+  accl: 32500
+  decel: -42500
+  dia_accl: 36000
+  dia_decel: -45000
   dist: 120 #直進
-  suction_active: 2
+  suction_active: 1
 
   # sla_accl: 28000
   # sla_decel: -30000
@@ -108,7 +109,7 @@ test: # テスト走行時に使用するパラメータ群
   w_max: 12.5
   alpha: 180
   ang: 3600
-  search_mode: 0
+  search_mode: 1
   
   suction_duty: 2.75
   suction_duty_low: 2.50
@@ -116,16 +117,19 @@ test: # テスト走行時に使用するパラメータ群
   # suction_duty_burst: 4.0
   # suction_duty_burst_low: 3.750
   # Nova
-  suction_duty_burst: 3.85
-  suction_duty_burst_low: 3.6
+  suction_duty_burst: 3.75
+  suction_duty_burst_low: 3.5
+
+  # suction_duty_burst: 4.0
+  # suction_duty_burst_low: 3.75
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 6
+  file_idx: 2
   sla_dist: 90
   # sla_type: 3
   sla_type: 4
-  sla_type2: 6 # 復路ターン種類
+  sla_type2: 9 # 復路ターン種類
   sla_return: 1 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval

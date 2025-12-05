@@ -2,4 +2,4 @@
 
 
 xtensa-esp32-elf-addr2line -pfiaC -e build/main.elf \
-0x420159fd:0x3fcc7cf0 0x4201b09e:0x3fcc7e90
+0x42017a14:0x3fcc8800 0x4201b138:0x3fcc89a0 
