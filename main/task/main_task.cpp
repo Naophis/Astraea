@@ -2078,6 +2078,9 @@ void MainTask::task() {
       test_pivot_n2();
     } else if (sys.user_mode == 22) {
       encoder_test();
+    } else if (sys.user_mode == 23) {
+      printf("load_circuit_path\n");
+      test_search_pivot();
     }
     umount();
   } else {
@@ -2898,6 +2901,92 @@ void MainTask::test_search_sla(bool mode) {
   ps.dist = 5;
   ps.accl = sys.test.accl;
   ps.decel = sys.test.decel;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+
+  vTaskDelay(100.0 / portTICK_RATE_MS);
+  pt->motor_disable();
+  reset_tgt_data();
+  reset_ego_data();
+  req_error_reset();
+  pt->suction_disable();
+  lt->stop_slalom_log();
+
+  lt->save(slalom_log_file);
+  ui->coin(120);
+
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10.0 / portTICK_RATE_MS);
+  }
+  lt->dump_log(slalom_log_file);
+  while (1) {
+    if (ui->button_state_hold())
+      break;
+    vTaskDelay(10.0 / portTICK_RATE_MS);
+  }
+  param->sen_ref_p.normal.expand.right45 = backup_r_expand;
+  param->sen_ref_p.normal.expand.left45 = backup_l_expand;
+}
+
+void MainTask::test_search_pivot() {
+
+  file_idx = 0;
+
+  if (file_idx >= tpp.file_list_size) {
+    ui->error();
+    return;
+  }
+  search_ctrl->set_motion_plannning(mp);
+  load_slalom_param(0, 0, 0);
+  sla_p = param_set.map[TurnType::Normal];
+  str_p = param_set.str_map[StraightType::Search];
+
+  printf("str: \n");
+  printf("- v_max: %f\n", str_p.v_max);
+  printf("- accl: %f\n", str_p.accl);
+  printf("- decel: %f\n", str_p.decel);
+
+  mp->reset_gyro_ref_with_check();
+
+  reset_tgt_data();
+  reset_ego_data();
+  pt->motor_enable();
+
+  req_error_reset();
+
+  if (param->test_log_enable > 0) {
+    lt->start_slalom_log();
+  }
+  // run 1.5cell
+  ps.v_max = str_p.v_max;
+  ps.v_end = str_p.v_max;
+  ps.dist = param->cell2 * 1.5 + param->offset_start_dist_search;
+  ps.accl = str_p.accl;
+  ps.decel = str_p.decel;
+  ps.sct = SensorCtrlType::Straight;
+  pt->search_mode = true;
+  mp->go_straight(ps);
+
+  // exec search pivot
+  search_ctrl->adachi=nullptr;
+  search_ctrl->pivot(param_set, 0);
+  // run back
+  ps.v_max = str_p.v_max;
+  ps.v_end = 20;
+  ps.dist = param->cell2 / 2 - 5;
+  ps.accl = str_p.accl;
+  ps.decel = str_p.decel;
+  ps.sct = SensorCtrlType::NONE;
+  mp->go_straight(ps);
+  ps.v_max = 20;
+  ps.v_end = 10;
+  ps.dist = 5;
+  ps.accl = str_p.accl;
+  ps.decel = str_p.decel;
   ps.sct = SensorCtrlType::NONE;
   mp->go_straight(ps);
 

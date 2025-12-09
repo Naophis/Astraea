@@ -1265,7 +1265,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
   pt->motor_enable();
   if (p_set.suction) {
     pt->suction_enable(p_set.suction_duty, p_set.suction_duty_low);
-    vTaskDelay(900.0 / portTICK_PERIOD_MS);
+    vTaskDelay(700.0 / portTICK_PERIOD_MS);
   }
   if (param->fast_log_enable > 0) {
     tgt_val->global_pos.ang = 0;

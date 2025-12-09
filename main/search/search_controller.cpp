@@ -229,11 +229,13 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   mp->reset_tgt_data();
   mp->reset_ego_data();
 
-  if (adachi->goal_step && !saved) {
-    vTaskDelay(1.0 / portTICK_RATE_MS);
-    save_maze_data();
-    vTaskDelay(1.0 / portTICK_RATE_MS);
-    saved = true;
+  if (adachi != nullptr) {
+    if (adachi->goal_step && !saved) {
+      vTaskDelay(1.0 / portTICK_RATE_MS);
+      save_maze_data();
+      vTaskDelay(1.0 / portTICK_RATE_MS);
+      saved = true;
+    }
   }
   vTaskDelay(5.0 / portTICK_RATE_MS);
 
@@ -356,7 +358,7 @@ MotionResult SearchController::pivot(param_set_t &p_set, float diff) {
   // p.v_max = p_set.str_map[StraightType::Search].v_max;
   // p.v_end = p_set.str_map[StraightType::Search].v_max;
 
-  p.v_max = p.v_end = p_set.map[TurnType::Normal].v;
+  p.v_max = p.v_end = p_set.str_map[StraightType::Search].v_max;
 
   p.accl = p_set.str_map[StraightType::Search].accl;
   p.decel = p_set.str_map[StraightType::Search].decel;
