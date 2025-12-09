@@ -206,8 +206,8 @@ class SlalomGUI:
         print(f"Integration method: Position={method}, Angular Velocity={method_w}, Turn Time={method_time}")
 
         offset = {
-            "prev": 7,
-            "after": 7,
+            "prev": 0,
+            "after": 0,
             "prev_dia": 7,
             "after_dia": 7,
         }
