@@ -4,6 +4,12 @@
 path_str: [16, 14, 14, 14, 14, 14, 14, 14, 2]
 path_turn: [5, 5, 5, 5, 5, 5, 5, 5, 255]
 
+sensor_exist_left45: 180
+wall_off_wait_dist: 1800
+front_dist_offset2: 140
+front_dist_offset3: 140
+front_dist_offset4: 140
+
 # 32x32(half), 16x16(clasic)
 # path_str: [62, 60, 60, 60, 60, 60, 60, 60, 2]
 # path_turn: [5, 5, 5, 5, 5, 5, 5, 5, 255]
