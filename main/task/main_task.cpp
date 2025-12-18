@@ -1484,6 +1484,29 @@ void MainTask::load_circuit_path() {
     pc->path_t.emplace_back(turn);
   }
 
+  param->sen_ref_p.normal.exist.left45        //
+      = param->sen_ref_p.normal.expand.left45 //
+      = getItem(root, "sensor_exist_left45")->valuedouble;
+  param->wall_off_wait_dist = getItem(root, "wall_off_wait_dist")->valuedouble;
+  param->front_dist_offset2 = getItem(root, "front_dist_offset2")->valuedouble;
+  param->front_dist_offset3 = getItem(root, "front_dist_offset3")->valuedouble;
+  param->front_dist_offset4 = getItem(root, "front_dist_offset4")->valuedouble;
+  param->wall_off_dist.div_th_r =      //
+      param->wall_off_dist.div_th_r2 = //
+      param->wall_off_dist.div_th_r3 = //
+      getItem(root, "wall_off_hold_div_th_r")->valuedouble;
+  param->wall_off_diff_ref_front_th =
+      getItem(root, "wall_off_diff_ref_front_th")->valuedouble;
+  param->wall_off_front_move_dist_th =
+      getItem(root, "wall_off_front_move_dist_th")->valuedouble;
+  param->wall_off_dist.diff_check_dist =
+      getItem(root, "wall_off_diff_check_dist")->valuedouble;
+  param->wall_off_dist.right_diff_th =
+      getItem(root, "wall_off_noexist_diff_r")->valuedouble;
+  param->wall_off_dist.noexist_th_r =      //
+      param->wall_off_dist.noexist_th_r2 = //
+      getItem(root, "wall_off_hold_noexist_th_r")->valuedouble;
+
   cJSON_Delete(root);
   umount();
 }
@@ -1916,6 +1939,11 @@ void MainTask::load_param() {
     load_sensor_param();
     load_turn_param_profiles(false, 0);
     load_offset_param();
+
+    if (sys.circuit_mode == 1) {
+      load_circuit_path();
+    }
+
     exec_param_prof();
     mp->wall_off_controller->get_right_strategy();
     mp->wall_off_controller->get_left_strategy();

@@ -117,8 +117,8 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
     // }
 
     // フロントセンサー補正
-    if (apply_front_sensor_correction(ps_front, tmp_dist_before,
-                                      tmp_dist_after)) {
+    if (apply_front_sensor_correction(ps_front, tmp_dist_before, tmp_dist_after,
+                                      TurnDirection::Right)) {
       return true;
     }
 
@@ -227,8 +227,8 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
     // }
 
     // フロントセンサー補正
-    if (apply_front_sensor_correction(ps_front, tmp_dist_before,
-                                      tmp_dist_after)) {
+    if (apply_front_sensor_correction(ps_front, tmp_dist_before, tmp_dist_after,
+                                      TurnDirection::Left)) {
       return true;
     }
 
@@ -247,11 +247,6 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
   // 第二段階：壁切れを待つ
   while (true) {
     tmp_dist_after = tgt_val->global_pos.dist;
-
-    // if (apply_front_sensor_correction(ps_front, tmp_dist_before,
-    //                                   tmp_dist_after)) {
-    //   return;
-    // }
 
     if (exist) {
       if (strategy.detect_wall_off(exist)) {
@@ -282,16 +277,28 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
 }
 
 bool IRAM_ATTR WallOffController::apply_front_sensor_correction(
-    param_straight_t &ps_front, float tmp_dist_before, float tmp_dist_after) {
+    param_straight_t &ps_front, float tmp_dist_before, float tmp_dist_after,
+    TurnDirection td) {
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
   const auto diff_front =
       std::abs(se->ego.left90_far_dist - se->ego.right90_dist); // 前後の距離差
-  const auto valid_diff = diff_front < param->wall_off_diff_ref_front_th;
+  auto valid_diff = diff_front < param->wall_off_diff_ref_front_th;
 
-  const auto diff_decrease = // 左右の壁が見え始めてたら
-      (se->ego.left45_dist_diff < 0 || se->ego.right45_dist_diff < 0);
+  auto diff_decrease = // 左右の壁が見え始めてたら
+      (td == TurnDirection::Left)
+          ? (se->ego.left45_dist_diff < 0 &&
+             (45 < se->ego.left45_dist && se->ego.left45_dist < 90)) ||
+                !(se->ego.left45_dist > 90)
+          : (se->ego.right45_dist_diff < 0 &&
+             (45 < se->ego.right45_dist && se->ego.right45_dist < 90)) ||
+                !(se->ego.right45_dist > 90);
+
+  if (param->wall_off_dist.right_diff_th > 180) { // is circuit
+    valid_diff = true;
+    diff_decrease = false;
+  }
 
   if (std::abs(tmp_dist_after - tmp_dist_before) >=
       std::abs(param->wall_off_front_move_dist_th)) {
