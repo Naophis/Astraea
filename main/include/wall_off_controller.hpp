@@ -81,7 +81,7 @@ private:
   // フロントセンサーによる距離補正
   bool apply_front_sensor_correction(param_straight_t &ps_front,
                                      float tmp_dist_before,
-                                     float tmp_dist_after);
+                                     float tmp_dist_after, TurnDirection td);
 
   // 壁の存在判定
   bool is_wall_exist(TurnDirection td, float threshold_l, float threshold_r);
