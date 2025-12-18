@@ -177,6 +177,13 @@ void IRAM_ATTR MainTask::dump1() {
     printf("R45_2: [%f, %f]\n", param->sensor_gain.r45_2.a, r45_2_b);
     printf("R45_3: [%f, %f]\n", param->sensor_gain.r45_3.a, r45_3_b);
 
+    printf("L90_near: [%f, %f]\n", param->sensor_gain.l90.a, l90_b);
+    printf("R90_near: [%f, %f]\n", param->sensor_gain.r90.a, r90_b);
+    printf("L90_mid: [%f, %f]\n", param->sensor_gain.l90.a, l90_b);
+    printf("R90_mid: [%f, %f]\n", param->sensor_gain.r90.a, r90_b);
+    printf("L90_far: [%f, %f]\n", param->sensor_gain.l90_far.a, l90_far_b);
+    printf("R90_far: [%f, %f]\n", param->sensor_gain.r90_far.a, r90_far_b);
+
     printf("front_sensor_b: %f, %f, %f, %f\n", //
            l90_b, l90_far_b, r90_b, r90_far_b);
 
