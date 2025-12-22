@@ -132,22 +132,22 @@ class Plot:
         trj_alpha = 1
 
         # 壁境界
-        # trj.plot(range, [45, 45], ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot(range, [-45, -45], ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot([-45, -45], range, ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot([45, 45], range, ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot(range, [135, 135], ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot([135, 135], range, ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot([225, 225], range, ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
-        # trj.plot(range, [225, 225], ls="-", c=wall_color,
-        #          lw=wall_width, alpha=wall_alpha)
+        trj.plot(range, [45, 45], ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot(range, [-45, -45], ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot([-45, -45], range, ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot([45, 45], range, ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot(range, [135, 135], ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot([135, 135], range, ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot([225, 225], range, ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
+        trj.plot(range, [225, 225], ls="-", c=wall_color,
+                 lw=wall_width, alpha=wall_alpha)
 
         # 点線
         trj.plot(range, [0, 0], ls="--", c=sub_line_color,
