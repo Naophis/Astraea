@@ -589,16 +589,18 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
     if (result && !use_oppo_wall) {
       dist = wall_off_controller->calculate_dia_wall_off_distance(td, sp.type,
                                                                   exist_wall);
+      g_offset_y_l = g_offset_x1 = g_offset_x2 = 0;
+      g_total_offset = dist;
     }
-    ps_front.dist = ps_front.dist - dist;
+    ps_front.dist = ps_front.dist + dist;
 
-    if (sp.type == TurnType::Dia90) {
-      ps_front.dia90_offset = (td == TurnDirection::Right)
-                                  ? param->dia90_offset
-                                  : -param->dia90_offset;
-    } else {
-      ps_front.dia90_offset = 0;
-    }
+    // if (sp.type == TurnType::Dia90) {
+    //   ps_front.dia90_offset = (td == TurnDirection::Right)
+    //                               ? param->dia90_offset
+    //                               : -param->dia90_offset;
+    // } else {
+    //   ps_front.dia90_offset = 0;
+    // }
 
     if (ps_front.dist > (0)) {
       res_f = go_straight(ps_front);

@@ -1124,6 +1124,12 @@ void MainTask::load_offset_param() {
       getItem(root, "dia135_offset_max_dist")->valuedouble;
   param->dia_turn_offset_calc_th =
       getItem(root, "dia_turn_offset_calc_th")->valuedouble;
+  param->dia45_2_offset_max_dist =
+      getItem(root, "dia45_2_offset_max_dist")->valuedouble;
+  param->dia135_2_offset_max_dist =
+      getItem(root, "dia135_2_offset_max_dist")->valuedouble;
+  param->dia90_offset_max_dist =
+      getItem(root, "dia90_offset_max_dist")->valuedouble;
 
   clear_dist_ragne_th_list = getItem(root, "clear_dist_ragne_th_list");
   clear_dist_ragne_dist_list = getItem(root, "clear_dist_ragne_dist_list");
@@ -3007,7 +3013,7 @@ void MainTask::test_search_pivot() {
   mp->go_straight(ps);
 
   // exec search pivot
-  search_ctrl->adachi=nullptr;
+  search_ctrl->adachi = nullptr;
   search_ctrl->pivot(param_set, 0);
   // run back
   ps.v_max = str_p.v_max;
