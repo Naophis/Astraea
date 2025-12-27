@@ -4,7 +4,7 @@
 # goals: [[1, 0], [2, 0], [1, 1], [2, 1]]
 # goals: [[1, 0]]
 # goals: [[3, 0]]
-goals: [[7, 0], [8, 0]]
+# goals: [[7, 0], [8, 0]]
 # goals: [[6, 2], [7, 2]]
 # goals: [[3, 0], [4, 0]]
 # goals: [[1, 1], [1, 2], [2, 1], [2, 2]]
@@ -54,13 +54,15 @@ goals: [[7, 0], [8, 0]]
 
 # goals: [[19, 8],[19, 9],[19, 10],[20, 8],[20, 9],[20, 10],[21, 8],[21, 9],[21, 10]]  #全日本2024 Final
 
+goals: [[5, 6],[5, 7],[6, 6],[6, 7]]
+
 #  27 *55
 maze_size: 32
 debug: 0 #
-circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
+circuit_mode: 1 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
-# mode: 0 # メイン
-mode: 1 # 最短スローム
+mode: 0 # メイン
+# mode: 1 # 最短スローム
 # mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
@@ -117,8 +119,8 @@ test: # テスト走行時に使用するパラメータ群
   # suction_duty_burst: 4.0
   # suction_duty_burst_low: 3.750
   # Nova
-  suction_duty_burst: 5.25
-  suction_duty_burst_low: 5.0
+  suction_duty_burst: 5.45
+  suction_duty_burst_low: 5.2
 
   # suction_duty_burst: 4.0
   # suction_duty_burst_low: 3.75
