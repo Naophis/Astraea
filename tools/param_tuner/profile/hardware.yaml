@@ -8,7 +8,7 @@ tire_tread: 38.72230756
 tire: 13.96250 #10deg 
 tire2: 13.96250 #10deg
 
-battery_gain: 4.20470376817139
+battery_gain: 3.904
 
 # tire: 14.120 #新品(#30) 14.12
 # tire2: 14.120 #新品(#30) 14.12
@@ -344,8 +344,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.0024569
-  gyro_w_gain_right: 0.0024569
+  gyro_w_gain_left: 0.00245625
+  gyro_w_gain_right: 0.00245625
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95

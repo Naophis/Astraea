@@ -26,6 +26,7 @@ dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値 Dia135_2, Dia90
 dia45_2_offset_max_dist: 6 # dia45_2壁切れ距離補正最大値
 dia135_2_offset_max_dist: 8 # dia135_2壁切れ距
 dia90_offset_max_dist: 6 # dia90壁切れ距離補正最大値
+lim_angle: 2.50 # 壁切れ補正計算用エゴ角制限値(rad) 0.5236=30deg
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
 pivot_back_enable_front_th: 120 # バック判断のための壁有無しきい値
@@ -166,10 +167,10 @@ wall_off_hold_dist_dia_r: 3.0
 dia_wall_off_ref_l: 24.0 #dia135
 dia_wall_off_ref_r: 24.0 #dia135
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l_wall: 31.5 #exist_wall
-dia_wall_off_ref_r_wall: 30.5 #exist_wall
-dia_wall_off_ref_l_piller: 36.75 #noexist_wall
-dia_wall_off_ref_r_piller: 36.75 #noexist_wall
+dia_wall_off_ref_l_wall: 33.5 #exist_wall
+dia_wall_off_ref_r_wall: 32.75 #exist_wall
+dia_wall_off_ref_l_piller: 42.25 #noexist_wall
+dia_wall_off_ref_r_piller: 40.5 #noexist_wall
 
 # 斜め壁切れ偏差
 wall_off_hold_div_th_dia_l: 0.250
