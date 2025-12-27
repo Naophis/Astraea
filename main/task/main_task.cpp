@@ -1117,6 +1117,13 @@ void MainTask::load_offset_param() {
       getItem(root, "dia135_offset_max_dist")->valuedouble;
   param->dia_turn_offset_calc_th =
       getItem(root, "dia_turn_offset_calc_th")->valuedouble;
+  param->dia45_2_offset_max_dist =
+      getItem(root, "dia45_2_offset_max_dist")->valuedouble;
+  param->dia135_2_offset_max_dist =
+      getItem(root, "dia135_2_offset_max_dist")->valuedouble;
+  param->dia90_offset_max_dist =
+      getItem(root, "dia90_offset_max_dist")->valuedouble;
+  param->lim_angle = getItem(root, "lim_angle")->valuedouble / 180 * M_PI;
 
   clear_dist_ragne_th_list = getItem(root, "clear_dist_ragne_th_list");
   clear_dist_ragne_dist_list = getItem(root, "clear_dist_ragne_dist_list");

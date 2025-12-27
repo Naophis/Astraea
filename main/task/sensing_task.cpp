@@ -379,6 +379,10 @@ void IRAM_ATTR SensingTask::task() {
           r45 = true;
         }
       }
+      if (tgt_val->ego_in.sla_param.counter >
+          (tgt_val->ego_in.sla_param.limit_time_count * 0.9)) {
+        r45 = l45 = true;
+      }
     }
     // LED_OFF ADC
     if (skip_sensing) {
@@ -473,10 +477,10 @@ void IRAM_ATTR SensingTask::task() {
             r45 = true;
           }
         }
-        // if (tgt_val->ego_in.sla_param.counter >
-        //     (tgt_val->ego_in.sla_param.limit_time_count / 2)) {
-        //   r90 = l90 = r45 = l45 = true;
-        // }
+        if (tgt_val->ego_in.sla_param.counter >
+            (tgt_val->ego_in.sla_param.limit_time_count * 0.9)) {
+          r45 = l45 = true;
+        }
       }
       if (r90) { // R90
         led_driver(LED_EN_R90, 1, LED_EN_R45_2, 0, LED_EN_R45_1, 0);

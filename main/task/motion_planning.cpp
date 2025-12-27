@@ -1490,29 +1490,43 @@ void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,
   float offset = 0;
   bool valid_l = false;
   bool valid_r = false;
+  const float ego_ang =
+      std::clamp(tgt_val->ego_in.ang, -param->lim_angle, param->lim_angle);
+  const static float ang32 = 32.0f / 180.0f * M_PI;
+  const static float cos32 = std::cos(ang32);
+  const static float tan32 = std::tan(ang32);
+  float gain = 1.0f;
   if (dir == TurnDirection::Left) {
     if (1 < se->sen.l45.sensor_dist &&
         se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_l = param->sen_ref_p.normal.ref.left45 - se->sen.l45.sensor_dist;
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      offset_l =
+          param->sen_ref_p.normal.ref.left45 - gain * se->sen.l45.sensor_dist;
       g_sen_l_dist = se->sen.l45.sensor_dist;
       valid_l = true;
     }
     if (1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_r = se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      offset_r =
+          gain * se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
       g_sen_r_dist = se->sen.r45.sensor_dist;
       valid_r = true;
     }
   } else {
     if (1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_r = param->sen_ref_p.normal.ref.right45 - se->sen.r45.sensor_dist;
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      offset_r =
+          param->sen_ref_p.normal.ref.right45 - gain * se->sen.r45.sensor_dist;
       g_sen_r_dist = se->sen.r45.sensor_dist;
       valid_r = true;
     }
     if (1 < se->sen.l45.sensor_dist &&
         se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      offset_l =
+          gain * se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
       g_sen_l_dist = se->sen.l45.sensor_dist;
       valid_l = true;
     }
@@ -1524,7 +1538,6 @@ void IRAM_ATTR MotionPlanning::calc_dia135_offset(param_straight_t &front,
   } else if (valid_r) {
     offset = offset_r;
   }
-  const static float tan32 = std::tan((32.0f / 180.0f) * M_PI);
   const auto offset_x1 = offset * tan32;
   const auto offset_x2 = offset;
   float total_offset = (offset_x1 + offset_x2);
@@ -1611,30 +1624,43 @@ void IRAM_ATTR MotionPlanning::calc_large_offset(param_straight_t &front,
   float offset = 0;
   bool valid_l = false;
   bool valid_r = false;
-
+  const float ego_ang =
+      std::clamp(tgt_val->ego_in.ang, -param->lim_angle, param->lim_angle);
+  const static float ang32 = 32.0f / 180.0f * M_PI;
+  const static float cos32 = std::cos(ang32);
+  const static float tan32 = std::tan(ang32);
+  float gain = 1.0f;
   if (dir == TurnDirection::Left) {
     if (1 < se->sen.l45.sensor_dist &&
         se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_l = param->sen_ref_p.normal.ref.left45 - se->sen.l45.sensor_dist;
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      offset_l =
+          param->sen_ref_p.normal.ref.left45 - gain * se->sen.l45.sensor_dist;
       g_sen_l_dist = se->sen.l45.sensor_dist;
       valid_l = true;
     }
     if (1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_r = se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      offset_r =
+          gain * se->sen.r45.sensor_dist - param->sen_ref_p.normal.ref.right45;
       g_sen_r_dist = se->sen.r45.sensor_dist;
       valid_r = true;
     }
   } else {
     if (1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_r = param->sen_ref_p.normal.ref.right45 - se->sen.r45.sensor_dist;
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      offset_r =
+          param->sen_ref_p.normal.ref.right45 - gain * se->sen.r45.sensor_dist;
       g_sen_r_dist = se->sen.r45.sensor_dist;
       valid_r = true;
     }
     if (1 < se->sen.l45.sensor_dist &&
         se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      offset_l =
+          gain * se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
       g_sen_l_dist = se->sen.l45.sensor_dist;
       valid_l = true;
     }
@@ -1651,7 +1677,6 @@ void IRAM_ATTR MotionPlanning::calc_large_offset(param_straight_t &front,
     offset = offset_r;
   }
 
-  const static float tan32 = std::tan((32.0f / 180.0f) * M_PI);
   const auto offset_x1 = offset * tan32;
   const auto offset_x2 = 0;
   float total_offset = (offset_x1 + offset_x2);
@@ -1681,29 +1706,45 @@ void IRAM_ATTR MotionPlanning::calc_dia45_offset(param_straight_t &front,
   float offset = 0;
   bool valid_l = false;
   bool valid_r = false;
+
+  const float ego_ang =
+      std::clamp(tgt_val->ego_in.ang, -param->lim_angle, param->lim_angle);
+  const static float ang32 = 32.0f / 180.0f * M_PI;
+  const static float cos32 = std::cos(ang32);
+  const static float tan32 = std::tan(ang32);
+  float gain = 1.0f;
+
   if (dir == TurnDirection::Left) {
     if (1 < se->sen.l45.sensor_dist &&
         se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      offset_l =
+          gain * se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
       g_sen_l_dist = se->sen.l45.sensor_dist;
       valid_l = true;
     }
     if (1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_r = param->sen_ref_p.normal.ref.right45 - se->sen.r45.sensor_dist;
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      offset_r =
+          param->sen_ref_p.normal.ref.right45 - gain * se->sen.r45.sensor_dist;
       g_sen_r_dist = se->sen.r45.sensor_dist;
       valid_r = true;
     }
   } else {
     if (1 < se->sen.r45.sensor_dist &&
         se->sen.r45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_r = param->sen_ref_p.normal.ref.right45 - se->sen.r45.sensor_dist;
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      offset_r =
+          param->sen_ref_p.normal.ref.right45 - gain * se->sen.r45.sensor_dist;
       g_sen_r_dist = se->sen.r45.sensor_dist;
       valid_r = true;
     }
     if (1 < se->sen.l45.sensor_dist &&
         se->sen.l45.sensor_dist < param->dia_turn_offset_calc_th) {
-      offset_l = se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      offset_l =
+          gain * se->sen.l45.sensor_dist - param->sen_ref_p.normal.ref.left45;
       g_sen_l_dist = se->sen.l45.sensor_dist;
       valid_l = true;
     }
@@ -1720,7 +1761,6 @@ void IRAM_ATTR MotionPlanning::calc_dia45_offset(param_straight_t &front,
     offset = offset_r;
   }
 
-  const static float tan32 = std::tan((32.0f / 180.0f) * M_PI);
   const auto offset_x1 = offset * tan32;
   const auto offset_x2 = offset;
   float total_offset = (offset_x1 + offset_x2);

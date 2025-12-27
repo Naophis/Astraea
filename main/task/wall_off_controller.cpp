@@ -78,6 +78,7 @@ WallOffController::process_right_wall_off(param_straight_t &ps_front) {
       break;
     }
     if (!exist) {
+      exist = se->ego.right45_dist < p_wall_off.wall_off_exist_wall_th_r;
       if (strategy.find_vertical_wall()) {
         break;
       }
@@ -188,6 +189,7 @@ WallOffController::process_left_wall_off(param_straight_t &ps_front) {
       break;
     }
     if (!exist) {
+      exist = se->ego.left45_dist < p_wall_off.wall_off_exist_wall_th_l;
       if (se->ego.left45_dist < p_wall_off.exist_dist_l2) {
         break;
       }
@@ -422,7 +424,7 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
   float tmp_dist_before = tgt_val->global_pos.dist;
   float tmp_dist_after = tmp_dist_before;
 
-  const auto exist = exist_wall =
+  auto exist = exist_wall =
       se->ego.right45_dist < p_wall_off.wall_off_exist_dia_wall_th_r;
   // 第一段階：壁切れ開始を待つ
   while (true) {
@@ -433,6 +435,11 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
       }
       break;
     } else {
+      exist = exist_wall =
+          se->ego.right45_dist < p_wall_off.wall_off_exist_dia_wall_th_r;
+      if (exist) {
+        continue;
+      }
       if (strategy.exist_dia_wall_start_alt()) {
         break;
       }
@@ -507,7 +514,7 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
   float tmp_dist_before = tgt_val->global_pos.dist;
   float tmp_dist_after = tmp_dist_before;
 
-  const auto exist = exist_wall =
+  auto exist = exist_wall =
       se->ego.left45_dist < p_wall_off.wall_off_exist_dia_wall_th_l;
 
   // 第一段階：壁切れ開始を待つ
@@ -519,6 +526,11 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
       }
       break;
     } else {
+      exist = exist_wall =
+          se->ego.left45_dist < p_wall_off.wall_off_exist_dia_wall_th_l;
+      if (exist) {
+        continue;
+      }
       if (strategy.exist_dia_wall_start_alt()) {
         break;
       }
@@ -593,22 +605,36 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
   }
   float dist = 0;
 
-  if (turn_type == TurnType::Dia135_2) {
+  float diff = 0;
+  float offset = 0;
+  const static float tan32 = std::tan((32.0f / 180.0f) * M_PI);
+  if (turn_type == TurnType::Dia45_2) {
     if (td == TurnDirection::Right) {
-      dist = (ref - se->sen.r45.sensor_dist) / ROOT2;
+      diff = (se->sen.r45.sensor_dist - ref);
     } else {
-      dist = (ref - se->sen.l45.sensor_dist) / ROOT2;
+      diff = (se->sen.l45.sensor_dist - ref);
     }
-    dist = std::clamp(dist, -param->dia_offset_max_dist,
-                      param->dia_offset_max_dist);
+    offset = (1 - tan32) * diff;
+    offset = std::clamp(offset, -param->dia45_2_offset_max_dist,
+                        param->dia45_2_offset_max_dist);
+  } else if (turn_type == TurnType::Dia135_2) {
+    if (td == TurnDirection::Right) {
+      diff = (se->sen.r45.sensor_dist - ref);
+    } else {
+      diff = (se->sen.l45.sensor_dist - ref);
+    }
+    offset = (1 + tan32) * diff;
+    offset = std::clamp(offset, -param->dia135_2_offset_max_dist,
+                        param->dia135_2_offset_max_dist);
   } else if (turn_type == TurnType::Dia90) {
     if (td == TurnDirection::Right) {
-      dist = (ref - se->sen.r45.sensor_dist) / ROOT2;
+      diff = (se->sen.r45.sensor_dist - ref);
     } else {
-      dist = (ref - se->sen.l45.sensor_dist) / ROOT2;
+      diff = (se->sen.l45.sensor_dist - ref);
     }
-    dist = std::clamp(dist, -param->dia_offset_max_dist,
-                      param->dia_offset_max_dist);
+    offset = tan32 * diff;
+    offset = std::clamp(offset, -param->dia90_offset_max_dist,
+                        param->dia90_offset_max_dist);
   }
 
   return dist;

@@ -594,7 +594,11 @@ typedef struct {
   float dia45_offset_max_dist = 0;
   float dia135_offset_max_dist = 0;
   float orval_offset_max_dist = 0;
-  
+  float dia45_2_offset_max_dist = 0;
+  float dia135_2_offset_max_dist = 0;
+  float dia90_offset_max_dist = 0;
+  float lim_angle = 0;
+
   float front_ctrl_error_th = 4;
 
   float clear_dist_ragne_from = 0;
