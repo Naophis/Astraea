@@ -30,6 +30,7 @@ public:
   MotionResult pivot(param_set_t &p_set, float diff);
   MotionResult pivot90(param_set_t &p_set, const TurnDirection td, float diff);
   MotionResult timeup_motion(param_set_t &p_set);
+  std::shared_ptr<Adachi> adachi;
 
 private:
   bool saved = false;
@@ -37,7 +38,6 @@ private:
   std::shared_ptr<MotionPlanning> mp;
   std::shared_ptr<MazeSolverBaseLgc> lgc;
   std::shared_ptr<PlanningTask> pt;
-  std::shared_ptr<Adachi> adachi;
   std::shared_ptr<LoggingTask> lt;
   std::shared_ptr<UserInterface> ui;
   std::shared_ptr<input_param_t> param;

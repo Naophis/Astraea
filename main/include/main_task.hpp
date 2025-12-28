@@ -115,7 +115,7 @@ private:
   param_set_t p_set;
 
   const TickType_t xDelay1000 = 1000.0 / portTICK_PERIOD_MS;
-  const TickType_t xDelay500 = 900.0 / portTICK_PERIOD_MS;
+  const TickType_t xDelay500 = 700.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay100 = 100.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay50 = 50.0 / portTICK_PERIOD_MS;
   const TickType_t xDelay10 = 10.0 / portTICK_PERIOD_MS;
@@ -136,6 +136,7 @@ private:
   void test_turn();
   void test_pivot_n();
   void test_pivot_n2();
+  void test_search_pivot();
   void test_sla();
   void test_run_sla();
   void test_search_sla(bool mode);

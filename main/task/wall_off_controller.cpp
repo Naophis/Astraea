@@ -325,6 +325,8 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
+  se->sen.r45.sensor_dist = se->ego.right45_dist;
+  se->sen.l45.sensor_dist = se->ego.left45_dist;
   // モーション設定
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
@@ -603,41 +605,56 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
     ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_piller
                                        : param->dia_wall_off_ref_l_piller;
   }
-  float dist = 0;
+  if (turn_type == TurnType::Dia135_2 || turn_type == TurnType::Dia90) {
+    ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_wall
+                                       : param->dia_wall_off_ref_l_wall;
+  }
 
   float diff = 0;
   float offset = 0;
-  const static float tan32 = std::tan((32.0f / 180.0f) * M_PI);
+
+  const float ego_ang =
+      std::clamp(tgt_val->ego_in.ang, -param->lim_angle, param->lim_angle);
+  const static float ang32 = 32.0f / 180.0f * M_PI;
+  const static float cos32 = std::cos(ang32);
+  const static float tan32 = std::tan(ang32);
+
+  float gain = 1.0f;
   if (turn_type == TurnType::Dia45_2) {
     if (td == TurnDirection::Right) {
-      diff = (se->sen.r45.sensor_dist - ref);
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      diff = (gain * se->sen.r45.sensor_dist - ref);
     } else {
-      diff = (se->sen.l45.sensor_dist - ref);
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      diff = (gain * se->sen.l45.sensor_dist - ref);
     }
-    offset = (1 - tan32) * diff;
+    offset = (1.0f - tan32) * diff;
     offset = std::clamp(offset, -param->dia45_2_offset_max_dist,
                         param->dia45_2_offset_max_dist);
   } else if (turn_type == TurnType::Dia135_2) {
     if (td == TurnDirection::Right) {
-      diff = (se->sen.r45.sensor_dist - ref);
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      diff = (gain * se->sen.r45.sensor_dist - ref);
     } else {
-      diff = (se->sen.l45.sensor_dist - ref);
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      diff = (gain * se->sen.l45.sensor_dist - ref);
     }
-    offset = (1 + tan32) * diff;
+    offset = (1.0f + tan32) * diff;
     offset = std::clamp(offset, -param->dia135_2_offset_max_dist,
                         param->dia135_2_offset_max_dist);
   } else if (turn_type == TurnType::Dia90) {
     if (td == TurnDirection::Right) {
-      diff = (se->sen.r45.sensor_dist - ref);
+      gain = std::cos(ang32 + ego_ang) / cos32;
+      diff = (gain * se->sen.r45.sensor_dist - ref);
     } else {
-      diff = (se->sen.l45.sensor_dist - ref);
+      gain = std::cos(ang32 - ego_ang) / cos32;
+      diff = (gain * se->sen.l45.sensor_dist - ref);
     }
     offset = tan32 * diff;
-    offset = std::clamp(offset, -param->dia90_offset_max_dist,
+    offset = std::clamp(diff, -param->dia90_offset_max_dist,
                         param->dia90_offset_max_dist);
   }
-
-  return dist;
+  return offset;
 }
 
 wall_off_hold_dist_t IRAM_ATTR &WallOffController::get_wall_off_param() {

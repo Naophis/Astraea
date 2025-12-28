@@ -1443,15 +1443,6 @@ void IRAM_ATTR PlanningTask::change_pwm_freq(float duty_l, float duty_r) {
 void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
                                            float duty_suction) {
   if (motor_en) {
-    // if (receive_req->nmr.sys_id.enable) {
-    //   duty_l =
-    //       ABS(receive_req->nmr.sys_id.left_v / sensing_result->ego.batt_kf *
-    //       100);
-    //   duty_r = ABS(receive_req->nmr.sys_id.right_v /
-    //   sensing_result->ego.batt_kf *
-    //                100);
-    //   // duty_suction = receive_req->nmr.sys_id.duty_suction;
-    // }
     change_pwm_freq(duty_l, duty_r);
   }
   if (suction_en) {
@@ -1479,6 +1470,11 @@ void IRAM_ATTR PlanningTask::set_next_duty(float duty_l, float duty_r,
     if (duty_suction_in > 100) {
       duty_suction_in = 100.0f;
     }
+    // is Numerical?
+    if (!isfinite(duty_suction_in)) {
+      duty_suction_in = 0;
+    }
+
     tgt_val->duty_suction = duty_suction_in;
     // printf("duty_suction_in: %f\n", duty_suction_in);
     // mcpwm_set_signal_low(MCPWM_UNIT_1, MCPWM_TIMER_2, MCPWM_OPR_A);
@@ -2449,29 +2445,20 @@ void IRAM_ATTR PlanningTask::apply_duty_limitter() {
     }
   } else if (tgt_val->motion_type == MotionType::FRONT_CTRL) {
     const auto max_duty = param_ro->sen_ref_p.search_exist.offset_l;
-    if (tgt_duty.duty_r > max_duty) {
-      tgt_duty.duty_r = max_duty;
-    } else if (tgt_duty.duty_r < -max_duty) {
-      tgt_duty.duty_r = -max_duty;
-    }
-    if (tgt_duty.duty_l > max_duty) {
-      tgt_duty.duty_l = max_duty;
-    } else if (tgt_duty.duty_l < -max_duty) {
-      tgt_duty.duty_l = -max_duty;
-    }
-  } else {
-    const auto max_duty = param_ro->max_duty;
-    if (tgt_duty.duty_r > max_duty) {
-      tgt_duty.duty_r = max_duty;
-    } else if (tgt_duty.duty_r < -max_duty) {
-      tgt_duty.duty_r = -max_duty;
-    }
-    if (tgt_duty.duty_l > max_duty) {
-      tgt_duty.duty_l = max_duty;
-    } else if (tgt_duty.duty_l < -max_duty) {
-      tgt_duty.duty_l = -max_duty;
-    }
+    tgt_duty.duty_r = std::clamp(tgt_duty.duty_r, -max_duty, max_duty);
+    tgt_duty.duty_l = std::clamp(tgt_duty.duty_l, -max_duty, max_duty);
   }
+  const auto max_duty = param_ro->max_duty;
+  // is Numerical
+  if (!isfinite(tgt_duty.duty_r)) {
+    tgt_duty.duty_r = 0;
+  }
+  if (!isfinite(tgt_duty.duty_l)) {
+    tgt_duty.duty_l = 0;
+  }
+
+  tgt_duty.duty_r = std::clamp(tgt_duty.duty_r, -max_duty, max_duty);
+  tgt_duty.duty_l = std::clamp(tgt_duty.duty_l, -max_duty, max_duty);
 }
 void IRAM_ATTR PlanningTask::clear_ctrl_val() {
   duty_c = duty_c2 = duty_roll = duty_front_ctrl_roll_keep = duty_roll_ang = 0;
