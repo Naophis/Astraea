@@ -23,6 +23,10 @@ large_offset_max_dist: 5 # large壁切れ距離補正最大値
 dia45_offset_max_dist: 5 # 斜め壁切れ距離補正最大値
 dia135_offset_max_dist: 10 # 斜め壁切れ距離補正最大値
 dia_offset_max_dist: 4 # 斜め壁切れ距離補正最大値 Dia135_2, Dia90
+dia45_2_offset_max_dist: 6 # dia45_2壁切れ距離補正最大値
+dia135_2_offset_max_dist: 8 # dia135_2壁切れ距
+dia90_offset_max_dist: 6 # dia90壁切れ距離補正最大値
+lim_angle: 2.50 # 壁切れ補正計算用エゴ角制限値(rad) 0.5236=30deg
 
 front_dist_offset0: 96.0 # pivot時の前壁補正ref
 pivot_back_enable_front_th: 120 # バック判断のための壁有無しきい値
@@ -231,9 +235,9 @@ cell2: 90.0
 
 trj_length: 1 # Number of trajectory points to generate
 
-trj_idx_v: [0, 300, 400, 1200, 1500, 1800, 2000, 2200, 2400, 10000] 
+trj_idx_v: [0, 10000] 
 # trj_idx_val: [0, 0, 0, 10, 15, 20, 24, 24, 24, 24] # max = trj_length-1
-trj_idx_val: [0, 0, 3, 3, 3, 3, 4, 4, 4, 4] # max = trj_length-1
+trj_idx_val: [0, 4] # max = trj_length-1
 kanayama:
   kx: 10
   ky: 0.0005
