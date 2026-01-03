@@ -867,8 +867,8 @@ void MainTask::load_offset_param() {
   }
   ifs.close();
   cJSON *root = cJSON_CreateObject(), *clear_dist_ragne_dist_list,
-        *clear_dist_ragne_th_list, *clear_dist_ragne_dist_list_fast,
-        *clear_dist_ragne_th_list_fast, *kanayama, *trj_idx_v, *trj_idx_val;
+        *clear_dist_ragne_th_list, *clear_dist_ragne_dist_list_fast, *kanayama,
+        *trj_idx_v, *trj_idx_val;
 
   root = cJSON_Parse(str.c_str());
 
@@ -1144,22 +1144,6 @@ void MainTask::load_offset_param() {
         cJSON_GetArrayItem(clear_dist_ragne_th_list, i)->valuedouble;
     param->clear_dist_ragne_dist_list.emplace_back(dist);
     param->clear_dist_ragne_th_list.emplace_back(th_value);
-  }
-
-  clear_dist_ragne_th_list_fast =
-      getItem(root, "clear_dist_ragne_th_list_fast");
-  clear_dist_ragne_dist_list_fast =
-      getItem(root, "clear_dist_ragne_dist_list_fast");
-  list_size = cJSON_GetArraySize(clear_dist_ragne_th_list_fast);
-  param->clear_dist_ragne_th_list_fast.clear();
-  param->clear_dist_ragne_dist_list_fast.clear();
-  for (int i = 0; i < list_size; i++) {
-    const auto dist =
-        cJSON_GetArrayItem(clear_dist_ragne_dist_list_fast, i)->valuedouble;
-    const auto th_value =
-        cJSON_GetArrayItem(clear_dist_ragne_th_list_fast, i)->valuedouble;
-    param->clear_dist_ragne_dist_list_fast.emplace_back(dist);
-    param->clear_dist_ragne_th_list_fast.emplace_back(th_value);
   }
 
   param->front_dist_offset_dia_front =
