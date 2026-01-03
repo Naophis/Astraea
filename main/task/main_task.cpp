@@ -2770,15 +2770,39 @@ void MainTask::test_sla() {
 
   mp->slalom(sla_p, rorl, nm, false);
 
+  auto lim_size = pt->sensor_deg_limitter_v.size();
+  // TODO: backup sensor_deg_limitter_str, sensor_deg_limitter_dia,
+  // sensor_deg_limitter_piller values
+
+  std::vector<float> bk_sensor_deg_limitter_str(lim_size);
+  std::vector<float> bk_sensor_deg_limitter_dia(lim_size);
+  std::vector<float> bk_sensor_deg_limitter_piller(lim_size);
+  for (int i = 0; i < lim_size; i++) {
+    bk_sensor_deg_limitter_str[i] = pt->sensor_deg_limitter_str[i];
+    bk_sensor_deg_limitter_dia[i] = pt->sensor_deg_limitter_dia[i];
+    bk_sensor_deg_limitter_piller[i] = pt->sensor_deg_limitter_piller[i];
+  }
+
   if (sys.test.sla_return > 0) {
     const auto type2 = static_cast<TurnType>(sys.test.sla_type2);
     bool dia = type2 == TurnType::Dia45_2 || type2 == TurnType::Dia135_2 ||
                type2 == TurnType::Dia90;
     param->sen_ref_p.normal.exist.right45 = 1;
     param->sen_ref_p.normal.exist.left45 = 1;
+    // clear deg limitter for slalom return
+    for (int i = 0; i < lim_size; i++) {
+      pt->sensor_deg_limitter_str[i] = 0.0;
+      pt->sensor_deg_limitter_dia[i] = 0.0;
+      pt->sensor_deg_limitter_piller[i] = 0.0;
+    }
     mp->slalom(sla_p2, rorl2, nm, dia);
   }
-
+  // restore sensor deg limitter values
+  for (int i = 0; i < lim_size; i++) {
+    pt->sensor_deg_limitter_str[i] = bk_sensor_deg_limitter_str[i];
+    pt->sensor_deg_limitter_dia[i] = bk_sensor_deg_limitter_dia[i];
+    pt->sensor_deg_limitter_piller[i] = bk_sensor_deg_limitter_piller[i];
+  }
   ps.v_max = sla_p.v;
   ps.v_end = sys.test.end_v;
   ps.dist = param->cell;
