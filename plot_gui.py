@@ -15,6 +15,7 @@ class PlotGUI:
         self.root = root
         self.root.title("PlotJuggler GUI")
         self.root.geometry("1000x600")
+        self.last_file_state = {}
 
         # Log directory
         self.log_dir = "./tools/param_tuner/logs/"
@@ -65,7 +66,7 @@ class PlotGUI:
         self.status_label.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=2)
 
         # --- Right Frame Content ---
-        self.figure = plt.figure(figsize=(5, 4), dpi=100)
+        self.figure = plt.figure(figsize=(5, 4), dpi=100, facecolor='black')
         # plt.style.use('dark_background') # This changes style globally, better set params locally or context
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.right_frame)
         self.canvas.draw()
@@ -76,12 +77,25 @@ class PlotGUI:
         self.tree.bind("<Double-1>", self.run_plotjuggler)
 
         self.load_files()
+        self.auto_refresh()
 
-    def load_files(self):
-        for item in self.tree.get_children():
-            self.tree.delete(item)
+    def auto_refresh(self):
+        self.load_files(check_updates=True)
+        self.root.after(1000, self.auto_refresh)
+
+    def load_files(self, check_updates=False):
         try:
             files = glob.glob(os.path.join(self.log_dir, "*.csv"))
+            current_state = {f: os.path.getmtime(f) for f in files}
+
+            if check_updates and current_state == self.last_file_state:
+                return
+
+            self.last_file_state = current_state
+
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+
             files.sort(key=os.path.getmtime, reverse=True)
             for f in files:
                 filename = os.path.basename(f)
@@ -121,7 +135,8 @@ class PlotGUI:
                     data = data.sort_values(by=['timestamp', 'x', 'y']).reset_index(drop=True)
                     if len(data) > 2:
                         last_motion_state = data['timestamp'].iloc[-2]
-                        filtered_data = data[data['timestamp'] != last_motion_state]
+                        # filtered_data = data[data['timestamp'] != last_motion_state]
+                        filtered_data = data[data['timestamp'].diff().fillna(0) >= 0]
                         
                         unique_states = filtered_data['timestamp'].unique()
                         num_states = len(unique_states)
@@ -164,6 +179,7 @@ class PlotGUI:
                 else:
                     ax.text(0.5, 0.5, "No x/y data found", ha='center', va='center', color='red')
 
+            self.figure.tight_layout()
             self.canvas.draw()
 
         except Exception as e:
