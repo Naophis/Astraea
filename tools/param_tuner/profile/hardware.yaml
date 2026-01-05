@@ -301,11 +301,12 @@ str_ang_pid:
   # b: 0.000275 #!searchm_mode
   # i: 0.0000075
 
-  # test
+  # search
   p: 0.035
   i: 0.0325
 
-  b: 0.035
+  # fast
+  b: 0.0425
   d: 0.0325
   c: 0
 
@@ -344,8 +345,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.00246095
   # gyro_w_gain_right: 0.00246095
-  gyro_w_gain_left: 0.00245625
-  gyro_w_gain_right: 0.00245625
+  gyro_w_gain_left: 0.00245765
+  gyro_w_gain_right: 0.00245765
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95
