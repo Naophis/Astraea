@@ -641,6 +641,7 @@ MotionResult IRAM_ATTR MotionPlanning::slalom(
   tgt_val->nmr.sct = SensorCtrlType::NONE;
   tgt_val->nmr.td = td;
   tgt_val->nmr.tt = sp.type;
+  tgt_val->nmr.sla_th = sp.sla_th;
   // tgt_val->ego_in.v = sp.v;//強制的に速度を指定
 
   if (sp.type == TurnType::Orval) {

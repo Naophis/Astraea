@@ -297,6 +297,11 @@ typedef struct {
   float omega_gate = 0;
   float i_theta_slew = 0;
   float i_theta_max = 0;
+  float alpha_stop = 0;
+  float alpha_rate = 0;
+  float theta_damp_th = 0;
+  float omega_damp = 0;
+  float th = 1;
 } pid_param_t;
 
 typedef struct {
@@ -742,6 +747,8 @@ typedef struct {
 typedef struct {
   float gain_z;
   float gain_zz;
+  float omega_ref_prev;
+  MotionType prev_motion_type;
 } gain_log_t;
 
 typedef struct {
@@ -821,6 +828,7 @@ typedef struct {
   volatile float ang;
   volatile float sla_alpha;
   volatile float sla_time;
+  volatile float sla_th;
   volatile float sla_pow_n;
   volatile float sla_rad;
   volatile float dia90_offset;
@@ -1003,6 +1011,7 @@ typedef struct {
   float ref_ang = 0;
   float rad = 0;
   float rad2 = 0;
+  float sla_th = 1.0;
   slalom_offset_t front;
   slalom_offset_t back;
   int pow_n = 0;

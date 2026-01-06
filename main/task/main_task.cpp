@@ -715,6 +715,12 @@ void MainTask::load_hw_param() {
   param->gyro_pid.i_theta_max = getItem(gyro_pid, "i_theta_max")->valuedouble;
   param->gyro_pid.theta_gate = getItem(gyro_pid, "theta_gate")->valuedouble;
   param->gyro_pid.omega_gate = getItem(gyro_pid, "omega_gate")->valuedouble;
+  param->gyro_pid.alpha_stop = getItem(gyro_pid, "alpha_stop")->valuedouble;
+  param->gyro_pid.alpha_rate = getItem(gyro_pid, "alpha_rate")->valuedouble;
+  param->gyro_pid.theta_damp_th =
+      getItem(gyro_pid, "theta_damp_th")->valuedouble * M_PI / 180;
+  param->gyro_pid.omega_damp = getItem(gyro_pid, "omega_damp")->valuedouble;
+  param->gyro_pid.th = getItem(gyro_pid, "th")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
@@ -1754,12 +1760,16 @@ void MainTask::load_slas(
   str.shrink_to_fit();
   if (!silent_load)
     printf("%s\n", file_name.c_str());
+  const static float Et_N2 = 0.6034501612189381f;
+  const static float Et_N4 = 0.7632146181989743f;
+  const static float Et_N6 = 0.8312737347682339f;
+  float v, ang, rad, pow_n, tmp_Et;
   for (const auto &p : turn_list) {
-    turn_map[p.first].v =
+    v = turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
-    turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
+    ang = turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
     if (p.first == TurnType::Normal) {
       turn_map[p.first].ref_ang = m_PI * 90 / 180;
     } else if (p.first == TurnType::Large) {
@@ -1778,18 +1788,35 @@ void MainTask::load_slas(
       turn_map[p.first].ref_ang = m_PI * 180 / 180;
     }
 
-    turn_map[p.first].rad =
+    turn_map[p.first].sla_th =
+        getItem(getItem(root, p.second.c_str()), "th")->valuedouble;
+    rad = turn_map[p.first].rad =
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
-    turn_map[p.first].time =
-        getItem(getItem(root, p.second.c_str()), "time")->valuedouble;
-    if (p.first == TurnType::Orval) {
-      turn_map[p.first].rad2 =
-          getItem(getItem(root, p.second.c_str()), "rad2")->valuedouble;
-      turn_map[p.first].time2 =
-          getItem(getItem(root, p.second.c_str()), "time2")->valuedouble;
-    }
-    turn_map[p.first].pow_n =
+    pow_n = turn_map[p.first].pow_n =
         getItem(getItem(root, p.second.c_str()), "pow_n")->valueint;
+    tmp_Et = Et_N4;
+    if (pow_n == 2) {
+      tmp_Et = Et_N2;
+    } else if (pow_n == 4) {
+      tmp_Et = Et_N4;
+    } else if (pow_n == 6) {
+      tmp_Et = Et_N6;
+    }
+    turn_map[p.first].time = (rad * ang) / (2.0 * v * tmp_Et);
+    if (p.first == TurnType::Orval) {
+      rad = turn_map[p.first].rad2 =
+          getItem(getItem(root, p.second.c_str()), "rad2")->valuedouble;
+      tmp_Et = Et_N4;
+      if (pow_n == 2) {
+        tmp_Et = Et_N2;
+      } else if (pow_n == 4) {
+        tmp_Et = Et_N4;
+      } else if (pow_n == 6) {
+        tmp_Et = Et_N6;
+      }
+      turn_map[p.first].time2 = (rad * ang) / (2.0 * v * tmp_Et);
+    }
+
     turn_map[p.first].front.right =
         getItem(getItem(getItem(root, p.second.c_str()), "front"), "right")
             ->valuedouble;
