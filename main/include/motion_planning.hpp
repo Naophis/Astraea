@@ -92,6 +92,7 @@ public:
   float g_total_offset = 0;
   float g_sen_r_dist = 0;
   float g_sen_l_dist = 0;
+  float g_sen_ang = 0;
 
 private:
   TaskHandle_t notify_handle = xTaskGetCurrentTaskHandle();

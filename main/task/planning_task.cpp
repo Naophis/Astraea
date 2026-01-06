@@ -2114,11 +2114,13 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     se->sen.l45.sensor_dist = se->ego.left45_dist;
     se->sen.l45.global_run_dist = se->sen.l45_2.global_run_dist =
         se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.l45.angle = tgt_val->ego_in.ang;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.l45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         se->ego.left45_dist < param_ro->sen_ref_p.normal2.exist.left90) {
       se->sen.l45.sensor_dist = se->ego.left45_dist;
+      se->sen.l45.angle = tgt_val->ego_in.ang;
     }
   }
 
@@ -2128,11 +2130,13 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     se->sen.r45.sensor_dist = se->ego.right45_dist;
     se->sen.r45.global_run_dist = se->sen.r45_2.global_run_dist =
         se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.r45.angle = tgt_val->ego_in.ang;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.r45.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         se->ego.right45_dist < param_ro->sen_ref_p.normal2.exist.right90) {
       se->sen.r45.sensor_dist = se->ego.right45_dist;
+      se->sen.r45.angle = tgt_val->ego_in.ang;
     }
   }
 
@@ -2142,11 +2146,13 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     se->sen.l45_2.sensor_dist = se->ego.left45_2_dist;
     se->sen.l45.global_run_dist = se->sen.l45_2.global_run_dist =
         se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.l45_2.angle = tgt_val->ego_in.ang;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.l45_2.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         se->ego.left45_dist < param_ro->sen_ref_p.normal2.exist.left90) {
       se->sen.l45_2.sensor_dist = se->ego.left45_2_dist;
+      se->sen.l45_2.angle = tgt_val->ego_in.ang;
     }
   }
 
@@ -2156,11 +2162,13 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     se->sen.r45_2.sensor_dist = se->ego.right45_2_dist;
     se->sen.r45.global_run_dist = se->sen.r45_2.global_run_dist =
         se->sen.r45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.r45_2.angle = tgt_val->ego_in.ang;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.r45_2.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         se->ego.right45_dist < param_ro->sen_ref_p.normal2.exist.right90) {
       se->sen.r45_2.sensor_dist = se->ego.right45_2_dist;
+      se->sen.r45_2.angle = tgt_val->ego_in.ang;
     }
   }
 
@@ -2170,11 +2178,13 @@ void IRAM_ATTR PlanningTask::calc_sensor_dist_diff() {
     se->sen.l45_3.sensor_dist = se->ego.left45_3_dist;
     se->sen.l45.global_run_dist = se->sen.l45_2.global_run_dist =
         se->sen.l45_3.global_run_dist = tgt_val->global_pos.dist;
+    se->sen.l45_3.angle = tgt_val->ego_in.ang;
   } else {
     if (((tgt_val->global_pos.dist - se->sen.l45_3.global_run_dist) >
          param_ro->wall_off_hold_dist) &&
         se->ego.left45_dist < param_ro->sen_ref_p.normal2.exist.left90) {
       se->sen.l45_3.sensor_dist = se->ego.left45_3_dist;
+      se->sen.l45_3.angle = tgt_val->ego_in.ang;
     }
   }
 

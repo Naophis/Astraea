@@ -229,6 +229,7 @@ typedef struct {
 typedef struct {
   float sensor_dist = 300;
   float global_run_dist = 0;
+  float angle = 0;
 } sen_log_t;
 
 typedef struct {

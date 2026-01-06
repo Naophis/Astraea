@@ -613,8 +613,6 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
   float diff = 0;
   float offset = 0;
 
-  const float ego_ang =
-      std::clamp(tgt_val->ego_in.ang, -param->lim_angle, param->lim_angle);
   const static float ang32 = 32.0f / 180.0f * M_PI;
   const static float cos32 = std::cos(ang32);
   const static float tan32 = std::tan(ang32);
@@ -622,9 +620,13 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
   float gain = 1.0f;
   if (turn_type == TurnType::Dia45_2) {
     if (td == TurnDirection::Right) {
+      const float ego_ang =
+          std::clamp(se->sen.r45.angle, -param->lim_angle, param->lim_angle);
       gain = std::cos(ang32 + ego_ang) / cos32;
       diff = (gain * se->sen.r45.sensor_dist - ref);
     } else {
+      const float ego_ang =
+          std::clamp(se->sen.l45.angle, -param->lim_angle, param->lim_angle);
       gain = std::cos(ang32 - ego_ang) / cos32;
       diff = (gain * se->sen.l45.sensor_dist - ref);
     }
@@ -633,9 +635,13 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
                         param->dia45_2_offset_max_dist);
   } else if (turn_type == TurnType::Dia135_2) {
     if (td == TurnDirection::Right) {
+      const float ego_ang =
+          std::clamp(se->sen.r45.angle, -param->lim_angle, param->lim_angle);
       gain = std::cos(ang32 + ego_ang) / cos32;
       diff = (gain * se->sen.r45.sensor_dist - ref);
     } else {
+      const float ego_ang =
+          std::clamp(se->sen.l45.angle, -param->lim_angle, param->lim_angle);
       gain = std::cos(ang32 - ego_ang) / cos32;
       diff = (gain * se->sen.l45.sensor_dist - ref);
     }
@@ -644,9 +650,13 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
                         param->dia135_2_offset_max_dist);
   } else if (turn_type == TurnType::Dia90) {
     if (td == TurnDirection::Right) {
+      const float ego_ang =
+          std::clamp(se->sen.r45.angle, -param->lim_angle, param->lim_angle);
       gain = std::cos(ang32 + ego_ang) / cos32;
       diff = (gain * se->sen.r45.sensor_dist - ref);
     } else {
+      const float ego_ang =
+          std::clamp(se->sen.l45.angle, -param->lim_angle, param->lim_angle);
       gain = std::cos(ang32 - ego_ang) / cos32;
       diff = (gain * se->sen.l45.sensor_dist - ref);
     }

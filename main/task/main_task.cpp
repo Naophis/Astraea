@@ -2860,9 +2860,13 @@ void MainTask::test_sla() {
   lt->dump_log(slalom_log_file);
 
   vTaskDelay(500.0 / portTICK_RATE_MS);
+  printf("----------------------------------\n");
   printf("offset: min(%f, %f) + %f = %f\n", mp->g_offset_y_l, mp->g_offset_y_r,
          mp->g_offset_x1, mp->g_total_offset);
+  printf("theta: %f\n", mp->g_sen_ang * 180 / m_PI);
   printf("sensor dist: %f, %f\n", mp->g_sen_l_dist, mp->g_sen_r_dist);
+  printf("----------------------------------\n");
+
   while (1) {
     if (ui->button_state_hold())
       break;
