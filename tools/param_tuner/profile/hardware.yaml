@@ -209,23 +209,24 @@ gyro_pid:
   windup_gain: 1.0
   windup_dead_bind: 1.50
 
-  alpha_stop: 2500.0 # [rad/s²] 角加速度制限（例: 80〜200）
+  alpha_stop: 2000.0 # [rad/s²] 角加速度制限（例: 80〜200）
   alpha_rate: 4000.00
   theta_damp_th: 5.0 # [deg] convert 
-  omega_damp: 0.0
-
-  # p: 0.000325
-  # i: 0.01365 #dif angle
-  # b: 0.0000275 #summation
-  # d: 0.000295
-
-  # p: 0.00
-  # i: 0.0
-  # b: 0.00
-  # d: 0.00
+  omega_damp: 0.00
 
   th: 0.90 # SLA_BACK_STR用
-  # c: 0.0
+  # th: 1.0 # SLA_BACK_STR用
+  theta_gate_on: 10 # [deg] 入力時にrad変換
+  theta_gate_full: 4 # [deg] 入力時にrad変換
+  theta_kp: 40.0 # 
+  theta_kd: 15.0 #  
+  omega_add_max: 6.0 # [rad/s] 角速度付加の最大値
+  alpha_rate_end: 2500.0 # [rad/s²] 終盤の角加速度制限
+  k_stop: 0.20 # 
+  theta_eps: 1.0 # [deg]
+  s_gate: 0.75 # 終盤ゲート開始位置(0〜1)
+
+    # c: 0.0
   i_theta_tau: 0.08      # [s] 角度I低域化の一次LPF時定数（例: 0.08〜0.15）
   i_theta_slew: 10.0     # [/s] 角度Iバイアスの変化率制限（例: 10〜50）
   i_theta_max: 20.0      # [-]  角度Iバイアスの振幅上限（例: 5〜20）
