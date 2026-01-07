@@ -774,6 +774,8 @@ typedef struct {
   float w_error_i_clamped;
   float gyro_pid_histerisis_i;
   float sat_flag;
+  float duty_roll;
+  float duty_roll_before;
 } aw_log_t;
 
 typedef struct {
@@ -1267,6 +1269,10 @@ typedef struct {
 
   real16_T duty_suction;
 
+  real16_T w_error_i_clamped;
+  real16_T w_i_base;
+  real16_T duty_roll;
+  real16_T duty_roll_before;
 } log_data_t2;
 
 typedef struct {
@@ -1470,11 +1476,10 @@ typedef struct {
   float left45_2_d_diff = 114;
   float left45_3_d_diff = 115;
   float duty_suction = 116;
-  int reserve1 = 117;
-
-  int reserve2 = 118;
-  int reserve3 = 119;
-  int reserve4 = 120;
+  float duty_roll = 117;
+  float w_error_i_clamped = 118;
+  float w_i_base = 119;
+  float duty_roll_before = 120;
   int reserve5 = 121;
 
 } LogStruct10 __attribute__((packed));

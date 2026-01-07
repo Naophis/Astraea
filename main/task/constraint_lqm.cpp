@@ -1,4 +1,5 @@
 #include "include/constraint_lqm.hpp"
+#include <iostream>
 
 ConstraintLQM::ConstraintLQM() : initialized(false) {}
 
@@ -11,8 +12,12 @@ void ConstraintLQM::initialize(const Parameters& params) {
 }
 
 float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
-    if (!initialized || p.horizon <= 0) return 0.0f;
+    if (!initialized || p.horizon <= 0) {
+      // printf("horizon %d <= 0 or not initialized\n", p.horizon);
+      return 0.0f;
+    }
 
+    // printf("check: ");
     // Model:
     // x = [theta_err; omega_err]
     // u = angular_accel * dt (or similar, depending on B)

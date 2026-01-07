@@ -220,7 +220,7 @@ gyro_pid:
 
   mpc_q_ang: 100
   mpc_q_vel: 10
-  mpc_r: 0.2
+  mpc_r: 0.1
   mpc_horizon: 10
 
 

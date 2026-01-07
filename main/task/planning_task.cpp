@@ -402,6 +402,14 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
                param_ro->ang_init_cov, //
                param_ro->ang_p_noise,  //
                param_ro->ang_m_noise);
+  ConstraintLQM::Parameters p;
+  p.q_ang = param_ro->gyro_pid.mpc_q_ang; // Use existing struct params we added
+  p.q_vel = param_ro->gyro_pid.mpc_q_vel;
+  p.r = param_ro->gyro_pid.mpc_r;
+  p.horizon = param_ro->gyro_pid.mpc_horizon;
+  p.dt = param_ro->dt;
+  p.max_iterations = 5;
+  mpc_solver.initialize(p);
 }
 
 void PlanningTask::task() {
@@ -2343,7 +2351,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     // Logging variables
     ee->aw_log.was_aw = (float)gyro_pid_windup_histerisis;
     ee->aw_log.w_i_base = w_error_i;
-    
+
     if (param_ro->gyro_pid.antiwindup) {
       const float db = param_ro->gyro_pid.windup_dead_bind;
       if ((w_error_i * ee->w.error_p < 0) &&
@@ -2359,7 +2367,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
         gyro_pid_windup_histerisis = false;
         gyro_pid_histerisis_i = 0;
       }
-      
+
       ee->aw_log.w_error_i_raw = w_error_i;
       ee->aw_log.gyro_pid_histerisis_i = gyro_pid_histerisis_i;
 
@@ -2395,6 +2403,50 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
 
     ee->ang_log.gain_zz = ee->ang_log.gain_z;
     ee->ang_log.gain_z = duty_roll;
+
+    // MPC Override Logic (Experimental)
+    // if pivort
+
+    if (tgt_val->motion_type == MotionType::PIVOT) {
+      // Do not use MPC during pivoting
+      ee->aw_log.duty_roll_before = 0; // Log before MPC
+      ee->aw_log.duty_roll = 0;
+    } else if (param_ro->enable_mpc > 0) {
+      // Use enable_kalman_gyro > 0 as a switch
+      // for MPC (assuming it's available)
+
+      float w_ref = tgt_val->ego_in.w; // + offset if angular feedback is active
+      // Only activate if we are finishing a turn (w_ref near 0) and saturating
+      bool near_zero = ABS(w_ref) < 1000.50f; // Threshold 0.5 rad/s
+
+      if (near_zero) {
+
+        if (mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p},
+                             -param_ro->max_duty, param_ro->max_duty) != 0) {
+          // Initialize if needed (hacky check usually needs proper init state)
+          ConstraintLQM::Parameters p;
+          p.q_ang = param_ro->gyro_pid.mpc_q_ang;
+          // Use existing struct params we added
+          p.q_vel = param_ro->gyro_pid.mpc_q_vel;
+          p.r = param_ro->gyro_pid.mpc_r;
+          p.horizon = param_ro->gyro_pid.mpc_horizon;
+          p.dt = param_ro->dt;
+          p.max_iterations = 5;
+          mpc_solver.initialize(p);
+        }
+
+        // Solve
+        float mpc_u = mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p},
+                                       -param_ro->max_duty, param_ro->max_duty);
+
+        // Blend or Override (Currently Override)
+        ee->aw_log.duty_roll_before = duty_roll; // Log before MPC
+        ee->aw_log.duty_roll = duty_roll = mpc_u;
+
+        // Update log for debugging
+        ee->aw_log.sat_flag = 2.0f; // Mark as MPC active
+      }
+    }
     set_ctrl_val(ee->w_val,
                  ee->w.error_p, // p
                  diff_ang,      // i
@@ -2405,37 +2457,6 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
                  kb_gain,       // kb*i2
                  kd_gain,       // kd*d
                  ee->ang_log.gain_zz, ee->ang_log.gain_z);
-  
-    // MPC Override Logic (Experimental)
-    if (param_ro->enable_mpc > 0) { // Use enable_kalman_gyro > 0 as a switch for MPC (assuming it's available)
-
-        float w_ref = tgt_val->ego_in.w; // + offset if angular feedback is active
-        // Only activate if we are finishing a turn (w_ref near 0) and saturating
-        bool near_zero = ABS(w_ref) < 0.5f; // Threshold 0.5 rad/s
-        
-        if (near_zero && ee->aw_log.sat_flag > 0.5f) {
-           if (mpc_solver.solve({ee->ang.error_p, ee->w.error_p}, -param_ro->max_duty, param_ro->max_duty) != 0) {
-               // Initialize if needed (hacky check usually needs proper init state)
-               ConstraintLQM::Parameters p;
-               p.q_ang = param_ro->motor_pid.mpc_q_ang; // Use existing struct params we added
-               p.q_vel = param_ro->motor_pid.mpc_q_vel;
-               p.r = param_ro->motor_pid.mpc_r;
-               p.horizon = param_ro->motor_pid.mpc_horizon;
-               p.dt = param_ro->dt;
-               p.max_iterations = 5;
-               mpc_solver.initialize(p);
-           }
-           
-           // Solve
-           float mpc_u = mpc_solver.solve({ee->ang.error_p, ee->w.error_p}, -param_ro->max_duty, param_ro->max_duty);
-           
-           // Blend or Override (Currently Override)
-           duty_roll = mpc_u; 
-           
-           // Update log for debugging
-           ee->aw_log.sat_flag = 2.0f; // Mark as MPC active
-        }
-    }
   }
 }
 void IRAM_ATTR PlanningTask::apply_duty_limitter() {
