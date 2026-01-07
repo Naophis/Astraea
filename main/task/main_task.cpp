@@ -721,6 +721,20 @@ void MainTask::load_hw_param() {
       getItem(gyro_pid, "theta_damp_th")->valuedouble * M_PI / 180;
   param->gyro_pid.omega_damp = getItem(gyro_pid, "omega_damp")->valuedouble;
   param->gyro_pid.th = getItem(gyro_pid, "th")->valuedouble;
+  param->gyro_pid.theta_gate_on =
+      getItem(gyro_pid, "theta_gate_on")->valuedouble * M_PI / 180;
+  param->gyro_pid.theta_gate_full =
+      getItem(gyro_pid, "theta_gate_full")->valuedouble * M_PI / 180;
+  param->gyro_pid.theta_kp = getItem(gyro_pid, "theta_kp")->valuedouble;
+  param->gyro_pid.theta_kd = getItem(gyro_pid, "theta_kd")->valuedouble;
+  param->gyro_pid.omega_add_max =
+      getItem(gyro_pid, "omega_add_max")->valuedouble;
+  param->gyro_pid.alpha_rate_end =
+      getItem(gyro_pid, "alpha_rate_end")->valuedouble;
+  param->gyro_pid.k_stop = getItem(gyro_pid, "k_stop")->valuedouble;
+  param->gyro_pid.theta_eps =
+      getItem(gyro_pid, "theta_eps")->valuedouble * M_PI / 180;
+  param->gyro_pid.s_gate = getItem(gyro_pid, "s_gate")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;

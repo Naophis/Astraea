@@ -302,6 +302,15 @@ typedef struct {
   float theta_damp_th = 0;
   float omega_damp = 0;
   float th = 1;
+  float theta_gate_on = 0;
+  float theta_gate_full = 0;
+  float theta_kp = 0;
+  float theta_kd = 0;
+  float omega_add_max = 0;
+  float alpha_rate_end = 0;
+  float k_stop = 0;
+  float theta_eps = 0;
+  float s_gate = 0;
 } pid_param_t;
 
 typedef struct {

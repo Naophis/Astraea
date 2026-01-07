@@ -1863,7 +1863,7 @@ void IRAM_ATTR PlanningTask::cp_request() {
     const auto tmp_ang = tgt_val->ego_in.ang;
     tgt_val->ego_in.img_ang -= last_tgt_angle;
     kf_ang.offset(-last_tgt_angle);
-    tgt_val->ego_in.ang = 0;
+    tgt_val->ego_in.ang -= last_tgt_angle;
     // } else {
     //   kf_ang.reset(0);
   }
@@ -2378,37 +2378,110 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
       }
     }
     if (tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-      if (param_ro->gyro_pid.th < 1.0) {
+      if (sla_th < 1.0) {
         enable = true;
       }
     }
 
     if (enable) {
       float theta_err = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-      // 生の角速度目標（例：理想プロファイル or 外側PID出力）
-      float omega_ref =
-          (tgt_val->ego_in.w + duty_roll_ang); // ★あなたの実変数名に置換
-      const float omega_meas =
-          sensing_result->ego.w_kf; // ★あなたの実変数名に置換
+      const float omega_meas = sensing_result->ego.w_kf;
+      // raw profile (feedforward) : rad/s
+      float omega_ref_raw = tgt_val->ego_in.w;
 
-      // (A) 残り角から “止まれる ω” 上限を作る： ω_max = sqrt(2 * alpha_stop *
-      // |theta_rem|) ※ alpha_stop
-      // は「確実に止められる」保守値（滑るなら小さめが正義）
-      const float abs_theta = fabsf(theta_err);
-      const float omega_max =
-          sqrtf(2.0f * param_ro->gyro_pid.alpha_stop * abs_theta);
+      // =========================
+      // (1) 終盤ゲート係数 s を作る（0→1）
+      // =========================
+      float abs_theta = ABS(theta_err); // 残り角でゲート
+
+      // 例: 追い込み開始=15deg, 全開=5deg（内部はradに変換済み想定）
+      // float theta_on = param_ro->gyro_pid.theta_gate_on;     // rad (例 0.26)
+      // float theta_full = param_ro->gyro_pid.theta_gate_full; // rad (例
+      // 0.087)
+      const float theta_on = 0.26;    // rad (例 0.26)
+      const float theta_full = 0.087; // rad (例 0.087)
+
+      // abs_theta が小さいほど 1
+      // clamp01((theta_on - abs_theta)/(theta_on - theta_full))
+      float s = 0.0f;
+      if (abs_theta < theta_on) {
+        float denom = fmaxf(theta_on - theta_full, 1e-6f);
+        s = (theta_on - abs_theta) / denom;
+        if (s < 0)
+          s = 0;
+        if (s > 1)
+          s = 1;
+        // より滑らかにしたいなら smoothstep
+        s = s * s * (3.0f - 2.0f * s);
+      }
+
+      // =========================
+      // (2) 終盤だけ角度追い込み（PD）を作って ω_ref_raw に足す
+      // =========================
+      // P: 角度誤差 -> 追加角速度
+      // D: 実角速度 -> 減衰（反転/ビビりを抑える）
+      float omega_add = 0.0f;
+      if (s > 0.0f) {
+        float p = param_ro->gyro_pid.theta_kp * theta_err;   // rad/s
+        float d = -param_ro->gyro_pid.theta_kd * omega_meas; // rad/s
+
+        omega_add = p + d;
+
+        // 追加分は必ず飽和（重要）
+        float add_max = param_ro->gyro_pid.omega_add_max; // 例 8〜12
+        omega_add = std::clamp(omega_add, -add_max, +add_max);
+        omega_ref_raw += s * omega_add;
+      }
+
+      // =========================
+      // (3) 制動限界（alpha_stop）で ω_ref を clamp
+      // =========================
+      float turn_sign = (tgt_val->td == TurnDirection::Left) ? 1.0f : -1.0f;
+      // float turn_sign = (omega_ref_raw >= 0.0f) ? 1.0f : -1.0f;
+      // duty_roll_ang が turn_sign と逆向きなら 0 にする
+      float tmp_duty_roll_ang = duty_roll_ang;
+
+      float k = 0.0f;
+      if (s > 0.5f) {
+        k = (s - 0.5f) / 0.5f;         // s=0.5→0, s=1→1
+        k = k * k * (3.0f - 2.0f * k); // smoothstep
+      }
+      if (turn_sign * tmp_duty_roll_ang < 0.0f) {
+        tmp_duty_roll_ang *= (1.0f - k); // 終盤に向かって徐々に0へ
+      }
+      float omega_ref = omega_ref_raw + tmp_duty_roll_ang;
+
+      const float theta_eps =
+          param_ro->gyro_pid.theta_eps; // まず0.5deg（固定でOK）
+      float omega_max =
+          std::sqrt(2.0f * param_ro->gyro_pid.alpha_stop * (abs_theta + theta_eps));
       omega_ref = std::clamp(omega_ref, -omega_max, +omega_max);
 
-      // (B) ω_ref のレート制限（角加速度制限）： |Δω_ref| <= alpha_rate * dt
-      const float omega_ref_prev =
-          ee->ang_log.omega_ref_prev; // ★保持場所は任意
-      const float domega = param_ro->gyro_pid.alpha_rate * dt;
-      omega_ref = std::clamp(omega_ref, omega_ref_prev - domega,
-                             omega_ref_prev + domega);
+      // =========================
+      // (4) レート制限：終盤だけ rate を落とす
+      // =========================
+
+      float prev = ee->ang_log.omega_ref_prev;
+
+      float r0 = param_ro->gyro_pid.alpha_rate;     // 通常
+      float r1 = param_ro->gyro_pid.alpha_rate_end; // 終盤
+      // s=0→r0, s=1→r1
+      float use_rate = r0 + s * (r1 - r0);
+      float domega = use_rate * dt;
+      omega_ref = std::clamp(omega_ref, prev - domega, prev + domega);
+
+      if (s > param_ro->gyro_pid.s_gate) {
+        float k_stop = param_ro->gyro_pid.k_stop; // 0.08〜0.15
+        omega_ref += -k_stop * omega_meas;
+      }
+
+      omega_ref = std::clamp(omega_ref, -omega_max, +omega_max);
+
       ee->ang_log.omega_ref_prev = omega_ref;
 
-      // (C) ここで ω誤差を作り直す（これが超重要）
-      // 既存の ee->w.error_p をここで上書きできるなら、以降は今のまま効く
+      // =========================
+      // (5) ここで ω誤差を生成（この後は既存の gyro PID で duty_roll）
+      // =========================
       ee->w.error_p = omega_ref - omega_meas;
 
       // 以降、あなたの既存ロジック
