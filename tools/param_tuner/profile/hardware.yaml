@@ -209,6 +209,14 @@ gyro_pid:
   windup_gain: 1.0
   windup_dead_bind: 1.50
 
+    # c: 0.0
+  i_theta_tau: 0.08      # [s] 角度I低域化の一次LPF時定数（例: 0.08〜0.15）
+  i_theta_slew: 10.0     # [/s] 角度Iバイアスの変化率制限（例: 10〜50）
+  i_theta_max: 20.0      # [-]  角度Iバイアスの振幅上限（例: 5〜20）
+  # theta_gate: 0.00875      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
+  theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
+  omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
+
   alpha_stop: 2000.0 # [rad/s²] 角加速度制限（例: 80〜200）
   alpha_rate: 4000.00
   theta_damp_th: 5.0 # [deg] convert 
@@ -226,13 +234,7 @@ gyro_pid:
   theta_eps: 1.0 # [deg]
   s_gate: 0.75 # 終盤ゲート開始位置(0〜1)
 
-    # c: 0.0
-  i_theta_tau: 0.08      # [s] 角度I低域化の一次LPF時定数（例: 0.08〜0.15）
-  i_theta_slew: 10.0     # [/s] 角度Iバイアスの変化率制限（例: 10〜50）
-  i_theta_max: 20.0      # [-]  角度Iバイアスの振幅上限（例: 5〜20）
-  # theta_gate: 0.00875      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
-  theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
-  omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
+
 
 angle_pid: # pid for angle
   # p: 44.50
