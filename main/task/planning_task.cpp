@@ -2339,6 +2339,11 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     }
     auto w_error_i = ee->w.error_i;
     auto w_error_d = ee->w_kf.error_d;
+
+    // Logging variables
+    ee->aw_log.was_aw = (float)gyro_pid_windup_histerisis;
+    ee->aw_log.w_i_base = w_error_i;
+    
     if (param_ro->gyro_pid.antiwindup) {
       const float db = param_ro->gyro_pid.windup_dead_bind;
       if ((w_error_i * ee->w.error_p < 0) &&
@@ -2354,6 +2359,11 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
         gyro_pid_windup_histerisis = false;
         gyro_pid_histerisis_i = 0;
       }
+      
+      ee->aw_log.w_error_i_raw = w_error_i;
+      ee->aw_log.gyro_pid_histerisis_i = gyro_pid_histerisis_i;
+
+      // Apply Clamp (Angle Limiter)
       if (tgt_val->motion_type == MotionType::SLALOM) {
         w_error_i = std::clamp(w_error_i * dt, -ABS(tgt_val->tgt_in.tgt_angle),
                                ABS(tgt_val->tgt_in.tgt_angle)) /
@@ -2363,6 +2373,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
                                ABS(last_tgt_angle)) /
                     dt;
       }
+      ee->aw_log.w_error_i_clamped = w_error_i;
     }
 
     if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
@@ -2394,6 +2405,37 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
                  kb_gain,       // kb*i2
                  kd_gain,       // kd*d
                  ee->ang_log.gain_zz, ee->ang_log.gain_z);
+  
+    // MPC Override Logic (Experimental)
+    if (param_ro->enable_mpc > 0) { // Use enable_kalman_gyro > 0 as a switch for MPC (assuming it's available)
+
+        float w_ref = tgt_val->ego_in.w; // + offset if angular feedback is active
+        // Only activate if we are finishing a turn (w_ref near 0) and saturating
+        bool near_zero = ABS(w_ref) < 0.5f; // Threshold 0.5 rad/s
+        
+        if (near_zero && ee->aw_log.sat_flag > 0.5f) {
+           if (mpc_solver.solve({ee->ang.error_p, ee->w.error_p}, -param_ro->max_duty, param_ro->max_duty) != 0) {
+               // Initialize if needed (hacky check usually needs proper init state)
+               ConstraintLQM::Parameters p;
+               p.q_ang = param_ro->motor_pid.mpc_q_ang; // Use existing struct params we added
+               p.q_vel = param_ro->motor_pid.mpc_q_vel;
+               p.r = param_ro->motor_pid.mpc_r;
+               p.horizon = param_ro->motor_pid.mpc_horizon;
+               p.dt = param_ro->dt;
+               p.max_iterations = 5;
+               mpc_solver.initialize(p);
+           }
+           
+           // Solve
+           float mpc_u = mpc_solver.solve({ee->ang.error_p, ee->w.error_p}, -param_ro->max_duty, param_ro->max_duty);
+           
+           // Blend or Override (Currently Override)
+           duty_roll = mpc_u; 
+           
+           // Update log for debugging
+           ee->aw_log.sat_flag = 2.0f; // Mark as MPC active
+        }
+    }
   }
 }
 void IRAM_ATTR PlanningTask::apply_duty_limitter() {
@@ -2428,8 +2470,16 @@ void IRAM_ATTR PlanningTask::apply_duty_limitter() {
     tgt_duty.duty_l = 0;
   }
 
+  const float prev_r = tgt_duty.duty_r;
+  const float prev_l = tgt_duty.duty_l;
   tgt_duty.duty_r = std::clamp(tgt_duty.duty_r, -max_duty, max_duty);
   tgt_duty.duty_l = std::clamp(tgt_duty.duty_l, -max_duty, max_duty);
+
+  if (prev_r != tgt_duty.duty_r || prev_l != tgt_duty.duty_l) {
+    ee->aw_log.sat_flag = 1.0f;
+  } else {
+    ee->aw_log.sat_flag = 0.0f;
+  }
 }
 void IRAM_ATTR PlanningTask::clear_ctrl_val() {
   duty_c = duty_c2 = duty_roll = duty_front_ctrl_roll_keep = duty_roll_ang = 0;

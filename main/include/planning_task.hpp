@@ -11,7 +11,7 @@
 #include "gen_code_mpc/mpc_tgt_calc.h"
 #include "include/logging_task.hpp"
 #include "include/maze_solver.hpp"
-
+#include "include/constraint_lqm.hpp" // Added for MPC
 #include "esp_system.h"
 #include "esp_vfs.h"
 #include "esp_vfs_fat.h"
@@ -306,6 +306,7 @@ private:
   // PID_Controller_2dof vel_pid_2dof;
   // PID_Controller_2dof gyro_pid_2dof;
   unsigned char w_reset = 0;
+  ConstraintLQM mpc_solver;
 };
 
 #endif

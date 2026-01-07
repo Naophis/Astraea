@@ -114,6 +114,7 @@ ff_roll_gain_after: 0.75
 ff_front_gain_decel: 0.5
 
 enable_kalman_gyro: 0
+enable_mpc: 1
 enable_kalman_encoder: 1
 
 # motor_pid_gain_limitter: 
@@ -217,23 +218,10 @@ gyro_pid:
   theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
   omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
 
-  alpha_stop: 2000.0 # [rad/s²] 角加速度制限（例: 80〜200）
-  alpha_rate: 4000.00
-  theta_damp_th: 5.0 # [deg] convert 
-  omega_damp: 0.00
-
-  th: 0.90 # SLA_BACK_STR用
-  # th: 1.0 # SLA_BACK_STR用
-  theta_gate_on: 10 # [deg] 入力時にrad変換
-  theta_gate_full: 4 # [deg] 入力時にrad変換
-  theta_kp: 40.0 # 
-  theta_kd: 15.0 #  
-  omega_add_max: 6.0 # [rad/s] 角速度付加の最大値
-  alpha_rate_end: 2500.0 # [rad/s²] 終盤の角加速度制限
-  k_stop: 0.20 # 
-  theta_eps: 1.0 # [deg]
-  s_gate: 0.75 # 終盤ゲート開始位置(0〜1)
-
+  mpc_q_ang: 100
+  mpc_q_vel: 10
+  mpc_r: 0.2
+  mpc_horizon: 10
 
 
 angle_pid: # pid for angle

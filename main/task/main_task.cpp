@@ -444,6 +444,7 @@ void MainTask::load_hw_param() {
   param->torque_mode = getItem(root, "torque_mode")->valueint;
 
   param->enable_kalman_gyro = getItem(root, "enable_kalman_gyro")->valueint;
+  param->enable_mpc = getItem(root, "enable_mpc")->valueint;
   param->enable_kalman_encoder =
       getItem(root, "enable_kalman_encoder")->valueint;
 
@@ -715,26 +716,11 @@ void MainTask::load_hw_param() {
   param->gyro_pid.i_theta_max = getItem(gyro_pid, "i_theta_max")->valuedouble;
   param->gyro_pid.theta_gate = getItem(gyro_pid, "theta_gate")->valuedouble;
   param->gyro_pid.omega_gate = getItem(gyro_pid, "omega_gate")->valuedouble;
-  param->gyro_pid.alpha_stop = getItem(gyro_pid, "alpha_stop")->valuedouble;
-  param->gyro_pid.alpha_rate = getItem(gyro_pid, "alpha_rate")->valuedouble;
-  param->gyro_pid.theta_damp_th =
-      getItem(gyro_pid, "theta_damp_th")->valuedouble * M_PI / 180;
-  param->gyro_pid.omega_damp = getItem(gyro_pid, "omega_damp")->valuedouble;
-  param->gyro_pid.th = getItem(gyro_pid, "th")->valuedouble;
-  param->gyro_pid.theta_gate_on =
-      getItem(gyro_pid, "theta_gate_on")->valuedouble * M_PI / 180;
-  param->gyro_pid.theta_gate_full =
-      getItem(gyro_pid, "theta_gate_full")->valuedouble * M_PI / 180;
-  param->gyro_pid.theta_kp = getItem(gyro_pid, "theta_kp")->valuedouble;
-  param->gyro_pid.theta_kd = getItem(gyro_pid, "theta_kd")->valuedouble;
-  param->gyro_pid.omega_add_max =
-      getItem(gyro_pid, "omega_add_max")->valuedouble;
-  param->gyro_pid.alpha_rate_end =
-      getItem(gyro_pid, "alpha_rate_end")->valuedouble;
-  param->gyro_pid.k_stop = getItem(gyro_pid, "k_stop")->valuedouble;
-  param->gyro_pid.theta_eps =
-      getItem(gyro_pid, "theta_eps")->valuedouble * M_PI / 180;
-  param->gyro_pid.s_gate = getItem(gyro_pid, "s_gate")->valuedouble;
+
+  param->gyro_pid.mpc_q_ang = getItem(gyro_pid, "mpc_q_ang")->valuedouble;
+  param->gyro_pid.mpc_q_vel = getItem(gyro_pid, "mpc_q_vel")->valuedouble;
+  param->gyro_pid.mpc_r = getItem(gyro_pid, "mpc_r")->valuedouble;
+  param->gyro_pid.mpc_horizon = getItem(gyro_pid, "mpc_horizon")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;

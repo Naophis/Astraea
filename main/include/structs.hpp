@@ -311,6 +311,10 @@ typedef struct {
   float k_stop = 0;
   float theta_eps = 0;
   float s_gate = 0;
+  float mpc_q_ang = 0;
+  float mpc_q_vel = 0;
+  float mpc_r = 0;
+  int mpc_horizon = 0;
 } pid_param_t;
 
 typedef struct {
@@ -726,6 +730,7 @@ typedef struct {
   char torque_mode = 0;
   char enable_kalman_gyro = 0;
   char enable_kalman_encoder = 0;
+  char enable_mpc = 0;
   float dia90_offset = 0;
   kanayama_t kanayama;
 } input_param_t;
@@ -761,6 +766,17 @@ typedef struct {
 } gain_log_t;
 
 typedef struct {
+  float was_aw;
+  float enter_aw;
+  float keep_aw;
+  float w_i_base;
+  float w_error_i_raw; // clamp前
+  float w_error_i_clamped;
+  float gyro_pid_histerisis_i;
+  float sat_flag;
+} aw_log_t;
+
+typedef struct {
   pid_error_t v;
   pid_error_t v_kf;
   pid_error_t dist;
@@ -787,6 +803,8 @@ typedef struct {
   pid_error2_t w_val;
   pid_error2_t ang_val;
   pid_error2_t s_val;
+
+  aw_log_t aw_log;
 
 } pid_error_entity_t;
 
