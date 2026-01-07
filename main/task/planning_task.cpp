@@ -2288,39 +2288,6 @@ void IRAM_ATTR PlanningTask::calc_angle_i_bias() {
   // --- 角度I（ee->ang.error_i）から“低帯域だけ”を取り出す ---
   const float dt = param_ro->dt; // 既存の制御周期
 
-  // // 1) Iの低域化（一次LPF）
-  // {
-  //   float tau = std::max(1e-6f, param_ro->gyro_pid.i_theta_tau);
-  //   float a = std::clamp(dt / tau, 0.0f, 1.0f);
-  //   ee->ang.i_slow += a * (ee->ang.error_i - ee->ang.i_slow);
-  // }
-
-  // // 2) 終盤だけ効かせるゲート：|eθ|が小さい・|ω_ref|が小さい時ほど1
-  // float e_theta_abs =
-  //     std::abs(tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-  // float w_ref_abs = std::abs(tgt_val->ego_in.w); // 目標角速度
-
-  // // |eθ|: 大→小 で 0→1 にしたいので、閾値で反転気味の重みを作る
-  // float w_theta =
-  //     1.0f - smoothstep01(e_theta_abs /
-  //                         std::max(1e-9f, param_ro->gyro_pid.theta_gate));
-  // // |ω|: 大→小 で 0→1
-  // float w_omega =
-  //     1.0 -
-  //     smoothstep01(w_ref_abs / std::max(1e-9f,
-  //     param_ro->gyro_pid.omega_gate));
-
-  // float w_gate = std::clamp(w_theta * w_omega, 0.0f, 1.0f);
-
-  // // 3) スルーレート＆振幅制限つきで target に追従
-  // float i_target = ee->ang.i_slow * w_gate;
-  // float max_step = std::max(0.0f, param_ro->gyro_pid.i_theta_slew) * dt;
-  // float di = std::clamp(i_target - ee->ang.i_bias, -max_step, +max_step);
-  // ee->ang.i_bias =
-  //     std::clamp(ee->ang.i_bias + di,
-  //     -std::abs(param_ro->gyro_pid.i_theta_max),
-  //                +std::abs(param_ro->gyro_pid.i_theta_max));
-
   if (tgt_val->motion_type == MotionType::NONE ||
       tgt_val->motion_type == MotionType::PIVOT ||
       tgt_val->motion_type == MotionType::PIVOT_PRE ||
@@ -2332,19 +2299,12 @@ void IRAM_ATTR PlanningTask::calc_angle_i_bias() {
       tgt_val->motion_type == MotionType::FRONT_CTRL) {
     ee->ang.i_bias = 0;
   } else {
-    ee->ang.i_bias = tgt_val->ego_in.img_ang - kim.theta;
+    ee->ang.i_bias = tgt_val->ego_in.img_ang -
+                     kim.theta; // 指示角度 - カルマンフィルタを使った角度
   }
   if (search_mode) {
     ee->ang.i_bias = 0;
   }
-
-  // // 4) モーション種別での無効化（あなたの既存ルールに追従）
-  // if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-  //       tgt_val->motion_type == MotionType::SLA_BACK_STR ||
-  //       tgt_val->motion_type == MotionType::PIVOT)) {
-  //   // 終盤以外は角度系補正を殺す
-  //   // ee->ang.i_bias = 0.0;
-  // }
 }
 
 void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
@@ -2370,270 +2330,70 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     gyro_pid_histerisis_i = 0;
   } else {
     // mode3 main
-    bool enable = false;
+
+    auto diff_ang = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
+    auto ang_sum = ee->ang.error_i;
     if (tgt_val->motion_type == MotionType::SLALOM) {
-      if (ABS(tgt_val->ego_in.img_ang) >
-          ABS(tgt_val->tgt_in.tgt_angle) * sla_th) {
-        enable = true;
-      }
+      diff_ang = 0;
+      ang_sum = 0;
     }
-    if (tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-      if (sla_th < 1.0) {
-        enable = true;
+    auto w_error_i = ee->w.error_i;
+    auto w_error_d = ee->w_kf.error_d;
+    if (param_ro->gyro_pid.antiwindup) {
+      const float db = param_ro->gyro_pid.windup_dead_bind;
+      if ((w_error_i * ee->w.error_p < 0) &&
+          ((ABS(ee->w.error_p) > db) ||
+           (gyro_pid_windup_histerisis && ABS(ee->w.error_p) > db * 0.75))) {
+        gyro_pid_histerisis_i += ee->w.error_p;
+        w_error_i = gyro_pid_histerisis_i;
+        gyro_pid_windup_histerisis = true;
+      } else {
+        if (gyro_pid_windup_histerisis) { // true -> false
+          w_error_i = ee->w.error_i = ee->ang.error_p / dt;
+        }
+        gyro_pid_windup_histerisis = false;
+        gyro_pid_histerisis_i = 0;
       }
-    }
-
-    if (enable) {
-      float theta_err = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-      const float omega_meas = sensing_result->ego.w_kf;
-      // raw profile (feedforward) : rad/s
-      float omega_ref_raw = tgt_val->ego_in.w;
-
-      // =========================
-      // (1) 終盤ゲート係数 s を作る（0→1）
-      // =========================
-      float abs_theta = ABS(theta_err); // 残り角でゲート
-
-      // 例: 追い込み開始=15deg, 全開=5deg（内部はradに変換済み想定）
-      // float theta_on = param_ro->gyro_pid.theta_gate_on;     // rad (例 0.26)
-      // float theta_full = param_ro->gyro_pid.theta_gate_full; // rad (例
-      // 0.087)
-      const float theta_on = 0.26;    // rad (例 0.26)
-      const float theta_full = 0.087; // rad (例 0.087)
-
-      // abs_theta が小さいほど 1
-      // clamp01((theta_on - abs_theta)/(theta_on - theta_full))
-      float s = 0.0f;
-      if (abs_theta < theta_on) {
-        float denom = fmaxf(theta_on - theta_full, 1e-6f);
-        s = (theta_on - abs_theta) / denom;
-        if (s < 0)
-          s = 0;
-        if (s > 1)
-          s = 1;
-        // より滑らかにしたいなら smoothstep
-        s = s * s * (3.0f - 2.0f * s);
-      }
-
-      // =========================
-      // (2) 終盤だけ角度追い込み（PD）を作って ω_ref_raw に足す
-      // =========================
-      // P: 角度誤差 -> 追加角速度
-      // D: 実角速度 -> 減衰（反転/ビビりを抑える）
-      float omega_add = 0.0f;
-      if (s > 0.0f) {
-        float p = param_ro->gyro_pid.theta_kp * theta_err;   // rad/s
-        float d = -param_ro->gyro_pid.theta_kd * omega_meas; // rad/s
-
-        omega_add = p + d;
-
-        // 追加分は必ず飽和（重要）
-        float add_max = param_ro->gyro_pid.omega_add_max; // 例 8〜12
-        omega_add = std::clamp(omega_add, -add_max, +add_max);
-        omega_ref_raw += s * omega_add;
-      }
-
-      // =========================
-      // (3) 制動限界（alpha_stop）で ω_ref を clamp
-      // =========================
-      float turn_sign = (tgt_val->td == TurnDirection::Left) ? 1.0f : -1.0f;
-      // float turn_sign = (omega_ref_raw >= 0.0f) ? 1.0f : -1.0f;
-      // duty_roll_ang が turn_sign と逆向きなら 0 にする
-      float tmp_duty_roll_ang = duty_roll_ang;
-
-      float k = 0.0f;
-      if (s > 0.5f) {
-        k = (s - 0.5f) / 0.5f;         // s=0.5→0, s=1→1
-        k = k * k * (3.0f - 2.0f * k); // smoothstep
-      }
-      if (turn_sign * tmp_duty_roll_ang < 0.0f) {
-        tmp_duty_roll_ang *= (1.0f - k); // 終盤に向かって徐々に0へ
-      }
-      float omega_ref = omega_ref_raw + tmp_duty_roll_ang;
-
-      const float theta_eps =
-          param_ro->gyro_pid.theta_eps; // まず0.5deg（固定でOK）
-      float omega_max =
-          std::sqrt(2.0f * param_ro->gyro_pid.alpha_stop * (abs_theta + theta_eps));
-      omega_ref = std::clamp(omega_ref, -omega_max, +omega_max);
-
-      // =========================
-      // (4) レート制限：終盤だけ rate を落とす
-      // =========================
-
-      float prev = ee->ang_log.omega_ref_prev;
-
-      float r0 = param_ro->gyro_pid.alpha_rate;     // 通常
-      float r1 = param_ro->gyro_pid.alpha_rate_end; // 終盤
-      // s=0→r0, s=1→r1
-      float use_rate = r0 + s * (r1 - r0);
-      float domega = use_rate * dt;
-      omega_ref = std::clamp(omega_ref, prev - domega, prev + domega);
-
-      if (s > param_ro->gyro_pid.s_gate) {
-        float k_stop = param_ro->gyro_pid.k_stop; // 0.08〜0.15
-        omega_ref += -k_stop * omega_meas;
-      }
-
-      omega_ref = std::clamp(omega_ref, -omega_max, +omega_max);
-
-      ee->ang_log.omega_ref_prev = omega_ref;
-
-      // =========================
-      // (5) ここで ω誤差を生成（この後は既存の gyro PID で duty_roll）
-      // =========================
-      ee->w.error_p = omega_ref - omega_meas;
-
-      // 以降、あなたの既存ロジック
-      auto diff_ang = theta_err;
-      auto ang_sum = ee->ang.error_i;
-
-      // SLALOM中は角度Iを殺したいなら「Iだけ」止める（diff_angは残す）
       if (tgt_val->motion_type == MotionType::SLALOM) {
-        ang_sum = 0;
-        // diff_ang = 0;   ←これをやると制動限界が作れないので消すのがおすすめ
+        w_error_i = std::clamp(w_error_i * dt, -ABS(tgt_val->tgt_in.tgt_angle),
+                               ABS(tgt_val->tgt_in.tgt_angle)) /
+                    dt;
+      } else if (tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+        w_error_i = std::clamp(w_error_i * dt, -ABS(last_tgt_angle),
+                               ABS(last_tgt_angle)) /
+                    dt;
       }
-
-      auto w_error_i = ee->w.error_i;
-      auto w_error_d = ee->w_kf.error_d;
-      if (param_ro->gyro_pid.antiwindup) {
-        if (w_error_i * ee->w.error_p < 0 &&
-            ((ABS(ee->w.error_p) > param_ro->gyro_pid.windup_dead_bind) ||
-             (gyro_pid_windup_histerisis &&
-              ABS(ee->w.error_p) >
-                  param_ro->gyro_pid.windup_dead_bind * 0.75))) {
-          gyro_pid_histerisis_i += ee->w.error_p;
-          w_error_i = gyro_pid_histerisis_i;
-          gyro_pid_windup_histerisis = true;
-        } else {
-          if (gyro_pid_windup_histerisis) { // true -> false
-
-            // w_error_i = ee->w.error_i = ee->ang.error_p / dt;
-
-            w_error_i = ee->w.error_i = ee->ang.i_bias / dt;
-          }
-          gyro_pid_windup_histerisis = false;
-          gyro_pid_histerisis_i = 0;
-        }
-        if (tgt_val->motion_type == MotionType::SLALOM) {
-          w_error_i =
-              std::clamp(w_error_i * dt, -ABS(tgt_val->tgt_in.tgt_angle),
-                         ABS(tgt_val->tgt_in.tgt_angle)) /
-              dt;
-        } else if (tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-          w_error_i = std::clamp(w_error_i * dt, -ABS(last_tgt_angle),
-                                 ABS(last_tgt_angle)) /
-                      dt;
-        }
-      }
-      if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-            tgt_val->motion_type == MotionType::SLA_BACK_STR ||
-            tgt_val->motion_type == MotionType::PIVOT)) {
-        diff_ang = 0;
-        // ang_sum = 0;
-      }
-
-      auto kp_gain = param_ro->gyro_pid.p * ee->w.error_p;
-      auto ki_gain = param_ro->gyro_pid.i * diff_ang;
-      auto kb_gain = param_ro->gyro_pid.b * w_error_i;
-      auto kc_gain = param_ro->gyro_pid.c * ee->ang.i_bias;
-      auto kd_gain = param_ro->gyro_pid.d * w_error_d;
-      limitter(kp_gain, ki_gain, kb_gain, kd_gain,
-               param_ro->gyro_pid_gain_limitter);
-      duty_roll = kp_gain + ki_gain + kb_gain + kc_gain + kd_gain;
-
-      // (D) 終端ダンピング（任意だけど効く）
-      // 残り角が小さい時だけ入れるのが安全
-      if (abs_theta < param_ro->gyro_pid.theta_damp_th) {
-        duty_roll += -param_ro->gyro_pid.omega_damp * omega_meas;
-      }
-
-      // 既存の差分項
-      duty_roll += (ee->ang_log.gain_z - ee->ang_log.gain_zz) * dt;
-
-      ee->ang_log.gain_zz = ee->ang_log.gain_z;
-      ee->ang_log.gain_z = duty_roll;
-
-      set_ctrl_val(ee->w_val,
-                   ee->w.error_p,              // p
-                   theta_err,                  // i
-                   w_error_i,                  // i2
-                   omega_max,                  // d
-                   kp_gain,                    // kp*p
-                   ki_gain,                    // ki*i
-                   kb_gain,                    // kb*i2
-                   ee->ang_log.omega_ref_prev, // kd*d
-                   ee->ang_log.gain_zz, ee->ang_log.gain_z);
-    } else {
-      auto diff_ang = (tgt_val->ego_in.img_ang - sensing_result->ego.ang_kf);
-      auto ang_sum = ee->ang.error_i;
-      if (tgt_val->motion_type == MotionType::SLALOM) {
-        diff_ang = 0;
-        ang_sum = 0;
-      }
-      auto w_error_i = ee->w.error_i;
-      auto w_error_d = ee->w_kf.error_d;
-      if (param_ro->gyro_pid.antiwindup) {
-        if (w_error_i * ee->w.error_p < 0 &&
-            ((ABS(ee->w.error_p) > param_ro->gyro_pid.windup_dead_bind) ||
-             (gyro_pid_windup_histerisis &&
-              ABS(ee->w.error_p) >
-                  param_ro->gyro_pid.windup_dead_bind * 0.75))) {
-          gyro_pid_histerisis_i += ee->w.error_p;
-          w_error_i = gyro_pid_histerisis_i;
-          gyro_pid_windup_histerisis = true;
-        } else {
-          if (gyro_pid_windup_histerisis) { // true -> false
-
-            // w_error_i = ee->w.error_i = ee->ang.error_p / dt;
-
-            w_error_i = ee->w.error_i = ee->ang.i_bias / dt;
-          }
-          gyro_pid_windup_histerisis = false;
-          gyro_pid_histerisis_i = 0;
-        }
-        if (tgt_val->motion_type == MotionType::SLALOM) {
-          w_error_i =
-              std::clamp(w_error_i * dt, -ABS(tgt_val->tgt_in.tgt_angle),
-                         ABS(tgt_val->tgt_in.tgt_angle)) /
-              dt;
-        } else if (tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-          w_error_i = std::clamp(w_error_i * dt, -ABS(last_tgt_angle),
-                                 ABS(last_tgt_angle)) /
-                      dt;
-        }
-      }
-
-      if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
-            tgt_val->motion_type == MotionType::SLA_BACK_STR ||
-            tgt_val->motion_type == MotionType::PIVOT)) {
-        diff_ang = 0;
-        ang_sum = 0;
-      }
-
-      auto kp_gain = param_ro->gyro_pid.p * ee->w.error_p;
-      auto ki_gain = param_ro->gyro_pid.i * diff_ang;
-      auto kb_gain = param_ro->gyro_pid.b * w_error_i;
-      auto kc_gain = param_ro->gyro_pid.c * ee->ang.i_bias;
-      auto kd_gain = param_ro->gyro_pid.d * w_error_d;
-      limitter(kp_gain, ki_gain, kb_gain, kd_gain,
-               param_ro->gyro_pid_gain_limitter);
-      duty_roll = kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
-                  (ee->ang_log.gain_z - ee->ang_log.gain_zz) * dt;
-
-      ee->ang_log.gain_zz = ee->ang_log.gain_z;
-      ee->ang_log.gain_z = duty_roll;
-      set_ctrl_val(ee->w_val,
-                   ee->w.error_p, // p
-                   diff_ang,      // i
-                   w_error_i,     // i2
-                   w_error_d,     // d
-                   kp_gain,       // kp*p
-                   ki_gain,       // ki*i
-                   kb_gain,       // kb*i2
-                   kd_gain,       // kd*d
-                   ee->ang_log.gain_zz, ee->ang_log.gain_z);
     }
+
+    if (!(tgt_val->motion_type == MotionType::SLA_FRONT_STR ||
+          tgt_val->motion_type == MotionType::SLA_BACK_STR ||
+          tgt_val->motion_type == MotionType::PIVOT)) {
+      diff_ang = 0;
+      ang_sum = 0;
+    }
+
+    auto kp_gain = param_ro->gyro_pid.p * ee->w.error_p;
+    auto ki_gain = param_ro->gyro_pid.i * diff_ang;
+    auto kb_gain = param_ro->gyro_pid.b * w_error_i;
+    auto kc_gain = param_ro->gyro_pid.c * ee->ang.i_bias;
+    auto kd_gain = param_ro->gyro_pid.d * w_error_d;
+    limitter(kp_gain, ki_gain, kb_gain, kd_gain,
+             param_ro->gyro_pid_gain_limitter);
+    duty_roll = kp_gain + ki_gain + kb_gain + kc_gain + kd_gain +
+                (ee->ang_log.gain_z - ee->ang_log.gain_zz) * dt;
+
+    ee->ang_log.gain_zz = ee->ang_log.gain_z;
+    ee->ang_log.gain_z = duty_roll;
+    set_ctrl_val(ee->w_val,
+                 ee->w.error_p, // p
+                 diff_ang,      // i
+                 w_error_i,     // i2
+                 w_error_d,     // d
+                 kp_gain,       // kp*p
+                 ki_gain,       // ki*i
+                 kb_gain,       // kb*i2
+                 kd_gain,       // kd*d
+                 ee->ang_log.gain_zz, ee->ang_log.gain_z);
   }
 }
 void IRAM_ATTR PlanningTask::apply_duty_limitter() {
