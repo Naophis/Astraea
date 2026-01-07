@@ -58,6 +58,9 @@ class PlotGUI:
         self.pj_btn = ttk.Button(self.btn_frame, text="Open PlotJuggler", command=self.run_plotjuggler)
         self.pj_btn.pack(side=tk.RIGHT, padx=2)
 
+        self.kill_pj_btn = ttk.Button(self.btn_frame, text="Kill PJ", command=self.kill_plotjuggler)
+        self.kill_pj_btn.pack(side=tk.RIGHT, padx=2)
+
         self.show_output_var = tk.BooleanVar(value=True)
         self.output_chk = ttk.Checkbutton(self.btn_frame, text="Show Output", variable=self.show_output_var)
         self.output_chk.pack(side=tk.RIGHT, padx=5)
@@ -210,6 +213,13 @@ class PlotGUI:
                 subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             self.status_label.config(text=f"Error: {e}")
+
+    def kill_plotjuggler(self):
+        try:
+            subprocess.run(["pkill", "-f", "plotjuggler"])
+            self.status_label.config(text="Killed all PlotJuggler instances.")
+        except Exception as e:
+            self.status_label.config(text=f"Error killing PlotJuggler: {e}")
 
 if __name__ == "__main__":
     root = tk.Tk()
