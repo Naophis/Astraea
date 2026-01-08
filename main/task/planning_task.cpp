@@ -2431,7 +2431,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
           p.r = param_ro->gyro_pid.mpc_r;
           p.horizon = param_ro->gyro_pid.mpc_horizon;
           p.dt = param_ro->dt;
-          p.max_iterations = 5;
+          p.max_iterations = (param_ro->gyro_pid.mpc_max_iter > 0) ? param_ro->gyro_pid.mpc_max_iter : 5;
           mpc_solver.initialize(p);
         }
 
@@ -2439,7 +2439,6 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
         float mpc_u = mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p},
                                        -param_ro->max_duty, param_ro->max_duty);
 
-        // Blend or Override (Currently Override)
         ee->aw_log.duty_roll_before = duty_roll; // Log before MPC
         ee->aw_log.duty_roll = duty_roll = mpc_u;
 

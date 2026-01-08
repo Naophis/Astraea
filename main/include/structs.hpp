@@ -315,6 +315,7 @@ typedef struct {
   float mpc_q_vel = 0;
   float mpc_r = 0;
   int mpc_horizon = 0;
+  int mpc_max_iter = 5;
 } pid_param_t;
 
 typedef struct {

@@ -218,10 +218,11 @@ gyro_pid:
   theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
   omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
 
-  mpc_q_ang: 100
-  mpc_q_vel: 10
-  mpc_r: 0.1
-  mpc_horizon: 10
+  mpc_q_ang: 50.0
+  mpc_q_vel: 10.0
+  mpc_r: 0.015
+  mpc_horizon: 5
+  mpc_max_iter: 15
 
 
 angle_pid: # pid for angle

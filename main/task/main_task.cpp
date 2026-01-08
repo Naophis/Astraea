@@ -721,6 +721,7 @@ void MainTask::load_hw_param() {
   param->gyro_pid.mpc_q_vel = getItem(gyro_pid, "mpc_q_vel")->valuedouble;
   param->gyro_pid.mpc_r = getItem(gyro_pid, "mpc_r")->valuedouble;
   param->gyro_pid.mpc_horizon = getItem(gyro_pid, "mpc_horizon")->valuedouble;
+  param->gyro_pid.mpc_max_iter = getItem(gyro_pid, "mpc_max_iter")->valueint;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
