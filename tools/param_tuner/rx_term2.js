@@ -367,7 +367,10 @@ const switchToBinaryMode = (obj) => {
             if (record[i] > 50 || record[i] < -50)
               res = false;
           if (data.name === "duty_roll")
-            if (record[i] > 5000 || record[i] < -5000)
+            if (record[i] > 0.1 || record[i] < -0.1)
+              res = false;
+          if (data.name === "duty_roll_before")
+            if (record[i] > 0.1 || record[i] < -0.1)
               res = false;
           return res;
         });

@@ -409,7 +409,7 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
   p.r = param_ro->gyro_pid.mpc_r;
   p.horizon = param_ro->gyro_pid.mpc_horizon;
   p.dt = param_ro->dt;
-  p.max_iterations = 5;
+  p.max_iterations = param_ro->gyro_pid.mpc_max_iter;
   mpc_solver.initialize(p);
 }
 

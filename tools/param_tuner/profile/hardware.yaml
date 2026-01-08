@@ -218,12 +218,12 @@ gyro_pid:
   theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
   omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
 
-  mpc_q_ang: 50.0
-  mpc_q_vel: 10.0
-  mpc_b: 0.01
-  mpc_r: 0.015
-  mpc_horizon: 5
-  mpc_max_iter: 15
+  mpc_q_ang: 225.0   # Angle error weight: START SAFE (then 50→100→200)
+  mpc_q_vel: 10.0   # Velocity error weight: for damping (10→20→50)
+  mpc_b: 0.5        # System gain: VERY CONSERVATIVE START (1→2→5→10→20)
+  mpc_r: 0.1        # Control cost: LARGE for smooth control (0.1→0.05→0.01)
+  mpc_horizon: 5    # Prediction horizon
+  mpc_max_iter: 8   # QP solver iterations: fewer for safety
   mpc_max_torque: 0.0025
 
 

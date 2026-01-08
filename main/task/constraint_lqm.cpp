@@ -13,11 +13,9 @@ void ConstraintLQM::initialize(const Parameters& params) {
 
 float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
     if (!initialized || p.horizon <= 0) {
-      // printf("horizon %d <= 0 or not initialized\n", p.horizon);
       return 0.0f;
     }
 
-    // printf("check: ");
     // Model:
     // x = [theta_err; omega_err]
     // u = angular_accel * dt (or similar, depending on B)
@@ -42,16 +40,28 @@ float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
     // Gradient of J w.r.t u_k is: 2*R*u_k + 2*B^T * lambda_(k+1)
     // where lambda is the costate: lambda_k = Q*x_k + A^T*lambda_(k+1)
     
-    float learning_rate = 0.001f; // Needs manual tuning or line search
+    // Adaptive learning rate scaled by system gain to prevent divergence
+    // When b is large, gradients are large, so we need smaller learning rate
+    float base_lr = 0.01f;
+    float learning_rate = base_lr / (1.0f + p.b * 0.1f); // Scale down with b
+    // Manual clamp for C++14 compatibility
+    if (learning_rate < 0.0001f) learning_rate = 0.0001f;
+    if (learning_rate > 0.01f) learning_rate = 0.01f;
+
     // Simple fixed step size is risky, but for this specific mass/inertia it might work.
     // Better: Coordinate Descent (Gauss-Seidel) if we built H.
     // For standard "Lightweight" on MCU, usually we precompute H and g.
     // But H depends on N. We assume N is fixed.
-    
+
     // Let's implement a very simple Forward-Backward rollout for gradient.
-    
+
     int iter = p.max_iterations;
     if (iter <= 0) iter = 5; // Default small count
+
+    // Safety check on input state
+    if (std::abs(x0.theta_error) > 3.14f || std::abs(x0.omega_error) > 100.0f) {
+        return 0.0f; // Invalid state, return zero control
+    }
 
     for (int k = 0; k < iter; ++k) {
         // Forward pass: Compute states
@@ -63,9 +73,15 @@ float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
         for (int t = 0; t < p.horizon; ++t) {
             float u = u_sequence[t];
             float total_acc = (u + x_seq[t].d) * p.b;
-            x_seq[t+1].theta_error = x_seq[t].theta_error + x_seq[t].omega_error * dt + total_acc * dt2; 
+            x_seq[t+1].theta_error = x_seq[t].theta_error + x_seq[t].omega_error * dt + total_acc * dt2;
             x_seq[t+1].omega_error = x_seq[t].omega_error + total_acc * dt;
             x_seq[t+1].d = x_seq[t].d; // Constant disturbance model
+
+            // Clip predicted states to prevent numerical explosion
+            if (x_seq[t+1].theta_error > 3.14f) x_seq[t+1].theta_error = 3.14f;
+            if (x_seq[t+1].theta_error < -3.14f) x_seq[t+1].theta_error = -3.14f;
+            if (x_seq[t+1].omega_error > 100.0f) x_seq[t+1].omega_error = 100.0f;
+            if (x_seq[t+1].omega_error < -100.0f) x_seq[t+1].omega_error = -100.0f;
         }
 
         // Backward pass: Compute gradients (via costates)
@@ -78,17 +94,24 @@ float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
             lambda.omega_error = 2 * p.q_vel * x_seq[t+1].omega_error + lambda_next.theta_error * dt + lambda_next.omega_error * 1.0f; 
 
             // Gradient w.r.t u_t: dJ/du = 2*R*u + B'*lambda_{k+1}
-            float grad = 2 * p.r * u_sequence[t] + (lambda_next.theta_error * dt2 + lambda_next.omega_error * dt);
-            
-            // Update u
-            u_sequence[t] -= learning_rate * grad;
-            
-            // Project (Clamp)
-            u_sequence[t] = std::clamp(u_sequence[t], u_min, u_max);
+            float grad = 2 * p.r * u_sequence[t] + p.b * (lambda_next.theta_error * dt2 + lambda_next.omega_error * dt);
+
+            // Strong gradient clipping for stability (scale with b)
+            float grad_limit = 10.0f / (1.0f + p.b * 0.01f);
+            if (grad > grad_limit) grad = grad_limit;
+            if (grad < -grad_limit) grad = -grad_limit;
+
+            // Update u with conservative step
+            float u_new = u_sequence[t] - learning_rate * grad;
+
+            // Project (Clamp) before updating
+            if (u_new > u_max) u_new = u_max;
+            if (u_new < u_min) u_new = u_min;
+            u_sequence[t] = u_new;
             
             lambda_next = lambda;
         }
     }
-    
+
     return u_sequence[0];
 }
