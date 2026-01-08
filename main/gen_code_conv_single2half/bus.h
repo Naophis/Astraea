@@ -86,7 +86,6 @@ typedef struct {
   float pow_n;
   int state;
   int counter;
-  float sla_th;
 } t_slalom;
 
 typedef struct {

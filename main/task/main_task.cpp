@@ -725,6 +725,8 @@ void MainTask::load_hw_param() {
   param->gyro_pid.mpc_max_iter = getItem(gyro_pid, "mpc_max_iter")->valueint;
   param->gyro_pid.mpc_max_torque =
       getItem(gyro_pid, "mpc_max_torque")->valuedouble;
+  param->gyro_pid.mpc_observer_k =
+      getItem(gyro_pid, "mpc_observer_k")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
@@ -1792,8 +1794,6 @@ void MainTask::load_slas(
       turn_map[p.first].ref_ang = m_PI * 180 / 180;
     }
 
-    turn_map[p.first].sla_th =
-        getItem(getItem(root, p.second.c_str()), "th")->valuedouble;
     rad = turn_map[p.first].rad =
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
     pow_n = turn_map[p.first].pow_n =

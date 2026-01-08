@@ -85,7 +85,11 @@ float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
         }
 
         // Backward pass: Compute gradients (via costates)
-        State lambda_next = {0, 0}; // lambda_N = 0 (or terminal cost P*x_N)
+        // Terminal cost: P*x_N (using same weights as stage cost for simplicity)
+        State lambda_next;
+        lambda_next.theta_error = 2 * p.q_ang * 10.0f * x_seq[p.horizon].theta_error; // 10x weight at terminal
+        lambda_next.omega_error = 2 * p.q_vel * 10.0f * x_seq[p.horizon].omega_error;
+        lambda_next.d = 0;
         
         for (int t = p.horizon - 1; t >= 0; --t) {
             // Costate equation: lambda_k = Q*x_k + A'*lambda_{k+1}

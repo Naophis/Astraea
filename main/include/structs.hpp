@@ -318,6 +318,7 @@ typedef struct {
   int mpc_horizon = 0;
   int mpc_max_iter = 5;
   float mpc_max_torque = 0;
+  float mpc_observer_k = 0.05f; // Disturbance observer gain
 } pid_param_t;
 
 typedef struct {
@@ -860,7 +861,6 @@ typedef struct {
   volatile float ang;
   volatile float sla_alpha;
   volatile float sla_time;
-  volatile float sla_th;
   volatile float sla_pow_n;
   volatile float sla_rad;
   volatile float dia90_offset;
@@ -1043,7 +1043,6 @@ typedef struct {
   float ref_ang = 0;
   float rad = 0;
   float rad2 = 0;
-  float sla_th = 1.0;
   slalom_offset_t front;
   slalom_offset_t back;
   int pow_n = 0;

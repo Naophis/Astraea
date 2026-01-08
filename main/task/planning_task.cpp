@@ -1785,7 +1785,6 @@ void IRAM_ATTR PlanningTask::cp_request() {
   } else if (receive_req->nmr.motion_type == MotionType::SLALOM) {
     tgt_val->td = receive_req->nmr.td;
     tgt_val->tt = receive_req->nmr.tt;
-    sla_th = receive_req->nmr.sla_th;
   }
   if (receive_req->nmr.motion_type == MotionType::SLA_BACK_STR) {
     left_keep.star_dist = right_keep.star_dist = tgt_val->global_pos.dist;
@@ -2412,34 +2411,26 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
 
     // Prediction: w_next = w + (u + d) * b * dt
     float w_pred = mpc_w_prev + (mpc_u_prev + mpc_d_estimated) * b * dt;
-    float observer_k = 0.05f;
+    float observer_k = param_ro->gyro_pid.mpc_observer_k;
 
-    if (tgt_val->motion_type == MotionType::SLALOM ||
-        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
-      mpc_d_estimated += observer_k * (w_meas - w_pred);
-    } else {
-      mpc_d_estimated = 0;
-    }
+    mpc_d_estimated += observer_k * (w_meas - w_pred);
     mpc_w_prev = w_meas;
 
     // MPC Override Logic
-    if (tgt_val->motion_type == MotionType::PIVOT) {
+    if (!(tgt_val->motion_type == MotionType::SLALOM ||
+          tgt_val->motion_type == MotionType::SLA_BACK_STR)) {
       ee->aw_log.duty_roll_before = 0;
       ee->aw_log.duty_roll = 0;
     } else if (param_ro->enable_mpc > 0) {
       float w_ref = tgt_val->ego_in.w;
-      // bool near_zero = ABS(w_ref) < 30.50f;
 
-      // if (near_zero) {
-      // Pass estimated d to solver
       float mpc_u =
-          mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p, mpc_d_estimated},
+          mpc_solver.solve({-w_error_i * dt, -ee->w.error_p, mpc_d_estimated},
                            -param_ro->max_duty, param_ro->max_duty);
 
       ee->aw_log.duty_roll_before = duty_roll;
       ee->aw_log.duty_roll = duty_roll = mpc_u;
       ee->aw_log.sat_flag = 2.0f;
-      // }
     }
     mpc_u_prev = duty_roll;
     set_ctrl_val(ee->w_val,
@@ -2642,6 +2633,8 @@ void IRAM_ATTR PlanningTask::reset_pid_val() {
     ee->sen_log.gain_zz = ee->sen_log.gain_z = 0;
     ee->sen_dia.error_i = ee->sen_dia.error_d = 0;
     ee->sen_log_dia.gain_zz = ee->sen_log_dia.gain_z = 0;
+    ee->aw_log.duty_roll_before = ee->aw_log.duty_roll = 0;
+    mpc_u_prev = mpc_d_estimated = 0;
   }
 
   // reset
