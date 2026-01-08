@@ -366,6 +366,9 @@ const switchToBinaryMode = (obj) => {
           if (data.name === "right45_3_d_diff")
             if (record[i] > 50 || record[i] < -50)
               res = false;
+          if (data.name === "duty_roll")
+            if (record[i] > 5000 || record[i] < -5000)
+              res = false;
           return res;
         });
         if (valid) {
