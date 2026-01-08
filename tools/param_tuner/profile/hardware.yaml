@@ -220,9 +220,11 @@ gyro_pid:
 
   mpc_q_ang: 50.0
   mpc_q_vel: 10.0
+  mpc_b: 0.01
   mpc_r: 0.015
   mpc_horizon: 5
   mpc_max_iter: 15
+  mpc_max_torque: 0.0025
 
 
 angle_pid: # pid for angle

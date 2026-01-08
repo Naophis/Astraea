@@ -313,9 +313,11 @@ typedef struct {
   float s_gate = 0;
   float mpc_q_ang = 0;
   float mpc_q_vel = 0;
+  float mpc_b = 0;
   float mpc_r = 0;
   int mpc_horizon = 0;
   int mpc_max_iter = 5;
+  float mpc_max_torque = 0;
 } pid_param_t;
 
 typedef struct {

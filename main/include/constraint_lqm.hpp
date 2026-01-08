@@ -21,11 +21,13 @@ public:
     struct State {
         float theta_error;
         float omega_error;
+        float d; // Disturbance
     };
 
     struct Parameters {
         float q_ang;
         float q_vel;
+        float b;
         float r; 
         int horizon;
         float dt;

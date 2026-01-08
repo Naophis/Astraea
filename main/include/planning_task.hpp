@@ -306,6 +306,9 @@ private:
   // PID_Controller_2dof vel_pid_2dof;
   // PID_Controller_2dof gyro_pid_2dof;
   unsigned char w_reset = 0;
+  float mpc_d_estimated = 0;
+  float mpc_w_prev = 0;
+  float mpc_u_prev = 0;
   ConstraintLQM mpc_solver;
 };
 

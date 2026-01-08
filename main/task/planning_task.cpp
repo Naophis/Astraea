@@ -403,8 +403,9 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
                param_ro->ang_p_noise,  //
                param_ro->ang_m_noise);
   ConstraintLQM::Parameters p;
-  p.q_ang = param_ro->gyro_pid.mpc_q_ang; // Use existing struct params we added
+  p.q_ang = param_ro->gyro_pid.mpc_q_ang;
   p.q_vel = param_ro->gyro_pid.mpc_q_vel;
+  p.b = param_ro->gyro_pid.mpc_b;
   p.r = param_ro->gyro_pid.mpc_r;
   p.horizon = param_ro->gyro_pid.mpc_horizon;
   p.dt = param_ro->dt;
@@ -2404,48 +2405,43 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     ee->ang_log.gain_zz = ee->ang_log.gain_z;
     ee->ang_log.gain_z = duty_roll;
 
-    // MPC Override Logic (Experimental)
-    // if pivort
+    // --- Disturbance Observer (DOB) ---
+    float dt = param_ro->dt;
+    float b = param_ro->gyro_pid.mpc_b;
+    float w_meas = -ee->w.error_p + tgt_val->ego_in.w;
 
+    // Prediction: w_next = w + (u + d) * b * dt
+    float w_pred = mpc_w_prev + (mpc_u_prev + mpc_d_estimated) * b * dt;
+    float observer_k = 0.05f;
+
+    if (tgt_val->motion_type == MotionType::SLALOM ||
+        tgt_val->motion_type == MotionType::SLA_BACK_STR) {
+      mpc_d_estimated += observer_k * (w_meas - w_pred);
+    } else {
+      mpc_d_estimated = 0;
+    }
+    mpc_w_prev = w_meas;
+
+    // MPC Override Logic
     if (tgt_val->motion_type == MotionType::PIVOT) {
-      // Do not use MPC during pivoting
-      ee->aw_log.duty_roll_before = 0; // Log before MPC
+      ee->aw_log.duty_roll_before = 0;
       ee->aw_log.duty_roll = 0;
     } else if (param_ro->enable_mpc > 0) {
-      // Use enable_kalman_gyro > 0 as a switch
-      // for MPC (assuming it's available)
+      float w_ref = tgt_val->ego_in.w;
+      // bool near_zero = ABS(w_ref) < 30.50f;
 
-      float w_ref = tgt_val->ego_in.w; // + offset if angular feedback is active
-      // Only activate if we are finishing a turn (w_ref near 0) and saturating
-      bool near_zero = ABS(w_ref) < 1000.50f; // Threshold 0.5 rad/s
+      // if (near_zero) {
+      // Pass estimated d to solver
+      float mpc_u =
+          mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p, mpc_d_estimated},
+                           -param_ro->max_duty, param_ro->max_duty);
 
-      if (near_zero) {
-
-        if (mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p},
-                             -param_ro->max_duty, param_ro->max_duty) != 0) {
-          // Initialize if needed (hacky check usually needs proper init state)
-          ConstraintLQM::Parameters p;
-          p.q_ang = param_ro->gyro_pid.mpc_q_ang;
-          // Use existing struct params we added
-          p.q_vel = param_ro->gyro_pid.mpc_q_vel;
-          p.r = param_ro->gyro_pid.mpc_r;
-          p.horizon = param_ro->gyro_pid.mpc_horizon;
-          p.dt = param_ro->dt;
-          p.max_iterations = (param_ro->gyro_pid.mpc_max_iter > 0) ? param_ro->gyro_pid.mpc_max_iter : 5;
-          mpc_solver.initialize(p);
-        }
-
-        // Solve
-        float mpc_u = mpc_solver.solve({-ee->ang.error_p, -ee->w.error_p},
-                                       -param_ro->max_duty, param_ro->max_duty);
-
-        ee->aw_log.duty_roll_before = duty_roll; // Log before MPC
-        ee->aw_log.duty_roll = duty_roll = mpc_u;
-
-        // Update log for debugging
-        ee->aw_log.sat_flag = 2.0f; // Mark as MPC active
-      }
+      ee->aw_log.duty_roll_before = duty_roll;
+      ee->aw_log.duty_roll = duty_roll = mpc_u;
+      ee->aw_log.sat_flag = 2.0f;
+      // }
     }
+    mpc_u_prev = duty_roll;
     set_ctrl_val(ee->w_val,
                  ee->w.error_p, // p
                  diff_ang,      // i

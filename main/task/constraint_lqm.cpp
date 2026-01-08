@@ -62,11 +62,10 @@ float ConstraintLQM::solve(const State& x0, float u_min, float u_max) {
         
         for (int t = 0; t < p.horizon; ++t) {
             float u = u_sequence[t];
-            x_seq[t+1].theta_error = x_seq[t].theta_error + x_seq[t].omega_error * dt + u * dt2; 
-            x_seq[t+1].omega_error = x_seq[t].omega_error + u * dt; // Approximating B*u as accel input
-                                                                    // u here is likely "alpha * dt" ? 
-                                                                    // Wait, if input is DUTY, B needs to map Duty->Alpha->Omega.
-                                                                    // For simplicity, let's assume u is "control effort" ~ alpha.
+            float total_acc = (u + x_seq[t].d) * p.b;
+            x_seq[t+1].theta_error = x_seq[t].theta_error + x_seq[t].omega_error * dt + total_acc * dt2; 
+            x_seq[t+1].omega_error = x_seq[t].omega_error + total_acc * dt;
+            x_seq[t+1].d = x_seq[t].d; // Constant disturbance model
         }
 
         // Backward pass: Compute gradients (via costates)
