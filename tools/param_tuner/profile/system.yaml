@@ -85,7 +85,7 @@ test: # テスト走行時に使用するパラメータ群
   # decel: -2500 
   # dia_accl: 2500
   # dia_decel: -2500
-  # dist: 120 #直進
+  # dist: 720 #直進
   # suction_active: 0
 
   v_max: 1800
@@ -123,11 +123,11 @@ test: # テスト走行時に使用するパラメータ群
 
   suction_gain: 50
   # suction_duty: 3.25
-  file_idx: 4
+  file_idx: 10
   sla_dist: 90
   # sla_type: 3
-  sla_type: 4
-  sla_type2: 9 # 復路ターン種類
+  sla_type: 3
+  sla_type2: 6 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
   # sla_type: 2 #orval
