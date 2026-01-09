@@ -2362,7 +2362,8 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
         gyro_pid_windup_histerisis = true;
       } else {
         if (gyro_pid_windup_histerisis) { // true -> false
-          w_error_i = ee->w.error_i = ee->ang.error_p / dt;
+          // w_error_i = ee->w.error_i = ee->ang.error_p / dt;
+          w_error_i = ee->w.error_i = ee->ang.i_bias / dt;
         }
         gyro_pid_windup_histerisis = false;
         gyro_pid_histerisis_i = 0;
