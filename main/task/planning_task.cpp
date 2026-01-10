@@ -724,6 +724,8 @@ float IRAM_ATTR PlanningTask::calc_sensor_pid_dia() {
   return duty;
 }
 float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
+  const auto se = get_sensing_entity();
+  const auto prm = get_param();
   float error = 0;
   int check = 0;
   float dist_mod = (int)(tgt_val->ego_in.dist / param_ro->dist_mod_num);
@@ -734,15 +736,15 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   bool expand_right_2 = false;
   bool expand_left_2 = false;
 
-  auto wall_th = interp1d(param_ro->clear_dist_ragne_dist_list,
-                          param_ro->clear_dist_ragne_th_list, tmp_dist, false);
-  // printf("wall_th %f %f\n", wall_th, tmp_dist);
-
-  const auto se = get_sensing_entity();
-  const auto prm = get_param();
-
   auto exist_right45 = prm->sen_ref_p.normal.exist.right45;
   auto exist_left45 = prm->sen_ref_p.normal.exist.left45;
+
+  auto wall_th = search_mode ? interp1d(param_ro->clear_dist_ragne_dist_list,
+                                        param_ro->clear_dist_ragne_th_list,
+                                        tmp_dist, false)
+                             : std::min(exist_left45, exist_right45);
+  // printf("wall_th %f %f\n", wall_th, tmp_dist);
+
   // auto exist_right45_expand = prm->sen_ref_p.normal.expand.right45;
   // auto exist_left45_expand = prm->sen_ref_p.normal.expand.left45;
   auto exist_right45_expand = wall_th;
@@ -2422,8 +2424,6 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
       ee->aw_log.duty_roll_before = 0;
       ee->aw_log.duty_roll = 0;
     } else if (param_ro->enable_mpc > 0) {
-      float w_ref = tgt_val->ego_in.w;
-
       float mpc_u =
           mpc_solver.solve({-w_error_i * dt, -ee->w.error_p, mpc_d_estimated},
                            -param_ro->max_duty, param_ro->max_duty);
