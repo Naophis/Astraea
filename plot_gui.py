@@ -132,8 +132,8 @@ class PlotGUI:
     def plot_file(self, file_path):
         self.figure.clear()
         sen_min = 20
-        sen_max = 55
-
+        sen_max = 57.5
+        sensor_offset = 53.14  # mm forward
         try:
             # Logic ported from trajectory_plot.py
             with plt.style.context('dark_background'):
@@ -218,9 +218,16 @@ class PlotGUI:
                                 
                                 if np.any(valid_mask):
                                     # Calculate left45_d sensor coordinates for valid points only
-                                    # left45 sensor points to the left, so add pi/2 to the robot angle
-                                    left45_d_x = x[valid_mask] + left45_d[valid_mask] * np.cos(angle[valid_mask] + np.pi/2) + 45 - 9
-                                    left45_d_y = y[valid_mask] + left45_d[valid_mask] * np.sin(angle[valid_mask] + np.pi/2)
+                                    # Sensor is mounted 53.14mm forward from robot center
+                                    
+                                    
+                                    # First, calculate sensor mount position (forward from robot center)
+                                    sensor_mount_x = x[valid_mask] + sensor_offset * np.cos(angle[valid_mask])
+                                    sensor_mount_y = y[valid_mask] + sensor_offset * np.sin(angle[valid_mask])
+                                    
+                                    # Then, add the perpendicular distance to the wall (left is +pi/2 from heading)
+                                    left45_d_x = sensor_mount_x + left45_d[valid_mask] * np.cos(angle[valid_mask] + np.pi/2) + 45 - 9
+                                    left45_d_y = sensor_mount_y + left45_d[valid_mask] * np.sin(angle[valid_mask] + np.pi/2)
                                     
                                     # Plot sensor positions with different marker
                                     ax.plot(left45_d_x, left45_d_y, "o", markersize=6, 
@@ -239,9 +246,14 @@ class PlotGUI:
                                 
                                 if np.any(valid_mask):
                                     # Calculate right45_d sensor coordinates for valid points only
-                                    # right45 sensor points to the right, so subtract pi/2 from the robot angle
-                                    right45_d_x = x[valid_mask] + right45_d[valid_mask] * np.cos(angle[valid_mask] - np.pi/2) + 45 - 9
-                                    right45_d_y = y[valid_mask] + right45_d[valid_mask] * np.sin(angle[valid_mask] - np.pi/2)
+                                    
+                                    # First, calculate sensor mount position (forward from robot center)
+                                    sensor_mount_x = x[valid_mask] + sensor_offset * np.cos(angle[valid_mask])
+                                    sensor_mount_y = y[valid_mask] + sensor_offset * np.sin(angle[valid_mask])
+                                    
+                                    # Then, add the perpendicular distance to the wall (right is -pi/2 from heading)
+                                    right45_d_x = sensor_mount_x + right45_d[valid_mask] * np.cos(angle[valid_mask] - np.pi/2) + 45 - 9
+                                    right45_d_y = sensor_mount_y + right45_d[valid_mask] * np.sin(angle[valid_mask] - np.pi/2)
                                     
                                     # Plot sensor positions with different marker (square for right sensor)
                                     ax.plot(right45_d_x, right45_d_y, "s", markersize=6, 
