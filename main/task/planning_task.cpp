@@ -754,21 +754,25 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   // auto exist_left45_expand_2 = prm->sen_ref_p.normal.expand.left45_2;
   float val_left = 1000;
   float val_right = 1000;
-  //前壁が近すぎるときはエスケープ
 
+  // 範囲チェック
   bool range_check_right =
       (1 < se->ego.right45_dist) && (se->ego.right45_dist < exist_right45);
   bool range_check_left =
       (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45);
 
+  // 柱１個文連続で検出しているか
   bool dist_check_right = ABS(tgt_val->global_pos.dist - right_keep.star_dist) >
                           prm->right_keep_dist_th;
   bool dist_check_left = ABS(tgt_val->global_pos.dist - left_keep.star_dist) >
                          prm->left_keep_dist_th;
+  // 切れ目チェック
   bool check_diff_right =
       ABS(se->ego.right45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_r;
   bool check_diff_left =
       ABS(se->ego.left45_dist_diff) < prm->sen_ref_p.normal.ref.kireme_l;
+
+  // 壁切れ前時の切れ目妥協
   if (!search_mode) {
     if (tgt_val->motion_type == MotionType::WALL_OFF ||
         tgt_val->motion_type == MotionType::SLA_FRONT_STR) {
@@ -783,7 +787,7 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
                         prm->sen_ref_p.normal.ref.kireme_l_fast;
     }
   }
-
+  // 前壁チェック
   bool check_front_left =
       (10 < se->ego.left90_mid_dist) &&
       (se->ego.left90_mid_dist < prm->sen_ref_p.normal.exist.front);
@@ -791,21 +795,23 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
       (10 < se->ego.right90_mid_dist) &&
       (se->ego.right90_mid_dist < prm->sen_ref_p.normal.exist.front);
 
+  // 切れ目に反応したら拡張をやめる
   if (!check_diff_right) {
     enable_expand_right = false;
   }
   if (!check_diff_left) {
     enable_expand_left = false;
   }
-
   if (search_mode && tgt_val->tgt_in.tgt_dist > 80 &&
       tgt_val->tgt_in.tgt_dist < 100 &&
       tgt_val->motion_type == MotionType::STRAIGHT) {
+    // 特殊条件(直進中)で拡張許可
     expand_right = (10 < se->ego.right45_dist) &&
                    (se->ego.right45_dist < prm->sen_ref_p.search_exist.right45);
     expand_left = (10 < se->ego.left45_dist) &&
                   (se->ego.left45_dist < prm->sen_ref_p.search_exist.left45);
   } else {
+    // 拡張許可時に許容幅を広げる
     if (enable_expand_right) {
       exist_right45_expand = wall_th + 1.0f;
       expand_right = (10 < se->ego.right45_dist) &&
