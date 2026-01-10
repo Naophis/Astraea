@@ -16,6 +16,10 @@ class PlotGUI:
         self.root.title("PlotJuggler GUI")
         self.root.geometry("1000x600")
         self.last_file_state = {}
+        
+        # Store current data for click events
+        self.current_data = None
+        self.current_filtered_data = None
 
         # Log directory
         self.log_dir = "./tools/param_tuner/logs/"
@@ -127,6 +131,9 @@ class PlotGUI:
 
     def plot_file(self, file_path):
         self.figure.clear()
+        sen_min = 20
+        sen_max = 55
+
         try:
             # Logic ported from trajectory_plot.py
             with plt.style.context('dark_background'):
@@ -135,11 +142,59 @@ class PlotGUI:
                 data = pd.read_csv(file_path)
                 
                 if 'x' in data.columns and 'y' in data.columns:
-                    data = data.sort_values(by=['timestamp', 'x', 'y']).reset_index(drop=True)
+                    # Sort by timestamp first, then by index (if available) to preserve chronological order
+                    if 'index' in data.columns:
+                        data = data.sort_values(by=['timestamp', 'index']).reset_index(drop=True)
+                    else:
+                        # If no index column, sort only by timestamp and preserve original order within each timestamp
+                        data = data.sort_values(by='timestamp', kind='stable').reset_index(drop=True)
+                    
+                    # Calculate cumulative angle from ang_kf with timestamp correction
+                    # ang_kf is in degrees, convert to radians
+                    if 'ang_kf' in data.columns:
+                        cumulative_angle = np.zeros(len(data))
+                        angle_offset = 0.0
+                        prev_timestamp = None
+                        
+                        for idx in range(len(data)):
+                            current_timestamp = data['timestamp'].iloc[idx]
+                            ang_kf_deg = data['ang_kf'].iloc[idx]
+                            ang_kf_rad = np.radians(ang_kf_deg)  # Convert to radians
+                            
+                            # When timestamp changes, check if we need to reset based on ideal_ang deviation
+                            if prev_timestamp is not None and current_timestamp != prev_timestamp:
+                                # Check if ideal_ang exists and if deviation is > 5 degrees
+                                if 'ideal_ang' in data.columns:
+                                    ideal_ang_deg = data['ideal_ang'].iloc[idx]
+                                    ideal_ang_rad = np.radians(ideal_ang_deg)
+                                    
+                                    # Calculate deviation between current ang_kf and ideal_ang
+                                    deviation_deg = abs(ang_kf_deg - ideal_ang_deg)
+                                    
+                                    # Only reset if deviation > 5 degrees
+                                    if deviation_deg > 5.0:
+                                        # Reset: don't carry over the previous angle
+                                        angle_offset = 0.0
+                                    else:
+                                        # Continue: carry over the previous cumulative angle
+                                        angle_offset = cumulative_angle[idx - 1]
+                                else:
+                                    # If no ideal_ang column, use previous behavior (always carry over)
+                                    angle_offset = cumulative_angle[idx - 1]
+                            
+                            cumulative_angle[idx] = ang_kf_rad + angle_offset
+                            prev_timestamp = current_timestamp
+                        
+                        data['angle_corrected'] = cumulative_angle
+                    
+                    # Store data for click events
+                    self.current_data = data
+                    
                     if len(data) > 2:
                         last_motion_state = data['timestamp'].iloc[-2]
                         # filtered_data = data[data['timestamp'] != last_motion_state]
                         filtered_data = data[data['timestamp'].diff().fillna(0) >= 0]
+                        self.current_filtered_data = filtered_data
                         
                         unique_states = filtered_data['timestamp'].unique()
                         num_states = len(unique_states)
@@ -150,8 +205,50 @@ class PlotGUI:
                             pos_y = group['y']
                             color = cmap(i / num_states) if num_states > 0 else 'cyan'
                             ax.plot(pos_x.to_numpy(), pos_y.to_numpy(), ".", markersize=4, color=color, label=f'State {state}')
+                            
+                            # Plot left45_d sensor positions if available
+                            if 'left45_d' in group.columns and 'angle_corrected' in group.columns:
+                                left45_d = group['left45_d'].to_numpy()
+                                angle = group['angle_corrected'].to_numpy()
+                                x = group['x'].to_numpy()
+                                y = group['y'].to_numpy()
+                                
+                                # Filter: only plot when left45_d is between 20 and 100
+                                valid_mask = (left45_d >= sen_min) & (left45_d < sen_max)
+                                
+                                if np.any(valid_mask):
+                                    # Calculate left45_d sensor coordinates for valid points only
+                                    # left45 sensor points to the left, so add pi/2 to the robot angle
+                                    left45_d_x = x[valid_mask] + left45_d[valid_mask] * np.cos(angle[valid_mask] + np.pi/2) + 45 - 9
+                                    left45_d_y = y[valid_mask] + left45_d[valid_mask] * np.sin(angle[valid_mask] + np.pi/2)
+                                    
+                                    # Plot sensor positions with different marker
+                                    ax.plot(left45_d_x, left45_d_y, "o", markersize=6, 
+                                           color=color, alpha=0.6, markeredgecolor='white', 
+                                           markeredgewidth=0.5)
+                            
+                            # Plot right45_d sensor positions if available
+                            if 'right45_d' in group.columns and 'angle_corrected' in group.columns:
+                                right45_d = group['right45_d'].to_numpy()
+                                angle = group['angle_corrected'].to_numpy()
+                                x = group['x'].to_numpy()
+                                y = group['y'].to_numpy()
+                                
+                                # Filter: only plot when right45_d is between 20 and 100
+                                valid_mask = (right45_d >= sen_min) & (right45_d < sen_max)
+                                
+                                if np.any(valid_mask):
+                                    # Calculate right45_d sensor coordinates for valid points only
+                                    # right45 sensor points to the right, so subtract pi/2 from the robot angle
+                                    right45_d_x = x[valid_mask] + right45_d[valid_mask] * np.cos(angle[valid_mask] - np.pi/2) + 45 - 9
+                                    right45_d_y = y[valid_mask] + right45_d[valid_mask] * np.sin(angle[valid_mask] - np.pi/2)
+                                    
+                                    # Plot sensor positions with different marker (square for right sensor)
+                                    ax.plot(right45_d_x, right45_d_y, "s", markersize=6, 
+                                           color=color, alpha=0.6, markeredgecolor='white', 
+                                           markeredgewidth=0.5)
                     
-                    ax.set_title('Position Plot', color='white')
+                    ax.set_title('Position Plot (with Left45 & Right45 Sensors)', color='white')
                     ax.set_xlabel('x', color='white')
                     ax.set_ylabel('y', color='white')
                     ax.grid(True, color='gray', linestyle='--', linewidth=0.5)
@@ -184,6 +281,9 @@ class PlotGUI:
 
             self.figure.tight_layout()
             self.canvas.draw()
+            
+            # Connect click event
+            self.canvas.mpl_connect('button_press_event', self.on_plot_click)
 
         except Exception as e:
             self.status_label.config(text=f"Plot Error: {e}")
@@ -191,6 +291,61 @@ class PlotGUI:
             # Draw empty if error
             self.figure.clear()
             self.canvas.draw()
+
+    def on_plot_click(self, event):
+        """Handle click events on the plot to display point information"""
+        if event.inaxes is None or self.current_data is None:
+            return
+        
+        # Get click coordinates
+        click_x = event.xdata
+        click_y = event.ydata
+        
+        if click_x is None or click_y is None:
+            return
+        
+        try:
+            # Find nearest point in the data
+            # Account for the offset applied in plotting (+ 45 - 9)
+            data_x = self.current_data['x'] + 45 - 9
+            data_y = self.current_data['y']
+            
+            # Calculate distances to all points
+            distances = np.sqrt((data_x - click_x)**2 + (data_y - click_y)**2)
+            nearest_idx = distances.idxmin()
+            
+            # Get the nearest point data
+            nearest_point = self.current_data.iloc[nearest_idx]
+            
+            # Print information to console (concise)
+            print(f"\n[{nearest_idx}] ts={nearest_point.get('timestamp', 'N/A')} | ", end="")
+            print(f"pos=({nearest_point['x']:.1f}, {nearest_point['y']:.1f}) | ", end="")
+            
+            if 'ang_kf' in nearest_point:
+                print(f"ang_kf={nearest_point['ang_kf']:.1f}° | ", end="")
+            
+            if 'angle_corrected' in nearest_point:
+                print(f"ang_corrected={np.degrees(nearest_point['angle_corrected']):.1f}° | ", end="")
+            
+            if 'left45_d' in nearest_point:
+                print(f"left45_d={nearest_point['left45_d']:.1f}", end="")
+                
+                # Calculate and show sensor position
+                if 'angle_corrected' in nearest_point:
+                    angle = nearest_point['angle_corrected']
+                    left45_d = nearest_point['left45_d']
+                    x = nearest_point['x']
+                    y = nearest_point['y']
+                    
+                    left45_d_x = x + left45_d * np.cos(angle + np.pi/2) + 45 - 9
+                    left45_d_y = y + left45_d * np.sin(angle + np.pi/2)
+                    
+                    print(f" → ({left45_d_x:.1f}, {left45_d_y:.1f})", end="")
+            
+            print()  # New line
+            
+        except Exception as e:
+            print(f"Error in click handler: {e}")
 
     def run_plotjuggler(self, event=None):
         selected_item = self.tree.selection()
