@@ -2418,8 +2418,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     mpc_w_prev = w_meas;
 
     // MPC Override Logic
-    if (!(tgt_val->motion_type == MotionType::SLALOM ||
-          tgt_val->motion_type == MotionType::SLA_BACK_STR)) {
+    if (!(tgt_val->motion_type == MotionType::SLALOM)) {
       ee->aw_log.duty_roll_before = 0;
       ee->aw_log.duty_roll = 0;
     } else if (param_ro->enable_mpc > 0) {
