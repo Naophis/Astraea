@@ -274,6 +274,9 @@ typedef struct {
   int16_t calc_time;
   int16_t calc_time2;
   int64_t sensing_timestamp;
+  float ang_kf_sum = 0;
+  float img_ang_sum = 0;
+  float img_ang_z = 0;
 } sensing_result_entity_t;
 
 typedef struct {
@@ -1271,8 +1274,8 @@ typedef struct {
 
   real16_T duty_suction;
 
-  real16_T w_error_i_clamped;
-  real16_T w_i_base;
+  real16_T ang_kf_sum;
+  real16_T img_ang_sum;
   real16_T duty_roll;
   real16_T duty_roll_before;
 } log_data_t2;
@@ -1479,8 +1482,8 @@ typedef struct {
   float left45_3_d_diff = 115;
   float duty_suction = 116;
   float duty_roll = 117;
-  float w_error_i_clamped = 118;
-  float w_i_base = 119;
+  float ang_kf_sum = 118;
+  float img_ang_sum = 119;
   float duty_roll_before = 120;
   int reserve5 = 121;
 

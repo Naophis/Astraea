@@ -411,6 +411,8 @@ void PlanningTask::reset_kf_state(bool reset_battery) {
   p.dt = param_ro->dt;
   p.max_iterations = param_ro->gyro_pid.mpc_max_iter;
   mpc_solver.initialize(p);
+  sensing_result->ang_kf_sum = sensing_result->img_ang_sum =
+      sensing_result->img_ang_z = 0;
 }
 
 void PlanningTask::task() {
@@ -838,12 +840,12 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     const bool is_wall_off_mode =
         (tgt_val->motion_type == MotionType::WALL_OFF);
     if (!is_wall_off_mode) {
-      check_left_sensor_error(error, check, range_check_left,
-                              dist_check_left, check_diff_left,
-                              expand_left, range_check_left_expand);
+      check_left_sensor_error(error, check, range_check_left, dist_check_left,
+                              check_diff_left, expand_left,
+                              range_check_left_expand);
       check_right_sensor_error(error, check, range_check_right,
-                               dist_check_right, check_diff_right,
-                               expand_right, range_check_right_expand);
+                               dist_check_right, check_diff_right, expand_right,
+                               range_check_right_expand);
     } else {
       // 壁切れモードの場合、反対側が見えているなら優先度を下げる
       if (tgt_val->nmr.motion_dir == MotionDirection::LEFT) {
@@ -1245,6 +1247,10 @@ void IRAM_ATTR PlanningTask::update_ego_motion() {
       kim.x += d_x;
       kim.y += d_y;
       kim.theta += d_ang;
+
+      sensing_result->ang_kf_sum += d_ang;
+      sensing_result->img_ang_sum +=
+          tgt_val->ego_in.img_ang - sensing_result->img_ang_z;
     }
   }
 
@@ -1681,7 +1687,7 @@ void IRAM_ATTR PlanningTask::cp_tgt_val() {
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
   tgt_val->ego_in.sla_param.counter = mpc_next_ego.sla_param.counter;
   tgt_val->ego_in.sla_param.state = mpc_next_ego.sla_param.state;
-
+  sensing_result->img_ang_z = tgt_val->ego_in.img_ang;
   tgt_val->ego_in.img_ang = mpc_next_ego.img_ang;
   tgt_val->ego_in.img_dist = mpc_next_ego.img_dist;
 

@@ -170,29 +170,32 @@ class PlotGUI:
                         # If no index column, sort only by timestamp and preserve original order within each timestamp
                         data = data.sort_values(by='timestamp', kind='stable').reset_index(drop=True)
                     
-                    # Calculate cumulative angle from ang_kf with timestamp correction
-                    # ang_kf is in degrees, convert to radians
-                    if 'ang_kf' in data.columns:
+                    # Use ang_kf_sum if available (no reset across motions), otherwise fallback to ang_kf
+                    if 'ang_kf_sum' in data.columns:
+                        # ang_kf_sum is already cumulative across motions, just convert to radians
+                        data['angle_corrected'] = np.radians(data['ang_kf_sum'])
+                    elif 'ang_kf' in data.columns:
+                        # Fallback: Calculate cumulative angle from ang_kf with timestamp correction
                         cumulative_angle = np.zeros(len(data))
                         angle_offset = 0.0
                         prev_timestamp = None
-                        
+
                         for idx in range(len(data)):
                             current_timestamp = data['timestamp'].iloc[idx]
                             ang_kf_deg = data['ang_kf'].iloc[idx]
                             ang_kf_rad = np.radians(ang_kf_deg)  # Convert to radians
-                            
+
                             # When timestamp changes, check if we need to reset based on ideal_ang deviation
                             if prev_timestamp is not None and current_timestamp != prev_timestamp:
                                 # Check if ideal_ang exists and if deviation is > 5 degrees
                                 if 'ideal_ang' in data.columns:
                                     ideal_ang_deg = data['ideal_ang'].iloc[idx]
                                     ideal_ang_rad = np.radians(ideal_ang_deg)
-                                    
+
                                     # Calculate deviation between current ang_kf and ideal_ang
                                     deviation_deg = abs(ang_kf_deg - ideal_ang_deg)
-                                    
-                                    # Only reset if deviation > 5 degrees
+
+                                    # Only reset if deviation > deviation_deg_th degrees
                                     if deviation_deg > deviation_deg_th:
                                         # Reset: don't carry over the previous angle
                                         angle_offset = 0.0
@@ -202,10 +205,10 @@ class PlotGUI:
                                 else:
                                     # If no ideal_ang column, use previous behavior (always carry over)
                                     angle_offset = cumulative_angle[idx - 1]
-                            
+
                             cumulative_angle[idx] = ang_kf_rad + angle_offset
                             prev_timestamp = current_timestamp
-                        
+
                         data['angle_corrected'] = cumulative_angle
                     
                     # Store data for click events
