@@ -26,8 +26,8 @@ normal:
 large:
   v: 2400
   ang: 90.0
-  pow_n: 4
-  rad: 60.5
+  pow_n: 4.0
+  rad: 58.5
   front: { left: 4.802694878657064, right: 7.802694878657064 }
   back: { left: 65.59381550343086, right: 70.59381550343086 }
 dia45:
