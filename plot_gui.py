@@ -150,8 +150,10 @@ class PlotGUI:
     def plot_file(self, file_path):
         self.figure.clear()
         sen_min = 20
-        sen_max = 57.5
-        sensor_offset = 53.14  # mm forward
+        sen_max = 80.5
+        sensor_x_offset = 25.0  # mm forward from robot center
+        sensor_angle_deg = 58  # sensor mounting angle in degrees
+        sensor_angle_rad = np.radians(sensor_angle_deg)
         deviation_deg_th = 25 # deg
         try:
             # Logic ported from trajectory_plot.py
@@ -232,21 +234,24 @@ class PlotGUI:
                                 x = group['x'].to_numpy()
                                 y = group['y'].to_numpy()
 
-                                # Filter: only plot when left45_d is between 20 and 100
+                                # Filter: only plot when left45_d is between sen_min and sen_max
                                 valid_mask = (left45_d >= sen_min) & (left45_d < sen_max)
 
                                 if np.any(valid_mask):
-                                    # Calculate left45_d sensor coordinates for valid points only
-                                    # Sensor is mounted 53.14mm forward from robot center
+                                    # Calculate left45_d sensor coordinates
+                                    # Sensor is mounted at 29.7mm forward, at 58deg angle
+                                    # y / x = tan(58deg), so x = y / tan(58deg)
+                                    sensor_y = left45_d[valid_mask]  # perpendicular distance to wall
+                                    sensor_x = sensor_y / np.tan(sensor_angle_rad)  # forward distance from sensor mount
 
+                                    # Sensor mount position (29.7mm forward from robot center)
+                                    sensor_mount_x = x[valid_mask] + sensor_x_offset * np.cos(angle[valid_mask])
+                                    sensor_mount_y = y[valid_mask] + sensor_x_offset * np.sin(angle[valid_mask])
 
-                                    # First, calculate sensor mount position (forward from robot center)
-                                    sensor_mount_x = x[valid_mask] + sensor_offset * np.cos(angle[valid_mask])
-                                    sensor_mount_y = y[valid_mask] + sensor_offset * np.sin(angle[valid_mask])
-
-                                    # Then, add the perpendicular distance to the wall (left is +pi/2 from heading)
-                                    left45_d_x = sensor_mount_x + left45_d[valid_mask] * np.cos(angle[valid_mask] + np.pi/2) + 45 - 9
-                                    left45_d_y = sensor_mount_y + left45_d[valid_mask] * np.sin(angle[valid_mask] + np.pi/2)
+                                    # Wall position in robot frame: forward by sensor_x, left by sensor_y
+                                    # Transform to global frame
+                                    left45_d_x = sensor_mount_x + sensor_x * np.cos(angle[valid_mask]) - sensor_y * np.sin(angle[valid_mask]) + 45 - 9
+                                    left45_d_y = sensor_mount_y + sensor_x * np.sin(angle[valid_mask]) + sensor_y * np.cos(angle[valid_mask])
 
                                     # Plot sensor positions with different marker
                                     ax.plot(left45_d_x, left45_d_y, "o", markersize=6,
@@ -260,19 +265,24 @@ class PlotGUI:
                                 x = group['x'].to_numpy()
                                 y = group['y'].to_numpy()
 
-                                # Filter: only plot when right45_d is between 20 and 100
+                                # Filter: only plot when right45_d is between sen_min and sen_max
                                 valid_mask = (right45_d >= sen_min) & (right45_d < sen_max)
 
                                 if np.any(valid_mask):
-                                    # Calculate right45_d sensor coordinates for valid points only
+                                    # Calculate right45_d sensor coordinates
+                                    # Sensor is mounted at 29.7mm forward, at 58deg angle
+                                    # y / x = tan(58deg), so x = y / tan(58deg)
+                                    sensor_y = right45_d[valid_mask]  # perpendicular distance to wall
+                                    sensor_x = sensor_y / np.tan(sensor_angle_rad)  # forward distance from sensor mount
 
-                                    # First, calculate sensor mount position (forward from robot center)
-                                    sensor_mount_x = x[valid_mask] + sensor_offset * np.cos(angle[valid_mask])
-                                    sensor_mount_y = y[valid_mask] + sensor_offset * np.sin(angle[valid_mask])
+                                    # Sensor mount position (29.7mm forward from robot center)
+                                    sensor_mount_x = x[valid_mask] + sensor_x_offset * np.cos(angle[valid_mask])
+                                    sensor_mount_y = y[valid_mask] + sensor_x_offset * np.sin(angle[valid_mask])
 
-                                    # Then, add the perpendicular distance to the wall (right is -pi/2 from heading)
-                                    right45_d_x = sensor_mount_x + right45_d[valid_mask] * np.cos(angle[valid_mask] - np.pi/2) + 45 - 9
-                                    right45_d_y = sensor_mount_y + right45_d[valid_mask] * np.sin(angle[valid_mask] - np.pi/2)
+                                    # Wall position in robot frame: forward by sensor_x, right by sensor_y (negative y)
+                                    # Transform to global frame
+                                    right45_d_x = sensor_mount_x + sensor_x * np.cos(angle[valid_mask]) + sensor_y * np.sin(angle[valid_mask]) + 45 - 9
+                                    right45_d_y = sensor_mount_y + sensor_x * np.sin(angle[valid_mask]) - sensor_y * np.cos(angle[valid_mask])
 
                                     # Plot sensor positions with different marker (square for right sensor)
                                     ax.plot(right45_d_x, right45_d_y, "s", markersize=6,
