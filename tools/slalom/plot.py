@@ -215,11 +215,11 @@ class Plot:
         print('  ang: {}'.format(sla.base_ang))
         print('  pow_n: {}'.format(sla.pow_n))
         print('  rad: {}'.format(sla.rad))
-        print('  time: {}'.format(sla.base_time))
+        # print('  time: {}'.format(sla.base_time))
         if type == "orval":
             print('  rad2: {}'.format(sla.rad))
-        if type == "orval":
-            print('  time2: {}'.format(sla.base_time))
+        # if type == "orval":
+        #     print('  time2: {}'.format(sla.base_time))
 
         print('  front: {{ left: {}, right: {} }}'.format(
             res2["prev_dist"], res2["prev_dist"]))
