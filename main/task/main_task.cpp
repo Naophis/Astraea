@@ -2554,6 +2554,16 @@ void MainTask::test_turn() {
   mp->reset_gyro_ref_with_check();
   reset_tgt_data();
   reset_ego_data();
+
+  if (sys.test.suction_active == 1) {
+    pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
+    vTaskDelay(xDelay1000);
+  } else if (sys.test.suction_active == 2) {
+    pt->suction_enable(sys.test.suction_duty_burst,
+                       sys.test.suction_duty_burst_low);
+    vTaskDelay(xDelay500);
+  }
+
   pt->motor_enable();
 
   req_error_reset();

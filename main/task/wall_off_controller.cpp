@@ -49,7 +49,9 @@ bool IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
   tgt_val->motion_type = MotionType::WALL_OFF;
   tgt_val->nmr.motion_type = MotionType::WALL_OFF;
-  tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
+  tgt_val->nmr.motion_dir = (td == TurnDirection::Left)
+                                ? MotionDirection::LEFT
+                                : MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = ps_front.dia_mode;
   tgt_val->nmr.sct = SensorCtrlType::Straight;
   tgt_val->nmr.timstamp++;
