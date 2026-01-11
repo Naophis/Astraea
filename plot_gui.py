@@ -69,6 +69,15 @@ class PlotGUI:
         self.output_chk = ttk.Checkbutton(self.btn_frame, text="Show Output", variable=self.show_output_var)
         self.output_chk.pack(side=tk.RIGHT, padx=5)
 
+        # Sensor visibility controls
+        self.show_left45_var = tk.BooleanVar(value=True)
+        self.left45_chk = ttk.Checkbutton(self.btn_frame, text="Left45", variable=self.show_left45_var, command=self.on_sensor_toggle)
+        self.left45_chk.pack(side=tk.RIGHT, padx=5)
+
+        self.show_right45_var = tk.BooleanVar(value=True)
+        self.right45_chk = ttk.Checkbutton(self.btn_frame, text="Right45", variable=self.show_right45_var, command=self.on_sensor_toggle)
+        self.right45_chk.pack(side=tk.RIGHT, padx=5)
+
         self.status_label = ttk.Label(self.left_frame, text="Ready", wraplength=300)
         self.status_label.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=2)
 
@@ -129,11 +138,21 @@ class PlotGUI:
         file_path = os.path.join(self.log_dir, filename)
         self.plot_file(file_path)
 
+    def on_sensor_toggle(self):
+        """Re-plot when sensor visibility is toggled"""
+        selected_item = self.tree.selection()
+        if not selected_item:
+            return
+        filename = self.tree.item(selected_item)['values'][0]
+        file_path = os.path.join(self.log_dir, filename)
+        self.plot_file(file_path)
+
     def plot_file(self, file_path):
         self.figure.clear()
         sen_min = 20
         sen_max = 57.5
         sensor_offset = 53.14  # mm forward
+        deviation_deg_th = 25 # deg
         try:
             # Logic ported from trajectory_plot.py
             with plt.style.context('dark_background'):
@@ -172,7 +191,7 @@ class PlotGUI:
                                     deviation_deg = abs(ang_kf_deg - ideal_ang_deg)
                                     
                                     # Only reset if deviation > 5 degrees
-                                    if deviation_deg > 5.0:
+                                    if deviation_deg > deviation_deg_th:
                                         # Reset: don't carry over the previous angle
                                         angle_offset = 0.0
                                     else:
@@ -206,58 +225,58 @@ class PlotGUI:
                             color = cmap(i / num_states) if num_states > 0 else 'cyan'
                             ax.plot(pos_x.to_numpy(), pos_y.to_numpy(), ".", markersize=4, color=color, label=f'State {state}')
                             
-                            # Plot left45_d sensor positions if available
-                            if 'left45_d' in group.columns and 'angle_corrected' in group.columns:
+                            # Plot left45_d sensor positions if available and enabled
+                            if self.show_left45_var.get() and 'left45_d' in group.columns and 'angle_corrected' in group.columns:
                                 left45_d = group['left45_d'].to_numpy()
                                 angle = group['angle_corrected'].to_numpy()
                                 x = group['x'].to_numpy()
                                 y = group['y'].to_numpy()
-                                
+
                                 # Filter: only plot when left45_d is between 20 and 100
                                 valid_mask = (left45_d >= sen_min) & (left45_d < sen_max)
-                                
+
                                 if np.any(valid_mask):
                                     # Calculate left45_d sensor coordinates for valid points only
                                     # Sensor is mounted 53.14mm forward from robot center
-                                    
-                                    
+
+
                                     # First, calculate sensor mount position (forward from robot center)
                                     sensor_mount_x = x[valid_mask] + sensor_offset * np.cos(angle[valid_mask])
                                     sensor_mount_y = y[valid_mask] + sensor_offset * np.sin(angle[valid_mask])
-                                    
+
                                     # Then, add the perpendicular distance to the wall (left is +pi/2 from heading)
                                     left45_d_x = sensor_mount_x + left45_d[valid_mask] * np.cos(angle[valid_mask] + np.pi/2) + 45 - 9
                                     left45_d_y = sensor_mount_y + left45_d[valid_mask] * np.sin(angle[valid_mask] + np.pi/2)
-                                    
+
                                     # Plot sensor positions with different marker
-                                    ax.plot(left45_d_x, left45_d_y, "o", markersize=6, 
-                                           color=color, alpha=0.6, markeredgecolor='white', 
+                                    ax.plot(left45_d_x, left45_d_y, "o", markersize=6,
+                                           color=color, alpha=0.6, markeredgecolor='white',
                                            markeredgewidth=0.5)
                             
-                            # Plot right45_d sensor positions if available
-                            if 'right45_d' in group.columns and 'angle_corrected' in group.columns:
+                            # Plot right45_d sensor positions if available and enabled
+                            if self.show_right45_var.get() and 'right45_d' in group.columns and 'angle_corrected' in group.columns:
                                 right45_d = group['right45_d'].to_numpy()
                                 angle = group['angle_corrected'].to_numpy()
                                 x = group['x'].to_numpy()
                                 y = group['y'].to_numpy()
-                                
+
                                 # Filter: only plot when right45_d is between 20 and 100
                                 valid_mask = (right45_d >= sen_min) & (right45_d < sen_max)
-                                
+
                                 if np.any(valid_mask):
                                     # Calculate right45_d sensor coordinates for valid points only
-                                    
+
                                     # First, calculate sensor mount position (forward from robot center)
                                     sensor_mount_x = x[valid_mask] + sensor_offset * np.cos(angle[valid_mask])
                                     sensor_mount_y = y[valid_mask] + sensor_offset * np.sin(angle[valid_mask])
-                                    
+
                                     # Then, add the perpendicular distance to the wall (right is -pi/2 from heading)
                                     right45_d_x = sensor_mount_x + right45_d[valid_mask] * np.cos(angle[valid_mask] - np.pi/2) + 45 - 9
                                     right45_d_y = sensor_mount_y + right45_d[valid_mask] * np.sin(angle[valid_mask] - np.pi/2)
-                                    
+
                                     # Plot sensor positions with different marker (square for right sensor)
-                                    ax.plot(right45_d_x, right45_d_y, "s", markersize=6, 
-                                           color=color, alpha=0.6, markeredgecolor='white', 
+                                    ax.plot(right45_d_x, right45_d_y, "s", markersize=6,
+                                           color=color, alpha=0.6, markeredgecolor='white',
                                            markeredgewidth=0.5)
                     
                     ax.set_title('Position Plot (with Left45 & Right45 Sensors)', color='white')
