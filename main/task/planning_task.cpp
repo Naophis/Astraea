@@ -833,44 +833,34 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
       (1 < se->ego.left45_dist) && (se->ego.left45_dist < exist_left45_expand);
 
   if (!(check_front_left && check_front_right)) { //前壁チェック
-    if (range_check_right) {
-      if (dist_check_right && check_diff_right) {
-        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-        enable_expand_right = true;
-      } else if (expand_right && range_check_right_expand && dist_check_right &&
-                 check_diff_right) {
-        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-        enable_expand_right = true;
-      }
-      check++;
-    } else if (expand_right && range_check_right_expand) {
-      if (dist_check_right && check_diff_right) {
-        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
-        enable_expand_right = true;
-      }
-      check++;
+    // 即時関数で条件別にセンサーエラーチェックの順序を切り替え
+
+    const bool is_wall_off_mode =
+        (tgt_val->motion_type == MotionType::WALL_OFF);
+    if (!is_wall_off_mode) {
+      check_left_sensor_error(error, check, range_check_left,
+                              dist_check_left, check_diff_left,
+                              expand_left, range_check_left_expand);
+      check_right_sensor_error(error, check, range_check_right,
+                               dist_check_right, check_diff_right,
+                               expand_right, range_check_right_expand);
     } else {
-      right_keep.star_dist = tgt_val->global_pos.dist;
-      enable_expand_right = false;
-    }
-    if (range_check_left) {
-      if (dist_check_left && check_diff_left) {
-        error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-        enable_expand_left = true;
-      } else if (expand_left && range_check_left_expand && dist_check_left &&
-                 check_diff_left) {
-        error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-        enable_expand_left = true;
+      // 壁切れモードの場合、反対側が見えているなら優先度を下げる
+      if (tgt_val->nmr.motion_dir == MotionDirection::LEFT) {
+        check_right_sensor_error(error, check, range_check_right,
+                                 range_check_right_expand, dist_check_right,
+                                 expand_right, range_check_right_expand);
+        check_left_sensor_error(error, check, range_check_left,
+                                range_check_left_expand, dist_check_left,
+                                expand_left, range_check_left_expand);
+      } else {
+        check_left_sensor_error(error, check, range_check_left,
+                                range_check_left_expand, dist_check_left,
+                                expand_left, range_check_left_expand);
+        check_right_sensor_error(error, check, range_check_right,
+                                 range_check_right_expand, dist_check_right,
+                                 expand_right, range_check_right_expand);
       }
-      check++;
-    } else if (expand_left && range_check_left_expand) {
-      if (dist_check_left && check_diff_left) {
-        error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
-        enable_expand_left = true;
-      }
-      check++;
-    } else {
-      left_keep.star_dist = tgt_val->global_pos.dist;
     }
     if (check != 0) {
       type = SensingControlType::Wall;
@@ -963,19 +953,24 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
             tmp_dist <= prm->clear_dist_ragne_to)) {
         if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
              m_PI) < prm->clear_angle) {
-          tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
-          ee->w.error_i = 0;
-          ee->w.error_d = 0;
-          ee->w.error_dd = 0;
-          ee->w_kf.error_i = 0;
-          ee->w_kf.error_d = 0;
-          ee->w_kf.error_dd = 0;
-          ee->ang.error_i = 0;
-          ee->ang.error_d = 0;
-          ee->ang.error_dd = 0;
-          ee->ang.i_slow = 0;
-          ee->ang.i_bias = 0;
-          w_reset = 0;
+
+          // 目標距離まで遠いならリセット
+          if ((tgt_val->tgt_in.tgt_dist - tgt_val->ego_in.dist) >
+              (prm->cell / 2)) {
+            tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
+            ee->w.error_i = 0;
+            ee->w.error_d = 0;
+            ee->w.error_dd = 0;
+            ee->w_kf.error_i = 0;
+            ee->w_kf.error_d = 0;
+            ee->w_kf.error_dd = 0;
+            ee->ang.error_i = 0;
+            ee->ang.error_d = 0;
+            ee->ang.error_dd = 0;
+            ee->ang.i_slow = 0;
+            ee->ang.i_bias = 0;
+            w_reset = 0;
+          }
         }
       } else {
         // ee->sen.error_i = 0;
@@ -1872,8 +1867,8 @@ void IRAM_ATTR PlanningTask::cp_request() {
     tgt_val->global_pos.img_dist = 0;
   }
 
-  right_keep.star_dist = tgt_val->global_pos.dist;
-  left_keep.star_dist = tgt_val->global_pos.dist;
+  // right_keep.star_dist = tgt_val->global_pos.dist;
+  // left_keep.star_dist = tgt_val->global_pos.dist;
 
   if (tgt_val->tgt_in.tgt_angle != 0) {
     const auto tmp_ang = tgt_val->ego_in.ang;
@@ -2427,8 +2422,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
 
     // MPC Override Logic
     if (!(tgt_val->motion_type == MotionType::SLALOM)) {
-      ee->aw_log.duty_roll_before = 0;
-      ee->aw_log.duty_roll = 0;
+      ee->aw_log.duty_roll_before = ee->aw_log.duty_roll = duty_roll;
     } else if (param_ro->enable_mpc > 0) {
       float mpc_u =
           mpc_solver.solve({-w_error_i * dt, -ee->w.error_p, mpc_d_estimated},
@@ -2438,6 +2432,7 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
       ee->aw_log.duty_roll = duty_roll = mpc_u;
       ee->aw_log.sat_flag = 2.0f;
     }
+    ee->aw_log.duty_roll_before = ee->aw_log.duty_roll = duty_roll;
     mpc_u_prev = duty_roll;
     set_ctrl_val(ee->w_val,
                  ee->w.error_p, // p
@@ -2791,7 +2786,7 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
 
   set_ctrl_val(ee->ang_val,
                ee->ang.error_p,                         // p
-               ang_error_i,                             // i
+               duty_sen,                                // i
                ee->ang.i_bias,                          // i2
                ee->ang.error_d,                         // d
                param_ro->angle_pid.p * ee->ang.error_p, // kp*p
@@ -2947,5 +2942,72 @@ void IRAM_ATTR PlanningTask::calc_kanamaya_ctrl() {
       tgt_val->motion_type == MotionType::SLA_BACK_STR) {
     sensing_result->ego.knym_v = tgt_val->ego_in.v;
     sensing_result->ego.knym_w = tgt_val->ego_in.w;
+  }
+}
+void IRAM_ATTR PlanningTask::check_left_sensor_error(
+    float &error, int &check, bool range_check_left, bool dist_check_left,
+    bool check_diff_left, bool expand_left, bool range_check_left_expand) {
+  const auto se = get_sensing_entity();
+  const auto prm = get_param();
+  const bool is_wall_off_mode = (tgt_val->motion_type == MotionType::WALL_OFF);
+
+  if (range_check_left) {
+    if (dist_check_left && check_diff_left) {
+      enable_expand_left = true;
+      if (!(is_wall_off_mode && error != 0)) {
+        error -= prm->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+      }
+    } else if (expand_left && range_check_left_expand && dist_check_left &&
+               check_diff_left) {
+      enable_expand_left = true;
+      if (!(is_wall_off_mode && error != 0)) {
+        error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+      }
+    }
+    check++;
+  } else if (expand_left && range_check_left_expand) {
+    if (dist_check_left && check_diff_left) {
+      enable_expand_left = true;
+      if (!(is_wall_off_mode && error != 0)) {
+        error -= param_ro->sen_ref_p.normal.ref.left45 - se->ego.left45_dist;
+      }
+    }
+    check++;
+  } else {
+    left_keep.star_dist = tgt_val->global_pos.dist;
+  }
+}
+void IRAM_ATTR PlanningTask::check_right_sensor_error(
+    float &error, int &check, bool range_check_right, bool dist_check_right,
+    bool check_diff_right, bool expand_right, bool range_check_right_expand) {
+  const auto se = get_sensing_entity();
+  const auto prm = get_param();
+  const bool is_wall_off_mode = (tgt_val->motion_type == MotionType::WALL_OFF);
+
+  if (range_check_right) {
+    if (dist_check_right && check_diff_right) {
+      enable_expand_right = true;
+      if (!(is_wall_off_mode && error != 0)) {
+        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+      }
+    } else if (expand_right && range_check_right_expand && dist_check_right &&
+               check_diff_right) {
+      enable_expand_right = true;
+      if (!(is_wall_off_mode && error != 0)) {
+        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+      }
+    }
+    check++;
+  } else if (expand_right && range_check_right_expand) {
+    if (dist_check_right && check_diff_right) {
+      if (!(is_wall_off_mode && error != 0)) {
+        error += prm->sen_ref_p.normal.ref.right45 - se->ego.right45_dist;
+      }
+      enable_expand_right = true;
+    }
+    check++;
+  } else {
+    right_keep.star_dist = tgt_val->global_pos.dist;
+    enable_expand_right = false;
   }
 }
