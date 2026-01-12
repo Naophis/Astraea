@@ -815,14 +815,14 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   } else {
     // 拡張許可時に許容幅を広げる
     if (enable_expand_right) {
-      exist_right45_expand = wall_th + 1.0f;
+      exist_right45_expand = wall_th + 1.5f;
       expand_right = (10 < se->ego.right45_dist) &&
                      (se->ego.right45_dist < exist_right45_expand);
     } else {
       exist_right45_expand = 0;
     }
     if (enable_expand_left) {
-      exist_left45_expand = wall_th + 1.0f;
+      exist_left45_expand = wall_th + 1.5f;
       expand_left = (10 < se->ego.left45_dist) &&
                     (se->ego.left45_dist < exist_left45_expand);
     } else {
