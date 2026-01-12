@@ -1,7 +1,7 @@
 var fs = require("fs");
 const yaml = require("js-yaml");
-let SerialPort = require("serialport");
-const Readline = require("@serialport/parser-readline");
+const { SerialPort } = require("serialport");
+const { ReadlineParser } = require("@serialport/parser-readline");
 const { argv } = require("process");
 let comport;
 let port;
@@ -39,6 +39,7 @@ const callerFun = async (mode) => {
     return filename.split(".")[0];
   }
   while (true) {
+    console.log(mode)
     const files = fs.readdirSync(__dirname + `/profile/${mode}/`);
     console.log(files)
     var list = files.filter((file) => {
@@ -105,8 +106,8 @@ const callerFun = async (mode) => {
 
 let ready = function (mode) {
   port = new SerialPort(
-    comport,
     {
+      path: comport,
       baudRate: 3000000,
       // baudRate: 115200,
     },
@@ -120,7 +121,7 @@ let ready = function (mode) {
     }
   );
   parser = port.pipe(
-    new Readline({
+    new ReadlineParser({
       delimiter: "\r\n",
     })
   );
@@ -172,7 +173,7 @@ let ready = function (mode) {
 
 const main = (argv) => {
 
-  const mode = argv.length > 2 ? argv[2] : "_hf";
+  const mode = argv.length > 2 ? argv[2] : "hf";
 
   SerialPort.list().then(
     (ports) => {

@@ -1,7 +1,7 @@
 var fs = require("fs");
 const yaml = require("js-yaml");
-let SerialPort = require("serialport");
-const Readline = require("@serialport/parser-readline");
+const { SerialPort } = require("serialport");
+const { ReadlineParser } = require("@serialport/parser-readline");
 const { argv } = require("process");
 let comport;
 let port;
@@ -188,8 +188,8 @@ const callerFun = async (mode) => {
 
 let ready = function (mode) {
   port = new SerialPort(
-    comport,
     {
+      path: comport,
       baudRate: 3000000,
       // baudRate: 115200,
     },
@@ -202,11 +202,7 @@ let ready = function (mode) {
       }
     }
   );
-  parser = port.pipe(
-    new Readline({
-      delimiter: "\r\n",
-    })
-  );
+  parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
   function getNowYMD() {
     var dt = new Date();
     var y = dt.getFullYear();

@@ -1,9 +1,10 @@
 var fs = require("fs");
 const yaml = require("js-yaml");
 const { decode } = require("punycode");
-let SerialPort = require("serialport");
-const Readline = SerialPort.parsers.Readline;
-const ByteLength = SerialPort.parsers.ByteLength;
+const { SerialPort } = require("serialport");
+const { ReadlineParser } = require("@serialport/parser-readline");
+const { ByteLengthParser } = require("@serialport/parser-byte-length");
+const path = require("path");
 
 let comport;
 let port;
@@ -13,10 +14,11 @@ let binaryMode = false;
 
 
 let ready = function () {
+  console.log(comport)
   port = new SerialPort(
-    comport,
     {
       baudRate: 3000000,
+      path: comport,
       // baudRate: 115200,
     },
     (e) => {
@@ -63,7 +65,7 @@ const getNowYMD_maze = () => {
 
 const switchLineMode = (obj) => {
   port.unpipe(parser);
-  parser = port.pipe(new Readline({ delimiter: "\r\n" }));
+  parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
   parser.on("data", function (data) {
     console.log(data);
     if (obj.dump_to_csv_ready) {
@@ -157,7 +159,7 @@ const switchToBinaryMode = (obj) => {
   port.unpipe(parser);
 
   // ByteLength パーサに切り替え
-  parser = port.pipe(new ByteLength({ length: dataSize }));
+  parser = port.pipe(new ByteLengthParser({ length: dataSize }));
 
   const header = obj.data_struct.map((data) => {
     return data.name
