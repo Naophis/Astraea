@@ -15,4 +15,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   listProfiles: (mode) => ipcRenderer.invoke('list-profiles', mode),
   sendParameter: (params) => ipcRenderer.invoke('send-parameter', params),
   sendAllParameters: (mode) => ipcRenderer.invoke('send-all-parameters', mode),
+
+  // ログ記録関連
+  startLogging: () => ipcRenderer.invoke('start-logging'),
+  stopLogging: () => ipcRenderer.invoke('stop-logging'),
+  getLoggingStatus: () => ipcRenderer.invoke('get-logging-status'),
 });

@@ -11,6 +11,8 @@ const elements = {
   sendAllBtn: document.getElementById('send-all-btn'),
   logOutput: document.getElementById('log-output'),
   clearLogBtn: document.getElementById('clear-log-btn'),
+  startLogBtn: document.getElementById('start-log-btn'),
+  stopLogBtn: document.getElementById('stop-log-btn'),
 };
 
 // 状態管理
@@ -18,6 +20,7 @@ let state = {
   connected: false,
   selectedMode: '',
   currentPort: '',
+  isLogging: false,
 };
 
 // ログバッファ（高速化のため）
@@ -78,12 +81,15 @@ function updateConnectionStatus(connected) {
     elements.connectBtn.disabled = true;
     elements.disconnectBtn.disabled = false;
     elements.sendAllBtn.disabled = false;
+    elements.startLogBtn.disabled = false;
   } else {
     elements.connectionStatus.textContent = '未接続';
     elements.connectionStatus.className = 'status-disconnected';
     elements.connectBtn.disabled = false;
     elements.disconnectBtn.disabled = true;
     elements.sendAllBtn.disabled = true;
+    elements.startLogBtn.disabled = true;
+    elements.stopLogBtn.disabled = true;
     state.currentPort = '';
   }
   updateFileButtons();
@@ -301,6 +307,40 @@ function clearLog() {
   addLog('ログをクリアしました', 'info');
 }
 
+// ログ記録開始
+async function startLogging() {
+  try {
+    const result = await window.electronAPI.startLogging();
+    if (result.success) {
+      state.isLogging = true;
+      elements.startLogBtn.disabled = true;
+      elements.stopLogBtn.disabled = false;
+      addLog(`ログ記録を開始しました: ${result.fileName}`, 'success');
+    } else {
+      addLog(`ログ記録開始エラー: ${result.message}`, 'error');
+    }
+  } catch (err) {
+    addLog(`ログ記録開始エラー: ${err.message}`, 'error');
+  }
+}
+
+// ログ記録停止
+async function stopLogging() {
+  try {
+    const result = await window.electronAPI.stopLogging();
+    if (result.success) {
+      state.isLogging = false;
+      elements.startLogBtn.disabled = false;
+      elements.stopLogBtn.disabled = true;
+      addLog(`ログ記録を停止しました: ${result.filePath}`, 'success');
+    } else {
+      addLog(`ログ記録停止エラー: ${result.message}`, 'error');
+    }
+  } catch (err) {
+    addLog(`ログ記録停止エラー: ${err.message}`, 'error');
+  }
+}
+
 // ユーティリティ関数
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -315,6 +355,8 @@ elements.modeSelect.addEventListener('change', (e) => {
 });
 elements.sendAllBtn.addEventListener('click', sendAllParameters);
 elements.clearLogBtn.addEventListener('click', clearLog);
+elements.startLogBtn.addEventListener('click', startLogging);
+elements.stopLogBtn.addEventListener('click', stopLogging);
 
 // ANSIエスケープシーケンス処理
 function processSerialData(data) {
