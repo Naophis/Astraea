@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32-S3 Parameter Tuner</title>
+    <title>Astraea Parameter Tuner</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>ESP32-S3 Parameter Tuner</h1>
+            <div class="header-left">
+                <h1>Astraea Parameter Tuner</h1>
+            </div>
+            <div class="header-controls">
+                <div class="header-group">
+                    <label>シリアルポート:</label>
+                    <button id="refresh-ports" class="btn btn-secondary btn-sm">更新</button>
+                    <select id="port-select" class="select-box-header">
+                        <option value="">ポートを選択...</option>
+                    </select>
+                    <button id="connect-btn" class="btn btn-primary btn-sm">接続</button>
+                    <button id="disconnect-btn" class="btn btn-danger btn-sm" disabled>切断</button>
+                </div>
+                <div class="header-group">
+                    <label>モード:</label>
+                    <select id="mode-select" class="select-box-header">
+                        <option value="">モードを選択...</option>
+                    </select>
+                </div>
+            </div>
             <div class="status-bar">
                 <span id="connection-status" class="status-disconnected">未接続</span>
             </div>
         </header>
 
         <div class="main-content">
-            <!-- 左側: 接続とプロファイル選択 -->
+            <!-- 左側: プロファイル選択 -->
             <div class="left-panel">
-                <!-- シリアルポート接続 -->
-                <section class="card">
-                    <h2>シリアルポート</h2>
-                    <div class="control-group">
-                        <button id="refresh-ports" class="btn btn-secondary">ポート検索</button>
-                        <select id="port-select" class="select-box">
-                            <option value="">ポートを選択...</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <button id="connect-btn" class="btn btn-primary">接続</button>
-                        <button id="disconnect-btn" class="btn btn-danger" disabled>切断</button>
-                    </div>
-                </section>
-
-                <!-- モード選択 -->
-                <section class="card">
-                    <h2>モード選択</h2>
-                    <select id="mode-select" class="select-box">
-                        <option value="">モードを選択...</option>
-                    </select>
-                </section>
 
                 <!-- プロファイル一覧 -->
                 <section class="card profile-section">

@@ -21,25 +21,68 @@ body {
 
 header {
     background: rgba(255, 255, 255, 0.95);
-    padding: 15px 20px;
+    padding: 12px 20px;
     border-radius: 10px;
     margin-bottom: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
+}
+
+.header-left {
+    flex-shrink: 0;
 }
 
 header h1 {
-    font-size: 24px;
+    font-size: 20px;
     color: #667eea;
     font-weight: 600;
+    margin: 0;
+}
+
+.header-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex: 1;
+}
+
+.header-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-group label {
+    font-size: 13px;
+    color: #555;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.select-box-header {
+    padding: 6px 10px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    min-width: 180px;
+}
+
+.select-box-header:focus {
+    outline: none;
+    border-color: #667eea;
 }
 
 .status-bar {
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-shrink: 0;
 }
 
 .status-disconnected {
@@ -62,7 +105,7 @@ header h1 {
 
 .main-content {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 600px 1fr;
     gap: 10px;
     flex: 1;
     overflow: hidden;
@@ -72,7 +115,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 .right-panel {
@@ -84,28 +127,37 @@ header h1 {
 .card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 10px;
-    padding: 20px;
+    padding: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.card.compact {
+    padding: 10px 12px;
+}
+
 .card h2 {
-    font-size: 18px;
+    font-size: 16px;
     color: #667eea;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
+.card.compact h2 {
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
 .card h3 {
-    font-size: 14px;
+    font-size: 13px;
     color: #555;
-    margin: 15px 0 10px 0;
+    margin: 10px 0 8px 0;
     font-weight: 600;
 }
 
 .control-group {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 4px;
+    margin-bottom: 4px;
 }
 
 .btn {
@@ -168,6 +220,7 @@ header h1 {
 .btn-sm {
     padding: 6px 12px;
     font-size: 12px;
+    flex: none;
 }
 
 .select-box {
@@ -191,22 +244,27 @@ header h1 {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow-y: auto;
 }
 
 .file-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    margin-bottom: 15px;
-    max-height: 200px;
+    margin-bottom: 10px;
     overflow-y: auto;
+}
+
+#system-files {
+    min-height: 120px;
+    max-height: 400px;
 }
 
 .file-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 10px 12px;
     background: #f8f9fa;
     border-radius: 6px;
     border: 2px solid transparent;
@@ -219,24 +277,28 @@ header h1 {
 }
 
 .file-name {
-    font-size: 14px;
+    font-size: 13px;
     color: #333;
     font-weight: 500;
 }
 
 .file-btn {
-    padding: 6px 12px;
+    padding: 6px 16px;
     background: #667eea;
     color: white;
     border: none;
     border-radius: 4px;
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    min-width: 60px;
 }
 
-.file-btn:hover {
+.file-btn:hover:not(:disabled) {
     background: #5568d3;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .file-btn:disabled {
@@ -273,21 +335,33 @@ header h1 {
     margin-bottom: 4px;
     white-space: pre-wrap;
     word-break: break-all;
+    display: flex;
+    gap: 8px;
 }
 
-.log-line.info {
+.log-timestamp {
+    color: #858585;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.log-message {
+    flex: 1;
+}
+
+.log-line.info .log-message {
     color: #4ec9b0;
 }
 
-.log-line.error {
+.log-line.error .log-message {
     color: #f48771;
 }
 
-.log-line.success {
+.log-line.success .log-message {
     color: #89d185;
 }
 
-.log-line.warning {
+.log-line.warning .log-message {
     color: #dcdcaa;
 }
 

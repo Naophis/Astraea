@@ -20,14 +20,53 @@ let state = {
   currentPort: '',
 };
 
-// ログ追加関数
+// ログバッファ（高速化のため）
+let logBuffer = [];
+let logUpdateScheduled = false;
+
+// ログ追加関数（バッファリング版）
 function addLog(message, type = 'info') {
-  const logLine = document.createElement('div');
-  logLine.className = `log-line ${type}`;
   const timestamp = new Date().toLocaleTimeString();
-  logLine.textContent = `[${timestamp}] ${message}`;
-  elements.logOutput.appendChild(logLine);
+  logBuffer.push({ timestamp, message, type });
+
+  // まだスケジュールされていなければ、次のフレームで更新
+  if (!logUpdateScheduled) {
+    logUpdateScheduled = true;
+    requestAnimationFrame(flushLogBuffer);
+  }
+}
+
+// ログバッファをDOMに反映
+function flushLogBuffer() {
+  logUpdateScheduled = false;
+
+  if (logBuffer.length === 0) return;
+
+  // DocumentFragmentを使って一括追加
+  const fragment = document.createDocumentFragment();
+
+  for (const { timestamp, message, type } of logBuffer) {
+    const logLine = document.createElement('div');
+    logLine.className = `log-line ${type}`;
+
+    const timestampSpan = document.createElement('span');
+    timestampSpan.className = 'log-timestamp';
+    timestampSpan.textContent = `[${timestamp}]`;
+
+    const messageSpan = document.createElement('span');
+    messageSpan.className = 'log-message';
+    messageSpan.textContent = message;
+
+    logLine.appendChild(timestampSpan);
+    logLine.appendChild(messageSpan);
+    fragment.appendChild(logLine);
+  }
+
+  elements.logOutput.appendChild(fragment);
   elements.logOutput.scrollTop = elements.logOutput.scrollHeight;
+
+  // バッファをクリア
+  logBuffer = [];
 }
 
 // 接続状態更新
@@ -59,7 +98,7 @@ function updateFileButtons() {
 }
 
 // シリアルポート一覧を更新
-async function refreshPorts() {
+async function refreshPorts(autoConnect = false) {
   addLog('ポートを検索中...', 'info');
   try {
     const ports = await window.electronAPI.listPorts();
@@ -75,6 +114,12 @@ async function refreshPorts() {
         elements.portSelect.appendChild(option);
       });
       addLog(`${ports.length}個のポートが見つかりました`, 'success');
+
+      // 自動接続が有効で、ポートが1つ以上ある場合は最初のポートに接続
+      if (autoConnect && ports.length > 0) {
+        elements.portSelect.value = ports[0].path;
+        await connect();
+      }
     }
   } catch (err) {
     addLog(`ポート検索エラー: ${err.message}`, 'error');
@@ -271,14 +316,30 @@ elements.modeSelect.addEventListener('change', (e) => {
 elements.sendAllBtn.addEventListener('click', sendAllParameters);
 elements.clearLogBtn.addEventListener('click', clearLog);
 
+// ANSIエスケープシーケンス処理
+function processSerialData(data) {
+  // ESC[2J (画面消去) を検出
+  if (data.includes('\x1B[2J') || data.includes('\x1B[0;0H')) {
+    elements.logOutput.innerHTML = '';
+    logBuffer = [];
+    return;
+  }
+
+  // エスケープシーケンスを除去してログに追加
+  const cleanData = data.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+  if (cleanData.trim()) {
+    addLog(cleanData, 'info');
+  }
+}
+
 // シリアルデータ受信
 window.electronAPI.onSerialData((data) => {
-  addLog(data, 'info');
+  processSerialData(data);
 });
 
 // 初期化
 (async function init() {
   addLog('アプリケーションを起動しました', 'success');
-  await refreshPorts();
+  await refreshPorts(true); // 自動接続を有効化
   await loadModes();
 })();
