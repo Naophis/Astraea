@@ -61,8 +61,8 @@ debug: 0 #
 circuit_mode: 0 # change kalman, sensor_exist, sensor_ctrl_th
 hf_cl: 0 # half(0) or classic(1)
 # mode: 0 # メイン
-mode: 1 # 最短スローム
-# mode: 2 # 直進
+# mode: 1 # 最短スローム
+mode: 2 # 直進
 # mode: 3 # 超信地
 # mode: 5 # 探索スラローム sla_wall_ref_l/r
 # mode: 7 # front ctrl
@@ -88,12 +88,12 @@ test: # テスト走行時に使用するパラメータ群
   # dist: 120 #直進
   # suction_active: 0
 
-  v_max: 1800
+  v_max: 15000
   accl: 45000
   decel: -55000
   dia_accl: 42000
   dia_decel: -47500
-  dist: 120 #直進
+  dist: 720 #直進
   suction_active: 2
 
   # sla_accl: 28000
@@ -108,7 +108,7 @@ test: # テスト走行時に使用するパラメータ群
   end_v: 10
   dia: 0
   w_max: 12.5
-  alpha: 180
+  alpha: 90
   ang: 3600
   search_mode: 0
   
@@ -126,7 +126,7 @@ test: # テスト走行時に使用するパラメータ群
   file_idx: 8
   sla_dist: 90
   # sla_type: 3
-  sla_type: 3
+  sla_type: 5
   sla_type2: 6 # 復路ターン種類
   sla_return: 0 # 往復フラグ
   # sla_type: 1 normal
