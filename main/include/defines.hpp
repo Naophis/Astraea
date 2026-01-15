@@ -126,15 +126,14 @@ constexpr uint8_t READ_FLAG = 0x80;
 constexpr uint16_t READ_FLAG2 = 0b01000000;
 constexpr uint16_t PARITY_FLAG = 0b10000000;
 constexpr uint8_t ESC = 0x1B;
-constexpr uint16_t BUF_SIZE = 4096;
+constexpr uint16_t BUF_SIZE = 8192;
 
 constexpr uint16_t MOTION_CHECK_TH = 1000;
 constexpr uint16_t ENC_OPE_V_R_TH = 90 * 1;
 
 constexpr uint16_t LOG_SIZE = 1300;
 constexpr uint16_t LINE_BUF_SIZE = 1024;
-// constexpr float BATTERY_GAIN = 3.2075; // 2.97324;
-constexpr float BATTERY_GAIN = 3.2119264895753674; // 2.97324;
+constexpr float BATTERY_GAIN = 3.503919806809492;
 
 constexpr uint8_t LEDC_HIGH_SPEED_MODE = 0;
 constexpr float LOW_BATTERY_TH = 11.8;

@@ -444,6 +444,7 @@ void MainTask::load_hw_param() {
   param->torque_mode = getItem(root, "torque_mode")->valueint;
 
   param->enable_kalman_gyro = getItem(root, "enable_kalman_gyro")->valueint;
+  param->enable_mpc = getItem(root, "enable_mpc")->valueint;
   param->enable_kalman_encoder =
       getItem(root, "enable_kalman_encoder")->valueint;
 
@@ -715,6 +716,17 @@ void MainTask::load_hw_param() {
   param->gyro_pid.i_theta_max = getItem(gyro_pid, "i_theta_max")->valuedouble;
   param->gyro_pid.theta_gate = getItem(gyro_pid, "theta_gate")->valuedouble;
   param->gyro_pid.omega_gate = getItem(gyro_pid, "omega_gate")->valuedouble;
+
+  param->gyro_pid.mpc_q_ang = getItem(gyro_pid, "mpc_q_ang")->valuedouble;
+  param->gyro_pid.mpc_q_vel = getItem(gyro_pid, "mpc_q_vel")->valuedouble;
+  param->gyro_pid.mpc_b = getItem(gyro_pid, "mpc_b")->valuedouble;
+  param->gyro_pid.mpc_r = getItem(gyro_pid, "mpc_r")->valuedouble;
+  param->gyro_pid.mpc_horizon = getItem(gyro_pid, "mpc_horizon")->valuedouble;
+  param->gyro_pid.mpc_max_iter = getItem(gyro_pid, "mpc_max_iter")->valueint;
+  param->gyro_pid.mpc_max_torque =
+      getItem(gyro_pid, "mpc_max_torque")->valuedouble;
+  param->gyro_pid.mpc_observer_k =
+      getItem(gyro_pid, "mpc_observer_k")->valuedouble;
 
   angle_pid = getItem(root, "angle_pid");
   param->angle_pid.p = getItem(angle_pid, "p")->valuedouble;
@@ -1754,42 +1766,45 @@ void MainTask::load_slas(
   str.shrink_to_fit();
   if (!silent_load)
     printf("%s\n", file_name.c_str());
+  const static float Et_N2 = 0.6034501612189381f;
+  const static float Et_N4 = 0.7632146181989743f;
+  const static float Et_N6 = 0.8312737347682339f;
+  float v, ang, rad, pow_n, tmp_Et;
   for (const auto &p : turn_list) {
-    turn_map[p.first].v =
+    v = turn_map[p.first].v =
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
-    turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
-    if (p.first == TurnType::Normal) {
-      turn_map[p.first].ref_ang = m_PI * 90 / 180;
-    } else if (p.first == TurnType::Large) {
-      turn_map[p.first].ref_ang = m_PI * 90 / 180;
-    } else if (p.first == TurnType::Dia45) {
-      turn_map[p.first].ref_ang = m_PI * 45 / 180;
-    } else if (p.first == TurnType::Dia45_2) {
-      turn_map[p.first].ref_ang = m_PI * 45 / 180;
-    } else if (p.first == TurnType::Dia135) {
-      turn_map[p.first].ref_ang = m_PI * 135 / 180;
-    } else if (p.first == TurnType::Dia135_2) {
-      turn_map[p.first].ref_ang = m_PI * 135 / 180;
-    } else if (p.first == TurnType::Dia90) {
-      turn_map[p.first].ref_ang = m_PI * 90 / 180;
-    } else if (p.first == TurnType::Orval) {
-      turn_map[p.first].ref_ang = m_PI * 180 / 180;
+    ang = turn_map[p.first].ang = turn_map[p.first].ref_ang =
+        m_PI * turn_map[p.first].ang / 180;
+
+    rad = turn_map[p.first].rad =
+        getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
+    pow_n = turn_map[p.first].pow_n =
+        getItem(getItem(root, p.second.c_str()), "pow_n")->valueint;
+    tmp_Et = Et_N4;
+    if (pow_n == 2) {
+      tmp_Et = Et_N2;
+    } else if (pow_n == 4) {
+      tmp_Et = Et_N4;
+    } else if (pow_n == 6) {
+      tmp_Et = Et_N6;
+    }
+    turn_map[p.first].time = (rad * ang) / (2.0 * v * tmp_Et);
+    if (p.first == TurnType::Orval) {
+      rad = turn_map[p.first].rad2 =
+          getItem(getItem(root, p.second.c_str()), "rad2")->valuedouble;
+      tmp_Et = Et_N4;
+      if (pow_n == 2) {
+        tmp_Et = Et_N2;
+      } else if (pow_n == 4) {
+        tmp_Et = Et_N4;
+      } else if (pow_n == 6) {
+        tmp_Et = Et_N6;
+      }
+      turn_map[p.first].time2 = (rad * ang) / (2.0 * v * tmp_Et);
     }
 
-    turn_map[p.first].rad =
-        getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
-    turn_map[p.first].time =
-        getItem(getItem(root, p.second.c_str()), "time")->valuedouble;
-    if (p.first == TurnType::Orval) {
-      turn_map[p.first].rad2 =
-          getItem(getItem(root, p.second.c_str()), "rad2")->valuedouble;
-      turn_map[p.first].time2 =
-          getItem(getItem(root, p.second.c_str()), "time2")->valuedouble;
-    }
-    turn_map[p.first].pow_n =
-        getItem(getItem(root, p.second.c_str()), "pow_n")->valueint;
     turn_map[p.first].front.right =
         getItem(getItem(getItem(root, p.second.c_str()), "front"), "right")
             ->valuedouble;
@@ -1977,6 +1992,8 @@ void MainTask::rx_uart_json() {
   umount();
   ui->coin(100);
   vTaskDelay(100.0 / portTICK_PERIOD_MS);
+  esp_reset_reason_t reason = esp_reset_reason();
+  printf("reset reason: %d\n", reason);
 }
 void MainTask::task() {
   mp->set_userinterface(ui);
@@ -2523,6 +2540,16 @@ void MainTask::test_turn() {
   mp->reset_gyro_ref_with_check();
   reset_tgt_data();
   reset_ego_data();
+
+  // if (sys.test.suction_active == 1) {
+  //   pt->suction_enable(sys.test.suction_duty, sys.test.suction_duty_low);
+  //   vTaskDelay(xDelay1000);
+  // } else if (sys.test.suction_active == 2) {
+  //   pt->suction_enable(sys.test.suction_duty_burst,
+  //                      sys.test.suction_duty_burst_low);
+  //   vTaskDelay(xDelay500);
+  // }
+
   pt->motor_enable();
 
   req_error_reset();
@@ -2770,15 +2797,39 @@ void MainTask::test_sla() {
 
   mp->slalom(sla_p, rorl, nm, false);
 
+  auto lim_size = pt->sensor_deg_limitter_v.size();
+  // TODO: backup sensor_deg_limitter_str, sensor_deg_limitter_dia,
+  // sensor_deg_limitter_piller values
+
+  std::vector<float> bk_sensor_deg_limitter_str(lim_size);
+  std::vector<float> bk_sensor_deg_limitter_dia(lim_size);
+  std::vector<float> bk_sensor_deg_limitter_piller(lim_size);
+  for (int i = 0; i < lim_size; i++) {
+    bk_sensor_deg_limitter_str[i] = pt->sensor_deg_limitter_str[i];
+    bk_sensor_deg_limitter_dia[i] = pt->sensor_deg_limitter_dia[i];
+    bk_sensor_deg_limitter_piller[i] = pt->sensor_deg_limitter_piller[i];
+  }
+
   if (sys.test.sla_return > 0) {
     const auto type2 = static_cast<TurnType>(sys.test.sla_type2);
     bool dia = type2 == TurnType::Dia45_2 || type2 == TurnType::Dia135_2 ||
                type2 == TurnType::Dia90;
     param->sen_ref_p.normal.exist.right45 = 1;
     param->sen_ref_p.normal.exist.left45 = 1;
+    // clear deg limitter for slalom return
+    for (int i = 0; i < lim_size; i++) {
+      pt->sensor_deg_limitter_str[i] = 0.0;
+      pt->sensor_deg_limitter_dia[i] = 0.0;
+      pt->sensor_deg_limitter_piller[i] = 0.0;
+    }
     mp->slalom(sla_p2, rorl2, nm, dia);
   }
-
+  // restore sensor deg limitter values
+  for (int i = 0; i < lim_size; i++) {
+    pt->sensor_deg_limitter_str[i] = bk_sensor_deg_limitter_str[i];
+    pt->sensor_deg_limitter_dia[i] = bk_sensor_deg_limitter_dia[i];
+    pt->sensor_deg_limitter_piller[i] = bk_sensor_deg_limitter_piller[i];
+  }
   ps.v_max = sla_p.v;
   ps.v_end = sys.test.end_v;
   ps.dist = param->cell;
@@ -2836,9 +2887,13 @@ void MainTask::test_sla() {
   lt->dump_log(slalom_log_file);
 
   vTaskDelay(500.0 / portTICK_RATE_MS);
+  printf("----------------------------------\n");
   printf("offset: min(%f, %f) + %f = %f\n", mp->g_offset_y_l, mp->g_offset_y_r,
          mp->g_offset_x1, mp->g_total_offset);
+  printf("theta: %f\n", mp->g_sen_ang * 180 / m_PI);
   printf("sensor dist: %f, %f\n", mp->g_sen_l_dist, mp->g_sen_r_dist);
+  printf("----------------------------------\n");
+
   while (1) {
     if (ui->button_state_hold())
       break;

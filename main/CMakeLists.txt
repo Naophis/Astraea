@@ -17,6 +17,7 @@ set(COMPONENT_SRCS
     "task/path_creator.cpp"
     "task/motion_planning.cpp"
     "task/planning_task.cpp"
+    "task/constraint_lqm.cpp"
     "task/ui.cpp"
     "task/fs.cpp"
     "task/main_task.cpp"

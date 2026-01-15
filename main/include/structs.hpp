@@ -229,6 +229,7 @@ typedef struct {
 typedef struct {
   float sensor_dist = 300;
   float global_run_dist = 0;
+  float angle = 0;
 } sen_log_t;
 
 typedef struct {
@@ -273,6 +274,9 @@ typedef struct {
   int16_t calc_time;
   int16_t calc_time2;
   int64_t sensing_timestamp;
+  float ang_kf_sum = 0;
+  float img_ang_sum = 0;
+  float img_ang_z = 0;
 } sensing_result_entity_t;
 
 typedef struct {
@@ -296,6 +300,28 @@ typedef struct {
   float omega_gate = 0;
   float i_theta_slew = 0;
   float i_theta_max = 0;
+  float alpha_stop = 0;
+  float alpha_rate = 0;
+  float theta_damp_th = 0;
+  float omega_damp = 0;
+  float th = 1;
+  float theta_gate_on = 0;
+  float theta_gate_full = 0;
+  float theta_kp = 0;
+  float theta_kd = 0;
+  float omega_add_max = 0;
+  float alpha_rate_end = 0;
+  float k_stop = 0;
+  float theta_eps = 0;
+  float s_gate = 0;
+  float mpc_q_ang = 0;
+  float mpc_q_vel = 0;
+  float mpc_b = 0;
+  float mpc_r = 0;
+  int mpc_horizon = 0;
+  int mpc_max_iter = 5;
+  float mpc_max_torque = 0;
+  float mpc_observer_k = 0.05f; // Disturbance observer gain
 } pid_param_t;
 
 typedef struct {
@@ -711,6 +737,7 @@ typedef struct {
   char torque_mode = 0;
   char enable_kalman_gyro = 0;
   char enable_kalman_encoder = 0;
+  char enable_mpc = 0;
   float dia90_offset = 0;
   kanayama_t kanayama;
 } input_param_t;
@@ -741,7 +768,22 @@ typedef struct {
 typedef struct {
   float gain_z;
   float gain_zz;
+  float omega_ref_prev;
+  MotionType prev_motion_type;
 } gain_log_t;
+
+typedef struct {
+  float was_aw;
+  float enter_aw;
+  float keep_aw;
+  float w_i_base;
+  float w_error_i_raw; // clamp前
+  float w_error_i_clamped;
+  float gyro_pid_histerisis_i;
+  float sat_flag;
+  float duty_roll;
+  float duty_roll_before;
+} aw_log_t;
 
 typedef struct {
   pid_error_t v;
@@ -770,6 +812,8 @@ typedef struct {
   pid_error2_t w_val;
   pid_error2_t ang_val;
   pid_error2_t s_val;
+
+  aw_log_t aw_log;
 
 } pid_error_entity_t;
 
@@ -1230,6 +1274,10 @@ typedef struct {
 
   real16_T duty_suction;
 
+  real16_T ang_kf_sum;
+  real16_T img_ang_sum;
+  real16_T duty_roll;
+  real16_T duty_roll_before;
 } log_data_t2;
 
 typedef struct {
@@ -1433,11 +1481,10 @@ typedef struct {
   float left45_2_d_diff = 114;
   float left45_3_d_diff = 115;
   float duty_suction = 116;
-  int reserve1 = 117;
-
-  int reserve2 = 118;
-  int reserve3 = 119;
-  int reserve4 = 120;
+  float duty_roll = 117;
+  float ang_kf_sum = 118;
+  float img_ang_sum = 119;
+  float duty_roll_before = 120;
   int reserve5 = 121;
 
 } LogStruct10 __attribute__((packed));

@@ -115,29 +115,29 @@ void ASM330LHH::setup() {
     ;
 
   write1byte(ASM330LHH_CTRL3_C, 0x44); // BDU,
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL4_C, 0x04); // I2C/I3CモードをDisableに設定
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL7_G, 0x00); // HP_EN_G=0 -> Gyro HPF OFF
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   // write1byte(ASM330LHH_CTRL2_G, 0xA1); // ODR: 6667Hz, scale: 4000deg/s
   write1byte(ASM330LHH_CTRL2_G, 0x91); // ODR: 3333Hz, scale: 4000deg/s
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   write1byte(ASM330LHH_CTRL8_XL, 0x00); // LPF2_XL_EN=0, HP_SLOPE_XL_EN=0
 
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   auto ctrl1 = read1byte(ASM330LHH_CTRL1_XL);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   auto ctrl2 = read1byte(ASM330LHH_CTRL2_G);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   auto ctrl3 = read1byte(ASM330LHH_CTRL3_C);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   auto ctrl4 = read1byte(ASM330LHH_CTRL4_C);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   auto ctrl9 = read1byte(ASM330LHH_CTRL9_XL);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
   printf("%d, %d, %d, %d, %d\n", ctrl1, ctrl2, ctrl3, ctrl4, ctrl9);
-  vTaskDelay(10.0 / portTICK_PERIOD_MS);
+  vTaskDelay(25.0 / portTICK_PERIOD_MS);
 }
 int16_t ASM330LHH::read_gyro_z() { return read_2byte(0x26); }
 int16_t ASM330LHH::read_accel_x() { return read_2byte(0x22); }

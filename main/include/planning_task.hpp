@@ -4,17 +4,17 @@
 #include "defines.hpp"
 #include "driver/ledc.h"
 #include "driver/mcpwm.h"
+#include "esp_system.h"
 #include "esp_timer.h"
+#include "esp_vfs.h"
+#include "esp_vfs_fat.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 #include "gen_code_mpc/mpc_tgt_calc.h"
+#include "include/constraint_lqm.hpp" // Added for MPC
 #include "include/logging_task.hpp"
 #include "include/maze_solver.hpp"
-
-#include "esp_system.h"
-#include "esp_vfs.h"
-#include "esp_vfs_fat.h"
 // #include "gen_code_pid/pid_controller.h"
 // #include "gen_code_pid_2dof/pid_controller_2dof.h"
 #include "gen_code_simple_pid/simple_pid_controller.h"
@@ -305,6 +305,17 @@ private:
   // PID_Controller_2dof vel_pid_2dof;
   // PID_Controller_2dof gyro_pid_2dof;
   unsigned char w_reset = 0;
+  float mpc_d_estimated = 0;
+  float mpc_w_prev = 0;
+  float mpc_u_prev = 0;
+  ConstraintLQM mpc_solver;
+  void check_left_sensor_error(float &error, int &check, bool range_check_left,
+                               bool dist_check_left, bool check_diff_left,
+                               bool expand_left, bool range_check_left_expand);
+  void check_right_sensor_error(float &error, int &check,
+                                bool range_check_right, bool dist_check_right,
+                                bool check_diff_right, bool expand_right,
+                                bool range_check_right_expand);
 };
 
 #endif
