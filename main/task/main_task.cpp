@@ -1775,24 +1775,8 @@ void MainTask::load_slas(
         getItem(getItem(root, p.second.c_str()), "v")->valuedouble;
     turn_map[p.first].ang =
         getItem(getItem(root, p.second.c_str()), "ang")->valuedouble;
-    ang = turn_map[p.first].ang = m_PI * turn_map[p.first].ang / 180;
-    if (p.first == TurnType::Normal) {
-      turn_map[p.first].ref_ang = m_PI * 90 / 180;
-    } else if (p.first == TurnType::Large) {
-      turn_map[p.first].ref_ang = m_PI * 90 / 180;
-    } else if (p.first == TurnType::Dia45) {
-      turn_map[p.first].ref_ang = m_PI * 45 / 180;
-    } else if (p.first == TurnType::Dia45_2) {
-      turn_map[p.first].ref_ang = m_PI * 45 / 180;
-    } else if (p.first == TurnType::Dia135) {
-      turn_map[p.first].ref_ang = m_PI * 135 / 180;
-    } else if (p.first == TurnType::Dia135_2) {
-      turn_map[p.first].ref_ang = m_PI * 135 / 180;
-    } else if (p.first == TurnType::Dia90) {
-      turn_map[p.first].ref_ang = m_PI * 90 / 180;
-    } else if (p.first == TurnType::Orval) {
-      turn_map[p.first].ref_ang = m_PI * 180 / 180;
-    }
+    ang = turn_map[p.first].ang = turn_map[p.first].ref_ang =
+        m_PI * turn_map[p.first].ang / 180;
 
     rad = turn_map[p.first].rad =
         getItem(getItem(root, p.second.c_str()), "rad")->valuedouble;
@@ -2008,6 +1992,8 @@ void MainTask::rx_uart_json() {
   umount();
   ui->coin(100);
   vTaskDelay(100.0 / portTICK_PERIOD_MS);
+  esp_reset_reason_t reason = esp_reset_reason();
+  printf("reset reason: %d\n", reason);
 }
 void MainTask::task() {
   mp->set_userinterface(ui);
