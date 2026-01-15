@@ -5,42 +5,14 @@ const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 const { ByteLengthParser } = require("@serialport/parser-byte-length");
 const path = require("path");
+const { argv } = require("process");
 
 let comport;
 let port;
-
 let parser;
 let binaryMode = false;
 
-
-let ready = function () {
-  console.log(comport)
-  port = new SerialPort(
-    {
-      baudRate: 3000000,
-      path: comport,
-      // baudRate: 115200,
-    },
-    (e) => {
-      if (e) {
-        console.log("comport access dinied");
-      } else {
-        console.log("connect");
-      }
-    }
-  );
-  // switchToBinaryMode(336);
-
-  let obj = {
-    dump_to_csv_ready: false,
-    dump_to_map: false,
-    data_struct: [],
-    file_name: getNowYMD(),
-    record: "",
-  };
-
-  switchLineMode(obj, parser);
-};
+// ===== ユーティリティ関数 =====
 
 const getNowYMD = () => {
   var dt = new Date();
@@ -51,7 +23,8 @@ const getNowYMD = () => {
   var M = ("00" + dt.getMinutes()).slice(-2);
   var s = ("00" + dt.getSeconds()).slice(-2);
   return `${y}${m}${d}_${h}${M}_${s}.csv`;
-}
+};
+
 const getNowYMD_maze = () => {
   var dt = new Date();
   var y = dt.getFullYear();
@@ -61,7 +34,175 @@ const getNowYMD_maze = () => {
   var M = ("00" + dt.getMinutes()).slice(-2);
   var s = ("00" + dt.getSeconds()).slice(-2);
   return `${y}${m}${d}_${h}${M}_${s}.maze`;
+};
+
+function resolveAfter2Seconds(str) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(str);
+    }, 500);
+  });
 }
+
+async function sleep2(delay, result) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(result), delay);
+  });
+}
+
+// ===== 送信関連の関数 =====
+
+async function write(str, result) {
+  return new Promise((resolve) => {
+    port.write(`${str}`, function () {
+      resolve(result);
+    });
+  });
+}
+
+const convert = (filename) => {
+  return filename.split(".")[0];
+};
+
+const callerFun = async (mode) => {
+  while (true) {
+    const files = fs.readdirSync(__dirname + `/profile/${mode}/`);
+    var list = ["system.yaml", "hardware.yaml"].concat(files.filter((file) => {
+      return file.match(/.yaml$/) || file.match(/.maze$/);
+    }));
+    let col = 5;
+    for (var i = 0; list.length;) {
+      let str = "";
+      if (list[i] === undefined) {
+        break;
+      }
+      for (var j = 0; j < col; j++) {
+        if (list[i + j] === undefined) {
+          break;
+        }
+        str += `[${i + j}]: ${convert(list[i + j])}\t`;
+      }
+      i += col;
+      console.log(str);
+    }
+    console.log(">");
+    var str = fs.readFileSync("/dev/stdin").toString().trim();
+
+    var idx = parseInt(str);
+    if (str === "all") {
+      console.log("all");
+      for (const file of files) {
+        if (file.match(/.yaml$/)) {
+          let txt = fs.readFileSync(`${__dirname}/profile/${mode}/${file}`, {
+            encoding: "utf-8",
+          });
+          let file_name = "";
+          if (file.match(/.maze$/)) {
+            file_name = "maze.txt";
+            console.log(txt);
+          } else if (file.match(/.yaml$/)) {
+            file_name = file.replace("yaml", mode);
+          }
+          if (file === "maze.yaml") {
+            // Skip maze.yaml
+          } else {
+            var saveData = yaml.load(txt);
+            var str = `${file_name}@${JSON.stringify(saveData)}`;
+            write(str);
+            await sleep2(800);
+            console.log(`${file}, ${file_name}: finish!!`);
+          }
+        }
+      }
+      for (const file of ["system.yaml", "hardware.yaml"]) {
+        let txt = fs.readFileSync(`${__dirname}/profile/${file}`, {
+          encoding: "utf-8",
+        });
+
+        let file_name = "";
+        if (file.match(/.maze$/)) {
+          file_name = "maze.txt";
+          console.log(txt);
+        } else if (file.match(/.yaml$/)) {
+          file_name = file.replace("yaml", "txt");
+        }
+
+        var saveData = yaml.load(txt);
+        var str = `${file_name}@${JSON.stringify(saveData)}`;
+        write(str);
+        await sleep2(800);
+        console.log(`${file}, ${file_name}: finish!!`);
+      }
+    } else {
+      if (idx > list.length) {
+        console.log("out of index");
+        continue;
+      }
+      if (idx === 0 || idx === 1) {
+        let file = "system.yaml";
+        if (idx === 1) {
+          file = "hardware.yaml";
+        }
+        let txt = fs.readFileSync(`${__dirname}/profile/${list[idx]}`, {
+          encoding: "utf-8",
+        });
+        var file_name = file.replace("yaml", "txt");
+        var saveData = yaml.load(txt);
+        var str = `${file_name}@${JSON.stringify(saveData)}`;
+        write(str);
+        await sleep2(800);
+        console.log(`${file}, ${file_name}: finish!!`);
+      } else {
+        let txt = fs.readFileSync(`${__dirname}/profile/${mode}/${list[idx]}`, {
+          encoding: "utf-8",
+        });
+
+        let file_name = "";
+        if (list[idx].match(/.maze$/)) {
+          file_name = `maze.${mode}`;
+        } else if (list[idx].match(/.yaml$/)) {
+          file_name = list[idx].replace("yaml", mode);
+        }
+
+        console.log(file_name);
+
+        if (file_name === "maze.hf") {
+          file_name = "maze.txt";
+          let maze_list = txt.split(",").map((e) => { return e.trim(); }).map((e) => { return (parseInt(e) | 0xf0); });
+          let size = 16;
+          if (maze_list.length > 300) {
+            size = 32;
+          }
+          for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+              if (x >= y) {
+                continue;
+              }
+              let idx = y * size + x;
+              let idx2 = x * size + y;
+              let tmp = maze_list[idx];
+              maze_list[idx] = maze_list[idx2];
+              maze_list[idx2] = tmp;
+            }
+          }
+          txt = maze_list.join(",");
+          var str = `${file_name}@${txt}`;
+          write(str);
+          await sleep2(800);
+          console.log(`${file_name}: finish!!`);
+        } else {
+          var saveData = yaml.load(txt);
+          var str = `${file_name}@${JSON.stringify(saveData)}`;
+          write(str);
+          await sleep2(600);
+          console.log(`${list[idx]}, ${file_name}: finish!!`);
+        }
+      }
+    }
+  }
+};
+
+// ===== 受信関連の関数 =====
 
 const switchLineMode = (obj) => {
   port.unpipe(parser);
@@ -93,7 +234,6 @@ const switchLineMode = (obj) => {
         }
         for (let y = 0; y < size; y++) {
           for (let x = 0; x < size; x++) {
-            // skip excahnged point
             if (x >= y) {
               continue;
             }
@@ -127,8 +267,6 @@ const switchLineMode = (obj) => {
     if (data.match(/^start/)) {
       obj.file_name = getNowYMD();
       obj.record = "";
-
-      // console.log(obj);
       switchToBinaryMode(obj);
     }
 
@@ -139,30 +277,27 @@ const switchLineMode = (obj) => {
       console.log(obj);
     }
   });
-}
+};
 
-let LOG_STRUCT_SIZE = 12; // 12 bytes per record
+let LOG_STRUCT_SIZE = 12;
 
 const switchToBinaryMode = (obj) => {
-  const dataSize = 48;//obj.byte_size
+  const dataSize = 48;
   const dataSize2 = obj.data_struct.reduce((prev, cur) => {
     return prev + cur.size;
   }, 0);
   console.log('size1: ', dataSize, 'bytes');
   console.log('size2: ', dataSize2, 'bytes');
 
-  LOG_STRUCT_SIZE = dataSize2 / (4 * 12); // 4 * 12 bytes per struct
+  LOG_STRUCT_SIZE = dataSize2 / (4 * 12);
 
   binaryMode = true;
 
-  // パイプラインをクリア
   port.unpipe(parser);
-
-  // ByteLength パーサに切り替え
   parser = port.pipe(new ByteLengthParser({ length: dataSize }));
 
   const header = obj.data_struct.map((data) => {
-    return data.name
+    return data.name;
   }).join(',');
   obj.record += `${header}\n`;
   console.log('header:', header);
@@ -189,7 +324,6 @@ const switchToBinaryMode = (obj) => {
         `${__dirname}/logs/latest.csv`
       );
       finish = true;
-      // port.unpipe(parser);
       clearInterval(interval);
       switchLineMode({
         dump_to_csv_ready: false,
@@ -202,7 +336,6 @@ const switchToBinaryMode = (obj) => {
     now = new Date().getTime();
   }, 1000);
 
-
   parser.on('data', (binaryData) => {
     let offset = 0;
     cnt++;
@@ -213,7 +346,6 @@ const switchToBinaryMode = (obj) => {
     const end_idx = start_idx + 12;
 
     for (let i = start_idx; i < end_idx; i++) {
-
       const data = obj.data_struct[i];
       if (data === undefined) {
         continue;
@@ -379,34 +511,92 @@ const switchToBinaryMode = (obj) => {
         if (valid) {
           last_index = record[0];
           const str = record.join(',');
-          console.log(str)
+          console.log(str);
           obj.record += `${str}\n`;
         }
         record = [];
       }
     }
   });
-}
+};
 
-SerialPort.list().then(
-  (ports) => {
-    for (let i in ports) {
-      const p = ports[i];
-      console.log(p.path, p.serialNumber);
-      if (
-        p.path.match(/usbserial/) ||
-        p.path.match(/COM/) ||
-        p.path.match(/ttyUSB/) ||
-        p.path.match(/ttyACM/)
-      ) {
-        if (p.serialNumber) {
-          comport = p.path;
-          console.log(`select: ${comport}`);
-          ready();
-          break;
+// ===== メイン初期化関数 =====
+
+let ready = function (mode, enableTx) {
+  console.log(comport);
+  port = new SerialPort(
+    {
+      baudRate: 3000000,
+      path: comport,
+    },
+    (e) => {
+      if (e) {
+        console.log("comport access denied");
+      } else {
+        console.log("connect");
+        if (enableTx) {
+          console.log("TX mode enabled - starting parameter sender");
+          callerFun(mode);
+        } else {
+          console.log("RX mode enabled - starting data receiver");
         }
       }
     }
-  },
-  (err) => console.error(err)
-);
+  );
+
+  let obj = {
+    dump_to_csv_ready: false,
+    dump_to_map: false,
+    data_struct: [],
+    file_name: getNowYMD(),
+    record: "",
+  };
+
+  switchLineMode(obj, parser);
+};
+
+// ===== エントリーポイント =====
+
+const main = (argv) => {
+  // Usage: node terminal.js [mode] [--tx]
+  // mode: _hf (default) or other profile names
+  // --tx: enable transmit mode
+  let mode = "_hf";
+  let enableTx = false;
+
+  for (let i = 2; i < argv.length; i++) {
+    if (argv[i] === "--tx") {
+      enableTx = true;
+    } else if (!argv[i].startsWith("--")) {
+      mode = argv[i];
+    }
+  }
+
+  console.log(`Mode: ${mode}`);
+  console.log(`TX Mode: ${enableTx ? "enabled" : "disabled"}`);
+
+  SerialPort.list().then(
+    (ports) => {
+      for (let i in ports) {
+        const p = ports[i];
+        console.log(p.path, p.serialNumber);
+        if (
+          p.path.match(/usbserial/) ||
+          p.path.match(/COM/) ||
+          p.path.match(/ttyUSB/) ||
+          p.path.match(/ttyACM/)
+        ) {
+          if (p.serialNumber) {
+            comport = p.path;
+            console.log(`select: ${comport}`);
+            ready(mode, enableTx);
+            break;
+          }
+        }
+      }
+    },
+    (err) => console.error(err)
+  );
+};
+
+main(argv);

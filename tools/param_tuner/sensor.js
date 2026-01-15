@@ -1,7 +1,7 @@
 var fs = require("fs");
 const yaml = require("js-yaml");
-let SerialPort = require("serialport");
-const Readline = require("@serialport/parser-readline");
+const { SerialPort } = require("serialport");
+const { ReadlineParser } = require("@serialport/parser-readline");
 
 let comport;
 let port;
@@ -13,8 +13,8 @@ let dist = parseFloat(process.argv[3]);
 console.log(`dist,L90,L45_3,L45_2,L45,F,R45,R45_2,R45_3,R90`);
 let ready = function () {
   port = new SerialPort(
-    comport,
     {
+      path: comport,
       baudRate: 3000000,
       // baudRate: 115200,
     },
@@ -27,7 +27,7 @@ let ready = function () {
     }
   );
   parser = port.pipe(
-    new Readline({
+    new ReadlineParser({
       delimiter: "\r\n",
     })
   );
