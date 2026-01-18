@@ -7,8 +7,8 @@ orval:
   # rad: 50.25
   # time: 0.05171874999999604
   # rad2: 51.0
-  front: { left: 8, right: 8 }
-  back: { left: 35, right: 35 }
+  front: { left: 12, right: 12 }
+  back: { left: 25, right: 25 }
 normal:
   v: 300.000000
   ang: 90.000000

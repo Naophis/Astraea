@@ -4,8 +4,8 @@ orval:
   pow_n: 4
   rad: 46.50
   rad2: 47.0
-  front: { left: 10, right: 10 }
-  back: { left: 25, right: 25 }
+  front: { left: 15, right: 15 }
+  back: { left: 20, right: 20 }
 normal:
   v: 300.000000
   ang: 90.000000

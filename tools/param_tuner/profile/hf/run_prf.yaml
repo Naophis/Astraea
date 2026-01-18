@@ -1,37 +1,37 @@
 exec_prof:
-  - fast: 1
+  - fast: 1 # 0
     normal: 1
     slow: 1
-  - fast: 2
+  - fast: 2 # 1
     normal: 2
     slow: 2
-  - fast: 3
+  - fast: 3 # 2
     normal: 3
     slow: 3
-  - fast: 7
+  - fast: 7 # 3
     normal: 5
     slow: 3
-  - fast: 8
+  - fast: 8 # 4
     normal: 6
     slow: 3
-  - fast: 9
+  - fast: 9 # 5
     normal: 7
     slow: 3
-  - fast: 10
+  - fast: 10 # 6
     normal: 8
     slow: 3
-  - fast: 10
+  - fast: 10 # 7
     normal: 9
     slow: 3
-  - fast: 11
+  - fast: 11 # 8
     normal: 10
     slow: 3
-  - fast: 12
+  - fast: 12 # 9
     normal: 11
     slow: 3
-  - fast: 13
+  - fast: 13 # 10
     normal: 12
     slow: 3
-  - fast: 13
+  - fast: 13 # 11
     normal: 12
     slow: 3
