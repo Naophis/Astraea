@@ -2142,7 +2142,8 @@ void MainTask::task() {
       mode_num = select_mode();
       pt->mode_select = false;
       exec_param_prof();
-      printf("%d\n", mode_num);
+      printf("mode_num: %d, exec_param_list.size(): %d\n", mode_num,
+             exec_param_list.size());
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
         rorl2 = ui->select_direction2();
@@ -2187,8 +2188,9 @@ void MainTask::task() {
           vTaskDelay(10.0 / portTICK_RATE_MS);
         }
         search_ctrl->print_maze();
-      } else if (2 <= mode_num && mode_num <= exec_param_list.size() - 1) {
+      } else if (2 <= mode_num && mode_num <= exec_param_list.size() + 1) {
         const auto p = exec_param_list[mode_num - 2];
+        printf("mode_num: %d\n", mode_num - 2);
         exec_param_list.clear();
         path_run(p.fast_idx, p.normal_idx, p.slow_idx);
       } else if (mode_num == (2 + exec_param_list.size())) {
