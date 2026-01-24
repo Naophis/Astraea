@@ -953,8 +953,8 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
     if (tgt_val->tgt_in.tgt_dist >= prm->clear_dist_order) {
       if (!(prm->clear_dist_ragne_from <= tmp_dist &&
             tmp_dist <= prm->clear_dist_ragne_to)) {
-        if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
-             m_PI) < prm->clear_angle) {
+        if (std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) <
+            prm->clear_angle) {
 
           // 目標距離まで遠いならリセット
           if ((tgt_val->tgt_in.tgt_dist - tgt_val->ego_in.dist) >
@@ -1076,8 +1076,8 @@ float IRAM_ATTR PlanningTask::check_sen_error_dia(SensingControlType &type) {
     // ee->sen_log_dia.gain_zz = 0;
     // ee->sen_log_dia.gain_z = 0;
     if (tgt_val->tgt_in.tgt_dist >= param_ro->clear_dist_order) {
-      if ((std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) * 180 /
-           m_PI) < param_ro->clear_angle) {
+      if (std::abs(tgt_val->ego_in.ang - tgt_val->ego_in.img_ang) <
+          param_ro->clear_angle) {
         // tgt_val->global_pos.ang = tgt_val->global_pos.img_ang;
         // ee->w.error_i = 0;
         // ee->w.error_d = 0;

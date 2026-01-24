@@ -907,7 +907,7 @@ void MainTask::load_offset_param() {
   param->cell = getItem(root, "cell")->valuedouble;
   param->cell2 = getItem(root, "cell2")->valuedouble;
   param->seach_timer = getItem(root, "seach_timer")->valueint;
-  param->clear_angle = getItem(root, "clear_angle")->valuedouble;
+  param->clear_angle = getItem(root, "clear_angle")->valuedouble * M_PI / 180;
   param->clear_dist_order = getItem(root, "clear_dist_order")->valuedouble;
   param->pivot_back_dist0 = getItem(root, "pivot_back_dist0")->valuedouble;
   param->pivot_back_dist1 = getItem(root, "pivot_back_dist1")->valuedouble;
@@ -2731,13 +2731,12 @@ void MainTask::test_sla() {
 
   backup_r = param->sen_ref_p.normal.exist.right45;
   backup_l = param->sen_ref_p.normal.exist.left45;
-  // if (sys.test.ignore_opp_sen) {
-  //   if (rorl == TurnDirection::Right) {
-  //     param->sen_ref_p.normal.exist.right45 = 1;
-  //   } else {
-  //     param->sen_ref_p.normal.exist.left45 = 1;
-  //   }
-  // }
+  if (rorl == TurnDirection::Right) {
+    param->sen_ref_p.normal.exist.left45 += 10;
+  } else {
+    param->sen_ref_p.normal.exist.right45 += 10;
+  }
+
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active == 1) {
@@ -2798,6 +2797,8 @@ void MainTask::test_sla() {
   }
 
   mp->slalom(sla_p, rorl, nm, false);
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
 
   auto lim_size = pt->sensor_deg_limitter_v.size();
   // TODO: backup sensor_deg_limitter_str, sensor_deg_limitter_dia,
@@ -3311,8 +3312,18 @@ void MainTask::test_dia_walloff() {
 }
 
 void MainTask::test_sla_walloff() {
+
+  backup_r = param->sen_ref_p.normal.exist.right45;
+  backup_l = param->sen_ref_p.normal.exist.left45;
   if (test_search_mode == 0) {
     rorl = ui->select_direction();
+
+    if (rorl == TurnDirection::Right) {
+      param->sen_ref_p.normal.exist.left45 += 10;
+    } else {
+      param->sen_ref_p.normal.exist.right45 += 10;
+    }
+
     if (rorl == TurnDirection::Left) {
       param->sen_ref_p.normal.exist.left45 = 1;
       param->sen_ref_p.normal.expand.left45 = 1;
@@ -3420,6 +3431,9 @@ void MainTask::test_sla_walloff() {
   reset_ego_data();
   req_error_reset();
   pt->suction_disable();
+
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
 
   lt->stop_slalom_log();
   reset_tgt_data();
