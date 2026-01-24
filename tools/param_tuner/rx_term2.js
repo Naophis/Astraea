@@ -287,6 +287,9 @@ const switchToBinaryMode = (obj) => {
           if (data.name.match(/ff_/) !== null)
             if (record[i] > 100000 || record[i] < -100000)
               res = false;
+          if (data.name === "motion_state")
+            if (record[i] > 1000 || record[i] < -1000)
+              res = false;
           if (data.name === "x")
             if (record[i] > 100000 || record[i] < -100000)
               res = false;
