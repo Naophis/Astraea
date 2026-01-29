@@ -225,6 +225,10 @@ class Plot:
             res2["prev_dist"], res2["prev_dist"]))
         print('  back: {{ left: {}, right: {} }}'.format(
             res2["after_dist"], res2["after_dist"]))
+        # 積分した角速度（角度）を出力
+        final_ang_rad = res["ang"][-1] if len(res["ang"]) > 0 else 0
+        final_ang_deg = final_ang_rad * 180 / np.pi
+        print('  integrated_w (angle): {:.4f} [rad] = {:.4f} [deg]'.format(final_ang_rad, final_ang_deg))
 
         accY = plt.subplot2grid((plot_row, plot_col), (4, 0), rowspan=1)
         accY.plot(res["acc_y"] / 9.8)

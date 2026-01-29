@@ -5,10 +5,10 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.8950 #10deg 
-tire2: 13.8950 #10deg
+tire: 13.9250 #10deg 
+tire2: 13.9250 #10deg
 
-battery_gain: 3.904
+battery_gain: 3.973
 
 # tire: 14.120 #新品(#30) 14.12
 # tire2: 14.120 #新品(#30) 14.12
@@ -37,7 +37,7 @@ motor_debug_mode_duty_r: 10
 motor_debug_mode_duty_l: -10
 
 MotorHz: 37500
-SuctionHz: 42500
+SuctionHz: 12500
 MotorResolution: 40
 SuctionResolution: 40
 
@@ -201,8 +201,10 @@ gyro_pid:
   mode: 3
 
   p: 0.000325
-  i: 0.01465 # dif angle
   b: 0.0000595 #summation
+  i: 0.01465 # dif angle
+  # p: 0.000375
+  # b: 0.0000725 #summation
   d: 0.000295
   c: 0
 
@@ -340,8 +342,8 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.0024588
   # gyro_w_gain_right: 0.0024588
-  gyro_w_gain_left: 0.0024585
-  gyro_w_gain_right: 0.0024585
+  gyro_w_gain_left: 0.00245725
+  gyro_w_gain_right: 0.00245825
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95
@@ -432,8 +434,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 145 #125~144
-normal_sla_r_wall_off_ref_cnt: 137 #125~144
+normal_sla_l_wall_off_ref_cnt: 132 #125~144
+normal_sla_r_wall_off_ref_cnt: 140 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6
