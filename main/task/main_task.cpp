@@ -1229,6 +1229,10 @@ void MainTask::load_sensor_param() {
       getItem(normal_ref, "kireme_r_wall_off")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_l_wall_off =
       getItem(normal_ref, "kireme_l_wall_off")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_r_wall_off2 =
+      getItem(normal_ref, "kireme_r_wall_off2")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_l_wall_off2 =
+      getItem(normal_ref, "kireme_l_wall_off2")->valuedouble;
 
   param->sen_ref_p.normal.exist.right45 =
       getItem(normal_exist, "right45")->valuedouble;
@@ -2848,7 +2852,7 @@ void MainTask::test_sla() {
     }
   }
   if (sys.test.ignore_opp_sen > 0) {
-    ps.v_max = sys.test.v_max;
+    ps.v_max = std::max(sys.test.v_max, sla_p.v);
     ps.dist = sys.test.dist;
   }
   ps.sct = SensorCtrlType::NONE;
@@ -2866,16 +2870,21 @@ void MainTask::test_sla() {
     ps.decel = sys.test.dia_decel;
   }
   ps.motion_type = MotionType::STRAIGHT;
+  // ps.motion_type = MotionType::SLA_BACK_STR;
+
   mp->go_straight(ps);
 
-  vTaskDelay(100.0 / portTICK_RATE_MS);
+  vTaskDelay(25.0 / portTICK_RATE_MS);
+
+  lt->stop_slalom_log();
+
+  vTaskDelay(75.0 / portTICK_RATE_MS);
   pt->motor_disable();
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
   pt->motor_disable();
   pt->suction_disable();
-  lt->stop_slalom_log();
 
   lt->save(slalom_log_file);
   ui->coin(120);
@@ -2970,7 +2979,7 @@ void MainTask::test_search_sla(bool mode) {
   pt->search_mode = true;
   mp->slalom(sla_p, rorl, nm);
   for (int i = 0; i < sys.test.turn_times; i++) {
-    mp->slalom(sla_p, rorl2, nm);
+    mp->slalom(sla_p, rorl, nm);
   }
 
   ps.v_max = sla_p.v;

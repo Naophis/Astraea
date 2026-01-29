@@ -316,6 +316,10 @@ private:
                                 bool range_check_right, bool dist_check_right,
                                 bool check_diff_right, bool expand_right,
                                 bool range_check_right_expand);
+
+  float calc_neipire(float t, float base_time, float N);
+  float calc_runge_kutta();
+  float runge_kutta_w(float t);
 };
 
 #endif
