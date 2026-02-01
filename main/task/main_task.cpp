@@ -907,7 +907,7 @@ void MainTask::load_offset_param() {
   param->cell = getItem(root, "cell")->valuedouble;
   param->cell2 = getItem(root, "cell2")->valuedouble;
   param->seach_timer = getItem(root, "seach_timer")->valueint;
-  param->clear_angle = getItem(root, "clear_angle")->valuedouble;
+  param->clear_angle = getItem(root, "clear_angle")->valuedouble * M_PI / 180;
   param->clear_dist_order = getItem(root, "clear_dist_order")->valuedouble;
   param->pivot_back_dist0 = getItem(root, "pivot_back_dist0")->valuedouble;
   param->pivot_back_dist1 = getItem(root, "pivot_back_dist1")->valuedouble;
@@ -1229,6 +1229,10 @@ void MainTask::load_sensor_param() {
       getItem(normal_ref, "kireme_r_wall_off")->valuedouble;
   param->sen_ref_p.normal.ref.kireme_l_wall_off =
       getItem(normal_ref, "kireme_l_wall_off")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_r_wall_off2 =
+      getItem(normal_ref, "kireme_r_wall_off2")->valuedouble;
+  param->sen_ref_p.normal.ref.kireme_l_wall_off2 =
+      getItem(normal_ref, "kireme_l_wall_off2")->valuedouble;
 
   param->sen_ref_p.normal.exist.right45 =
       getItem(normal_exist, "right45")->valuedouble;
@@ -2142,7 +2146,8 @@ void MainTask::task() {
       mode_num = select_mode();
       pt->mode_select = false;
       exec_param_prof();
-      printf("%d\n", mode_num);
+      printf("mode_num: %d, exec_param_list.size(): %d\n", mode_num,
+             exec_param_list.size());
       if (mode_num == 0) {
         lgc->set_goal_pos(sys.goals);
         rorl2 = ui->select_direction2();
@@ -2187,8 +2192,9 @@ void MainTask::task() {
           vTaskDelay(10.0 / portTICK_RATE_MS);
         }
         search_ctrl->print_maze();
-      } else if (2 <= mode_num && mode_num <= exec_param_list.size() - 1) {
+      } else if (2 <= mode_num && mode_num <= exec_param_list.size() + 1) {
         const auto p = exec_param_list[mode_num - 2];
+        printf("mode_num: %d\n", mode_num - 2);
         exec_param_list.clear();
         path_run(p.fast_idx, p.normal_idx, p.slow_idx);
       } else if (mode_num == (2 + exec_param_list.size())) {
@@ -2729,13 +2735,12 @@ void MainTask::test_sla() {
 
   backup_r = param->sen_ref_p.normal.exist.right45;
   backup_l = param->sen_ref_p.normal.exist.left45;
-  // if (sys.test.ignore_opp_sen) {
-  //   if (rorl == TurnDirection::Right) {
-  //     param->sen_ref_p.normal.exist.right45 = 1;
-  //   } else {
-  //     param->sen_ref_p.normal.exist.left45 = 1;
-  //   }
-  // }
+  if (rorl == TurnDirection::Right) {
+    param->sen_ref_p.normal.exist.left45 += 10;
+  } else {
+    param->sen_ref_p.normal.exist.right45 += 10;
+  }
+
   mp->reset_gyro_ref_with_check();
 
   if (sys.test.suction_active == 1) {
@@ -2794,9 +2799,6 @@ void MainTask::test_sla() {
     nm.v_max = sla_p2.v;
     nm.v_end = sla_p2.v;
   }
-
-  mp->slalom(sla_p, rorl, nm, false);
-
   auto lim_size = pt->sensor_deg_limitter_v.size();
   // TODO: backup sensor_deg_limitter_str, sensor_deg_limitter_dia,
   // sensor_deg_limitter_piller values
@@ -2808,7 +2810,14 @@ void MainTask::test_sla() {
     bk_sensor_deg_limitter_str[i] = pt->sensor_deg_limitter_str[i];
     bk_sensor_deg_limitter_dia[i] = pt->sensor_deg_limitter_dia[i];
     bk_sensor_deg_limitter_piller[i] = pt->sensor_deg_limitter_piller[i];
+    // pt->sensor_deg_limitter_str[i] = 0.0;
+    pt->sensor_deg_limitter_dia[i] = 0.0;
+    pt->sensor_deg_limitter_piller[i] = 0.0;
   }
+
+  mp->slalom(sla_p, rorl, nm, false);
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
 
   if (sys.test.sla_return > 0) {
     const auto type2 = static_cast<TurnType>(sys.test.sla_type2);
@@ -2845,7 +2854,7 @@ void MainTask::test_sla() {
     }
   }
   if (sys.test.ignore_opp_sen > 0) {
-    ps.v_max = sys.test.v_max;
+    ps.v_max = std::max(sys.test.v_max, sla_p.v);
     ps.dist = sys.test.dist;
   }
   ps.sct = SensorCtrlType::NONE;
@@ -2863,16 +2872,21 @@ void MainTask::test_sla() {
     ps.decel = sys.test.dia_decel;
   }
   ps.motion_type = MotionType::STRAIGHT;
+  // ps.motion_type = MotionType::SLA_BACK_STR;
+
   mp->go_straight(ps);
 
-  vTaskDelay(100.0 / portTICK_RATE_MS);
+  vTaskDelay(25.0 / portTICK_RATE_MS);
+
+  lt->stop_slalom_log();
+
+  vTaskDelay(75.0 / portTICK_RATE_MS);
   pt->motor_disable();
   reset_tgt_data();
   reset_ego_data();
   req_error_reset();
   pt->motor_disable();
   pt->suction_disable();
-  lt->stop_slalom_log();
 
   lt->save(slalom_log_file);
   ui->coin(120);
@@ -2967,7 +2981,7 @@ void MainTask::test_search_sla(bool mode) {
   pt->search_mode = true;
   mp->slalom(sla_p, rorl, nm);
   for (int i = 0; i < sys.test.turn_times; i++) {
-    mp->slalom(sla_p, rorl2, nm);
+    mp->slalom(sla_p, rorl, nm);
   }
 
   ps.v_max = sla_p.v;
@@ -3309,8 +3323,18 @@ void MainTask::test_dia_walloff() {
 }
 
 void MainTask::test_sla_walloff() {
+
+  backup_r = param->sen_ref_p.normal.exist.right45;
+  backup_l = param->sen_ref_p.normal.exist.left45;
   if (test_search_mode == 0) {
     rorl = ui->select_direction();
+
+    if (rorl == TurnDirection::Right) {
+      param->sen_ref_p.normal.exist.left45 += 10;
+    } else {
+      param->sen_ref_p.normal.exist.right45 += 10;
+    }
+
     if (rorl == TurnDirection::Left) {
       param->sen_ref_p.normal.exist.left45 = 1;
       param->sen_ref_p.normal.expand.left45 = 1;
@@ -3418,6 +3442,9 @@ void MainTask::test_sla_walloff() {
   reset_ego_data();
   req_error_reset();
   pt->suction_disable();
+
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
 
   lt->stop_slalom_log();
   reset_tgt_data();
