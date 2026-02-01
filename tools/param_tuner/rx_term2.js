@@ -144,6 +144,7 @@ const switchLineMode = (obj) => {
 let LOG_STRUCT_SIZE = 12; // 12 bytes per record
 
 const switchToBinaryMode = (obj) => {
+  let last_ang_sum = 0;
   const dataSize = 48;//obj.byte_size
   const dataSize2 = obj.data_struct.reduce((prev, cur) => {
     return prev + cur.size;
@@ -282,25 +283,67 @@ const switchToBinaryMode = (obj) => {
               res = false;
           }
           if (data.name.match(/_pid_/) !== null)
-            if (record[i] > 100000 || record[i] < -100000)
+            if (record[i] > 100000 || record[i] < -100000) {
+              console.log(data.name, 'error:', record[i]);
               res = false;
+            }
           if (data.name.match(/ff_/) !== null)
-            if (record[i] > 100000 || record[i] < -100000)
+            if (record[i] > 100000 || record[i] < -100000) {
+              console.log(data.name, 'error:', record[i]);
               res = false;
+            }
+          if (data.name === "motion_state")
+            if (record[i] > 1000 || record[i] < -1000) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
+          if (data.name === "timestamp")
+            if (record[i] > 10000 || record[i] < 0) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
+          if (data.name === "duty_roll")
+            if (record[i] > 0.05 || record[i] < -0.05) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
+          if (data.name === "duty_roll_before")
+            if (record[i] > 70 || record[i] < -70) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
           if (data.name === "x")
-            if (record[i] > 100000 || record[i] < -100000)
+            if (record[i] > 100000 || record[i] < -100000) {
+              console.log(data.name, 'error:', record[i]);
               res = false;
+            }
           if (data.name === "y")
-            if (record[i] > 100000 || record[i] < -100000)
+            if (record[i] > 100000 || record[i] < -100000) {
+              console.log(data.name, 'error:', record[i]);
               res = false;
+            }
+          if (data.name === "ang_kf_sum") {
+            if (record[i] > 1000 || record[i] < -1000) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
+            if (Math.abs(Math.abs(record[i]) - last_ang_sum) > 40) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
+            last_ang_sum = Math.abs(record[i]);
+          }
+          if (data.name === "pln_time_diff")
+            if (record[i] > 3000 || record[i] < 0) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
+          return res;
           if (data.name === "battery")
             if (record[i] > 15 || record[i] < 0)
               res = false;
           if (data.name === "alpha")
             if (record[i] > 100000 || record[i] < -100000)
-              res = false;
-          if (data.name === "timestamp")
-            if (record[i] > 10000 || record[i] < 0)
               res = false;
           if (data.name === "m_pid_i_v")
             if (record[i] > 0.1 || record[i] < -0.1)
