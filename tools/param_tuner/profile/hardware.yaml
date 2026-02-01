@@ -37,7 +37,7 @@ motor_debug_mode_duty_r: 10
 motor_debug_mode_duty_l: -10
 
 MotorHz: 37500
-SuctionHz: 12500
+SuctionHz: 42500
 MotorResolution: 40
 SuctionResolution: 40
 
@@ -200,7 +200,7 @@ motor_pid3:
 gyro_pid:
   mode: 3
 
-  p: 0.000325
+  p: 0.000425
   b: 0.0000595 #summation
   i: 0.01465 # dif angle
   # p: 0.000375
@@ -246,6 +246,7 @@ angle_pid: # pid for angle
 
   p: 9.50
   i: 0.0
+  # i: 1.75
   d: 4.5
 
   antiwindup: 0 #I制御してないので意味ない
@@ -303,7 +304,7 @@ str_ang_pid:
   i: 0.0325
 
   # fast
-  b: 0.0425
+  b: 0.0475
   d: 0.0325
   c: 0
 

@@ -8,30 +8,33 @@ exec_prof:
   - fast: 3 # 2
     normal: 3
     slow: 3
-  - fast: 7 # 3
+  - fast: 6 # 3
+    normal: 4
+    slow: 3
+  - fast: 7 # 4
     normal: 5
     slow: 3
-  - fast: 8 # 4
+  - fast: 8 # 5
     normal: 6
     slow: 3
-  - fast: 9 # 5
+  - fast: 9 # 6
     normal: 7
     slow: 3
-  - fast: 10 # 6
+  - fast: 10 # 7
     normal: 8
     slow: 3
-  - fast: 10 # 7
+  - fast: 10 # 8
     normal: 9
     slow: 3
-  - fast: 11 # 8
+  - fast: 11 # 9
     normal: 10
     slow: 3
-  - fast: 12 # 9
+  - fast: 12 # 10
     normal: 11
     slow: 3
-  - fast: 13 # 10
+  - fast: 13 # 11
     normal: 12
     slow: 3
-  - fast: 13 # 11
+  - fast: 13 # 12
     normal: 12
     slow: 3

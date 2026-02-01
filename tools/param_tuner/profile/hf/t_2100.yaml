@@ -4,8 +4,8 @@ orval:
   pow_n: 4
   rad: 52.0
   rad2: 50.0
-  front: { left: 4, right: 4 }
-  back: { left: 35, right: 35 }
+  front: { left: 12, right: 12 }
+  back: { left: 25, right: 25 }
 normal:
   v: 300.000000
   ang: 90.000000
@@ -28,15 +28,15 @@ large:
   ang: 90.0
   pow_n: 4
   rad: 58.5
-  front: { left: 11.102694878657064, right: 12.102694878657064 }
-  back: { left: 54.59381550343086, right: 54.59381550343086 }
+  front: { left: 14.602694878657064, right: 18.602694878657064 }
+  back: { left: 37.59381550343086, right: 37.59381550343086 }
 dia45:
   v: 2100
   ang: 45.0
   pow_n: 6
   rad: 54.0
-  front: { left: 12.216513994989235, right: 7.216513994989235 }
-  back: { left: 60.07891890533133, right: 60.07891890533133 }
+  front: { left: 6.216513994989235, right: 9.716513994989235 }
+  back: { left: 55.07891890533133, right: 55.07891890533133 }
 dia45_2:
   v: 2100
   ang: 45

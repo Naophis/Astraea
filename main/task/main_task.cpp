@@ -2799,11 +2799,6 @@ void MainTask::test_sla() {
     nm.v_max = sla_p2.v;
     nm.v_end = sla_p2.v;
   }
-
-  mp->slalom(sla_p, rorl, nm, false);
-  param->sen_ref_p.normal.exist.right45 = backup_r;
-  param->sen_ref_p.normal.exist.left45 = backup_l;
-
   auto lim_size = pt->sensor_deg_limitter_v.size();
   // TODO: backup sensor_deg_limitter_str, sensor_deg_limitter_dia,
   // sensor_deg_limitter_piller values
@@ -2815,7 +2810,14 @@ void MainTask::test_sla() {
     bk_sensor_deg_limitter_str[i] = pt->sensor_deg_limitter_str[i];
     bk_sensor_deg_limitter_dia[i] = pt->sensor_deg_limitter_dia[i];
     bk_sensor_deg_limitter_piller[i] = pt->sensor_deg_limitter_piller[i];
+    // pt->sensor_deg_limitter_str[i] = 0.0;
+    pt->sensor_deg_limitter_dia[i] = 0.0;
+    pt->sensor_deg_limitter_piller[i] = 0.0;
   }
+
+  mp->slalom(sla_p, rorl, nm, false);
+  param->sen_ref_p.normal.exist.right45 = backup_r;
+  param->sen_ref_p.normal.exist.left45 = backup_l;
 
   if (sys.test.sla_return > 0) {
     const auto type2 = static_cast<TurnType>(sys.test.sla_type2);

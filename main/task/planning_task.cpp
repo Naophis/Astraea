@@ -2823,6 +2823,14 @@ void IRAM_ATTR PlanningTask::calc_pid_val_ang() {
   ee->ang.error_d = ee->ang.error_p - ee->ang.error_d;
   ee->ang.error_dd = ee->ang.error_d - ee->ang.error_dd;
   ee->ang.error_i += (ee->ang.error_p);
+  // 壁制御できないときは角度を固定
+  if (!(tgt->motion_type == MotionType::STRAIGHT) ||
+      tgt->motion_type == MotionType::SLA_FRONT_STR ||
+      tgt->motion_type == MotionType::SLA_BACK_STR ||
+      tgt->motion_type == MotionType::WALL_OFF ||
+      tgt->motion_type == MotionType::WALL_OFF_DIA) {
+    ee->ang.error_d = ee->ang.error_dd = ee->ang.error_i = 0;
+  }
 
   if (w_reset == 0) { // 角度リセット直後は誤差を0にする
     // ee->ang.error_d = ee->ang.error_dd = ee->ang.error_i = 0;
