@@ -338,6 +338,11 @@ const switchToBinaryMode = (obj) => {
               console.log(data.name, 'error:', record[i]);
               res = false;
             }
+          if (data.name === "kim_theta")
+            if (record[i] > 3000 || record[i] < -3000) {
+              console.log(data.name, 'error:', record[i]);
+              res = false;
+            }
           return res;
           if (data.name === "battery")
             if (record[i] > 15 || record[i] < 0)
