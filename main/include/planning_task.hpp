@@ -93,6 +93,8 @@ public:
 
   std::vector<float> axel_degenerate_x;
   std::vector<float> axel_degenerate_y;
+  std::vector<float> axel_degenerate_dia_x;
+  std::vector<float> axel_degenerate_dia_y;
   std::vector<float> sensor_deg_limitter_v;
   std::vector<float> sensor_deg_limitter_str;
   std::vector<float> sensor_deg_limitter_dia;

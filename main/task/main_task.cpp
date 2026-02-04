@@ -399,7 +399,8 @@ void MainTask::load_hw_param() {
         *axel_degenerate_y, *led_blight, *gyro_pid_gain_limitter,
         *motor_pid_gain_limitter, *motor2_pid_gain_limitter,
         *sensor_deg_limitter_v, *sensor_deg_limitter_str,
-        *sensor_deg_limitter_dia, *sensor_deg_limitter_piller;
+        *sensor_deg_limitter_dia, *sensor_deg_limitter_piller,
+        *axel_degenerate_dia_x, *axel_degenerate_dia_y;
 
   root = cJSON_Parse(str.c_str());
 
@@ -500,6 +501,18 @@ void MainTask::load_hw_param() {
     pt->axel_degenerate_y.emplace_back(y);
   }
 
+  axel_degenerate_dia_x = getItem(root, "axel_degenerate_dia_x");
+  axel_degenerate_dia_y = getItem(root, "axel_degenerate_dia_y");
+  list_size = cJSON_GetArraySize(axel_degenerate_dia_x);
+  pt->axel_degenerate_dia_x.clear();
+  pt->axel_degenerate_dia_y.clear();
+  for (int i = 0; i < list_size; i++) {
+    const auto x = cJSON_GetArrayItem(axel_degenerate_dia_x, i)->valuedouble;
+    const auto y = cJSON_GetArrayItem(axel_degenerate_dia_y, i)->valuedouble;
+    pt->axel_degenerate_dia_x.emplace_back(x);
+    pt->axel_degenerate_dia_y.emplace_back(y);
+  }
+
   pt->sensor_deg_limitter_v.clear();
   pt->sensor_deg_limitter_str.clear();
   pt->sensor_deg_limitter_dia.clear();
@@ -591,19 +604,19 @@ void MainTask::load_hw_param() {
   // param->motor_pid_gain_limitter.mode =
   //     getItem(motor_pid_gain_limitter, "mode")->valueint;
 
-  motor2_pid_gain_limitter = getItem(root, "motor2_pid_gain_limitter");
-  param->motor2_pid_gain_limitter.p =
-      getItem(motor2_pid_gain_limitter, "p")->valuedouble;
-  param->motor2_pid_gain_limitter.i =
-      getItem(motor2_pid_gain_limitter, "i")->valuedouble;
-  param->motor2_pid_gain_limitter.d =
-      getItem(motor2_pid_gain_limitter, "d")->valuedouble;
-  param->motor2_pid_gain_limitter.b =
-      getItem(motor2_pid_gain_limitter, "b")->valuedouble;
-  param->motor2_pid_gain_limitter.c =
-      getItem(motor2_pid_gain_limitter, "c")->valuedouble;
-  param->motor2_pid_gain_limitter.mode =
-      getItem(motor2_pid_gain_limitter, "mode")->valueint;
+  // motor2_pid_gain_limitter = getItem(root, "motor2_pid_gain_limitter");
+  // param->motor2_pid_gain_limitter.p =
+  //     getItem(motor2_pid_gain_limitter, "p")->valuedouble;
+  // param->motor2_pid_gain_limitter.i =
+  //     getItem(motor2_pid_gain_limitter, "i")->valuedouble;
+  // param->motor2_pid_gain_limitter.d =
+  //     getItem(motor2_pid_gain_limitter, "d")->valuedouble;
+  // param->motor2_pid_gain_limitter.b =
+  //     getItem(motor2_pid_gain_limitter, "b")->valuedouble;
+  // param->motor2_pid_gain_limitter.c =
+  //     getItem(motor2_pid_gain_limitter, "c")->valuedouble;
+  // param->motor2_pid_gain_limitter.mode =
+  //     getItem(motor2_pid_gain_limitter, "mode")->valueint;
 
   gyro_pid_gain_limitter = getItem(root, "gyro_pid_gain_limitter");
   param->gyro_pid_gain_limitter.p =
@@ -648,13 +661,13 @@ void MainTask::load_hw_param() {
   param->motor_pid2.windup_dead_bind =
       getItem(motor_pid2, "windup_dead_bind")->valuedouble;
 
-  motor_pid3 = getItem(root, "motor_pid3");
-  param->motor_pid3.p = getItem(motor_pid3, "p")->valuedouble;
-  param->motor_pid3.i = getItem(motor_pid3, "i")->valuedouble;
-  param->motor_pid3.d = getItem(motor_pid3, "d")->valuedouble;
-  param->motor_pid3.b = getItem(motor_pid3, "b")->valuedouble;
-  param->motor_pid3.c = getItem(motor_pid3, "c")->valuedouble;
-  param->motor_pid3.mode = getItem(motor_pid3, "mode")->valueint;
+  // motor_pid3 = getItem(root, "motor_pid3");
+  // param->motor_pid3.p = getItem(motor_pid3, "p")->valuedouble;
+  // param->motor_pid3.i = getItem(motor_pid3, "i")->valuedouble;
+  // param->motor_pid3.d = getItem(motor_pid3, "d")->valuedouble;
+  // param->motor_pid3.b = getItem(motor_pid3, "b")->valuedouble;
+  // param->motor_pid3.c = getItem(motor_pid3, "c")->valuedouble;
+  // param->motor_pid3.mode = getItem(motor_pid3, "mode")->valueint;
 
   // sen_pid = getItem(root, "sensor_pid");
   // param->sensor_pid.p = getItem(sen_pid, "p")->valuedouble;
@@ -2832,6 +2845,20 @@ void MainTask::test_sla() {
       pt->sensor_deg_limitter_piller[i] = 0.0;
     }
     mp->slalom(sla_p2, rorl2, nm, dia);
+  } else if (sys.test.turn_times > 0) {
+    for (int i = 0; i < sys.test.turn_times; i++) {
+
+      if (static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia45 ||
+          static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia135) {
+        if ((i & 0x01) == 0x00) {
+          mp->slalom(sla_p2, rorl, nm, true);
+        } else {
+          mp->slalom(sla_p, rorl, nm, false);
+        }
+      } else {
+        mp->slalom(sla_p, rorl, nm);
+      }
+    }
   }
   // restore sensor deg limitter values
   for (int i = 0; i < lim_size; i++) {

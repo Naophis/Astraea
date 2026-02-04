@@ -28,6 +28,11 @@ void dump_heap_info(const char *tag) {
   size_t free_psram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
   size_t min_free_psram = heap_caps_get_minimum_free_size(MALLOC_CAP_SPIRAM);
 
+  // MALLOC_CAP_INTERNAL
+  size_t free_internal = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+  size_t min_free_internal =
+      heap_caps_get_minimum_free_size(MALLOC_CAP_INTERNAL);
+
   printf("---- Heap Info [%s] ----\n", tag);
   printf("Total free heap: %u (min: %u)\n", (unsigned)free_heap,
          (unsigned)min_free_heap);
@@ -37,12 +42,15 @@ void dump_heap_info(const char *tag) {
          (unsigned)min_free_32bit);
   printf("   SPIRAM (ext) : %u (min: %u)\n", (unsigned)free_psram,
          (unsigned)min_free_psram);
+  printf(" INTERNAL (int) : %u (min: %u)\n", (unsigned)free_internal,
+         (unsigned)min_free_internal);
 
   // より詳細に見たい場合はこれで全ヒープ領域の状態を出力
   heap_caps_print_heap_info(MALLOC_CAP_8BIT);
   heap_caps_print_heap_info(MALLOC_CAP_32BIT);
   heap_caps_print_heap_info(MALLOC_CAP_SPIRAM);
   heap_caps_print_heap_info(MALLOC_CAP_8BIT);
+  heap_caps_print_heap_info(MALLOC_CAP_INTERNAL);
 }
 void mount() {
   if (mount_state) {

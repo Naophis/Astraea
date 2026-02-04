@@ -386,8 +386,12 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   const TickType_t xDelay2 = 100.0 / portTICK_PERIOD_MS;
   const float PI = 3.141592653589793238;
   const float th = 10;
-  int i = 0;
   int c = 0;
+  const int size = sizeof(LogStruct1) + sizeof(LogStruct2) +
+                   sizeof(LogStruct3) + sizeof(LogStruct4) +
+                   sizeof(LogStruct5) + sizeof(LogStruct6) +
+                   sizeof(LogStruct7) + sizeof(LogStruct8) +
+                   sizeof(LogStruct9) + sizeof(LogStruct10);
   print_header();
 
   float left90_d_z = 0;
@@ -398,11 +402,15 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   float right45_d_z = 0;
   float right45_2_d_z = 0;
   float right45_3_d_z = 0;
-
+  ls1.index = 0;
   const auto len = log_vec.size();
+  uint8_t send_buf[size];
   for (const auto &ld : log_vec) {
-    ls1.index = i++;
-    if (i == len) {
+    ls1.index++;
+    if (ls1.index >= len) {
+      break;
+    }
+    if (ls1.index < 0) {
       break;
     }
 
@@ -515,10 +523,16 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls4.sen_dist_r45 = halfToFloat(ld->sen_log_r45);
 
     ls4.timestamp = ld->motion_timestamp;
+
+    if (ls4.timestamp > 1000) {
+      break;
+    }
+
     ls4.sen_calc_time = ld->sen_calc_time;
     ls4.sen_calc_time2 = ld->sen_calc_time2;
     ls4.pln_calc_time = ld->pln_calc_time;
-    ls4.pln_calc_time2 = ld->pln_calc_time2;
+    ls4.pln_calc_time2 = 123;
+
     ls4.pln_time_diff = ld->pln_time_diff;
 
     ls5.m_pid_p = halfToFloat(ld->m_pid_p);
@@ -606,16 +620,29 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     ls10.duty_roll_before = halfToFloat(ld->duty_roll_before);
     ls10.reserve5 = 0;
 
-    uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
-    uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
-    uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
-    uart_write_bytes(UART_NUM_0, &ls4, sizeof(LogStruct4));
-    uart_write_bytes(UART_NUM_0, &ls5, sizeof(LogStruct5));
-    uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
-    uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
-    uart_write_bytes(UART_NUM_0, &ls8, sizeof(LogStruct8));
-    uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
-    uart_write_bytes(UART_NUM_0, &ls10, sizeof(LogStruct10));
+    // 単一バッファにまとめて1回で送信（printf干渉を最小化）
+
+    size_t offset = 0;
+    memcpy(send_buf + offset, &ls1, sizeof(LogStruct1));
+    offset += sizeof(LogStruct1);
+    memcpy(send_buf + offset, &ls2, sizeof(LogStruct2));
+    offset += sizeof(LogStruct2);
+    memcpy(send_buf + offset, &ls3, sizeof(LogStruct3));
+    offset += sizeof(LogStruct3);
+    memcpy(send_buf + offset, &ls4, sizeof(LogStruct4));
+    offset += sizeof(LogStruct4);
+    memcpy(send_buf + offset, &ls5, sizeof(LogStruct5));
+    offset += sizeof(LogStruct5);
+    memcpy(send_buf + offset, &ls6, sizeof(LogStruct6));
+    offset += sizeof(LogStruct6);
+    memcpy(send_buf + offset, &ls7, sizeof(LogStruct7));
+    offset += sizeof(LogStruct7);
+    memcpy(send_buf + offset, &ls8, sizeof(LogStruct8));
+    offset += sizeof(LogStruct8);
+    memcpy(send_buf + offset, &ls9, sizeof(LogStruct9));
+    offset += sizeof(LogStruct9);
+    memcpy(send_buf + offset, &ls10, sizeof(LogStruct10));
+    uart_write_bytes(UART_NUM_0, send_buf, size);
 
     c++;
     if (c == 50) {
@@ -626,16 +653,29 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
 
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
   ls1.index = -1;
-  uart_write_bytes(UART_NUM_0, &ls1, sizeof(LogStruct1));
-  uart_write_bytes(UART_NUM_0, &ls2, sizeof(LogStruct2));
-  uart_write_bytes(UART_NUM_0, &ls3, sizeof(LogStruct3));
-  uart_write_bytes(UART_NUM_0, &ls4, sizeof(LogStruct4));
-  uart_write_bytes(UART_NUM_0, &ls5, sizeof(LogStruct5));
-  uart_write_bytes(UART_NUM_0, &ls6, sizeof(LogStruct6));
-  uart_write_bytes(UART_NUM_0, &ls7, sizeof(LogStruct7));
-  uart_write_bytes(UART_NUM_0, &ls8, sizeof(LogStruct8));
-  uart_write_bytes(UART_NUM_0, &ls9, sizeof(LogStruct9));
-  uart_write_bytes(UART_NUM_0, &ls10, sizeof(LogStruct10));
+  {
+    size_t offset = 0;
+    memcpy(send_buf + offset, &ls1, sizeof(LogStruct1));
+    offset += sizeof(LogStruct1);
+    memcpy(send_buf + offset, &ls2, sizeof(LogStruct2));
+    offset += sizeof(LogStruct2);
+    memcpy(send_buf + offset, &ls3, sizeof(LogStruct3));
+    offset += sizeof(LogStruct3);
+    memcpy(send_buf + offset, &ls4, sizeof(LogStruct4));
+    offset += sizeof(LogStruct4);
+    memcpy(send_buf + offset, &ls5, sizeof(LogStruct5));
+    offset += sizeof(LogStruct5);
+    memcpy(send_buf + offset, &ls6, sizeof(LogStruct6));
+    offset += sizeof(LogStruct6);
+    memcpy(send_buf + offset, &ls7, sizeof(LogStruct7));
+    offset += sizeof(LogStruct7);
+    memcpy(send_buf + offset, &ls8, sizeof(LogStruct8));
+    offset += sizeof(LogStruct8);
+    memcpy(send_buf + offset, &ls9, sizeof(LogStruct9));
+    offset += sizeof(LogStruct9);
+    memcpy(send_buf + offset, &ls10, sizeof(LogStruct10));
+    uart_write_bytes(UART_NUM_0, send_buf, size);
+  }
 
   vTaskDelay(10.0 / portTICK_PERIOD_MS);
 
@@ -652,6 +692,10 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   log_vec.clear();
   // umount();
   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
+
+  for (const auto &ld : log_vec) {
+    // printf("log size: %d bytes\n", sizeof(*ld));
+  }
 }
 
 void IRAM_ATTR LoggingTask::dump_log2(std::string file_name) {}
@@ -751,7 +795,7 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->sen_calc_time = sensing_result->calc_time;
   ld->sen_calc_time2 = sensing_result->calc_time2;
   ld->pln_calc_time = tgt_val->calc_time;
-  ld->pln_calc_time2 = tgt_val->calc_time2;
+  // ld->pln_calc_time2 = tgt_val->calc_time2;
   ld->pln_time_diff = tgt_val->calc_time_diff;
 
   ld->m_pid_p = floatToHalf(error_entity->v_val.p);
