@@ -19,6 +19,7 @@ let ready = function () {
     {
       baudRate: 3000000,
       path: comport,
+      highWaterMark: 256 * 1024,  // 256KB buffer (default: 64KB)
       // baudRate: 115200,
     },
     (e) => {
@@ -128,7 +129,11 @@ const switchLineMode = (obj) => {
       obj.file_name = getNowYMD();
       obj.record = "";
 
-      // console.log(obj);
+      // デバッグ: 最初の20カラムの型定義を出力
+      console.log('First 20 columns:');
+      for (let i = 0; i < 20 && i < obj.data_struct.length; i++) {
+        console.log(`  [${i}] ${obj.data_struct[i].name}: ${obj.data_struct[i].type}`);
+      }
       switchToBinaryMode(obj);
     }
 
@@ -151,6 +156,7 @@ const switchToBinaryMode = (obj) => {
   }, 0);
   console.log('size1: ', dataSize, 'bytes');
   console.log('size2: ', dataSize2, 'bytes');
+  console.log('header count:', obj.data_struct.length, '(expected: 120)');
 
   LOG_STRUCT_SIZE = dataSize2 / (4 * 12); // 4 * 12 bytes per struct
 
@@ -160,7 +166,7 @@ const switchToBinaryMode = (obj) => {
   port.unpipe(parser);
 
   // ByteLength パーサに切り替え
-  parser = port.pipe(new ByteLengthParser({ length: dataSize }));
+  parser = port.pipe(new ByteLengthParser({ length: dataSize, highWaterMark: 256 * 1024 }));
 
   const header = obj.data_struct.map((data) => {
     return data.name
@@ -209,6 +215,18 @@ const switchToBinaryMode = (obj) => {
     cnt++;
     index++;
 
+    // デバッグ: 最初の4バイト(index)を監視
+    if (cnt === 1) {
+      const rawIndex = binaryData.readInt32LE(0);
+      if (rawIndex < 0 || rawIndex > 100000) {
+        console.log(`[WARN] index=${index}, rawIndex=${rawIndex}, first8bytes=${binaryData.slice(0, 8).toString('hex')}`);
+        // 異常なindexを検出したらこのレコードをスキップ
+        cnt = 0;
+        record = [];
+        return;
+      }
+    }
+
     let bind = false;
     const start_idx = (cnt - 1) * 12;
     const end_idx = start_idx + 12;
@@ -254,28 +272,12 @@ const switchToBinaryMode = (obj) => {
 
     if (cnt === LOG_STRUCT_SIZE) {
       cnt = 0;
-      if (index > 10 && record[0] <= 0 && !finish) {
-        clearInterval(interval);
-        fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
-          flag: "w+",
-        });
-        fs.copyFileSync(
-          `${__dirname}/logs/${obj.file_name}`,
-          `${__dirname}/logs/latest.csv`
-        );
-        finish = true;
-        console.log("end");
-        clearInterval(interval);
-        switchLineMode({
-          dump_to_csv_ready: false,
-          dump_to_map: false,
-          data_struct: [],
-          file_name: getNowYMD(),
-          record: "",
-        });
-      } else if (!finish) {
+      if (!finish) {
         let valid = obj.data_struct.every((data, i) => {
           let res = true;
+          // return true
+          if (record[i] < -100000 || record[i] > 100000)
+            res = false;
           if (data.name === "index") {
             if (record[i] < 0 || record[i] > 100000)
               res = false;
@@ -426,6 +428,25 @@ const switchToBinaryMode = (obj) => {
           obj.record += `${str}\n`;
         }
         record = [];
+      } else if (finish) {
+        clearInterval(interval);
+        fs.writeFileSync(`${__dirname}/logs/${obj.file_name}`, `${obj.record}`, {
+          flag: "w+",
+        });
+        fs.copyFileSync(
+          `${__dirname}/logs/${obj.file_name}`,
+          `${__dirname}/logs/latest.csv`
+        );
+        finish = true;
+        console.log("end");
+        clearInterval(interval);
+        switchLineMode({
+          dump_to_csv_ready: false,
+          dump_to_map: false,
+          data_struct: [],
+          file_name: getNowYMD(),
+          record: "",
+        });
       }
     }
   });
