@@ -5,10 +5,11 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.9250 #10deg 
-tire2: 13.9250 #10deg
+tire: 13.90 #10deg 
+tire2: 13.90 #10deg
 
-battery_gain: 3.973
+battery_gain: 3.9804018006458484
+# battery_gain: 4.389473684210526
 
 # tire: 14.120 #新品(#30) 14.12
 # tire2: 14.120 #新品(#30) 14.12
@@ -71,7 +72,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 9000
+log_size: 8000
 
 front_ctrl_error_th: 1
 
@@ -102,6 +103,9 @@ axel_degenerate_y: [1, 1, 0.9, 0.85, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
+axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10]
+axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.75, 0.5, 0.125]
+
 decel_delay_cnt: 5
 dedel_delay_n: 4
 
@@ -124,13 +128,13 @@ enable_kalman_encoder: 1
 #   d: 15
 #   b: 15
 #   c: 15
-motor2_pid_gain_limitter: 
-  mode: 1
-  p: 15
-  i: 15
-  d: 15
-  b: 15
-  c: 15
+# motor2_pid_gain_limitter: 
+#   mode: 1
+#   p: 15
+#   i: 15
+#   d: 15
+#   b: 15
+#   c: 15
 gyro_pid_gain_limitter: 
   mode: 1
   p: 15
@@ -190,13 +194,13 @@ motor_pid2:
   # d: 0.0
 
   c: 1
-motor_pid3:
-  mode: 0
-  p: 0.0
-  i: 0.0
-  b: 0.00
-  d: 0.00
-  c: 0
+# motor_pid3:
+#   mode: 0
+#   p: 0.0
+#   i: 0.0
+#   b: 0.00
+#   d: 0.00
+#   c: 0
 gyro_pid:
   mode: 3
 
@@ -246,7 +250,7 @@ angle_pid: # pid for angle
 
   p: 9.50
   i: 0.0
-  # i: 1.75
+  # i: 0.25
   d: 4.5
 
   antiwindup: 0 #I制御してないので意味ない
@@ -344,7 +348,7 @@ gyro_param:
   # gyro_w_gain_left: 0.0024588
   # gyro_w_gain_right: 0.0024588
   gyro_w_gain_left: 0.00245725
-  gyro_w_gain_right: 0.00245825
+  gyro_w_gain_right: 0.00245725
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95
@@ -435,8 +439,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 132 #125~144
-normal_sla_r_wall_off_ref_cnt: 140 #125~144
+normal_sla_l_wall_off_ref_cnt: 134 #125~144
+normal_sla_r_wall_off_ref_cnt: 137 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6
