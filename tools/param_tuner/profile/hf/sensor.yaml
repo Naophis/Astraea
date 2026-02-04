@@ -9,8 +9,8 @@ normal:
     kireme_l_fast: 1.250
     kireme_r_wall_off: 0.250
     kireme_l_wall_off: 0.250
-    kireme_r_wall_off2: 0.450
-    kireme_l_wall_off2: 0.250
+    kireme_r_wall_off2: 0.750
+    kireme_l_wall_off2: 0.750
     # kireme_r: 2.25
     # kireme_l: 2.25
   expand:
@@ -30,8 +30,8 @@ normal:
   exist:
     # right45: 45.5
     # left45: 45.5
-    right45: 44.5
-    left45: 44.5
+    right45: 44.75
+    left45: 44.75
     # right45: 60.0 
     # left45: 60.0
     # right45: 60.0 
