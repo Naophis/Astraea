@@ -23,5 +23,5 @@ if [ $# -ne 0 ];then
 
 else
     # python3 trajectory_plot.py ./tools/param_tuner/logs/latest.csv &
-    ros2 run plotjuggler plotjuggler -d ./tools/param_tuner/logs/latest.csv -l ./tools/param_tuner/profile.xml
+    ros2 run plotjuggler plotjuggler -d ./tools/param_tuner/logs/latest.csv
 fi

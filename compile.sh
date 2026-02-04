@@ -1,1 +1,1 @@
-idf.py build
+idf.py -D SDKCONFIG_DEFAULTS=sdkconfig build
