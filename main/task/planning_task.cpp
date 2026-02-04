@@ -543,6 +543,19 @@ void PlanningTask::task() {
             (1 - param_ro->sensor_gain.front2.b) *
                 tgt_val->tgt_in.axel_degenerate_gain +
             param_ro->sensor_gain.front2.b * axel_degenerate_gain;
+      } else if (axel_degenerate_dia_x.size() > 0 &&
+                 tgt_val->nmr.sct == SensorCtrlType::Dia) {
+        SensingControlType type = SensingControlType::None;
+        diff = ABS(check_sen_error_dia(type));
+        if (diff == 0) {
+          diff = diff_old;
+        }
+        axel_degenerate_gain =
+            interp1d(axel_degenerate_dia_x, axel_degenerate_dia_y, diff, false);
+        tgt_val->tgt_in.axel_degenerate_gain =
+            (1 - param_ro->sensor_gain.front2.b) *
+                tgt_val->tgt_in.axel_degenerate_gain +
+            param_ro->sensor_gain.front2.b * axel_degenerate_gain;
       }
     } else {
       diff = diff_old = 0;
@@ -779,10 +792,22 @@ float IRAM_ATTR PlanningTask::check_sen_error(SensingControlType &type) {
   if (!search_mode) {
     if (tgt_val->motion_type == MotionType::WALL_OFF ||
         tgt_val->motion_type == MotionType::SLA_FRONT_STR) {
-      check_diff_right = ABS(se->ego.right45_dist_diff) <
-                         prm->sen_ref_p.normal.ref.kireme_r_wall_off;
-      check_diff_left = ABS(se->ego.left45_dist_diff) <
-                        prm->sen_ref_p.normal.ref.kireme_l_wall_off;
+      if (se->ego.right45_dist_diff < 0) {
+        // 接近時は緩め
+        check_diff_right = ABS(se->ego.right45_dist_diff) <
+                           prm->sen_ref_p.normal.ref.kireme_r_wall_off2;
+      } else {
+        check_diff_right = ABS(se->ego.right45_dist_diff) <
+                           prm->sen_ref_p.normal.ref.kireme_r_wall_off;
+      }
+      if (se->ego.left45_dist_diff < 0) {
+        // 接近時は緩め
+        check_diff_left = ABS(se->ego.left45_dist_diff) <
+                          prm->sen_ref_p.normal.ref.kireme_l_wall_off2;
+      } else {
+        check_diff_left = ABS(se->ego.left45_dist_diff) <
+                          prm->sen_ref_p.normal.ref.kireme_l_wall_off;
+      }
     } else {
       check_diff_right = ABS(se->ego.right45_dist_diff) <
                          prm->sen_ref_p.normal.ref.kireme_r_fast;
@@ -1988,6 +2013,11 @@ void IRAM_ATTR PlanningTask::cp_request() {
   } else if (receive_req->nmr.motion_type == MotionType::WALL_OFF ||
              receive_req->nmr.motion_type == MotionType::WALL_OFF_DIA) {
   }
+  if (tgt_val->motion_type == MotionType::WALL_OFF ||
+      tgt_val->motion_type == MotionType::WALL_OFF_DIA) {
+    se->sen.r45.sensor_dist = se->ego.right45_dist;
+    se->sen.l45.sensor_dist = se->ego.left45_dist;
+  }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
   int idx = (int)data;
@@ -2735,8 +2765,8 @@ void IRAM_ATTR PlanningTask::calc_translational_ctrl() {
     auto ki_gain = param_ro->motor_pid2.i * v_error_i;
     auto kb_gain = param_ro->motor_pid2.b * diff_dist;
     auto kd_gain = param_ro->motor_pid2.d * ee->v_kf.error_d;
-    limitter(kp_gain, ki_gain, kb_gain, kd_gain,
-             param_ro->motor2_pid_gain_limitter);
+    // limitter(kp_gain, ki_gain, kb_gain, kd_gain,
+    //          param_ro->motor2_pid_gain_limitter);
     duty_c = kp_gain + ki_gain + kb_gain + kd_gain;
 
     set_ctrl_val(ee->v_val, ee->v.error_p, v_error_i, diff_dist, ee->v.error_d,
@@ -2929,6 +2959,16 @@ void IRAM_ATTR PlanningTask::generate_trajectory() {
   // tgt_val->ego_in.ideal_px = tgt_val->ego_in.ideal_py = 0;
   auto tmp = tgt_val->ego_in.img_ang;
   tgt_val->ego_in.img_ang += last_tgt_angle;
+
+  // if (tgt_val->motion_type == MotionType::NONE && motion_req_timestamp > 10)
+  // {
+  //   return;
+  // }
+
+  if (param_ro->trj_length <= 0) {
+    return;
+  }
+
   for (int i = 0; i < param_ro->trj_length; i++) {
     int32_T index = i + 1;
     if (i == 0) {

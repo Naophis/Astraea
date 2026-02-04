@@ -33,8 +33,8 @@ bool IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
   bool exist = false;
-  se->sen.r45.sensor_dist = se->ego.right45_dist;
-  se->sen.l45.sensor_dist = se->ego.left45_dist;
+  // se->sen.r45.sensor_dist = se->ego.right45_dist;
+  // se->sen.l45.sensor_dist = se->ego.left45_dist;
 
   // モーション設定
   tgt_val->nmr.v_max = ps_front.v_max;
@@ -47,7 +47,7 @@ bool IRAM_ATTR WallOffController::execute_wall_off(TurnDirection td,
   tgt_val->nmr.alpha = 0;
   tgt_val->nmr.ang = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  tgt_val->motion_type = MotionType::WALL_OFF;
+  // tgt_val->motion_type = MotionType::WALL_OFF;
   tgt_val->nmr.motion_type = MotionType::WALL_OFF;
   tgt_val->nmr.motion_dir = (td == TurnDirection::Left)
                                 ? MotionDirection::LEFT
@@ -327,8 +327,8 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   const auto se = get_sensing_entity();
   const auto p_wall_off = get_wall_off_param();
 
-  se->sen.r45.sensor_dist = se->ego.right45_dist;
-  se->sen.l45.sensor_dist = se->ego.left45_dist;
+  // se->sen.r45.sensor_dist = se->ego.right45_dist;
+  // se->sen.l45.sensor_dist = se->ego.left45_dist;
   // モーション設定
   tgt_val->nmr.v_max = ps_front.v_max;
   tgt_val->nmr.v_end = ps_front.v_end;
@@ -340,7 +340,7 @@ bool IRAM_ATTR WallOffController::execute_wall_off_dia(
   tgt_val->nmr.alpha = 0;
   tgt_val->nmr.ang = 0;
   tgt_val->nmr.motion_mode = RUN_MODE2::ST_RUN;
-  tgt_val->motion_type = MotionType::WALL_OFF_DIA;
+  // tgt_val->motion_type = MotionType::WALL_OFF_DIA;
   tgt_val->nmr.motion_type = MotionType::WALL_OFF_DIA;
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.dia_mode = ps_front.dia_mode;

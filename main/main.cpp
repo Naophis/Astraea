@@ -199,6 +199,7 @@ extern "C" void app_main() {
   tgt_val->ego_in.v = 0;
   tgt_val->ego_in.w = 0;
   tgt_val->motion_type = MotionType::NONE;
+  tgt_val->nmr.motion_type = MotionType::NONE;
   param->gyro_param.gyro_w_gain_left = 0.0002645;
 
   st->set_sensing_entity(sensing_entity);

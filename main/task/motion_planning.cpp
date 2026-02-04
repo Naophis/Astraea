@@ -139,13 +139,13 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
       // 次のタイミングで通り過ぎてしまう場合は早めに切り上げる
       const auto tmp_dist = now_dist + tgt_val->ego_in.v * dt;
       if (std::abs(tmp_dist) >= std::abs(p.dist)) {
-        auto diff = std::abs(p.dist - now_dist);
-        volatile auto time = diff / tgt_val->ego_in.v * 240000000.0 * dt;
-        param->sen_ref_p.normal.exist.left45 = left;
-        param->sen_ref_p.normal.exist.right45 = right;
-        for (int i = 0; i < time; i++)
-          ;
-        return MotionResult::NONE;
+        // auto diff = std::abs(p.dist - now_dist);
+        // volatile auto time = diff / tgt_val->ego_in.v * 240000000.0 * dt;
+        // param->sen_ref_p.normal.exist.left45 = left;
+        // param->sen_ref_p.normal.exist.right45 = right;
+        // for (int i = 0; i < time; i++)
+        //   ;
+        // return MotionResult::NONE;
       }
     }
     // 壁切れ処理をWallOffControllerに委任
@@ -260,7 +260,9 @@ MotionResult IRAM_ATTR MotionPlanning::pivot_turn(param_roll_t &p) {
   pt->motor_enable();
   reset_tgt_data();
   reset_ego_data();
-  tgt_val->motion_type = MotionType::NONE;
+  // tgt_val->motion_type = MotionType::NONE;
+  tgt_val->nmr.motion_type = MotionType::NONE;
+
   tgt_val->nmr.timstamp++;
 
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
@@ -307,7 +309,8 @@ MotionResult IRAM_ATTR MotionPlanning::pivot_turn(param_roll_t &p) {
         pt->motor_enable();
         reset_tgt_data();
         reset_ego_data();
-        tgt_val->motion_type = MotionType::NONE;
+        // tgt_val->motion_type = MotionType::NONE;
+        tgt_val->nmr.motion_type = MotionType::NONE;
         tgt_val->nmr.timstamp++;
 
         xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
@@ -903,7 +906,8 @@ void IRAM_ATTR MotionPlanning::reset_ego_data() {
   tgt_val->nmr.motion_dir = MotionDirection::RIGHT;
   tgt_val->nmr.ego_reset_req = true;
   // 一度初期化
-  tgt_val->motion_type = MotionType::NONE;
+  // tgt_val->motion_type = MotionType::NONE;
+  tgt_val->nmr.motion_type = MotionType::NONE;
   tgt_val->nmr.timstamp++;
 
   xTaskNotify(*th, (uint32_t)tgt_val.get(), eSetValueWithOverwrite);
