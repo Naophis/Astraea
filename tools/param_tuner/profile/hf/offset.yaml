@@ -172,10 +172,10 @@ wall_off_hold_dist_dia_r: 3.0
 dia_wall_off_ref_l: 24.0 #dia135
 dia_wall_off_ref_r: 24.0 #dia135
 #斜め壁切れ時のmax接近距離
-dia_wall_off_ref_l_wall: 32.5 #exist_wall
-dia_wall_off_ref_r_wall: 36.75 #exist_wall
-dia_wall_off_ref_l_piller: 41.06 #noexist_wall
-dia_wall_off_ref_r_piller: 39.45 #noexist_wall
+dia_wall_off_ref_l_wall: 33.75 #exist_wall
+dia_wall_off_ref_r_wall: 33.00 #exist_wall
+dia_wall_off_ref_l_piller: 41.5 #noexist_wall
+dia_wall_off_ref_r_piller: 40.5 #noexist_wall
 
 # 斜め壁切れ偏差
 wall_off_hold_div_th_dia_l: 0.250
