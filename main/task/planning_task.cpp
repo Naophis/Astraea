@@ -2440,7 +2440,10 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     ee->aw_log.w_i_base = w_error_i;
 
     if (param_ro->gyro_pid.antiwindup) {
-      const float db = param_ro->gyro_pid.windup_dead_bind;
+      float db = param_ro->gyro_pid.windup_dead_bind;
+      if (duty_sen != 0) {
+        db *= param_ro->gyro_pid.windup_gain;
+      }
       if ((w_error_i * ee->w.error_p < 0) &&
           ((ABS(ee->w.error_p) > db) ||
            (gyro_pid_windup_histerisis && ABS(ee->w.error_p) > db * 0.75))) {
