@@ -475,6 +475,7 @@ typedef struct {
   bool search_wall_off_enable;
   float search_wall_off_l_dist_offset;
   float search_wall_off_r_dist_offset;
+  float search_wall_off_offset_dist;
 
   float ctrl_exist_wall_th_l;
   float ctrl_exist_wall_th_r;

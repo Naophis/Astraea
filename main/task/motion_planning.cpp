@@ -41,6 +41,10 @@ void MotionPlanning::set_logging_task(std::shared_ptr<LoggingTask> &_lt) {
 }
 MotionResult IRAM_ATTR MotionPlanning::go_straight(
     param_straight_t &p, std::shared_ptr<Adachi> &adachi, bool search_mode) {
+  const auto se = get_sensing_entity();
+  const static float ang32 = 32.0f / 180.0f * M_PI;
+  const static float cos32 = std::cos(ang32);
+  const static float tan32 = std::tan(ang32);
   tgt_val->nmr.v_max = p.v_max;
   tgt_val->nmr.v_end = p.v_end;
   tgt_val->nmr.accl = p.accl;
@@ -173,10 +177,34 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
           wall_off_state |= 2;
         }
       } else if (wall_off_state == 3 && exist_right && exist_left) {
+
+        const float ego_ang_l =
+            std::clamp(se->sen.l45.angle, -param->lim_angle, param->lim_angle);
+        auto gain_l = std::cos(ang32 - ego_ang_l) / cos32;
+        auto offset_l = param->sen_ref_p.normal.ref.left45 -
+                        gain_l * se->sen.l45.sensor_dist;
+        const float ego_ang_r =
+            std::clamp(se->sen.r45.angle, -param->lim_angle, param->lim_angle);
+        float gain_r = std::cos(ang32 + ego_ang_r) / cos32;
+        float offset_r = gain_r * se->sen.r45.sensor_dist -
+                         param->sen_ref_p.normal.ref.right45;
+        float offset =
+            (std::abs(offset_l) < std::abs(offset_r)) ? offset_l : offset_r;
+
+        const float offset_x1 = offset * tan32;
+        const float offset_x2 = 0;
+        const float total_offset =
+            std::clamp((offset_x1 + offset_x2),
+                       -param->wall_off_dist.search_wall_off_offset_dist,
+                       param->wall_off_dist.search_wall_off_offset_dist);
+        g_offset_x1 = offset_x1;
+        g_offset_x2 = offset_x2;
+        g_total_offset = total_offset;
         if (sensing_result->ego.right45_dist >
             param->wall_off_dist.noexist_th_r) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          p.dist -= total_offset;
           param->sen_ref_p.normal.exist.left45 = left;
           param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
@@ -184,24 +212,57 @@ MotionResult IRAM_ATTR MotionPlanning::go_straight(
                    param->wall_off_dist.noexist_th_l) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          p.dist += total_offset;
           param->sen_ref_p.normal.exist.left45 = left;
           param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
         }
       } else if (wall_off_state == 1 && exist_right) {
+        const float ego_ang_r =
+            std::clamp(se->sen.r45.angle, -param->lim_angle, param->lim_angle);
+        float gain_r = std::cos(ang32 + ego_ang_r) / cos32;
+        float offset_r = gain_r * se->sen.r45.sensor_dist -
+                         param->sen_ref_p.normal.ref.right45;
+        const float offset_x1 = offset_r * tan32;
+        const float offset_x2 = 0;
+        const float total_offset =
+            std::clamp((offset_x1 + offset_x2),
+                       -param->wall_off_dist.search_wall_off_offset_dist,
+                       param->wall_off_dist.search_wall_off_offset_dist);
+        g_offset_x1 = offset_x1;
+        g_offset_x2 = offset_x2;
+        g_total_offset = total_offset;
         if (sensing_result->ego.right45_dist >
             param->wall_off_dist.noexist_th_r) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_r_dist_offset;
+          p.dist += total_offset;
+
           param->sen_ref_p.normal.exist.left45 = left;
           param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);
         }
       } else if (wall_off_state == 2 && exist_left) {
+
+        const float ego_ang_l =
+            std::clamp(se->sen.l45.angle, -param->lim_angle, param->lim_angle);
+        float gain_l = std::cos(ang32 - ego_ang_l) / cos32;
+        float offset_l = param->sen_ref_p.normal.ref.left45 -
+                         gain_l * se->sen.l45.sensor_dist;
+        const float offset_x1 = offset_l * tan32;
+        const float offset_x2 = 0;
+        const float total_offset =
+            std::clamp((offset_x1 + offset_x2),
+                       -param->wall_off_dist.search_wall_off_offset_dist,
+                       param->wall_off_dist.search_wall_off_offset_dist);
+        g_offset_x1 = offset_x1;
+        g_offset_x2 = offset_x2;
+        g_total_offset = total_offset;
         if (sensing_result->ego.left45_dist >
             param->wall_off_dist.noexist_th_l) {
           wall_off_state = 4;
           p.dist = param->wall_off_dist.search_wall_off_l_dist_offset;
+          p.dist += total_offset;
           param->sen_ref_p.normal.exist.left45 = left;
           param->sen_ref_p.normal.exist.right45 = right;
           return go_straight(p, fake_adachi, false);

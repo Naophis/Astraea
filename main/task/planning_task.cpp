@@ -2018,6 +2018,10 @@ void IRAM_ATTR PlanningTask::cp_request() {
     se->sen.r45.sensor_dist = se->ego.right45_dist;
     se->sen.l45.sensor_dist = se->ego.left45_dist;
   }
+  if (search_mode && tgt_val->motion_type == MotionType::STRAIGHT) {
+      se->sen.r45.sensor_dist = se->ego.right45_dist;
+      se->sen.l45.sensor_dist = se->ego.left45_dist;
+  }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
   int idx = (int)data;
