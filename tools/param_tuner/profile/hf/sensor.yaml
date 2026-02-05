@@ -47,11 +47,11 @@ normal:
     left90: 60
 normal2: #壁なし補正時
   ref:
-    left45: 56.750
-    right45: 62.750
+    left45: 57.50
+    right45: 57.50
     # front: 47
-    kireme_l: 58.0 # ref.right/leftより少し多くする
-    kireme_r: 64.0 # 串制御条件。これより遠くないと発動しない
+    kireme_l: 58.50 # ref.right/leftより少し多くする
+    kireme_r: 58.50 # 串制御条件。これより遠くないと発動しない
     right90: 180 # 串制御条件。これより近くないと発動しない
     left90: 180 # 
   exist:
@@ -110,7 +110,7 @@ search:
     # 前壁補正
     front_ctrl_th: 56 #ref
     # front_ctrl: 46.0 #前壁補正：距離
-    front_ctrl: 47.750 #前壁補正：距離
+    front_ctrl: 46.750 #前壁補正：距離
     # kireme_r: -0.6  #前壁補正：角度 +が右、-が左
     kireme_r: -0.0  #前壁補正：角度 +が右、-が左
 gain:

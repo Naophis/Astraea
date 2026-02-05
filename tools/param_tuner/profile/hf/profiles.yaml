@@ -81,7 +81,7 @@ profile_idx:
   - run_param: 6
     suction: 2
     normal: 1
-    large: 8
+    large: 10
     orval: 8
     dia45: 6
     dia45_2: 6
@@ -91,7 +91,7 @@ profile_idx:
   - run_param: 7
     suction: 2
     normal: 1
-    large: 8
+    large: 10
     orval: 8
     dia45: 6
     dia45_2: 6
@@ -107,7 +107,7 @@ profile_idx:
     dia45_2: 7
     dia135: 7
     dia135_2: 7
-    dia90: 7
+    dia90: 6
   - run_param: 9
     suction: 2
     normal: 1
@@ -117,7 +117,7 @@ profile_idx:
     dia45_2: 7
     dia135: 7
     dia135_2: 7
-    dia90: 7
+    dia90: 6
   - run_param: 10
     suction: 2
     normal: 1
@@ -127,7 +127,7 @@ profile_idx:
     dia45_2: 7
     dia135: 7
     dia135_2: 7
-    dia90: 7
+    dia90: 6
   - run_param: 11
     suction: 2
     normal: 1
