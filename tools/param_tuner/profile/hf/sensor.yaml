@@ -110,7 +110,7 @@ search:
     # 前壁補正
     front_ctrl_th: 56 #ref
     # front_ctrl: 46.0 #前壁補正：距離
-    front_ctrl: 46.750 #前壁補正：距離
+    front_ctrl: 45.750 #前壁補正：距離
     # kireme_r: -0.6  #前壁補正：角度 +が右、-が左
     kireme_r: -0.0  #前壁補正：角度 +が右、-が左
 gain:
