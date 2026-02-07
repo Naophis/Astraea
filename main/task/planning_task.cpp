@@ -2018,6 +2018,10 @@ void IRAM_ATTR PlanningTask::cp_request() {
     se->sen.r45.sensor_dist = se->ego.right45_dist;
     se->sen.l45.sensor_dist = se->ego.left45_dist;
   }
+  if (search_mode && tgt_val->motion_type == MotionType::STRAIGHT) {
+      se->sen.r45.sensor_dist = se->ego.right45_dist;
+      se->sen.l45.sensor_dist = se->ego.left45_dist;
+  }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
   int idx = (int)data;
@@ -2440,7 +2444,10 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
     ee->aw_log.w_i_base = w_error_i;
 
     if (param_ro->gyro_pid.antiwindup) {
-      const float db = param_ro->gyro_pid.windup_dead_bind;
+      float db = param_ro->gyro_pid.windup_dead_bind;
+      if (duty_sen != 0) {
+        db *= param_ro->gyro_pid.windup_gain;
+      }
       if ((w_error_i * ee->w.error_p < 0) &&
           ((ABS(ee->w.error_p) > db) ||
            (gyro_pid_windup_histerisis && ABS(ee->w.error_p) > db * 0.75))) {

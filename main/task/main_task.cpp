@@ -1073,6 +1073,9 @@ void MainTask::load_offset_param() {
       getItem(root, "search_wall_off_l_dist_offset")->valuedouble;
   param->wall_off_dist.search_wall_off_r_dist_offset =
       getItem(root, "search_wall_off_r_dist_offset")->valuedouble;
+  param->wall_off_dist.search_wall_off_offset_dist =
+      getItem(root, "search_wall_off_offset_dist")->valuedouble;
+
   param->wall_off_dist.search_wall_off_enable =
       getItem(root, "search_wall_off_enable")->valueint;
 
@@ -3486,6 +3489,13 @@ void MainTask::test_sla_walloff() {
     vTaskDelay(10.0 / portTICK_RATE_MS);
   }
   lt->dump_log(slalom_log_file);
+  vTaskDelay(500.0 / portTICK_RATE_MS);
+  printf("----------------------------------\n");
+  printf("offset: min(%f, %f) + %f = %f\n", mp->g_offset_y_l, mp->g_offset_y_r,
+         mp->g_offset_x1, mp->g_total_offset);
+  printf("theta: %f\n", mp->g_sen_ang * 180 / m_PI);
+  printf("sensor dist: %f, %f\n", mp->g_sen_l_dist, mp->g_sen_r_dist);
+  printf("----------------------------------\n");
   while (1) {
     if (ui->button_state_hold())
       break;
