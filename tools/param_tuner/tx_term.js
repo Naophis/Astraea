@@ -3,6 +3,7 @@ const yaml = require("js-yaml");
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
 const { argv } = require("process");
+const { type } = require("os");
 let comport;
 let port;
 
@@ -115,6 +116,10 @@ const callerFun = async (mode) => {
     } else {
       if (idx > list.length) {
         console.log("out of index");
+        continue;
+      }
+      if(typeof idx !== "number" || isNaN(idx)){
+        console.log("invalid input");
         continue;
       }
       if (idx === 0 || idx === 1) {
