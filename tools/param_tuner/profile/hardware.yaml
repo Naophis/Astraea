@@ -5,10 +5,10 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.9450 #10deg 
-tire2: 13.9450 #10deg 
+tire: 13.9750 #10deg 
+tire2: 13.9750 #10deg 
 
-battery_gain: 3.2119264895753674
+battery_gain: 3.9523961990254124
 # battery_gain: 4.567
 
 # tire: 14.120 #新品(#30) 14.12
@@ -72,7 +72,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 9000
+log_size: 8500
 
 front_ctrl_error_th: 1
 
@@ -357,12 +357,8 @@ sensor_pid_dia:
   c: 0
   mode: 0
 gyro_param:
-  # gyro_w_gain_left: 0.00246095
-  # gyro_w_gain_right: 0.00246095
-  # gyro_w_gain_left: 0.0024365
-  # gyro_w_gain_right: 0.0024365
-  gyro_w_gain_left: 0.0024385
-  gyro_w_gain_right: 0.0024385
+  gyro_w_gain_left: 0.002442
+  gyro_w_gain_right: 0.002442
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95
@@ -453,7 +449,7 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 133 #125~144
+normal_sla_l_wall_off_ref_cnt: 130 #125~144
 normal_sla_r_wall_off_ref_cnt: 133 #125~144
 
 normal_sla_l_wall_off_dist: 6
