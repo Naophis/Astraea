@@ -47,8 +47,8 @@ normal:
     left90: 60
 normal2: #壁なし補正時
   ref:
-    left45: 58.0
-    right45: 58.0
+    left45: 58.5
+    right45: 57.25
     # front: 47
     kireme_l: 60.0 # ref.right/leftより少し多くする
     kireme_r: 60.0 # 串制御条件。これより遠くないと発動しない
@@ -70,18 +70,18 @@ dia: #midを参照
     # right45: 30.625
     # left45: -33.5 #斜め45度センサー制御条件 1 < val < this_parm
     # right45: -30.75 #斜め45度センサー制御条件  1 < val < this_parm
-    left45: 33.75 #斜め45度センサー制御条件 1 < val < this_parm
-    right45: 33.00 #斜め45度センサー制御条件  1 < val < this_parm
-    left90: 125 # mid
-    right90: 110   # mid
+    left45: 33.250 #斜め45度センサー制御条件 1 < val < this_parm
+    right45: 32.75 #斜め45度センサー制御条件  1 < val < this_parm
+    left90: 132 # mid
+    right90: 108    # mid
 
     kireme_l: 165 # dia front over th (not use)
     kireme_r: 160 # dia front over th (not use)
   exist:
-    left45: 31.75 #斜め制御横センサー制御条件
-    right45: 31.00 #斜め制御横センサー制御条件
-    left90: 120 # dia.ref.left90 -5
-    right90: 105 # dia.ref.right90 -5
+    left45: 34.25 #斜め制御横センサー制御条件
+    right45: 33.75 #斜め制御横センサー制御条件
+    left90: 127 # dia.ref.left90 -5
+    right90: 103 # dia.ref.right90 -5
     # left45: 3.5 #斜め制御横センサー制御条件
     # right45: 3.5 #斜め制御横センサー制御条件
     # left90: 36.0 # dia.ref.left90 -5
