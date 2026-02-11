@@ -138,7 +138,7 @@ diff_dist_th_r: 1.5 # 壁切れ偏差チェック 偏差条件
 wall_off_diff_check_dist: 25 # 移動距離条件 p_wall_off.diff_check_dist
 
 #detect_pass_through_case1(dia: 通過チェック)
-diff_check_dist_dia_2: 25 # 壁切れ偏差チェック　距離条件
+diff_check_dist_dia_2: 5 # 壁切れ偏差チェック　距離条件
 
 # detect_pass_through_case1/2(通過時の距離補正値)
 wall_off_pass_through_offset_l: -5
