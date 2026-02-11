@@ -60,6 +60,7 @@ public:
   // 斜め走行用の壁切れ距離計算
   float calculate_dia_wall_off_distance(TurnDirection td, TurnType turn_type,
                                         bool &exist_wall);
+  bool continuous_turn_flag = false;
 
 private:
   std::shared_ptr<input_param_t> param;

@@ -1422,6 +1422,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
 
       // printf("%f %f %f %f\n", ps.dist, ps.v_max, ps.v_end, ps.accl);
       ps.dist -= param->long_run_offset_dist;
+      wall_off_controller->continuous_turn_flag = false;
       auto res = go_straight(ps);
       carry_over_dist = 0;
       if (res == MotionResult::ERROR) {
@@ -1468,6 +1469,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
         nm.v_max = MAX(p_set.map_fast[turn_type].v, p_set.str_map[st].v_max);
         nm.v_end = p_set.map_fast[turn_type].v;
         auto res = slalom(p_set.map_fast[turn_type], turn_dir, nm, dia);
+        wall_off_controller->continuous_turn_flag = true;
         if (res == MotionResult::ERROR) {
           break;
         }
@@ -1475,6 +1477,7 @@ void IRAM_ATTR MotionPlanning::exec_path_running(param_set_t &p_set) {
         auto res =
             slalom(fast_mode ? p_set.map[turn_type] : p_set.map_slow[turn_type],
                    turn_dir, nm, dia);
+        wall_off_controller->continuous_turn_flag = true;
         if (res == MotionResult::ERROR) {
           break;
         }
