@@ -452,13 +452,15 @@ bool IRAM_ATTR WallOffController::process_right_wall_off_dia(
     // 距離更新
     tmp_dist_after = tgt_val->global_pos.dist;
 
-    // // 見切れた場合の検出
-    // if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after,
-    //                                        init_r45_dist)) {
-    //   ps_front.dist += p_wall_off.right_dia_oppo;
-    //   ps_front.dist = MAX(ps_front.dist, 0.1);
-    //   return false;
-    // }
+    // 見切れた場合の検出
+    if (continuous_turn_flag) {
+      if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after,
+                                             init_r45_dist)) {
+        ps_front.dist += p_wall_off.right_dia_oppo;
+        ps_front.dist = MAX(ps_front.dist, 0.1);
+        return true;
+      }
+    }
 
     // 反対側の壁ありの場合の検出
     if (strategy.detect_pass_through_case2(tmp_dist_before, tmp_dist_after,
@@ -543,13 +545,15 @@ bool IRAM_ATTR WallOffController::process_left_wall_off_dia(
     // 距離更新
     tmp_dist_after = tgt_val->global_pos.dist;
 
-    // // 見切れた場合の検出
-    // if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after,
-    //                                        init_l45_dist)) {
-    //   ps_front.dist += p_wall_off.left_dia_oppo;
-    //   ps_front.dist = MAX(ps_front.dist, 0.1);
-    //   return false;
-    // }
+    // 見切れた場合の検出
+    if (continuous_turn_flag) {
+      if (strategy.detect_pass_through_case1(tmp_dist_before, tmp_dist_after,
+                                             init_l45_dist)) {
+        ps_front.dist += p_wall_off.left_dia_oppo;
+        ps_front.dist = MAX(ps_front.dist, 0.1);
+        return true;
+      }
+    }
 
     // 反対側の壁ありの場合の検出
     if (strategy.detect_pass_through_case2(tmp_dist_before, tmp_dist_after,
