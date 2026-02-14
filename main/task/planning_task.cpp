@@ -552,6 +552,10 @@ void PlanningTask::task() {
         }
         axel_degenerate_gain =
             interp1d(axel_degenerate_dia_x, axel_degenerate_dia_y, diff, false);
+        if (axel_degenerate_gain < 0 &&
+            tgt_val->tgt_in.end_v > tgt_val->ego_in.v) {
+          tgt_val->tgt_in.axel_degenerate_gain = 0.01f;
+        }
         tgt_val->tgt_in.axel_degenerate_gain =
             (1 - param_ro->sensor_gain.front2.b) *
                 tgt_val->tgt_in.axel_degenerate_gain +
@@ -2019,8 +2023,8 @@ void IRAM_ATTR PlanningTask::cp_request() {
     se->sen.l45.sensor_dist = se->ego.left45_dist;
   }
   if (search_mode && tgt_val->motion_type == MotionType::STRAIGHT) {
-      se->sen.r45.sensor_dist = se->ego.right45_dist;
-      se->sen.l45.sensor_dist = se->ego.left45_dist;
+    se->sen.r45.sensor_dist = se->ego.right45_dist;
+    se->sen.l45.sensor_dist = se->ego.left45_dist;
   }
 }
 float IRAM_ATTR PlanningTask::calc_sensor(float data, float a, float b) {
