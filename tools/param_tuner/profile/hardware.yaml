@@ -104,8 +104,10 @@ axel_degenerate_y: [1, 1, 0.9, 0.85, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
-axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10]
-axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.75, 0.5, 0.125]
+# axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10]
+# axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.75, 0.5, 0.125]
+axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10, 20]
+axel_degenerate_dia_y: [1, 1, 1, 0.95, 0.85, 0.75, 0.125, -0.1]
 
 decel_delay_cnt: 5
 dedel_delay_n: 4
