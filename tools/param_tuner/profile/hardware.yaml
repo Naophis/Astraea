@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.90 #10deg 
-tire2: 13.90 #10deg
+tire: 13.9250 #10deg 
+tire2: 13.9250 #10deg
 
 battery_gain: 3.9804018006458484
 # battery_gain: 4.389473684210526
@@ -103,8 +103,10 @@ axel_degenerate_y: [1, 1, 0.9, 0.85, 0.5, 0.2, 0.1]
 # axel_degenerate_y: [1, 1, 1, 1, 0.8, 0.75, 0.5]
 # axel_degenerate_y: [1, 1, 1, 1, 1, 1, 1]
 
-axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10]
-axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.75, 0.5, 0.125]
+axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10, 20]
+# axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.75, 0.5, 0.125. 0.1]
+axel_degenerate_dia_y: [1, 1, 1, 0.95, 0.85, 0.75, 0.5, -0.1]
+# axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.5, -0.]
 
 decel_delay_cnt: 5
 dedel_delay_n: 4
@@ -202,21 +204,67 @@ motor_pid2:
 #   d: 0.00
 #   c: 0
 gyro_pid:
-  mode: 3
+  # mode: 3
 
-  p: 0.000425
-  b: 0.0000595 #summation
+  # p: 0.000425
+  # b: 0.0000595 #summation
+  # i: 0.01465 # dif angle
+  # # p: 0.000375
+  # # b: 0.0000725 #summation
+  # d: 0.000295
+  # c: 0
+
+  # antiwindup: 1
+  # windup_gain: 10.0
+  # windup_dead_bind: 1.50
+
+  #   # c: 0.0
+  # i_theta_tau: 0.08      # [s] 角度I低域化の一次LPF時定数（例: 0.08〜0.15）
+  # i_theta_slew: 10.0     # [/s] 角度Iバイアスの変化率制限（例: 10〜50）
+  # i_theta_max: 20.0      # [-]  角度Iバイアスの振幅上限（例: 5〜20）
+  # # theta_gate: 0.00875      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
+  # theta_gate: 0.004375      # [rad] |eθ|が小さい終盤で効かせるゲートの閾値（例: 0.05〜0.15）
+  # omega_gate: 25.0      # [rad/s] |ω_ref|が低い時だけ効かせるゲート（例: 15〜40）
+
+  # mpc_q_ang: 500.0  # Angle error weight: HIGH for good tracking (terminal cost is 10x this!)
+  # mpc_q_vel: 125.0   # Velocity error weight: HIGH for damping to prevent oscillation
+  # mpc_b: 0.000475        # System gain: CRITICAL! Increase gradually (0.5→1→2→5→10)
+  # mpc_r: 0.01       # Control cost: SMALL to allow aggressive control
+  # mpc_horizon: 5    # Prediction horizon
+  # mpc_max_iter: 10  # QP solver iterations
+  # mpc_max_torque: 0.0025
+  # mpc_observer_k: 0.25  # Disturbance observer gain (0.01=slow, 0.05=default, 0.1-0.2=aggressive)
+
+
+  mode: 3
+  # p: 0.000325
+  # i: 0.01465
+  # b: 0.0000275
+  # d: 0.000775
+
+  p: 0.000325
   i: 0.01465 # dif angle
-  # p: 0.000375
-  # b: 0.0000725 #summation
+  # b: 0.0000375 #summation
+  b: 0.0000595 #summation
+  # b: 0.0000425 #summation
   d: 0.000295
-  c: 0
 
   antiwindup: 1
-  windup_gain: 10.0
+  windup_gain: 1.0
   windup_dead_bind: 1.50
 
-    # c: 0.0
+  # p: 0.000325
+  # i: 0.01365 #dif angle
+  # b: 0.0000275 #summation
+  # d: 0.000295
+
+  # p: 0.00
+  # i: 0.0
+  # b: 0.00
+  # d: 0.00
+
+  c: 0.0075
+  # c: 0.0
   i_theta_tau: 0.08      # [s] 角度I低域化の一次LPF時定数（例: 0.08〜0.15）
   i_theta_slew: 10.0     # [/s] 角度Iバイアスの変化率制限（例: 10〜50）
   i_theta_max: 20.0      # [-]  角度Iバイアスの振幅上限（例: 5〜20）
@@ -308,7 +356,7 @@ str_ang_pid:
   i: 0.0325
 
   # fast
-  b: 0.0475
+  b: 0.035
   d: 0.0325
   c: 0
 
@@ -347,14 +395,14 @@ sensor_pid_dia:
 gyro_param:
   # gyro_w_gain_left: 0.0024588
   # gyro_w_gain_right: 0.0024588
-  gyro_w_gain_left: 0.00245725
-  gyro_w_gain_right: 0.00245725
+  gyro_w_gain_left: 0.00246195
+  gyro_w_gain_right: 0.00246195
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95
   lp_delay: 1
   list_size: 256
-  loop_size: 10
+  loop_size: 2
 
 # gyro2_param:
 #   # gyro_w_gain_left: 0.00246095
@@ -439,8 +487,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 130 #125~144
-normal_sla_r_wall_off_ref_cnt: 131 #125~144
+normal_sla_l_wall_off_ref_cnt: 131 #125~144
+normal_sla_r_wall_off_ref_cnt: 132 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6
