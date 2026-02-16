@@ -5,8 +5,8 @@ dt: 0.001
 # tire_tread: 38.0
 # tire_tread: 37.72230756
 tire_tread: 38.72230756
-tire: 13.9750 #10deg 
-tire2: 13.9750 #10deg 
+tire: 13.925 #10deg 
+tire2: 13.925 #10deg 
 
 battery_gain: 3.9523961990254124
 # battery_gain: 4.567
@@ -72,7 +72,7 @@ search_log_enable: 1
 test_log_enable: 1
 fast_log_enable: 1
 sen_log_size: 100
-log_size: 8500
+log_size: 8000
 
 front_ctrl_error_th: 1
 
@@ -106,8 +106,8 @@ axel_degenerate_y: [1, 1, 0.9, 0.85, 0.5, 0.2, 0.1]
 
 # axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10]
 # axel_degenerate_dia_y: [1, 1, 1, 0.75, 0.75, 0.5, 0.125]
-axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10, 20]
-axel_degenerate_dia_y: [1, 1, 1, 0.95, 0.85, 0.75, 0.125, -0.1]
+axel_degenerate_dia_x: [0, 1, 2, 4, 6, 8, 10, 40]
+axel_degenerate_dia_y: [1, 1, 1, 0.95, 0.85, 0.75, 0.5, -0.1]
 
 decel_delay_cnt: 5
 dedel_delay_n: 4
@@ -359,14 +359,14 @@ sensor_pid_dia:
   c: 0
   mode: 0
 gyro_param:
-  gyro_w_gain_left: 0.002442
-  gyro_w_gain_right: 0.002442
+  gyro_w_gain_left: 0.002440
+  gyro_w_gain_right: 0.002440
   retry_min_th: 0
   retry_max_th: 3
   robust_th: 0.95
   lp_delay: 1
   list_size: 256
-  loop_size: 10
+  loop_size: 5
 
 # gyro2_param:
 #   # gyro_w_gain_left: 0.00246095
@@ -451,8 +451,8 @@ normal_sla_r_wall_off_th_in: 70 #[mm]
 normal_sla_l_wall_off_th_out: 80 #[mm]
 normal_sla_r_wall_off_th_out: 80 #[mm]
 
-normal_sla_l_wall_off_ref_cnt: 136 #125~144
-normal_sla_r_wall_off_ref_cnt: 136 #125~144
+normal_sla_l_wall_off_ref_cnt: 132 #125~144
+normal_sla_r_wall_off_ref_cnt: 133 #125~144
 
 normal_sla_l_wall_off_dist: 6
 normal_sla_r_wall_off_dist: 6

@@ -48,14 +48,14 @@ res_r45 = main_plot(R45, "./result_r.csv", 6, "R45")
 res_r45_2 = main_plot(R45_2, "./result_r.csv", 7, "R45_2")
 res_r45_3 = main_plot(R45_3, "./result_r.csv", 8, "R45_3")
 
-# res_f = main_plot(F, "./result_f.csv", 5, "F")
-# res_l90_near = main_plot(L90, "./result_f.csv", 1, "L90_near")
-# res_r90_near = main_plot(R90, "./result_f.csv", 9, "R90_near")
+res_f = main_plot(F, "./result_f.csv", 5, "F")
+res_l90_near = main_plot(L90, "./result_f.csv", 1, "L90_near")
+res_r90_near = main_plot(R90, "./result_f.csv", 9, "R90_near")
 
-# res_l90_mid = main_plot(L90, "./result_f.csv", 1, "L90_mid")
-# res_r90_mid = main_plot(R90, "./result_f.csv", 9, "R90_mid")
+res_l90_mid = main_plot(L90, "./result_f.csv", 1, "L90_mid")
+res_r90_mid = main_plot(R90, "./result_f.csv", 9, "R90_mid")
 
-# res_l90_far = main_plot(L90, "./result_f.csv", 1, "L90_far")
-# res_r90_far = main_plot(R90, "./result_f.csv", 9, "R90_far")
+res_l90_far = main_plot(L90, "./result_f.csv", 1, "L90_far")
+res_r90_far = main_plot(R90, "./result_f.csv", 9, "R90_far")
 
 plt.show()
