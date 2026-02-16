@@ -771,7 +771,10 @@ void IRAM_ATTR LoggingTask::set_data() {
   ld->left45_3_lp = (sensing_result->led_sen.left45_3.raw);
   ld->right45_3_lp = (sensing_result->led_sen.right45_3.raw);
 
-  ld->battery_lp = floatToHalf(sensing_result->ego.batt_kf);
+  // ld->battery_lp = floatToHalf(sensing_result->ego.batt_kf);
+  ld->battery_lp = floatToHalf(sensing_result->ego.battery_raw);
+
+  
   ld->duty_l = floatToHalf(sensing_result->ego.duty.duty_l);
   ld->duty_r = floatToHalf(sensing_result->ego.duty.duty_r);
 

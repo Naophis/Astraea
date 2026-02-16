@@ -85,17 +85,17 @@ void init_gpio() {
   io_conf.pin_bit_mask |= 1ULL << LED_EN_R45_2;
   io_conf.pin_bit_mask |= 1ULL << LED_EN_R90;
 
-  io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
-  io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
-  io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
+  // io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
+  // io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
+  // io_conf.pin_bit_mask |= 1ULL << SUCTION_PWM;
 
-  io_conf.pin_bit_mask |= 1ULL << Motor_L_PWM;
-  io_conf.pin_bit_mask |= 1ULL << Motor_R_PWM;
+  // io_conf.pin_bit_mask |= 1ULL << Motor_L_PWM;
+  // io_conf.pin_bit_mask |= 1ULL << Motor_R_PWM;
 
-  io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
-  io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
-  io_conf.pin_bit_mask |= 1ULL << L_CW_CCW2;
-  io_conf.pin_bit_mask |= 1ULL << R_CW_CCW2;
+  // io_conf.pin_bit_mask |= 1ULL << L_CW_CCW1;
+  // io_conf.pin_bit_mask |= 1ULL << R_CW_CCW1;
+  // io_conf.pin_bit_mask |= 1ULL << L_CW_CCW2;
+  // io_conf.pin_bit_mask |= 1ULL << R_CW_CCW2;
 
   io_conf.pin_bit_mask |= 1ULL << BUZZER;
 
@@ -239,8 +239,8 @@ extern "C" void app_main() {
   mt->create_task(1);
 
   esp_task_wdt_reset();
-  esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
-  esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
+  // esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(0));
+  // esp_task_wdt_add(xTaskGetIdleTaskHandleForCPU(1));
 
   while (1) {
     vTaskDelay(5000.0 / portTICK_RATE_MS);
