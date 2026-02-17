@@ -2,7 +2,7 @@
 
 void LoggingTask::create_task(const BaseType_t xCoreID) {
   qh = xQueueCreate(4, sizeof(motion_tgt_val_t *));
-  xTaskCreatePinnedToCore(task_entry_point, "logging_task", 8192, this, 1,
+  xTaskCreatePinnedToCore(task_entry_point, "logging_task", 8192, this, 3,
                           &handle, xCoreID);
 }
 
@@ -681,7 +681,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
 
   printf("end___\n"); // csvファイル追記終了トリガー
 
-  vTaskDelay(500.0 / portTICK_PERIOD_MS);
+  vTaskDelay(1000.0 / portTICK_PERIOD_MS);
 
   printf("memory: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
 
@@ -689,6 +689,23 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
   printf("gyro var_robust_dps2: %f\n", tgt_val->var_robust_dps2);
   printf("gyro var_unbiased_dps2: %f\n", tgt_val->var_unbiased_dps2);
   printf("gyro retry: %d\n", tgt_val->gyro_retry);
+
+  {
+    char *buf = (char *)malloc(2048);
+    if (buf != NULL) {
+      printf("========== Task List ==========\n");
+      printf("Name\t\tState\tPrio\tStack\tNum\n");
+      vTaskList(buf);
+      printf("%s", buf);
+      printf("========== Runtime Stats ==========\n");
+      printf("Name\t\tTime\t\t%%\n");
+      vTaskGetRunTimeStats(buf);
+      printf("%s", buf);
+      printf("===================================\n");
+      free(buf);
+    }
+  }
+
   log_vec.clear();
   // umount();
   // std::vector<std::shared_ptr<log_data_t2>>().swap(log_vec);
@@ -774,7 +791,6 @@ void IRAM_ATTR LoggingTask::set_data() {
   // ld->battery_lp = floatToHalf(sensing_result->ego.batt_kf);
   ld->battery_lp = floatToHalf(sensing_result->ego.battery_raw);
 
-  
   ld->duty_l = floatToHalf(sensing_result->ego.duty.duty_l);
   ld->duty_r = floatToHalf(sensing_result->ego.duty.duty_r);
 
