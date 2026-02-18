@@ -2453,6 +2453,10 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
       if (duty_sen != 0) {
         db *= param_ro->gyro_pid.windup_gain;
       }
+      if (tgt_val->motion_type == MotionType::SLALOM &&
+          tgt_val->tt == TurnType::Normal) {
+        db *= param_ro->gyro_pid.windup_gain;
+      }
       if ((w_error_i * ee->w.error_p < 0) &&
           ((ABS(ee->w.error_p) > db) ||
            (gyro_pid_windup_histerisis && ABS(ee->w.error_p) > db * 0.75))) {

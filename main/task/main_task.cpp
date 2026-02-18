@@ -3880,6 +3880,8 @@ void MainTask::path_run(int idx, int idx2, int idx3) {
   mp->exec_path_running(param_set);
 
   pc->print_path();
+
+  dump1();
   param->sen_ref_p.normal.exist.left45 = backup_l45;
   param->sen_ref_p.normal.exist.right45 = backup_r45;
 
