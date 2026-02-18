@@ -2449,7 +2449,8 @@ void IRAM_ATTR PlanningTask::calc_angle_velocity_ctrl() {
 
     if (param_ro->gyro_pid.antiwindup) {
       float db = param_ro->gyro_pid.windup_dead_bind;
-      if (duty_sen != 0 && tgt_val->nmr.sct == SensorCtrlType::Straight) {
+      // if (duty_sen != 0 && tgt_val->nmr.sct == SensorCtrlType::Straight) {
+      if (duty_sen != 0) {
         db *= param_ro->gyro_pid.windup_gain;
       }
       if ((w_error_i * ee->w.error_p < 0) &&
