@@ -55,6 +55,11 @@ public:
   void set_input_param_entity(std::shared_ptr<input_param_t> &_param);
 
   bool is_ready() { return ready; }
+
+  // デバッグ用: メインループ内のチェックポイント
+  volatile int debug_checkpoint = 0;
+  volatile int64_t debug_checkpoint_time = 0;  // チェックポイント更新時刻(us)
+  volatile int debug_loop_count = 0;           // ループ回数
   std::deque<int> gyro_q;
   void set_tgt_val(std::shared_ptr<motion_tgt_val_t> &_tgt_val);
 

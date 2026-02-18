@@ -302,6 +302,9 @@ void IRAM_ATTR SensingTask::task() {
   ready = true;
 
   while (1) {
+    debug_checkpoint = 0; // ループ先頭
+    debug_checkpoint_time = esp_timer_get_time();
+    debug_loop_count++;
 
     last_gyro_time = now_gyro_time;
     last_enc_r_time = now_enc_r_time;
@@ -326,14 +329,22 @@ void IRAM_ATTR SensingTask::task() {
     auto enc_r_dt = dt;
     auto enc_l_dt = dt;
 
+    debug_checkpoint = 1; // SPI読み取り(gyro+encoder)開始
+    debug_checkpoint_time = esp_timer_get_time();
     timer_200us_callback_main();
 
+    debug_checkpoint = 2; // calc_vel開始
+    debug_checkpoint_time = esp_timer_get_time();
     calc_vel(gyro_dt, enc_l_dt, enc_r_dt);
 
+    debug_checkpoint = 3; // battery ADC
+    debug_checkpoint_time = esp_timer_get_time();
     if (skip_sensing) {
       exec_adc(BATTERY, width, &sensing_result->battery.raw);
     }
 
+    debug_checkpoint = 4; // LED制御判定開始
+    debug_checkpoint_time = esp_timer_get_time();
     if (pt->search_mode && tgt_val->motion_type == MotionType::STRAIGHT) {
       // 加速中は正面は発光させない
       if (tgt_val->ego_in.state == 0) {
@@ -385,6 +396,8 @@ void IRAM_ATTR SensingTask::task() {
       }
     }
     // LED_OFF ADC
+    debug_checkpoint = 5; // LED_OFF ADC開始
+    debug_checkpoint_time = esp_timer_get_time();
     if (skip_sensing) {
       if (r90) {
         exec_adc(SEN_R90, width, &sensing_result->led_sen_before.right90.raw);
@@ -421,6 +434,8 @@ void IRAM_ATTR SensingTask::task() {
     l45 = true;
     // LED_OFF ADC
     // 超信地旋回中は発光をサボる
+    debug_checkpoint = 6; // LED発光+ADC読み取り判定開始
+    debug_checkpoint_time = esp_timer_get_time();
     bool led_on = true;
     if (tgt_val->motion_type == MotionType::PIVOT) {
       led_on = false;
@@ -482,6 +497,8 @@ void IRAM_ATTR SensingTask::task() {
           r45 = l45 = true;
         }
       }
+      debug_checkpoint = 7; // R90 LED発光+ADC
+      debug_checkpoint_time = esp_timer_get_time();
       if (r90) { // R90
         led_driver(LED_EN_R90, 1, LED_EN_R45_2, 0, LED_EN_R45_1, 0);
         lec_cnt = 0;
@@ -493,6 +510,8 @@ void IRAM_ATTR SensingTask::task() {
       } else {
         se->led_sen_after.right90.raw = 0;
       }
+      debug_checkpoint = 8; // L90 LED発光+ADC
+      debug_checkpoint_time = esp_timer_get_time();
       if (l90) { // L90
         led_driver(LED_EN_L90, 1, LED_EN_L45_2, 0, LED_EN_L45_1, 0);
         lec_cnt = 0;
@@ -504,6 +523,8 @@ void IRAM_ATTR SensingTask::task() {
       } else {
         se->led_sen_after.left90.raw = 0;
       }
+      debug_checkpoint = 9; // R45 LED発光+ADC
+      debug_checkpoint_time = esp_timer_get_time();
       if (r45) { // R45
 
         // // R45
@@ -543,6 +564,8 @@ void IRAM_ATTR SensingTask::task() {
         se->led_sen_after.right45.raw = se->led_sen_after.right45_2.raw =
             se->led_sen_after.right45_3.raw = 0;
       }
+      debug_checkpoint = 10; // L45 LED発光+ADC
+      debug_checkpoint_time = esp_timer_get_time();
       if (l45) { // L45
         // L45
         led_driver(LED_EN_L90, 0, LED_EN_L45_2, 0, LED_EN_L45_1, 1);
@@ -616,8 +639,14 @@ void IRAM_ATTR SensingTask::task() {
                       se->led_sen.front.raw = 0;
     }
 
+    debug_checkpoint = 11; // センサ差分計算完了
+    debug_checkpoint_time = esp_timer_get_time();
+
     end = esp_timer_get_time();
     se->calc_time2 = (int16_t)(end - start);
+
+    debug_checkpoint = 12; // vTaskDelay待ち
+    debug_checkpoint_time = esp_timer_get_time();
     vTaskDelay(1.0 / portTICK_PERIOD_MS);
   }
 }

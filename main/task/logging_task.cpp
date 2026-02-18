@@ -1,4 +1,7 @@
 #include "include/logging_task.hpp"
+#include "include/sensing_task.hpp"
+
+extern std::shared_ptr<SensingTask> st;
 
 void LoggingTask::create_task(const BaseType_t xCoreID) {
   qh = xQueueCreate(4, sizeof(motion_tgt_val_t *));
@@ -694,7 +697,7 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
     char *buf = (char *)malloc(2048);
     if (buf != NULL) {
       printf("========== Task List ==========\n");
-      printf("Name\t\tState\tPrio\tStack\tNum\n");
+      printf("Name\t\tState\tPrio\tStack\tNum\tCore\n");
       vTaskList(buf);
       printf("%s", buf);
       printf("========== Runtime Stats ==========\n");
@@ -704,6 +707,32 @@ void IRAM_ATTR LoggingTask::dump_log(std::string file_name) {
       printf("===================================\n");
       free(buf);
     }
+    // sensing_task チェックポイント情報
+    static const char *cp_names[] = {
+        " 0: loop_top",
+        " 1: SPI(gyro+enc)",
+        " 2: calc_vel",
+        " 3: battery_ADC",
+        " 4: LED_ctrl_judge",
+        " 5: LED_OFF_ADC",
+        " 6: LED_ON_judge",
+        " 7: R90_LED+ADC",
+        " 8: L90_LED+ADC",
+        " 9: R45_LED+ADC",
+        "10: L45_LED+ADC",
+        "11: sensor_diff_done",
+        "12: vTaskDelay",
+    };
+    int cp = st->debug_checkpoint;
+    int64_t cp_time = st->debug_checkpoint_time;
+    int64_t now = esp_timer_get_time();
+    int loop_cnt = st->debug_loop_count;
+    printf("========== Sensing Debug ==========\n");
+    printf("checkpoint: %d (%s)\n", cp,
+           (cp >= 0 && cp <= 12) ? cp_names[cp] : "unknown");
+    printf("stuck_duration: %lld us\n", now - cp_time);
+    printf("loop_count: %d\n", loop_cnt);
+    printf("===================================\n");
   }
 
   log_vec.clear();
