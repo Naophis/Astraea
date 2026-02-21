@@ -5,7 +5,7 @@ orval:
   rad: 51.0
   rad2: 51.0
   front: { left: 4, right: 4 }
-  back: { left: 32, right: 32 }
+  back: { left: 40, right: 40 }
 normal:
   v: 300.000000
   ang: 90.000000
@@ -27,8 +27,8 @@ large:
   ang: 90.0
   pow_n: 4
   rad: 58.5
-  front: { left: 9.902694878657064, right: 15.1502694878657064 }
-  back: { left: 42.59381550343086, right: 42.59381550343086 }
+  front: { left: 6.902694878657064, right: 13.1502694878657064 }
+  back: { left: 45.59381550343086, right: 45.59381550343086 }
 
   #circuit
   # v: 2500

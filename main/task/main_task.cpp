@@ -1127,6 +1127,11 @@ void MainTask::load_offset_param() {
       getItem(root, "dia_wall_off_ref_l_wall")->valuedouble;
   param->dia_wall_off_ref_r_wall =
       getItem(root, "dia_wall_off_ref_r_wall")->valuedouble;
+  param->dia_wall_off_ref_l_wall2 =
+      getItem(root, "dia_wall_off_ref_l_wall2")->valuedouble;
+  param->dia_wall_off_ref_r_wall2 =
+      getItem(root, "dia_wall_off_ref_r_wall2")->valuedouble;
+
   param->dia_wall_off_ref_l_piller =
       getItem(root, "dia_wall_off_ref_l_piller")->valuedouble;
   param->dia_wall_off_ref_r_piller =
@@ -2832,6 +2837,7 @@ void MainTask::test_sla() {
   }
 
   mp->slalom(sla_p, rorl, nm, false);
+  mp->wall_off_controller->continuous_turn_flag = true;
   param->sen_ref_p.normal.exist.right45 = backup_r;
   param->sen_ref_p.normal.exist.left45 = backup_l;
 
@@ -2848,6 +2854,7 @@ void MainTask::test_sla() {
       pt->sensor_deg_limitter_piller[i] = 0.0;
     }
     mp->slalom(sla_p2, rorl2, nm, dia);
+    mp->wall_off_controller->continuous_turn_flag = true;
   } else if (sys.test.turn_times > 0) {
     for (int i = 0; i < sys.test.turn_times; i++) {
 
@@ -2855,11 +2862,14 @@ void MainTask::test_sla() {
           static_cast<TurnType>(sys.test.sla_type) == TurnType::Dia135) {
         if ((i & 0x01) == 0x00) {
           mp->slalom(sla_p2, rorl, nm, true);
+          mp->wall_off_controller->continuous_turn_flag = true;
         } else {
           mp->slalom(sla_p, rorl, nm, false);
+          mp->wall_off_controller->continuous_turn_flag = true;
         }
       } else {
         mp->slalom(sla_p, rorl, nm);
+        mp->wall_off_controller->continuous_turn_flag = true;
       }
     }
   }
@@ -2905,6 +2915,7 @@ void MainTask::test_sla() {
   // ps.motion_type = MotionType::SLA_BACK_STR;
 
   mp->go_straight(ps);
+  mp->wall_off_controller->continuous_turn_flag = false;
 
   vTaskDelay(25.0 / portTICK_RATE_MS);
 

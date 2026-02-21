@@ -607,6 +607,10 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
   const auto se = get_sensing_entity();
   auto ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_wall
                                           : param->dia_wall_off_ref_l_wall;
+  if (continuous_turn_flag) {
+    ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_wall2
+                                       : param->dia_wall_off_ref_l_wall2;
+  }
   if (!exist_wall) {
     ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_piller
                                        : param->dia_wall_off_ref_l_piller;
@@ -614,6 +618,10 @@ float IRAM_ATTR WallOffController::calculate_dia_wall_off_distance(
   if (turn_type == TurnType::Dia135_2 || turn_type == TurnType::Dia90) {
     ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_wall
                                        : param->dia_wall_off_ref_l_wall;
+    if (continuous_turn_flag) {
+      ref = (td == TurnDirection::Right) ? param->dia_wall_off_ref_r_wall2
+                                         : param->dia_wall_off_ref_l_wall2;
+    }
   }
 
   float diff = 0;

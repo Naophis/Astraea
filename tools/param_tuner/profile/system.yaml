@@ -86,10 +86,10 @@ test: # テスト走行時に使用するパラメータ群
   decel: -2500 
   dia_accl: 2500
   dia_decel: -2500
-  dist: 720 #直進
+  dist: 420 #直進
   suction_active: 0
 
-  # v_max: 6500
+  # v_max: 5500
   # # accl: 42500
   # # decel: -52500
   # accl: 22500
@@ -121,15 +121,15 @@ test: # テスト走行時に使用するパラメータ群
   # suction_duty_burst: 4.0
   # suction_duty_burst_low: 3.750
   # Nova
-  suction_duty_burst: 4.75
-  suction_duty_burst_low: 4.5   # suction_duty_burst -0.25
+  suction_duty_burst: 4.25
+  suction_duty_burst_low: 4.0 # suction_duty_burst -0.25
 
   # suction_duty_burst: 4.0
   # suction_duty_burst_low: 3.75
 
   suction_gain: 200
   # suction_duty: 3.25
-  file_idx: 8
+  file_idx: 4
   sla_dist: 90
   # sla_type: 3
   sla_type: 4
